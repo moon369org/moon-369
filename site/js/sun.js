@@ -88,12 +88,12 @@
     var now = Date.now(), L = loc || DEMO, r = light(now, L.lat, L.lon);
     document.querySelectorAll('[data-light-label]').forEach(function (el) { var t = r.label; if (el.textContent !== t) el.textContent = t; });
     var el = document.querySelector('[data-sun-panel]'); if (!el) return;
-    var md = moonDate(r.dayStart);
+    var md = moonDate(now);
     var place = loc ? 'YOUR SKY' : DEMO.name;
     var s = season(now, L.lat < 0);
     var html = cell((r.phase === 'light' ? 'LIGHT' : 'DARK') + ' · ' + place, r.counter, r.polar ? (r.polar === 'day' ? 'Midnight sun' : 'Polar night') : (r.phase === 'light' ? 'since first light' : 'since sunset'), 'sun-big');
     html += cell(r.phase === 'light' ? 'UNTIL SUNSET' : 'UNTIL FIRST LIGHT', dur(r.remainingMs), r.phase === 'light' ? 'of light left' : 'of dark left');
-    html += cell('THIS DAY', p2(md.m) + ' · ' + p2(md.d), 'Moon ' + p2(md.m) + ', Day ' + p2(md.d));
+    html += cell('MOON DATE', p2(md.m) + ' · ' + p2(md.d), 'Moon ' + p2(md.m) + ', Day ' + p2(md.d));
     if (loc) html += cell('SEASON', s.name, s.next + ' in ' + Math.ceil(s.inDays) + ' days');
     else html += '<div class="sun-c sun-btn-c"><button type="button" class="sun-btn" data-sun-locate>USE MY LOCATION</button><div class="sun-s">Showing New York until you share yours.</div></div>';
     if (el.innerHTML !== html) el.innerHTML = html;

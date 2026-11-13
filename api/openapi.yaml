@@ -118,12 +118,12 @@ paths:
         - { name: unix_ns, in: query, schema: { type: string }, description: Instant to read. Defaults to now. }
         - { name: moonmark, in: query, schema: { type: string }, description: A Moonmark to read instead. }
       responses:
-        '200': { description: 'The reading: phase, counter, label ("Light 06:28:10"), remaining, length, when it began and ends as Moonmarks, and the day: its Moon date and first light.' }
+        '200': { description: 'The reading: phase, counter, label ("Light 06:28:10"), remaining, length, when it began and ends, and first_light (when this day''s light began), as Moonmarks. The Moon date is global and is read from the moonmark.' }
         '400': { description: Missing or bad lat or lon }
   /v1/sun:
     get:
       summary: Sun, the local layer. Local clock, the local day's Moon date, sunrise, solar noon, sunset, day length and season
-      description: sun.moon_date is the Moon date for the whole local day, taken at local noon. Moonmarks carry the true Moon date.
+      description: The Moon date is global; read it from the moonmark. The sun object is the old local clock only.
       parameters:
         - $ref: '#/components/parameters/tz'
         - $ref: '#/components/parameters/lat'

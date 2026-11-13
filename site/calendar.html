@@ -377,7 +377,7 @@ class Component extends DCLogic {
     const ln = offAt(nowMs);
     const myLoc = (window.MoonSun && window.MoonSun.where) ? window.MoonSun.where() : { lat: 40.71, lon: -74.01, approx: true };
     const lr = (window.MoonSun && window.MoonSun.light) ? window.MoonSun.light(nowMs, myLoc.lat, myLoc.lon) : null;
-    const today = lr ? c.toMoon(lr.dayStart) : c.toMoon(Date.UTC(ln.y, ln.mo - 1, ln.d, 12) - ln.off);
+    const today = c.toMoon(nowMs); // the Moon date is global
     const live = c.toMoon(nowMs);
     let fmtLocal = c.fmtLong; try { fmtLocal = new Intl.DateTimeFormat('en-US', { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }); } catch (e) {}
     let fmtDay = null; try { fmtDay = new Intl.DateTimeFormat('en-US', { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric' }); } catch (e) {}

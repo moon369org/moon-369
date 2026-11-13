@@ -344,7 +344,7 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 <div style="display: flex; flex-direction: column; gap: 12px; padding: 40px 0 8px; border-top: 1px solid #1C1D20">
 <div style="font-family: 'Syncopate', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.24em">LIGHT · DARK · HOW PEOPLE LIVE THE DAY</div>
-<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Moon is the engine and the calendar, and every moment on it is a Moonmark. People live the day by the light: the Light counter starts at <code>00:00:00</code> at first light and counts up in Moon seconds until sunset, then Dark counts up until the next first light, which begins the next Moon day. It needs only where you stand, <code>lat</code> and <code>lon</code>, never a time zone. Add them to <code>/v1/now</code>, <code>/v1/convert</code> or <code>/v1/m/{moonmark}</code> to get a <code>light</code> object. Where the sun doesn't rise or set for weeks, the day starts at solar midnight. <code>/v1/sun</code> still returns the old local clock if you need to show it&nbsp;alongside.</p>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Moon is the engine and the calendar, and every moment on it is a Moonmark. People live the day by the light: the Light counter starts at <code>00:00:00</code> at first light and counts up in Moon seconds until sunset, then Dark counts up until the next first light. Light and Dark never change the date: the Moon date is one date for the whole planet and changes at the same instant&nbsp;everywhere. It needs only where you stand, <code>lat</code> and <code>lon</code>, never a time zone. Add them to <code>/v1/now</code>, <code>/v1/convert</code> or <code>/v1/m/{moonmark}</code> to get a <code>light</code> object. Where the sun doesn't rise or set for weeks, the counters start at solar midnight. <code>/v1/sun</code> still returns the old local clock if you need to show it&nbsp;alongside.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
@@ -352,7 +352,7 @@ footer > div > div:first-child svg{width:64px!important}
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/light</span>
 <span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">LIGHT · DARK</span>
 </div>
-<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Where you are in the day: Light or Dark, the counter, what remains until sunset or first light, the length of this light or dark, and the day's Moon date and first light, each as a&nbsp;Moonmark. After sunset it returns <code>&quot;phase&quot;: &quot;dark&quot;</code> with the Dark counter, the time left until first light and the length of the&nbsp;night.</p>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Where you are in the day: Light or Dark, the counter, what remains until sunset or first light, the length of this light or dark, and when this day's light began, each as a&nbsp;Moonmark. After sunset it returns <code>&quot;phase&quot;: &quot;dark&quot;</code> with the Dark counter, the time left until first light and the length of the&nbsp;night.</p>
 <div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse">
 <thead><tr style="text-align: left"><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">PARAM</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">TYPE</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">DESCRIPTION</th></tr></thead>
 <tbody><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">lat, lon</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">number</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Where you stand. Required.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">unix_ns, utc, moonmark</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">string</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">The moment to read. Defaults to now.</td></tr></tbody></table></div>
@@ -374,10 +374,7 @@ footer > div > div:first-child svg{width:64px!important}
     &quot;polar&quot;: null,
     &quot;began&quot;: { &quot;moonmark&quot;: &quot;1928.05.03 23:18:20.927296794&quot; },
     &quot;ends&quot;:  { &quot;moonmark&quot;: &quot;1928.05.04 08:55:00.531769295&quot; },
-    &quot;day&quot;: {
-      &quot;moon_date&quot;: &quot;1928.05.03&quot;,
-      &quot;first_light&quot;: { &quot;moonmark&quot;: &quot;1928.05.03 23:18:20.927296794&quot; }
-    }
+    &quot;first_light&quot;: { &quot;moonmark&quot;: &quot;1928.05.03 23:18:20.927296794&quot; }
   }
 }</pre>
 </div>
@@ -403,9 +400,9 @@ footer > div > div:first-child svg{width:64px!important}
 <pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
   &quot;rule&quot;: { &quot;light&quot;: &quot;06:45&quot;, &quot;repeat&quot;: &quot;daily&quot; },
   &quot;occurrences&quot;: [
-    { &quot;moon_date&quot;: &quot;1928.05.03&quot;, &quot;label&quot;: &quot;Light 06:45&quot;,
-      &quot;moonmark&quot;: &quot;1928.05.04 06:03:20.927209107&quot; },
     { &quot;moon_date&quot;: &quot;1928.05.04&quot;, &quot;label&quot;: &quot;Light 06:45&quot;,
+      &quot;moonmark&quot;: &quot;1928.05.04 06:03:20.927209107&quot; },
+    { &quot;moon_date&quot;: &quot;1928.05.05&quot;, &quot;label&quot;: &quot;Light 06:45&quot;,
       &quot;moonmark&quot;: &quot;1928.05.05 05:08:36.801924733&quot; }
   ]
 }</pre>
@@ -421,9 +418,9 @@ footer > div > div:first-child svg{width:64px!important}
 <pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
   &quot;rule&quot;: { &quot;dark&quot;: &quot;02:00&quot;, &quot;repeat&quot;: &quot;daily&quot; },
   &quot;occurrences&quot;: [
-    { &quot;moon_date&quot;: &quot;1928.05.03&quot;, &quot;label&quot;: &quot;Dark 02:00&quot;,
-      &quot;moonmark&quot;: &quot;1928.05.04 10:55:00.531814513&quot; },
     { &quot;moon_date&quot;: &quot;1928.05.04&quot;, &quot;label&quot;: &quot;Dark 02:00&quot;,
+      &quot;moonmark&quot;: &quot;1928.05.04 10:55:00.531814513&quot; },
+    { &quot;moon_date&quot;: &quot;1928.05.05&quot;, &quot;label&quot;: &quot;Dark 02:00&quot;,
       &quot;moonmark&quot;: &quot;1928.05.05 09:58:17.520328583&quot; }
   ]
 }</pre>

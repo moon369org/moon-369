@@ -3,8 +3,8 @@ import {
   toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, phaseName, unixNsToIso, yearInfo,
   moonLength, MoonRangeError, type MoonTime,
 } from './moon.js';
-import { lightAt, lightDate, lightSeries, counterMs } from './light.js';
-import { toSun, fromSun, dailySeries, localMoonDate, sunDay, seasonAt, seasonEventsBetween, checkZone, SunError } from './sun.js';
+import { lightAt, lightSeries, counterMs } from './light.js';
+import { toSun, fromSun, dailySeries, sunDay, seasonAt, seasonEventsBetween, checkZone, SunError } from './sun.js';
 
 export interface RateLimiter { limit(o: { key: string }): Promise<{ success: boolean }> }
 
@@ -92,7 +92,7 @@ function lightBody(ns: bigint, q: URLSearchParams) {
     location: { lat, lon },
     phase: r.phase, counter: r.counter, label: r.label, remaining: r.remaining, length: r.phase_length, polar: r.polar,
     began: mk(r.began_ms), ends: mk(r.ends_ms),
-    day: { moon_date: lightDate(ms, lat, lon).label, first_light: mk(r.day_start_ms) },
+    first_light: mk(r.day_start_ms),
   };
 }
 
@@ -105,7 +105,6 @@ function sunBody(ns: bigint, q: URLSearchParams, dateOverride?: string) {
   const zone = tz ? checkZone(tz) : undefined;
   const local = zone ? toSun(ns, zone) : undefined;
   const out: Record<string, unknown> = { zone: zone ?? null, ...(local ? { date: local.date, time: local.time, weekday: local.weekday, utc_offset: local.utc_offset, dst: local.dst } : {}) };
-  if (zone) out.moon_date = localMoonDate(dateOverride ?? local!.date, zone);
   const lat = latS === null ? null : Number(latS), lon = lonS === null ? null : Number(lonS);
   const hemi = lat !== null && lat < 0 ? 'south' : 'north';
   if (lat !== null && lon !== null) {
@@ -192,7 +191,7 @@ const SPEC = {
   time_zones: null,
   dst: false,
   roles: { moon: 'The engine and the calendar: one continuous count underneath everything, read as the date, the 13 moons and the phase.', moonmark: 'One exact moment on the Moon engine, the same everywhere: YEAR.MM.DD HH:MM:SS.NNNNNNNNN. For events, records and systems.', light: 'How people live the day. The Light counter starts at 00:00:00 at first light and runs to sunset; the Dark counter starts at sunset and runs to the next first light. Counters tick in Moon seconds. Needs only where you stand: no time zones.' },
-  date_rule: 'Moonmarks carry the true Moon date, which changes at the Moon day boundary. A human day begins at first light and takes the Moon date in effect at that moment (light.day.moon_date). Polar fallback: when the sun neither rises nor sets, the day begins at solar midnight.',
+  date_rule: 'The Moon date is global: one date for the whole planet, and it changes at the Moon day boundary at the same instant everywhere. Light and Dark never change the date; they only count the local day. Polar fallback: when the sun neither rises nor sets, the counters start at solar midnight.',
   light_layer: 'Light and Dark counters from sunrise and sunset, in Moon seconds. Only a location is needed. /v1/sun remains for showing the old local clock beside it.',
   license: 'MIT',
 };
@@ -309,9 +308,9 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           const lat = Number(q.get('lat')), lon = Number(q.get('lon'));
           const fromNs = unixNsFromQuery(q) ?? (q.get('from') ? toUnixNs(parseMoonmark(q.get('from')!)) : nowUnixNs());
           const occ = lightSeries(Number(fromNs / 1_000_000n), phase, c, lat, lon, days).map((o) => {
-            const day = lightDate(o.day_start_ms + 1, lat, lon).label;
-            return o.ms === null ? { moon_date: day, skipped: true, reason: phase === 'light' ? 'not that much light this day' : 'not that much dark this day' }
-              : { moon_date: day, label: `${phase === 'light' ? 'Light' : 'Dark'} ${c}`, ...at(BigInt(Math.round(o.ms)) * 1_000_000n) };
+            if (o.ms === null) return { skipped: true, reason: phase === 'light' ? 'not that much light this day' : 'not that much dark this day', first_light: at(BigInt(Math.round(o.day_start_ms)) * 1_000_000n)!.moonmark };
+            const a = at(BigInt(Math.round(o.ms)) * 1_000_000n)!;
+            return { moon_date: a.moonmark.slice(0, a.moonmark.indexOf(' ')), label: `${phase === 'light' ? 'Light' : 'Dark'} ${c}`, ...a };
           });
           return json({ rule: { [phase]: c, repeat: 'daily', location: { lat, lon } }, occurrences: occ }, 200, { ...FOREVER, ...planHdr });
         }
@@ -324,7 +323,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const zone = checkZone(tz);
         const occurrences = dailySeries(from, time, zone, days).map((o) => o.unixNs === null
           ? { sun_date: o.sunDate, skipped: true }
-          : { sun_date: o.sunDate, sun_time: time, moon_date: localMoonDate(o.sunDate, zone).label, ...at(o.unixNs, zone) });
+          : (() => { const a = at(o.unixNs, zone)!; return { sun_date: o.sunDate, sun_time: time, moon_date: a.moonmark.slice(0, a.moonmark.indexOf(' ')), ...a }; })());
         return json({ rule: { time, tz: zone, repeat: 'daily' }, occurrences }, 200, { ...FOREVER, ...planHdr });
       }
 

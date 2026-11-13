@@ -4,12 +4,12 @@ The open standard for time. One engine, two layers:
 
 - **Moon** is the engine and the calendar: one continuous count underneath everything, read as the date, 13 moons, 369 days and the real moon's phase.
 - **Moonmark** is one exact moment on that engine, the same everywhere: `1928.05.03 09:12:04.205379905`. For events, records and systems.
-- **Light and Dark** is how people live the day. The Light counter starts at 00:00:00 at first light and runs to sunset, then Dark runs to the next first light. A day begins at first light. It only needs where you stand, never a time zone.
+- **Light and Dark** is how people live the day. The Light counter starts at 00:00:00 at first light and runs to sunset, then Dark runs to the next first light. Light and Dark never change the date: the Moon date is global and changes at the same instant everywhere. It only needs where you stand, never a time zone.
 
 Hosted at `https://api.moon369.org`. This repo is the hosted API (a Vercel Function) and the reference implementation of the standard.
 
 - `src/moon.ts`: the whole standard. Exact conversions in whole nanoseconds (BigInt), no floating point.
-- `src/light.ts`: Light and Dark counters, the first-light date rule and the polar fallback.
+- `src/light.ts`: Light and Dark counters, and the polar fallback.
 - `src/sun.ts`: Sun, the local layer: local clock, sunrise, sunset, seasons and the local Moon date.
 - `src/index.ts`: the API: routing, rate limits, optional keys, caching, CORS.
 - `api/index.ts` + `vercel.json`: the Vercel Function entry; every path is rewritten to it.
@@ -26,7 +26,7 @@ Hosted at `https://api.moon369.org`. This repo is the hosted API (a Vercel Funct
 | `GET /v1/convert?unix=` / `unix_ns=` / `utc=` | Standard time to Moon time (`&format=string` for plain text) |
 | `GET /v1/to-unix?moonmark=` or `year=&moon=&day=&time=` | Moon time to standard time |
 | `GET /v1/year/{year}` | The 13 moons of a year, their lengths and UTC starts |
-| `GET /v1/light?lat=&lon=` | Light and Dark: the counter, what remains, and today's Moon date and first light |
+| `GET /v1/light?lat=&lon=` | Light and Dark: the counter, what remains, and when this day's light began |
 | `GET /v1/sun` | Sun, the local layer: local clock, sunrise, solar noon, sunset, day length and season (`tz`, `lat`, `lon`, `date`) |
 | `GET /v1/schedule?light=06:45&lat=&lon=` | Repeat a Light or Dark reading every day, each with its Moonmark |
 | `GET /v1/seasons/{year}` | Equinoxes and solstices inside a Moon year, in Moon time |

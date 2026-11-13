@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { handle } from '../src/index';
-import { lightAt, lightDate, lightSeries, counter } from '../src/light';
+import { lightAt, lightSeries, counter } from '../src/light';
 
 const get = (path: string) => handle(new Request(`https://api.example.org${path}`), {});
 const j = async (r: Promise<Response>): Promise<any> => (await r).json();
@@ -18,8 +18,6 @@ describe('Light and Dark counters', () => {
     const r = lightAt(at('2026-11-14T01:30:00Z'), DENVER.lat, DENVER.lon); // 18:30 MST
     expect(r.phase).toBe('dark');
     expect(r.counter.startsWith('01:39')).toBe(true);
-    expect(lightDate(at('2026-11-14T13:30:00Z'), DENVER.lat, DENVER.lon).label).toBe('1928.05.04'); // 06:30 MST, before first light (06:43)
-    expect(lightDate(at('2026-11-14T15:00:00Z'), DENVER.lat, DENVER.lon).label).not.toBe('1928.05.04');
   });
   it('falls back to solar midnight in polar night', () => {
     const r = lightAt(at('2026-12-10T12:00:00Z'), 69.65, 18.96); // Tromsø
@@ -44,7 +42,8 @@ describe('Light routes', () => {
   it('GET /v1/light needs only a location', async () => {
     const b = await j(get('/v1/light?lat=39.74&lon=-104.99&utc=2026-11-13T21:00:00Z'));
     expect(b.light.label).toBe('Light 07:00:42');
-    expect(b.light.day.moon_date).toBe('1928.05.04');
+    expect(b.light.first_light.moonmark).toMatch(/^1928\.05\.04 /);
+    expect(b.light.day).toBeUndefined();
     expect(b.light.ends.moonmark).toMatch(/^1928\.05\.04 /);
   });
   it('GET /v1/now with lat and lon adds light, with no time zone', async () => {
@@ -56,7 +55,13 @@ describe('Light routes', () => {
     const b = await j(get('/v1/schedule?light=06:45&lat=39.74&lon=-104.99&utc=2026-11-13T20:00:00Z&days=3'));
     expect(b.occurrences).toHaveLength(3);
     expect(b.occurrences[0].label).toBe('Light 06:45');
-    expect(b.occurrences[0].moon_date).toBe('1928.05.04');
+    for (const o of b.occurrences) expect(o.moon_date).toBe(o.moonmark.split(' ')[0]);
+  });
+  it('the Moon date is global: the same instant has one date everywhere', async () => {
+    const t = '2026-11-14T03:00:00Z';
+    const a = await j(get(`/v1/light?lat=39.74&lon=-104.99&utc=${t}`));
+    const b = await j(get(`/v1/light?lat=35.68&lon=139.69&utc=${t}`));
+    expect(a.moonmark.split(' ')[0]).toBe(b.moonmark.split(' ')[0]);
   });
   it('errors cleanly', async () => {
     expect((await get('/v1/light?lat=43')).status).toBe(400);

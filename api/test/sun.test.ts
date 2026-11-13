@@ -96,10 +96,10 @@ describe('local Moon date (local-noon rule)', () => {
     expect(shared % 2).toBe(0);
     expect(shared).toBeGreaterThan(0);
   });
-  it('appears on /v1/sun and /v1/schedule', async () => {
+  it('is not used by the API: /v1/sun has no local date and schedule uses the global Moon date', async () => {
     const s = await j(get('/v1/sun?tz=America/Denver&date=2026-11-12'));
-    expect(s.sun.moon_date.label).toBe('1928.05.03');
+    expect(s.sun.moon_date).toBeUndefined();
     const sc = await j(get('/v1/schedule?time=09:00&tz=America/Denver&from=2026-11-12&days=1'));
-    expect(sc.occurrences[0].moon_date).toBe('1928.05.03');
+    expect(sc.occurrences[0].moon_date).toBe(sc.occurrences[0].moonmark.split(' ')[0]);
   });
 });

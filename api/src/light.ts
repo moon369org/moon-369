@@ -3,7 +3,7 @@
  * The Light counter starts at 00:00:00 at first light (sunrise) and runs until sunset.
  * The Dark counter starts at 00:00:00 at sunset and runs until the next first light.
  * Counters tick in Moon seconds. Nothing here needs a time zone: only where you stand.
- * The human Moon date of a day is the Moon date at its first light.
+ * The Moon date is global and never depends on first light; Light and Dark only count the local day.
  * Polar fallback: when the sun neither rises nor sets, the day starts at solar midnight
  * and the whole day is Light (midnight sun) or Dark (polar night).
  */
@@ -74,13 +74,6 @@ export function lightAt(ms: number, lat: number, lon: number): LightReading {
     began_ms: cur.ms, ends_ms: nxt.ms, remaining: counter(nxt.ms - ms), phase_length: counter(nxt.ms - cur.ms),
     day_start_ms: es[ds].ms, polar,
   };
-}
-
-/** The human Moon date for the day containing an instant: the Moon date at that day's first light. */
-export function lightDate(ms: number, lat: number, lon: number) {
-  const r = lightAt(ms, lat, lon);
-  const t = toMoon(BigInt(Math.round(r.day_start_ms)) * 1_000_000n);
-  return { year: t.year, moon: t.moon, day: t.day, label: `${t.year}.${String(t.moon).padStart(2, '0')}.${String(t.day).padStart(2, '0')}` };
 }
 
 /**
