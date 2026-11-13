@@ -1,0 +1,188 @@
+openapi: 3.1.0
+info:
+  title: Moon API
+  version: 1.0.0
+  summary: The open standard for time. 13 moons, 369 days, one global clock.
+  license: { name: MIT, identifier: MIT }
+  description: |
+    All times are Moon time unless a field name says `utc` or `unix`.
+    Nanosecond values are returned as strings to keep full precision.
+    No key is required. Send `Authorization: Bearer <key>` for the higher keyed limit.
+servers:
+  - url: https://api.moon369.org
+components:
+  parameters:
+    tz: { name: tz, in: query, schema: { type: string, example: America/Denver }, description: IANA time zone for the Sun local clock. Time zones exist only in Sun. }
+    lat: { name: lat, in: query, schema: { type: number, example: 40.71 }, description: Latitude. Adds Light and Dark. Requires lon. }
+    lon: { name: lon, in: query, schema: { type: number, example: -74.01 }, description: Longitude, east positive. Requires lat. }
+  securitySchemes:
+    key: { type: http, scheme: bearer }
+  schemas:
+    MoonTime:
+      type: object
+      properties:
+        year: { type: integer, example: 1928 }
+        moon: { type: integer, minimum: 1, maximum: 13, example: 5 }
+        day: { type: integer, minimum: 1, maximum: 29, example: 3 }
+        day_of_year: { type: integer, minimum: 1, maximum: 369 }
+        moon_length_days: { type: integer, enum: [28, 29] }
+        time: { type: string, example: "08:57:39" }
+        moonmark: { type: string, example: "1928.05.03 08:57:39.035909351", description: "One exact moment on the Moon engine" }
+        moonmark_url: { type: string, description: Link that opens this Moonmark. Put it in a QR code. }
+        phase:
+          type: object
+          properties:
+            fraction: { type: number, description: "0 = new moon, 0.5 = full moon" }
+            name: { type: string, example: Waxing crescent }
+        moon_ns: { type: string, description: Moon nanoseconds since the epoch }
+        unix_ns: { type: string, example: "1794516299901000000" }
+        unix_ms: { type: integer }
+        utc: { type: string, example: "2026-11-12T20:44:59.901000000Z" }
+        time_zone: { type: "null" }
+        dst: { type: boolean, const: false }
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string, enum: [missing_param, bad_param, out_of_range, not_found, rate_limited, invalid_key, keys_disabled, method_not_allowed, internal] }
+            message: { type: string }
+  responses:
+    BadRequest: { description: Invalid input, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    RateLimited: { description: Rate limit reached, headers: { Retry-After: { schema: { type: integer } } }, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+security: [{}, { key: [] }]
+paths:
+  /v1/now:
+    get:
+      summary: Current Moon date and time
+      description: Add tz for the Sun local clock, and lat and lon for sunrise, sunset and the season.
+      parameters:
+        - $ref: '#/components/parameters/tz'
+        - $ref: '#/components/parameters/lat'
+        - $ref: '#/components/parameters/lon'
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/MoonTime' } } } }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /v1/moonmark:
+    get:
+      summary: A Moonmark, nanosecond precise, with clock accuracy. /v1/stamp is the old name and still works.
+      parameters:
+        - { name: unix_ns, in: query, schema: { type: string }, description: Instant to mark. Omit to mark the server receive time. }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  moonmark: { type: string }
+                  moonmark_url: { type: string }
+                  moon_ns: { type: string }
+                  unix_ns: { type: string }
+                  utc: { type: string }
+                  accuracy_ns: { type: [integer, "null"], description: null when the caller supplied the instant }
+                  clock: { type: string, example: server-ntp }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /v1/convert:
+    get:
+      summary: Standard time to Moon time
+      parameters:
+        - { name: unix, in: query, schema: { type: integer }, description: Unix milliseconds }
+        - { name: unix_ns, in: query, schema: { type: string }, description: Unix nanoseconds }
+        - { name: utc, in: query, schema: { type: string }, description: ISO 8601 with Z or offset, up to 9 fraction digits }
+        - { name: sun, in: query, schema: { type: string, example: '2026-11-12T14:00' }, description: A local Sun date and time. Needs tz. }
+        - $ref: '#/components/parameters/tz'
+        - $ref: '#/components/parameters/lat'
+        - $ref: '#/components/parameters/lon'
+        - { name: format, in: query, schema: { type: string, enum: [object, string] } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/MoonTime' } }, text/plain: { schema: { type: string } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /v1/m/{moonmark}:
+    get:
+      summary: Open a Moonmark link. The URL form is YEAR.MM.DD-HH.MM.SS.fraction, which is what a Moonmark QR code carries.
+      parameters:
+        - { name: moonmark, in: path, required: true, schema: { type: string, example: '1928.05.03-08.57.39.035909351' } }
+        - $ref: '#/components/parameters/tz'
+      responses:
+        '200': { description: The moment, plus the reader's local Sun time when tz is given }
+  /v1/light:
+    get:
+      summary: Light and Dark. The Light counter starts at 00:00:00 at first light and runs to sunset; Dark runs from sunset to the next first light. Counters tick in Moon seconds. Needs only a location.
+      parameters:
+        - $ref: '#/components/parameters/lat'
+        - $ref: '#/components/parameters/lon'
+        - { name: unix_ns, in: query, schema: { type: string }, description: Instant to read. Defaults to now. }
+        - { name: moonmark, in: query, schema: { type: string }, description: A Moonmark to read instead. }
+      responses:
+        '200': { description: 'The reading: phase, counter, label ("Light 06:28:10"), remaining, length, when it began and ends as Moonmarks, and the day: its Moon date and first light.' }
+        '400': { description: Missing or bad lat or lon }
+  /v1/sun:
+    get:
+      summary: Sun, the local layer. Local clock, the local day's Moon date, sunrise, solar noon, sunset, day length and season
+      description: sun.moon_date is the Moon date for the whole local day, taken at local noon. Moonmarks carry the true Moon date.
+      parameters:
+        - $ref: '#/components/parameters/tz'
+        - $ref: '#/components/parameters/lat'
+        - $ref: '#/components/parameters/lon'
+        - { name: date, in: query, schema: { type: string, example: '2026-12-21' }, description: Local date. Defaults to today. }
+      responses:
+        '200': { description: OK }
+        '400': { description: Bad tz, lat or lon }
+  /v1/schedule:
+    get:
+      summary: Repeat a Light or Dark reading every day (light=06:45 with lat and lon), each occurrence with its Moon date and Moonmark. The older time and tz form still works.
+      parameters:
+        - { name: light, in: query, schema: { type: string, example: '06:45' }, description: A Light counter to repeat. Or use dark. }
+        - { name: dark, in: query, schema: { type: string, example: '02:30' } }
+        - $ref: '#/components/parameters/lat'
+        - $ref: '#/components/parameters/lon'
+        - { name: time, in: query, schema: { type: string, example: '14:00' }, description: Older form, local clock time. Needs tz. }
+        - { name: tz, in: query, schema: { type: string, example: America/Denver } }
+        - { name: from, in: query, schema: { type: string, example: '2026-11-01' }, description: First local date. Defaults to today in tz. }
+        - { name: days, in: query, schema: { type: integer, minimum: 1, maximum: 400, default: 7 } }
+      responses:
+        '200': { description: OK. Days where clocks skip the time are marked skipped. }
+  /v1/seasons/{year}:
+    get:
+      summary: Every equinox and solstice inside a Moon year, as Moonmarks
+      parameters:
+        - { name: year, in: path, required: true, schema: { type: integer, example: 1928 } }
+      responses:
+        '200': { description: OK }
+  /v1/to-unix:
+    get:
+      summary: Moon time to standard time
+      parameters:
+        - { name: moonmark, in: query, schema: { type: string }, description: "A Moonmark, YEAR.MM.DD HH:MM:SS.fraction (alternative to the fields below). stamp is accepted as the old name." }
+        - { name: year, in: query, schema: { type: integer } }
+        - { name: moon, in: query, schema: { type: integer, minimum: 1, maximum: 13 } }
+        - { name: day, in: query, schema: { type: integer, minimum: 1, maximum: 29 } }
+        - { name: time, in: query, schema: { type: string, example: "12:30:00.5" } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unix_ns: { type: string }
+                  unix_ms: { type: integer }
+                  utc: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /v1/year/{year}:
+    get:
+      summary: All 13 moons of a Moon year with UTC start instants
+      parameters:
+        - { name: year, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: OK }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /v1/spec:
+    get:
+      summary: The constants of the standard, including the exact Moon second ratio
+      responses:
+        '200': { description: OK }

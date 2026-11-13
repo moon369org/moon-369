@@ -1,0 +1,258 @@
+/*
+ * Moon motion layer, shared by every page.
+ * Starfield (js/moon-motion.js) sits behind the home hero; everything here is CSS-only
+ * and switches off under prefers-reduced-motion.
+ * Performance rule: anything that moves animates only transform or opacity, so the
+ * compositor runs it without repainting. Glows (filters, shadows) stay static.
+ */
+
+/* ---------- Stars (home hero only) ---------- */
+/* #top becomes its own stacking context so the stars sit behind its content
+   but above the page background. The layer spans the full viewport width and
+   fades out toward the bottom of the hero. */
+#top { isolation: isolate; }
+[data-dc-root] > div { overflow-x: clip; }
+.moon-stars {
+  position: absolute; top: 0; bottom: 0; left: calc(50% - 50vw); right: calc(50% - 50vw);
+  z-index: -1; pointer-events: none; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent);
+  mask-image: linear-gradient(to bottom, #000 65%, transparent);
+}
+.moon-starlayer { position: absolute; inset: 0; background-repeat: repeat; }
+/* Two layers of bright stars fading out of phase: two composited layers, not one per star. */
+.moon-twinkle { position: absolute; inset: 0; animation: mm-twinkle 4.6s ease-in-out infinite; will-change: opacity; }
+.moon-twinkle + .moon-twinkle { animation-duration: 6.1s; animation-delay: -2.3s; }
+.moon-twinkle i {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle, #FFFFFF 0 30%, rgba(233, 228, 216, 0.35) 45%, transparent 70%);
+}
+@keyframes mm-twinkle { 0%, 100% { opacity: .1; } 50% { opacity: 1; } }
+.moon-meteor {
+  position: absolute; left: 0; top: 0; width: 140px; height: 1.5px; opacity: 0;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, #FFFFFF, rgba(233, 228, 216, 0.4) 30%, transparent);
+  border-radius: 1px;
+}
+
+/* ---------- Scroll progress beam ---------- */
+@supports (animation-timeline: scroll()) {
+  body::before {
+    content: ""; position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 50;
+    background: linear-gradient(90deg, transparent, #E9E4D8 40%, #FFFFFF);
+    box-shadow: 0 0 12px rgba(233, 228, 216, 0.6);
+    transform-origin: 0 50%; transform: scaleX(0);
+    animation: mm-progress linear both; animation-timeline: scroll(root);
+  }
+  @keyframes mm-progress { to { transform: scaleX(1); } }
+}
+
+/* ---------- Page entry: headlines warp in ---------- */
+[data-dc-root] h1 { transform-origin: 0 50%; animation: mm-warp 1.4s cubic-bezier(.16, 1, .3, 1) both; }
+#top h1 { transform-origin: 50% 50%; }
+@keyframes mm-warp {
+  from { opacity: 0; transform: scale(1.35, 0.9); }
+  60% { opacity: 1; }
+}
+
+/* Page-to-page warp (browsers with cross-document view transitions). */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: mm-vt-out .35s cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: mm-vt-in .55s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes mm-vt-out { to { opacity: 0; transform: scale(1.04); } }
+@keyframes mm-vt-in { from { opacity: 0; transform: scale(.97); } }
+
+/* ---------- Navigation ---------- */
+nav[aria-label="Main"] a:not([style*="border"]) {
+  background: linear-gradient(#E9E4D8, #E9E4D8) 50% 100% / 0 1px no-repeat;
+  padding-bottom: 4px;
+  transition: background-size .35s cubic-bezier(.16, 1, .3, 1), color .2s, text-shadow .3s;
+}
+nav[aria-label="Main"] a:not([style*="border"]):hover,
+nav[aria-label="Main"] a:not([style*="border"]):focus-visible {
+  background-size: 100% 1px; text-shadow: 0 0 12px rgba(233, 228, 216, 0.55);
+}
+
+/* ---------- Buttons: light sweep + glow ---------- */
+[data-dc-root] a[style*="padding: 18px 30px"],
+[data-dc-root] a[style*="padding: 14px 22px"],
+[data-dc-root] button:not(.mm-burger),
+[data-dc-root] .mc-btn {
+  position: relative; overflow: hidden; isolation: isolate;
+  transition: box-shadow .4s, border-color .3s, transform .3s cubic-bezier(.16, 1, .3, 1);
+}
+[data-dc-root] a[style*="padding: 18px 30px"]::after,
+[data-dc-root] a[style*="padding: 14px 22px"]::after,
+[data-dc-root] button:not(.mm-burger)::after,
+[data-dc-root] .mc-btn::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+  transform: translateX(-110%);
+}
+[data-dc-root] a[style*="padding: 18px 30px"]:hover,
+[data-dc-root] a[style*="padding: 14px 22px"]:hover,
+[data-dc-root] button:not(.mm-burger):hover,
+[data-dc-root] .mc-btn:hover {
+  box-shadow: 0 0 24px rgba(233, 228, 216, 0.28), inset 0 0 12px rgba(233, 228, 216, 0.08);
+  transform: translateY(-1px);
+}
+[data-dc-root] a[style*="padding: 18px 30px"]:hover::after,
+[data-dc-root] a[style*="padding: 14px 22px"]:hover::after,
+[data-dc-root] button:not(.mm-burger):hover::after,
+[data-dc-root] .mc-btn:hover::after { transform: translateX(110%); transition: transform .8s cubic-bezier(.16, 1, .3, 1); }
+[data-dc-root] input:focus { outline: none; border-color: #E9E4D8 !important; box-shadow: 0 0 0 1px #E9E4D8, 0 0 24px rgba(233, 228, 216, 0.2); transition: box-shadow .3s; }
+
+/* ---------- Hero mark (home) ---------- */
+#top { position: relative; }
+#top::before {
+  content: ""; position: absolute; left: 50%; top: 170px; width: 640px; height: 640px; max-width: 120vw;
+  transform: translate(-50%, -50%); pointer-events: none; z-index: -1;
+  background: radial-gradient(circle, rgba(233, 228, 216, 0.10), rgba(129, 151, 173, 0.05) 35%, transparent 65%);
+  animation: mm-halo 3.2s cubic-bezier(.45, 0, .55, 1) infinite; will-change: transform, opacity;
+}
+@keyframes mm-halo { 0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 50% { opacity: .55; transform: translate(-50%, -50%) scale(.9); } }
+.mm-orbit { fill: none; stroke: rgba(233, 228, 216, 0.16); stroke-width: .6; stroke-dasharray: 1.5 3; }
+/* Satellites: an ellipse built from two eased translations (x = cos, y = sin) on nested
+   layers, tilted by the parent. Percentages are of the mark box (180 x 140 svg units). */
+.mm-sat, .mm-sx, .mm-sy { position: absolute; inset: 0; pointer-events: none; }
+.mm-sx, .mm-sy, .mm-sat i { will-change: transform, opacity; }
+.mm-sat i { position: absolute; left: 50%; top: 50%; border-radius: 50%; transform: translate(-50%, -50%); }
+.mm-sat-a { transform: rotate(-14deg); }
+.mm-sat-a i { width: 9px; height: 9px; background: #FFFFFF; box-shadow: 0 0 8px rgba(255, 255, 255, 0.7); animation: mm-depth 14s linear infinite; }
+.mm-sat-a .mm-sx { animation: mm-ax 14s infinite; }
+.mm-sat-a .mm-sy { animation: mm-ay 14s infinite; }
+.mm-sat-b { transform: rotate(16deg); }
+.mm-sat-b i { width: 5px; height: 5px; background: #8197AD; animation: mm-depth 26s linear -13s infinite; }
+.mm-sat-b .mm-sx { animation: mm-bx 26s -13s infinite; }
+.mm-sat-b .mm-sy { animation: mm-by 26s -13s infinite; }
+@keyframes mm-ax { 0%, 100% { transform: translateX(50%); animation-timing-function: cubic-bezier(.37, 0, .63, 1); } 50% { transform: translateX(-50%); animation-timing-function: cubic-bezier(.37, 0, .63, 1); } }
+@keyframes mm-ay {
+  0%, 50% { transform: translateY(0); animation-timing-function: cubic-bezier(.61, 1, .88, 1); }
+  25% { transform: translateY(15.7%); animation-timing-function: cubic-bezier(.12, 0, .39, 0); }
+  75% { transform: translateY(-15.7%); animation-timing-function: cubic-bezier(.12, 0, .39, 0); }
+  100% { transform: translateY(0); }
+}
+@keyframes mm-bx { 0%, 100% { transform: translateX(62.2%); animation-timing-function: cubic-bezier(.37, 0, .63, 1); } 50% { transform: translateX(-62.2%); animation-timing-function: cubic-bezier(.37, 0, .63, 1); } }
+@keyframes mm-by {
+  0%, 50% { transform: translateY(0); animation-timing-function: cubic-bezier(.61, 1, .88, 1); }
+  25% { transform: translateY(21.4%); animation-timing-function: cubic-bezier(.12, 0, .39, 0); }
+  75% { transform: translateY(-21.4%); animation-timing-function: cubic-bezier(.12, 0, .39, 0); }
+  100% { transform: translateY(0); }
+}
+/* Bright on the near half of the orbit, dim while passing behind the mark. */
+@keyframes mm-depth { 0%, 46% { opacity: 1; } 56%, 94% { opacity: .15; } 100% { opacity: 1; } }
+
+/* ---------- Live clocks glow ---------- */
+#clock div[style*="font-size: clamp(56px"],
+[data-dc-root] div[style*="font-size: clamp(48px, 8vw, 112px)"],
+[data-dc-root] div[style*="font-size: 40px; line-height: 1"] {
+  text-shadow: 0 0 28px rgba(233, 228, 216, 0.35), 0 0 2px rgba(233, 228, 216, 0.6);
+}
+#clock svg[viewBox="-11 -11 22 22"][style*="0.82em"] { filter: drop-shadow(0 0 6px rgba(233, 228, 216, 0.35)); }
+
+/* ---------- Time zone map: scanning beam ---------- */
+/* An HTML overlay above the map svg, so the beam moves without repainting the map. */
+.mm-scan {
+  position: absolute; top: 9%; bottom: 1%; left: 0; width: 13.3%; pointer-events: none;
+  background: linear-gradient(90deg, rgba(129, 151, 173, 0), rgba(233, 228, 216, 0.07) 80%, rgba(233, 228, 216, 0.28));
+  border-right: 1px solid rgba(233, 228, 216, 0.55);
+  animation: mm-scan 9s linear infinite; will-change: transform;
+}
+@keyframes mm-scan { from { transform: translateX(-100%); } to { transform: translateX(752%); } }
+
+/* ---------- Year ring ---------- */
+#year svg path[style*="stroke: rgb(233, 228, 216); stroke-width: 22"] { filter: drop-shadow(0 0 8px rgba(233, 228, 216, 0.6)); }
+/* The turning rings are separate svgs over the ring, rotated as whole layers. */
+.mm-ring-wrap { position: relative; width: 100%; max-width: 520px; }
+.mm-ring-wrap > svg.mm-spin, .mm-ring-wrap > svg.mm-spin-rev { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; will-change: transform; }
+.mm-spin { animation: mm-spin 120s linear infinite; }
+.mm-spin-rev { animation: mm-spin 200s linear infinite reverse; }
+@keyframes mm-spin { to { transform: rotate(360deg); } }
+
+/* ---------- Cards and panels ---------- */
+#standard div[style*="padding: 40px 32px 48px"] { position: relative; transition: background-color .5s; }
+#standard div[style*="padding: 40px 32px 48px"]::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, #E9E4D8, transparent);
+  transform: scaleX(0); transition: transform .6s cubic-bezier(.16, 1, .3, 1);
+}
+#standard div[style*="padding: 40px 32px 48px"]:hover { background-color: #111215 !important; }
+#standard div[style*="padding: 40px 32px 48px"]:hover::before { transform: scaleX(1); }
+[data-dc-root] pre { transition: box-shadow .4s; }
+[data-dc-root] pre:hover { box-shadow: inset 0 0 0 1px rgba(233, 228, 216, 0.18), 0 0 30px rgba(129, 151, 173, 0.08); }
+details > summary span[aria-hidden] { display: inline-block; transition: transform .4s cubic-bezier(.16, 1, .3, 1); }
+details[open] > summary span[aria-hidden] { transform: rotate(45deg); }
+details > summary { transition: color .2s, text-shadow .3s; }
+details > summary:hover { text-shadow: 0 0 14px rgba(233, 228, 216, 0.35); }
+
+/* ---------- Calendar ---------- */
+.mc-day { transition: border-color .25s, background-color .25s, box-shadow .3s; }
+.mc-day:hover { box-shadow: 0 0 14px rgba(233, 228, 216, 0.12); }
+.mc-day.today { box-shadow: 0 0 16px rgba(233, 228, 216, 0.55); }
+.mc-moon { transition: border-color .3s, box-shadow .4s; }
+.mc-moon.current { box-shadow: 0 0 30px rgba(233, 228, 216, 0.08), inset 0 0 20px rgba(233, 228, 216, 0.03); }
+section[aria-label="Current Moon date and time"] > svg { filter: drop-shadow(0 0 18px rgba(233, 228, 216, 0.35)); }
+
+/* ---------- Mobile header: half-size logo, two-line menu button ---------- */
+.mm-burger { display: none; }
+@media (max-width: 720px) {
+  /* Compact hero so the mark, headline, copy and buttons fit on one screen. */
+  #top { padding: 24px 20px 56px !important; gap: 24px !important; }
+  #top .mm-mark { width: 150px !important; }
+  #top::before { top: 82px; width: 420px; height: 420px; }
+  #top h1 { font-size: 30px !important; }
+  #top > div[style*="gap: 28px"] { gap: 14px !important; }
+  #top p { font-size: clamp(14.5px, 3.85vw, 15px) !important; line-height: 1.5 !important; text-wrap: balance; }
+  #top > div[style*="gap: 16px"] { gap: 10px !important; }
+  #top a[style*="padding: 18px 30px"] { padding: 15px 22px !important; }
+  [data-dc-root] header a[aria-label="Moon home"] svg { width: 66px !important; height: 18.5px !important; }
+  [data-dc-root] header a[aria-label="Moon home"] { gap: 10px !important; font-size: 10px; }
+  /* Only collapse the links when the script is there to open them again. */
+  /* Pinned top bar: slides away while scrolling down, back in when scrolling up. */
+  html.mm-js [data-dc-root] header {
+    position: sticky; top: 0; z-index: 20; background: #0B0B0D; transform: translateZ(0);
+    transition: transform .35s cubic-bezier(.16, 1, .3, 1); will-change: transform;
+  }
+  html.mm-head-hidden [data-dc-root] header { transform: translateY(-100%) translateZ(0); }
+  /* Every section and the footer get their own layer below the bar, so animated or
+     scrolling content inside them (map, satellites, fade-ins) can never paint over
+     the bar or its menu. Safari otherwise lets composited layers jump the order. */
+  html.mm-js [data-dc-root] section, html.mm-js [data-dc-root] footer { position: relative; z-index: 0; }
+  html.mm-js [data-dc-root] header > div { flex-wrap: nowrap !important; }
+  html.mm-js .mm-burger {
+    display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 7px;
+    width: 44px; height: 44px; margin-right: -10px; padding: 0; border: 0; background: none; cursor: pointer;
+  }
+  .mm-burger span { display: block; width: 24px; height: 1.5px; background: #E9E4D8; transition: transform .3s cubic-bezier(.16, 1, .3, 1); }
+  .mm-scrim {
+    position: fixed; inset: 0; z-index: 19;
+    background: rgba(11, 11, 13, 0.45);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s .3s;
+  }
+  html.mm-menu-open .mm-scrim { opacity: 1; visibility: visible; transition: opacity .3s; }
+  html.mm-menu-open { overflow: hidden; }
+  html.mm-menu-open .mm-burger span:first-child { transform: translateY(4.25px) rotate(45deg); }
+  html.mm-menu-open .mm-burger span:last-child { transform: translateY(-4.25px) rotate(-45deg); }
+  .mm-burger:focus-visible { outline: 2px solid #E9E4D8; outline-offset: 2px; }
+  html.mm-js [data-dc-root] nav[aria-label="Main"] {
+    position: absolute; left: 0; right: 0; top: 100%;
+    flex-direction: column; flex-wrap: nowrap !important; align-items: stretch !important; gap: 0 !important;
+    padding: 4px 20px 24px; background: #0B0B0D; border-bottom: 1px solid #1C1D20;
+    font-size: 12px !important; letter-spacing: 0.24em !important;
+    opacity: 0; transform: translateY(-8px); visibility: hidden; pointer-events: none;
+    transition: opacity .25s, transform .3s cubic-bezier(.16, 1, .3, 1), visibility 0s .3s;
+  }
+  html.mm-menu-open [data-dc-root] nav[aria-label="Main"] {
+    opacity: 1; transform: none; visibility: visible; pointer-events: auto;
+    transition: opacity .25s, transform .3s cubic-bezier(.16, 1, .3, 1);
+  }
+  html.mm-js [data-dc-root] nav[aria-label="Main"] a { min-height: 52px; padding-bottom: 0; border-bottom: 1px solid #1C1D20; }
+  html.mm-js [data-dc-root] nav[aria-label="Main"] a[style*="padding: 14px 22px"] { margin-top: 18px; justify-content: center; padding: 0 22px !important; border: 1px solid #E9E4D8; }
+}
+
+/* ---------- Reduced motion: keep the look, drop the movement ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  @supports (animation-timeline: scroll()) { body::before { display: none; } }
+  @view-transition { navigation: none; }
+}

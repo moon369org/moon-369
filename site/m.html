@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moonmark · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A Moonmark is one exact moment, the same everywhere on Earth. Open it in your own local light.">
+<link rel="canonical" href="https://moon369.org/m">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/m">
+<meta property="og:title" content="Moonmark · Moon">
+<meta property="og:description" content="A Moonmark is one exact moment, the same everywhere on Earth. Open it in your own local light.">
+<meta property="og:image" content="https://moon369.org/assets/og/moonmark.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Moonmark · Moon, over a photograph of the moon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Moonmark · Moon">
+<meta name="twitter:description" content="A Moonmark is one exact moment, the same everywhere on Earth. Open it in your own local light.">
+<meta name="twitter:image" content="https://moon369.org/assets/og/moonmark.jpg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0B0B0D">
+<base href="/">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<style>x-dc{display:none}html,body{background:#0B0B0D}html{scrollbar-width:thin;scrollbar-color:#2E3035 #0B0B0D}
+*{scrollbar-width:thin;scrollbar-color:#2E3035 transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#24262A;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#3A3B3F;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
+@keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
+header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+</style>
+<script src="js/preact.umd.js" defer></script>
+<script src="js/moon-phase.js" defer></script>
+<script src="js/sun.js" defer></script>
+<script src="js/qrcode.js" defer></script>
+<script src="js/moonmark.js" defer></script>
+<script src="js/header.js" defer></script>
+<script src="js/dc-lite.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
+.pk-a,.pk-b,.pk-f{animation-duration:3.2s;animation-iteration-count:infinite;animation-fill-mode:both}
+.pk-a{animation-name:pkA}.pk-b{animation-name:pkB}.pk-f{animation-name:pkF}
+@keyframes pkA{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(-30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkB{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkF{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.6,1)}36%,54%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.6,1)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pk-a,.pk-b,.pk-f{animation:none}}
+@media (max-width: 720px){
+header > div{padding:16px 20px!important;gap:12px 16px!important}
+nav[aria-label="Main"]{gap:10px 18px!important;font-size:10px!important;letter-spacing:.18em!important}
+nav[aria-label="Main"] a{min-height:44px;display:inline-flex!important;align-items:center}
+nav[aria-label="Main"] a[style*="padding: 14px 22px"]{padding:0 14px!important}
+[style*="padding: 140px 32px"],[style*="padding: 160px 32px"],[style*="padding: 120px 32px"]{padding:72px 20px!important}
+[style*="padding: 120px 32px 140px"]{padding:56px 20px 80px!important}
+[style*="padding: 100px 32px 90px"]{padding:56px 20px 48px!important}
+[style*="padding: 64px 32px 120px"],[style*="padding: 80px 32px 120px"]{padding:40px 20px 80px!important}
+[style*="padding: 40px 32px"]{padding:32px 20px!important}
+[style*="padding: 40px 48px"]{padding:28px 22px!important}
+[style*="padding: 40px; display: flex"]{padding:24px!important;gap:24px!important}
+[style*="gap: 104px"]{gap:72px!important}
+[style*="gap: 80px"]{gap:48px!important}
+[style*="gap: 64px"]{gap:40px!important}
+[style*="gap: 56px"]{gap:36px!important}
+pre{font-size:12.5px!important}
+.mw-hint{display:block!important}
+}
+@media (max-width: 720px){
+footer > div{flex-direction:column!important;align-items:center!important;text-align:center;gap:28px!important}
+footer > div > div:first-child{align-items:center!important}
+footer > div > div:last-child{justify-content:center!important;gap:22px!important}
+footer > div > div:first-child svg{width:64px!important}
+}
+</style>
+<style>
+.mk-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:48px;align-items:start}
+.mk-main{display:flex;flex-direction:column;gap:26px}
+.mk-l{font-family:'Syncopate',sans-serif;font-size:10px;letter-spacing:.26em;color:#8A8B8F}
+.mk-date{display:flex;align-items:center;gap:18px;font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(16px,2.2vw,26px);letter-spacing:.12em}
+.mk-ph{width:56px;height:56px;flex:none}
+.mk-mark{font-family:'JetBrains Mono',monospace;font-size:clamp(24px,3.6vw,44px);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.mk-mark span{color:#8A8B8F}
+.mk-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:#1C1D20;border:1px solid #1C1D20}
+.mk-rows div{background:#0B0B0D;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.mk-rows span{font-family:'Syncopate',sans-serif;font-size:9.5px;letter-spacing:.22em;color:#8A8B8F}
+.mk-rows b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:14px}
+.mk-btns{display:flex;gap:12px;flex-wrap:wrap}
+.mk-btns button{min-height:52px;padding:0 24px;background:none;border:1px solid #E9E4D8;color:#E9E4D8;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10px;letter-spacing:.22em;cursor:pointer}
+.mk-btns .mk-p{background:#E9E4D8;color:#0B0B0D}
+.mk-side{display:flex;flex-direction:column;gap:14px}
+.mk-qr{background:#E9E4D8;padding:8px}.mk-qr svg{display:block;width:100%;height:auto}
+.mk-cap{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#8A8B8F;letter-spacing:.04em}
+.mk-note{font-size:13px;line-height:1.55;color:#5E6064;border-top:1px solid #1C1D20;padding-top:14px}
+@media (max-width:720px){.mk-grid{grid-template-columns:1fr;gap:32px}.mk-side{max-width:280px}.mk-rows{grid-template-columns:1fr}.mk-mark{font-size:20px}.mk-ph{width:40px;height:40px}}
+</style>
+</helmet>
+<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="/" aria-label="Moon home" style="display: block"><svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+</svg></a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: 'Syncopate', sans-serif; font-size: 11px; letter-spacing: 0.28em">
+<a href="/">HOME</a>
+<a href="/calendar">CALENDAR</a>
+<a href="/api">API</a>
+</nav>
+</div>
+</header>
+
+<section style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 140px; display: flex; flex-direction: column; gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">ONE EXACT MOMENT · THE SAME EVERYWHERE</div>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">MOONMARK</h1>
+</div>
+<div data-mk-root></div>
+</section>
+</div>
+
+<footer style="border-top: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8A8B8F">
+<div style="display: flex; flex-direction: column; gap: 18px"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #24262A; stroke-width: 9"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap"><a href="/" style="color: #8A8B8F">HOME</a><a href="/calendar" style="color: #8A8B8F">CALENDAR</a><a href="/api" style="color: #8A8B8F">API</a><a href="/m" style="color: #8A8B8F">MOONMARK</a><a href="/press" style="color: #8A8B8F">PRESS</a></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":6400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

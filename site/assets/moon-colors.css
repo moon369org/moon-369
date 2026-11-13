@@ -1,0 +1,11 @@
+:root{
+  --moon-void: #050506;
+  --moon-eclipse: #0B0B0D;
+  --moon-graphite: #16171A;
+  --moon-basalt: #24262A;
+  --moon-ash: #8A8B8F;
+  --moon-regolith: #E9E4D8;
+  --moon-font-display: 'Syncopate', sans-serif;
+  --moon-font-text: 'Inter', sans-serif;
+  --moon-font-data: 'JetBrains Mono', monospace;
+}

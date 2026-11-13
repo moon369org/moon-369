@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200">
+<rect x="-100" y="-100" width="200" height="200" rx="44" fill="#E9E4D8"/>
+<g transform="scale(0.8000)">
+<defs>
+<mask id="iA" maskUnits="userSpaceOnUse" x="-90" y="-70" width="180" height="140">
+<rect x="-90" y="-70" width="180" height="140" fill="#fff"/>
+<circle cx="30.0" cy="0" r="46" fill="none" stroke="#000" stroke-width="18"/>
+<path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" fill="none" stroke="#fff" stroke-width="18"/>
+</mask>
+<mask id="iB" maskUnits="userSpaceOnUse" x="-90" y="-70" width="180" height="140">
+<rect x="-90" y="-70" width="180" height="140" fill="#fff"/>
+<path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" fill="none" stroke="#000" stroke-width="18"/>
+</mask>
+</defs>
+<circle cx="-30.0" cy="0" r="46" fill="none" stroke="#0B0B0D" stroke-width="8" mask="url(#iA)"/>
+<circle cx="30.0" cy="0" r="46" fill="none" stroke="#0B0B0D" stroke-width="8" mask="url(#iB)"/>
+</g>
+</svg>

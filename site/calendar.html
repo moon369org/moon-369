@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moon Calendar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="13 moons locked to the real moon, 369 days a year. See today, every moon and every phase.">
+<link rel="canonical" href="https://moon369.org/calendar">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/calendar">
+<meta property="og:title" content="The Moon Calendar">
+<meta property="og:description" content="13 moons locked to the real moon, 369 days a year. See today, every moon and every phase.">
+<meta property="og:image" content="https://moon369.org/assets/og/calendar.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Moon Calendar, over a photograph of the moon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Moon Calendar">
+<meta name="twitter:description" content="13 moons locked to the real moon, 369 days a year. See today, every moon and every phase.">
+<meta name="twitter:image" content="https://moon369.org/assets/og/calendar.jpg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "The Moon Calendar", "url": "https://moon369.org/calendar", "isPartOf": {"@id": "https://moon369.org/#site"}}</script>
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<style>x-dc{display:none}html,body{background:#0B0B0D}html{scrollbar-width:thin;scrollbar-color:#2E3035 #0B0B0D}
+*{scrollbar-width:thin;scrollbar-color:#2E3035 transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#24262A;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#3A3B3F;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
+@keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
+header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+</style>
+<script src="js/preact.umd.js" defer></script>
+<script src="js/moon-phase.js" defer></script>
+<script src="js/sun.js" defer></script>
+<script src="js/header.js" defer></script>
+<script src="js/dc-lite.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
+.mc-day{border:1px solid transparent;border-top:3px solid var(--season);padding:5px 2px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;color:#E9E4D8;cursor:pointer;min-width:0;min-height:44px;font:inherit}
+.mc-day:hover{border-color:#3A3C41;border-top-color:var(--season)}
+.mc-day:focus-visible,.mc-btn:focus-visible,.mc-in:focus-visible{outline:2px solid #E9E4D8;outline-offset:2px}
+.mc-day.today{background:#E9E4D8;color:#0B0B0D}
+.mc-day.today .mc-g{color:#3A3A3E}
+.mc-day.today .mc-ev{color:#0B0B0D}
+.mc-day.sel{border-color:#E9E4D8;border-top-color:var(--season)}
+.s0{--season:#8FA88A}.s1{--season:#CDB57C}.s2{--season:#B8826A}.s3{--season:#8197AD}
+.mc-ev{font-size:9px;line-height:1;color:var(--season);font-weight:600}
+.mc-g{font-size:9.5px;color:#8A8B8F;white-space:nowrap}
+.mc-moon{background:#16171A;border:1px solid #24262A;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mc-moon.current{border-color:#8A8B8F}
+.mc-btn{font-family:'Syncopate',sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;cursor:pointer;background:#16171A;color:#E9E4D8;border:1px solid #24262A;padding:0 18px;min-height:44px}
+.mc-btn:hover{border-color:#8A8B8F}
+.mc-in{font-family:'JetBrains Mono',monospace;font-size:14px;padding:12px;border:1px solid #24262A;background:#0B0B0D;color:#E9E4D8;width:100%;box-sizing:border-box;min-height:44px;color-scheme:dark}
+@media (max-width: 720px){
+header > div{padding:16px 20px!important;gap:12px 16px!important}
+nav[aria-label="Main"]{gap:10px 18px!important;font-size:10px!important;letter-spacing:.18em!important}
+nav[aria-label="Main"] a{min-height:44px;display:inline-flex!important;align-items:center}
+nav[aria-label="Main"] a[style*="padding: 14px 22px"]{padding:0 14px!important}
+[style*="padding: 140px 32px"],[style*="padding: 160px 32px"],[style*="padding: 120px 32px"]{padding:72px 20px!important}
+[style*="padding: 120px 32px 140px"]{padding:56px 20px 80px!important}
+[style*="padding: 100px 32px 90px"]{padding:56px 20px 48px!important}
+[style*="padding: 64px 32px 120px"],[style*="padding: 80px 32px 120px"]{padding:40px 20px 80px!important}
+[style*="padding: 40px 32px"]{padding:32px 20px!important}
+[style*="padding: 40px 48px"]{padding:28px 22px!important}
+[style*="padding: 40px; display: flex"]{padding:24px!important;gap:24px!important}
+[style*="gap: 104px"]{gap:72px!important}
+[style*="gap: 80px"]{gap:48px!important}
+[style*="gap: 64px"]{gap:40px!important}
+[style*="gap: 56px"]{gap:36px!important}
+pre{font-size:12.5px!important}
+.mw-hint{display:block!important}
+}
+@media (max-width: 720px){.mc-g{font-size:8px!important;letter-spacing:-.02em}.mc-moon{padding:12px!important}}
+.mc-show-m{display:none}
+@media (max-width: 720px){
+.mc-now{border:0!important;background:transparent!important;padding:0!important}
+.mc-ph-big{display:none!important}
+.mc-ph-sm{display:block!important}
+.mc-hide-m{display:none!important}
+.mc-show-m{display:inline!important}
+.mc-date{display:flex;flex-direction:column;gap:6px;font-size:22px!important}
+.mc-dot{display:none}
+.mc-seg{white-space:nowrap}
+.mc-yn{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
+.mc-yn .mc-btn{padding:0 6px;font-size:9px;letter-spacing:.12em;white-space:nowrap}
+}
+@media (max-width: 720px){
+footer > div{flex-direction:column!important;align-items:center!important;text-align:center;gap:28px!important}
+footer > div > div:first-child{align-items:center!important}
+footer > div > div:last-child{justify-content:center!important;gap:22px!important}
+footer > div > div:first-child svg{width:64px!important}
+}
+</style>
+</helmet>
+<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="/" aria-label="Moon home" style="display: block">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+</svg>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: 'Syncopate', sans-serif; font-size: 11px; letter-spacing: 0.28em">
+<a href="/">HOME</a>
+<a href="/calendar" aria-current="page" style="border-bottom: 1px solid #E9E4D8; padding-bottom: 4px">CALENDAR</a>
+<a href="/api">API</a>
+<a href="/#faq">FAQ</a>
+</nav>
+</div>
+</header>
+
+<div style="max-width: 1280px; margin: 0 auto; padding: 64px 32px 120px; display: flex; flex-direction: column; gap: 56px">
+
+<section class="mc-now" aria-label="Current Moon date and time" style="border: 1px solid #24262A; background: #16171A; padding: 40px; display: flex; flex-wrap: wrap; align-items: center; gap: 40px">
+<svg class="mc-ph-big" aria-hidden="true" viewBox="-11 -11 22 22" style="width: 120px; height: 120px; display: block; flex: none">
+<circle r="10" style="fill: #24262A"></circle>
+<path d="{{now.ph}}" style="fill: #E9E4D8"></path>
+</svg>
+<div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">TODAY ON MOON<span class="mc-hide-m"> · SINCE FIRST LIGHT</span></div>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: 0.14em" class="mc-date"><span class="mc-seg">YEAR {{now.y}}</span><span class="mc-dot"> · </span><span class="mc-seg">MOON {{now.m}}</span><span class="mc-dot"> · </span><span class="mc-seg">DAY {{now.d}}</span></h1>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: 'JetBrains Mono', monospace; font-size: clamp(40px, 6vw, 72px); line-height: 1; font-variant-numeric: tabular-nums"><svg class="mc-ph-sm" aria-hidden="true" viewBox="-11 -11 22 22" style="width: 0.82em; height: 0.82em; display: none; flex: none"><circle r="10" style="fill: #24262A"></circle><path d="{{now.ph}}" style="fill: #E9E4D8"></path></svg><div>{{now.clock}}</div></div>
+<div style="font-size: 14px; color: #8A8B8F">{{now.meta}}</div>
+<div class="{{now.seasonCls}}" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; border: 1px solid #24262A; padding: 6px 14px; font-size: 13px">
+<span aria-hidden="true" style="width: 9px; height: 9px; border-radius: 50%; background: var(--season)"></span>
+<span class="mc-hide-m">{{now.season}}</span><span class="mc-show-m">{{now.seasonShort}}</span>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(26px, 3.4vw, 44px); letter-spacing: 0.08em">{{yearTitle}}</h2>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #8A8B8F"><span class="mc-hide-m">{{yearRange}}</span><span class="mc-show-m">{{yearRangeShort}}</span></div>
+</div>
+<div class="mc-yn" style="display: flex; flex-wrap: wrap; gap: 8px">
+<button class="mc-btn" type="button" aria-label="Previous year" onClick="{{prevYear}}"><span class="mc-hide-m">PREVIOUS</span><span class="mc-show-m">‹ PREV</span></button>
+<button class="mc-btn" type="button" onClick="{{thisYear}}">THIS YEAR</button>
+<button class="mc-btn" type="button" aria-label="Next year" onClick="{{nextYear}}"><span class="mc-hide-m">NEXT</span><span class="mc-show-m">NEXT ›</span></button>
+</div>
+</div>
+<div aria-label="Season colors" style="display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: #8A8B8F">
+<span class="s0" style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 14px; height: 4px; background: var(--season)"></span>Spring</span>
+<span class="s1" style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 14px; height: 4px; background: var(--season)"></span>Summer</span>
+<span class="s2" style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 14px; height: 4px; background: var(--season)"></span>Autumn</span>
+<span class="s3" style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 14px; height: 4px; background: var(--season)"></span>Winter</span>
+<span>◆ Equinox or solstice falls on this day · Northern Hemisphere seasons</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px">
+<sc-for list="{{moons}}" as="mo" hint-placeholder-count="13">
+<article class="{{mo.cls}}">
+<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+<h3 style="margin: 0; font-family: 'Syncopate', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em">{{mo.title}}</h3>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">{{mo.sub}}</span>
+</header>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+<sc-for list="{{mo.days}}" as="d" hint-placeholder-count="28">
+<button type="button" class="{{d.cls}}" aria-label="{{d.label}}" onClick="{{d.pick}}">
+<svg aria-hidden="true" viewBox="-11 -11 22 22" style="width: 14px; height: 14px; display: block"><circle r="10" style="fill: #24262A"></circle><path d="{{d.ph}}" style="fill: #E9E4D8"></path></svg>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500">{{d.n}}<sc-if value="{{d.hit}}" hint-placeholder-val="{{false}}"> <span class="mc-ev">◆</span></sc-if></span>
+<span class="mc-g">{{d.g}}</span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{mo.hasEvents}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; border-top: 1px solid #24262A; padding-top: 10px">
+<sc-for list="{{mo.events}}" as="e" hint-placeholder-count="1">
+<div class="{{e.cls}}" style="display: flex; gap: 8px; align-items: baseline"><span aria-hidden="true" style="width: 9px; height: 9px; flex: none; background: var(--season)"></span><span>{{e.text}}</span></div>
+</sc-for>
+</div>
+</sc-if>
+</article>
+</sc-for>
+</div>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px">
+<div aria-live="polite" style="border: 1px solid #24262A; background: #16171A; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+<h3 style="margin: 0; font-family: 'Syncopate', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em">SELECTED DAY</h3>
+<dl style="margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; font-size: 14px">
+<sc-for list="{{detail}}" as="r" hint-placeholder-count="6">
+<dt style="color: #8A8B8F">{{r.k}}</dt><dd style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{r.v}}</dd>
+</sc-for>
+</dl>
+</div>
+<div style="border: 1px solid #24262A; background: #16171A; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+<h3 style="margin: 0; font-family: 'Syncopate', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em">CONVERT A DATE</h3>
+<label for="mc-conv" style="font-size: 13px; color: #8A8B8F">Standard date and time (UTC)</label>
+<input id="mc-conv" class="mc-in" type="datetime-local" step="1" value="{{convVal}}" onChange="{{onConv}}">
+<dl style="margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; font-size: 14px">
+<sc-for list="{{convOut}}" as="r" hint-placeholder-count="3">
+<dt style="color: #8A8B8F">{{r.k}}</dt><dd style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{r.v}}</dd>
+</sc-for>
+</dl>
+</div>
+</section>
+
+<section style="border: 1px solid #24262A; background: #16171A; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<h3 style="margin: 0; font-family: 'Syncopate', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em">THE SYSTEM</h3>
+<div style="overflow-x: auto">
+<table style="border-collapse: collapse; width: 100%; min-width: 520px; font-size: 14px">
+<thead><tr>
+<th scope="col" style="text-align: left; padding: 10px 12px; border-bottom: 1px solid #24262A; font-weight: 500; color: #8A8B8F; font-size: 12px; letter-spacing: 0.06em">MOON UNIT</th>
+<th scope="col" style="text-align: left; padding: 10px 12px; border-bottom: 1px solid #24262A; font-weight: 500; color: #8A8B8F; font-size: 12px; letter-spacing: 0.06em">MADE OF</th>
+<th scope="col" style="text-align: left; padding: 10px 12px; border-bottom: 1px solid #24262A; font-weight: 500; color: #8A8B8F; font-size: 12px; letter-spacing: 0.06em">IN STANDARD TIME</th>
+</tr></thead>
+<tbody>
+<tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon second</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">base unit</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">1.0403730 s</td></tr>
+<tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon minute</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">60 Moon seconds</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">62.4224 s</td></tr>
+<tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon hour</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">60 Moon minutes</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">1 h 02 m 25.3 s</td></tr>
+<tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon day</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">24 Moon hours</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">24 h 58 m 08.2 s</td></tr>
+<tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">28.3846154 Moon days</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">29.530589 days (one lunation)</td></tr>
+<tr><td style="padding: 10px 12px">Moon year</td><td style="padding: 10px 12px">13 moons, 369 Moon days</td><td style="padding: 10px 12px; font-family: 'JetBrains Mono', monospace">383.8977 days</td></tr>
+</tbody>
+</table>
+</div>
+<p style="margin: 0; max-width: 820px; font-size: 13px; line-height: 1.7; color: #8A8B8F">One clock for the whole planet: no time zones, no daylight saving. Year 0 began at the first new moon of 0 AD, 23 January 0000, 02:44 UTC, and the count runs unbroken from there. Each moon has 28 or 29 whole days (five moons get 29), and a day belongs to the moon it starts in. Moon boundaries track the average lunation, so a real new moon can land up to about half a Moon day either side, and that offset never accumulates. Equinoxes and solstices follow Meeus, Astronomical Algorithms ch. 27, accurate to about a&nbsp;minute.</p>
+</section>
+
+</div>
+
+<footer style="border-top: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8A8B8F">
+<div style="display: flex; flex-direction: column; gap: 18px"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #24262A; stroke-width: 9"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap"><a href="/" style="color: #8A8B8F">HOME</a><a href="/calendar" style="color: #8A8B8F">CALENDAR</a><a href="/api" style="color: #8A8B8F">API</a><a href="/m" style="color: #8A8B8F">MOONMARK</a><a href="/press" style="color: #8A8B8F">PRESS</a></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":5600}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    this.setState({ now: Date.now(), conv: new Date().toISOString().slice(0, 19) });
+    this.timer = setInterval(() => this.setState({ now: Date.now() }), 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+
+  C() {
+    if (this._c) return this._c;
+    const EPOCH = -62165308562978.61, K = 1.0403730490216803, MS_SEC = 1000 * K, MS_DAY = 86400 * MS_SEC;
+    const YEAR_DAYS = 369, MOONS = 13, MOON_DAYS = YEAR_DAYS / MOONS;
+    const moonOfDay = (d) => Math.floor(d * MOONS / YEAR_DAYS);
+    const firstDay = (m) => Math.ceil(m * YEAR_DAYS / MOONS);
+    const toMoon = (ms) => {
+      const t = ms - EPOCH, dayAbs = Math.floor(t / MS_DAY);
+      const year = Math.floor(dayAbs / YEAR_DAYS), dYear = dayAbs - year * YEAR_DAYS;
+      const moon = moonOfDay(dYear), day = dYear - firstDay(moon);
+      let secs = (t - dayAbs * MS_DAY) / MS_SEC;
+      const h = Math.floor(secs / 3600); secs -= h * 3600;
+      const m = Math.floor(secs / 60); secs -= m * 60;
+      const phase = window.MoonPhase.fraction(ms);
+      return { year, moon: moon + 1, day: day + 1, dYear, h, m, s: Math.floor(secs), phase };
+    };
+    const dayStart = (year, dYear) => EPOCH + (year * YEAR_DAYS + dYear) * MS_DAY;
+    const PT = [[485,324.96,1934.136],[203,337.23,32964.467],[199,342.08,20.186],[182,27.85,445267.112],[156,73.14,45036.886],[136,171.52,22518.443],[77,222.54,65928.934],[74,296.72,3034.906],[70,243.58,9037.513],[58,119.81,33718.147],[52,297.17,150.678],[50,21.02,2281.226],[45,247.54,29929.562],[44,325.15,31555.956],[29,60.93,4443.417],[18,155.12,67555.328],[17,288.79,4562.452],[16,198.04,62894.029],[14,199.76,31436.921],[12,95.39,14577.848],[12,287.11,31931.756],[12,320.81,34777.259],[9,227.73,1222.114],[8,15.45,16859.074]];
+    const C1 = [[1721139.29189,365242.13740,0.06134,0.00111,-0.00071],[1721233.25401,365241.72562,-0.05323,0.00907,0.00025],[1721325.70455,365242.49558,-0.11677,-0.00297,0.00074],[1721414.39987,365242.88257,-0.00769,-0.00933,-0.00006]];
+    const C2 = [[2451623.80984,365242.37404,0.05169,-0.00411,-0.00057],[2451716.56767,365241.62603,0.00325,0.00888,-0.00030],[2451810.21715,365242.01767,-0.11575,0.00337,0.00078],[2451900.05952,365242.74049,-0.06223,-0.00823,0.00032]];
+    const evCache = {};
+    const seasonEvent = (year, i) => {
+      const key = year + ':' + i; if (key in evCache) return evCache[key];
+      const c = year < 1000 ? C1[i] : C2[i], Y = year < 1000 ? year / 1000 : (year - 2000) / 1000;
+      const j0 = c[0] + c[1] * Y + c[2] * Y * Y + c[3] * Y ** 3 + c[4] * Y ** 4, T = (j0 - 2451545) / 36525, r = Math.PI / 180;
+      const W = (35999.373 * T - 2.47) * r, dl = 1 + 0.0334 * Math.cos(W) + 0.0007 * Math.cos(2 * W);
+      let S = 0; for (const [a, b, cc] of PT) S += a * Math.cos((b + cc * T) * r);
+      return evCache[key] = (j0 + 0.00001 * S / dl - 2440587.5) * 86400000;
+    };
+    const eventsBetween = (a, b) => {
+      const out = [], y0 = new Date(a).getUTCFullYear() - 1, y1 = new Date(b).getUTCFullYear() + 1;
+      for (let y = y0; y <= y1; y++) for (let i = 0; i < 4; i++) out.push({ t: seasonEvent(y, i), i });
+      return out.sort((p, q) => p.t - q.t);
+    };
+    const seasonAt = (ms) => {
+      const ev = eventsBetween(ms, ms); let last = null, next = null;
+      for (const e of ev) { if (e.t <= ms) last = e; else { next = e; break; } }
+      return { season: last.i, next };
+    };
+    const phaseName = (p) => ['New moon','Waxing crescent','First quarter','Waxing gibbous','Full moon','Waning gibbous','Last quarter','Waning crescent'][Math.floor((p * 8 + 0.5) % 8)];
+    const phasePath = (p) => window.MoonPhase.path(p, 10);
+    // Phase shown for a day = the real moon at the middle of that Moon day.
+    const dayPhase = (year, dYear) => window.MoonPhase.fraction(dayStart(year, dYear) + MS_DAY / 2);
+    const dayIllum = (year, dYear) => window.MoonPhase.illumination(dayStart(year, dYear) + MS_DAY / 2);
+    const fmtShort = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    const fmtLong = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' });
+    const fmtYear = (ms) => { const y = new Date(ms).getUTCFullYear(); return fmtLong.format(ms).replace(String(y), y < 1 ? (1 - y) + ' BC' : String(y)); };
+    const fmtLoc = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
+    // The local day(s) whose local noon falls inside this Moon day (the people's date rule).
+    const localDays = (s0, s1) => {
+      const d0 = new Date(s0); let n = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate(), 12).getTime();
+      if (n < s0) { const dn = new Date(n); n = new Date(dn.getFullYear(), dn.getMonth(), dn.getDate() + 1, 12).getTime(); }
+      const out = [];
+      while (n < s1) { out.push(n); const dn = new Date(n); n = new Date(dn.getFullYear(), dn.getMonth(), dn.getDate() + 1, 12).getTime(); }
+      if (!out.length) return '';
+      return out.length === 1 ? fmtLoc.format(out[0]) : fmtLoc.format(out[0]) + '/' + new Date(out[1]).getDate();
+    };
+    this._c = { localDays, MS_DAY, YEAR_DAYS, MOONS, moonOfDay, firstDay, toMoon, dayStart, eventsBetween, seasonAt, phaseName, phasePath, dayPhase, dayIllum, fmtShort, fmtLong: { format: fmtYear } };
+    return this._c;
+  }
+
+  yearData(year, today, sel) {
+    const key = year + '|' + today.year + ':' + today.dYear + '|' + sel.year + ':' + sel.dYear;
+    if (this._yk === key) return this._yd;
+    const c = this.C();
+    const EVENT = ['Spring equinox', 'Summer solstice', 'Autumn equinox', 'Winter solstice'];
+    const SEASON = ['Spring', 'Summer', 'Autumn', 'Winter'];
+    const a = c.dayStart(year, 0), b = c.dayStart(year + 1, 0) - 1;
+    const evs = c.eventsBetween(a, b);
+    let season = c.seasonAt(a).season;
+    const moons = [];
+    for (let m = 0; m < c.MOONS; m++) {
+      const f = c.firstDay(m), l = c.firstDay(m + 1);
+      const days = [], events = [];
+      for (let d = f; d < l; d++) {
+        const s0 = c.dayStart(year, d), s1 = s0 + c.MS_DAY;
+        const hit = evs.find((e) => e.t >= s0 && e.t < s1);
+        if (hit) {
+          season = hit.i;
+          events.push({ cls: 's' + hit.i, text: EVENT[hit.i] + ' · Day ' + (d - f + 1) + ' · ' + c.fmtLong.format(hit.t) + ' UTC' });
+        }
+        const isToday = today.year === year && today.dYear === d;
+        const isSel = sel.year === year && sel.dYear === d;
+        days.push({
+          n: d - f + 1, g: c.localDays(s0, s1), hit: !!hit, ph: c.phasePath(c.dayPhase(year, d)),
+          cls: 'mc-day s' + season + (isToday ? ' today' : '') + (isSel ? ' sel' : ''),
+          label: 'Moon ' + (m + 1) + ', day ' + (d - f + 1) + ', ' + SEASON[season] + (hit ? ', ' + EVENT[hit.i] : ''),
+          pick: () => this.setState({ sel: { year, dYear: d } })
+        });
+      }
+      moons.push({
+        title: 'MOON ' + (m + 1),
+        sub: (l - f) + ' days · ' + c.fmtShort.format(c.dayStart(year, f)),
+        cls: 'mc-moon' + (today.year === year && today.moon === m + 1 ? ' current' : ''),
+        days, events, hasEvents: events.length > 0
+      });
+    }
+    this._yk = key;
+    const fd = (ms) => { const dt = new Date(ms); const y = dt.getUTCFullYear(); return c.fmtShort.format(ms) + ', ' + (y < 1 ? (1 - y) + ' BC' : y); };
+    this._yd = { moons, range: c.fmtLong.format(a) + ' to ' + c.fmtLong.format(b) + ' UTC', rangeShort: fd(a) + ' → ' + fd(b) };
+    return this._yd;
+  }
+
+  renderVals() {
+    const c = this.C();
+    const st = this.state || {};
+    const SEASON = ['Spring', 'Summer', 'Autumn', 'Winter'];
+    const EVENT = ['Spring equinox', 'Summer solstice', 'Autumn equinox', 'Winter solstice'];
+    const pad = (n) => String(n).padStart(2, '0');
+    const nowMs = st.now || Date.now();
+    // People's Moon date: the Moon date in effect at local noon of today.
+    const zone = (window.MoonSun && window.MoonSun.zone) || 'UTC';
+    const offAt = (ms) => { let o = {}; try { new Intl.DateTimeFormat('en-US', { timeZone: zone, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(ms).forEach((x) => { o[x.type] = x.value; }); } catch (e) { return { off: 0, y: 1970, mo: 1, d: 1 }; } return { off: Date.UTC(+o.year, +o.month - 1, +o.day, +o.hour % 24, +o.minute) - Math.floor(ms / 60000) * 60000, y: +o.year, mo: +o.month, d: +o.day }; };
+    const ln = offAt(nowMs);
+    const myLoc = (window.MoonSun && window.MoonSun.where) ? window.MoonSun.where() : { lat: 40.71, lon: -74.01, approx: true };
+    const lr = (window.MoonSun && window.MoonSun.light) ? window.MoonSun.light(nowMs, myLoc.lat, myLoc.lon) : null;
+    const today = lr ? c.toMoon(lr.dayStart) : c.toMoon(Date.UTC(ln.y, ln.mo - 1, ln.d, 12) - ln.off);
+    const live = c.toMoon(nowMs);
+    let fmtLocal = c.fmtLong; try { fmtLocal = new Intl.DateTimeFormat('en-US', { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }); } catch (e) {}
+    let fmtDay = null; try { fmtDay = new Intl.DateTimeFormat('en-US', { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric' }); } catch (e) {}
+    let fmtClock = null; try { fmtClock = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }); } catch (e) {}
+    const place = zone.split('/').pop().replace(/_/g, ' ');
+    const year = st.year ?? today.year;
+    const sel = st.sel || { year: today.year, dYear: today.dYear };
+    const yd = this.yearData(year, today, sel);
+
+    const sa = c.seasonAt(nowMs);
+    const now = {
+      date: 'YEAR ' + today.year + ' · MOON ' + today.moon + ' · DAY ' + today.day,
+      y: today.year, m: pad(today.moon), d: pad(today.day),
+      seasonShort: SEASON[sa.season] + ' · ' + ['Equinox', 'Solstice', 'Equinox', 'Solstice'][sa.next.i] + ' in ' + Math.round((sa.next.t - nowMs) / c.MS_DAY) + ' days',
+      clock: lr ? lr.counter : (fmtClock ? fmtClock.format(nowMs) : pad(live.h) + ':' + pad(live.m) + ':' + pad(live.s)),
+      meta: (lr ? (lr.phase === 'light' ? 'Light' : 'Dark') + (myLoc.approx ? ' in New York' : ' where you are') + ' · ' : '') + c.phaseName(live.phase) + ' · ' + Math.round(window.MoonPhase.illumination(nowMs) * 100) + '% lit · Moonmark ' + live.year + '.' + pad(live.moon) + '.' + pad(live.day) + ' ' + pad(live.h) + ':' + pad(live.m),
+      ph: c.phasePath(live.phase),
+      seasonCls: 's' + sa.season,
+      season: SEASON[sa.season] + ' · ' + EVENT[sa.next.i] + ' in ' + ((sa.next.t - nowMs) / c.MS_DAY).toFixed(1) + ' Moon days'
+    };
+
+    const sm = c.moonOfDay(sel.dYear), sp = c.dayPhase(sel.year, sel.dYear), si = c.dayIllum(sel.year, sel.dYear);
+    const ss = c.dayStart(sel.year, sel.dYear), se = ss + c.MS_DAY;
+    const detail = [
+      { k: 'Moon date', v: 'Year ' + sel.year + ', Moon ' + (sm + 1) + ', Day ' + (sel.dYear - c.firstDay(sm) + 1) },
+      { k: 'Day of year', v: (sel.dYear + 1) + ' of 369' },
+      { k: 'Your days', v: (() => { const out = []; for (let t = ss - c.MS_DAY; t < se + c.MS_DAY; t += 3600000 * 6) { const o = offAt(t); const noon = Date.UTC(o.y, o.mo - 1, o.d, 12) - o.off; if (noon >= ss && noon < se && fmtDay) { const lbl = fmtDay.format(noon); if (out.indexOf(lbl) < 0) out.push(lbl); } } return out.length ? out.join(' and ') : 'None'; })() },
+      { k: 'Moon day runs', v: fmtLocal.format(ss) + ' to ' + fmtLocal.format(se) },
+      { k: 'Phase', v: c.phaseName(sp) + ' · ' + Math.round(si * 100) + '% lit' },
+      { k: 'Season', v: SEASON[c.seasonAt(se - 1).season] }
+    ];
+
+    const convVal = st.conv || '';
+    let convOut = [];
+    const cms = convVal ? Date.parse(convVal + 'Z') : NaN;
+    if (!isNaN(cms)) {
+      const t = c.toMoon(cms);
+      convOut = [
+        { k: 'Moon date', v: 'Year ' + t.year + ', Moon ' + t.moon + ', Day ' + t.day },
+        { k: 'Moon time', v: pad(t.h) + ':' + pad(t.m) + ':' + pad(t.s) },
+        { k: 'Phase', v: c.phaseName(t.phase) }
+      ];
+    }
+
+    return {
+      now, moons: yd.moons, yearTitle: 'YEAR ' + year, yearRange: yd.range, yearRangeShort: yd.rangeShort,
+      prevYear: () => this.setState({ year: year - 1 }),
+      nextYear: () => this.setState({ year: year + 1 }),
+      thisYear: () => this.setState({ year: today.year }),
+      detail, convVal, convOut,
+      onConv: (e) => this.setState({ conv: e.target.value })
+    };
+  }
+}
+</script>
+</body>
+</html>

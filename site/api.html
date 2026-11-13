@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moon API</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Open source, no key. Moon dates, nanosecond Moonmarks, and Light and Dark for anywhere on Earth.">
+<link rel="canonical" href="https://moon369.org/api">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/api">
+<meta property="og:title" content="Moon API">
+<meta property="og:description" content="Open source, no key. Moon dates, nanosecond Moonmarks, and Light and Dark for anywhere on Earth.">
+<meta property="og:image" content="https://moon369.org/assets/og/api.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Moon API, over a photograph of the moon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Moon API">
+<meta name="twitter:description" content="Open source, no key. Moon dates, nanosecond Moonmarks, and Light and Dark for anywhere on Earth.">
+<meta name="twitter:image" content="https://moon369.org/assets/og/api.jpg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebAPI", "name": "Moon API", "url": "https://moon369.org/api", "documentation": "https://moon369.org/api", "provider": {"@type": "Organization", "name": "Moon", "url": "https://moon369.org/"}, "termsOfService": "https://moon369.org/api#terms", "description": "Open source, no key. Moon dates, nanosecond Moonmarks, and Light and Dark for anywhere on Earth."}</script>
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<style>x-dc{display:none}html,body{background:#0B0B0D}html{scrollbar-width:thin;scrollbar-color:#2E3035 #0B0B0D}
+*{scrollbar-width:thin;scrollbar-color:#2E3035 transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#24262A;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#3A3B3F;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
+@media (min-width: 721px){
+nav[aria-label="Docs"]{position:sticky;top:calc(var(--hd-h,0px) + 32px);max-height:calc(100vh - var(--hd-h,0px) - 64px);overflow-y:auto;transition:top .38s cubic-bezier(.2,.8,.2,1)}
+nav[aria-label="Docs"] a{transition:color .15s}
+nav[aria-label="Docs"] a{position:relative}
+nav[aria-label="Docs"] a.ap-on{color:#E9E4D8!important}
+nav[aria-label="Docs"] a.ap-on::before{content:"";position:absolute;left:-21px;top:50%;height:18px;margin-top:-9px;width:2px;background:#E9E4D8}
+}
+@keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
+header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+</style>
+<script src="js/preact.umd.js" defer></script>
+<script src="js/moon-phase.js" defer></script>
+<script src="js/sun.js" defer></script>
+<script src="js/header.js" defer></script>
+<script src="js/dc-lite.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;color:#E9E4D8}
+@media (max-width: 720px){
+header > div{padding:16px 20px!important;gap:12px 16px!important}
+nav[aria-label="Main"]{gap:10px 18px!important;font-size:10px!important;letter-spacing:.18em!important}
+nav[aria-label="Main"] a{min-height:44px;display:inline-flex!important;align-items:center}
+nav[aria-label="Main"] a[style*="padding: 14px 22px"]{padding:0 14px!important}
+[style*="padding: 140px 32px"],[style*="padding: 160px 32px"],[style*="padding: 120px 32px"]{padding:72px 20px!important}
+[style*="padding: 120px 32px 140px"]{padding:56px 20px 80px!important}
+[style*="padding: 100px 32px 90px"]{padding:56px 20px 48px!important}
+[style*="padding: 64px 32px 120px"],[style*="padding: 80px 32px 120px"]{padding:40px 20px 80px!important}
+[style*="padding: 40px 32px"]{padding:32px 20px!important}
+[style*="padding: 40px 48px"]{padding:28px 22px!important}
+[style*="padding: 40px; display: flex"]{padding:24px!important;gap:24px!important}
+[style*="gap: 104px"]{gap:72px!important}
+[style*="gap: 80px"]{gap:48px!important}
+[style*="gap: 64px"]{gap:40px!important}
+[style*="gap: 56px"]{gap:36px!important}
+pre{font-size:12.5px!important}
+.mw-hint{display:block!important}
+}
+@media (max-width: 720px){
+.ap-hide-m{display:none!important}
+.ap-date{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:10px;border-top:1px solid #24262A}
+.ap-date-c{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 0 2px}
+.ap-date-c+.ap-date-c{border-left:1px solid #24262A}
+.ap-date-l{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.24em;color:#8A8B8F}
+.ap-date-v{font-family:'Syncopate',sans-serif;font-weight:700;font-size:20px;letter-spacing:.06em;color:#E9E4D8}
+[style*="flex: 0 1 380px"]{flex:1 1 100%!important}
+[style*="flex: 0 1 380px"] [style*="font-size: 40px"]{font-size:44px!important}
+nav[aria-label="Docs"]{position:sticky;top:0;z-index:5;max-width:none!important;flex:1 1 100%!important;flex-direction:row!important;flex-wrap:nowrap!important;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-left:0!important;padding:12px 20px!important;margin:-40px -20px 0;background:rgba(11,11,13,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid #1C1D20;counter-reset:ap;scroll-padding-left:20px}
+nav[aria-label="Docs"]::-webkit-scrollbar{display:none}
+nav[aria-label="Docs"] > div{display:none}
+nav[aria-label="Docs"] a{flex:none;display:inline-flex!important;align-items:center;gap:8px;min-height:40px!important;padding:0 14px!important;border:1px solid #24262A;border-radius:999px;font-size:13px!important;white-space:nowrap;counter-increment:ap}
+nav[aria-label="Docs"] a::before{content:counter(ap,decimal-leading-zero);font-family:'JetBrains Mono',monospace;font-size:10px;color:#5E6064;letter-spacing:.1em}
+nav[aria-label="Docs"] a.ap-on{border-color:#E9E4D8;color:#E9E4D8!important}
+nav[aria-label="Docs"] a.ap-on::before{color:#E9E4D8}
+[id="start"],[id="constants"],[id="endpoints"],[id="errors"],[id="precision"],[id="reference"],[id="attribution"],[id="brand"],[id="terms"]{scroll-margin-top:72px}
+}
+@media (max-width: 720px){
+footer > div{flex-direction:column!important;align-items:center!important;text-align:center;gap:28px!important}
+footer > div > div:first-child{align-items:center!important}
+footer > div > div:last-child{justify-content:center!important;gap:22px!important}
+footer > div > div:first-child svg{width:64px!important}
+}
+</style>
+</helmet>
+<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="/" aria-label="Moon home" style="display: flex; align-items: center; gap: 18px">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+</svg>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: #8A8B8F; padding-left: 18px; border-left: 1px solid #24262A">API</span>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 28px; font-family: 'Syncopate', sans-serif; font-size: 11px; letter-spacing: 0.28em">
+<a href="/">HOME</a>
+<a href="/calendar">CALENDAR</a>
+<a href="#endpoints">ENDPOINTS</a>
+<a href="#attribution">ATTRIBUTION</a>
+<a href="#reference" style="padding: 14px 22px; background: #E9E4D8; color: #0B0B0D; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SOURCE CODE</a>
+</nav>
+</div>
+</header>
+
+<section style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 90px; display: flex; flex-wrap: wrap; gap: 56px; align-items: flex-end; justify-content: space-between">
+<div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">OPEN SOURCE · MIT · V1</div>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">MOON API</h1>
+<p style="margin: 0; max-width: 600px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Moon is an open standard and open source. Call the hosted API with no signup, or run the reference code yourself. One constant, no time&nbsp;zones.</p>
+</div>
+<div style="flex: 0 1 380px; border: 1px solid #24262A; padding: 24px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.24em; color: #8A8B8F">LIVE · MOONMARK · GET /v1/now</div>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: 'JetBrains Mono', monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums"><svg role="img" aria-label="{{phaseName}}" viewBox="-11 -11 22 22" style="width: 0.82em; height: 0.82em; display: block; flex: none"><circle r="10" style="fill: #24262A"></circle><path d="{{phasePath}}" style="fill: #E9E4D8"></path></svg><div>{{clock}}</div></div>
+<div class="ap-hide-m" style="font-family: 'Syncopate', sans-serif; font-size: 12px; letter-spacing: 0.24em">{{dateLine}}</div>
+<div class="ap-date" style="display: none"><div class="ap-date-c"><div class="ap-date-l">YEAR</div><div class="ap-date-v">{{yNum}}</div></div><div class="ap-date-c"><div class="ap-date-l">MOON</div><div class="ap-date-v">{{moonNum}}</div></div><div class="ap-date-c"><div class="ap-date-l">DAY</div><div class="ap-date-v">{{dayNum}}</div></div></div>
+</div>
+</div>
+</section>
+
+<div style="max-width: 1280px; margin: 0 auto; padding: 64px 32px 120px; display: flex; flex-wrap: wrap; gap: 64px; align-items: flex-start">
+
+<nav aria-label="Docs" style="flex: 1 1 200px; max-width: 240px; display: flex; flex-direction: column; border-left: 1px solid #24262A; padding-left: 20px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.24em; color: #8A8B8F; padding-bottom: 10px">ON THIS PAGE</div>
+<a href="#start" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Quick start</a>
+<a href="#constants" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Constants</a>
+<a href="#endpoints" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Endpoints</a>
+<a href="#errors" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Errors &amp; limits</a>
+<a href="#precision" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Precision</a>
+<a href="#reference" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Reference code</a>
+<a href="#attribution" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Attribution</a>
+<a href="#brand" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Brand rules</a>
+<a href="#terms" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Terms</a>
+</nav>
+
+<main style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 72px">
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="start" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">01</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">QUICK START</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">No signup, no key. Call <code>/v1/now</code> and you have Moon time. Every response is JSON, and every caller gets the same answer at the same&nbsp;instant.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: #24262A; border: 1px solid #24262A">
+<div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">STEP 1</div><div style="font-size: 16px; font-weight: 500">Call the API</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">Base URL <code>https://api.moon369.org</code>. Open rate limit 120 requests a minute. Optional free key for higher&nbsp;volume.</p></div>
+<div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">STEP 2</div><div style="font-size: 16px; font-weight: 500">Or run it yourself</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">The reference code is MIT licensed. Same answer as the API, fully&nbsp;offline.</p></div>
+<div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">STEP 3</div><div style="font-size: 16px; font-weight: 500">Show the badge</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">Display "Powered by Moon" with a link back wherever Moon time&nbsp;appears.</p></div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="constants" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">02</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">CONSTANTS</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">The whole standard fits in this table. Everything the API returns is derived from these&nbsp;values.</p>
+</div>
+<div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse"><tbody><tr><th scope="row" style="text-align: left; padding: 16px 20px; border-top: 1px solid #1C1D20; font-weight: 500; font-size: 15px; white-space: nowrap">Moon second</th><td style="padding: 16px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8">1.0403730490216803 SI seconds</td></tr><tr><th scope="row" style="text-align: left; padding: 16px 20px; border-top: 1px solid #1C1D20; font-weight: 500; font-size: 15px; white-space: nowrap">Moon minute</th><td style="padding: 16px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8">60 Moon seconds · 62.4224 s</td></tr><tr><th scope="row" style="text-align: left; padding: 16px 20px; border-top: 1px solid #1C1D20; font-weight: 500; font-size: 15px; white-space: nowrap">Moon hour</th><td style="padding: 16px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8">60 Moon minutes · 3,745.343 s</td></tr><tr><th scope="row" style="text-align: left; padding: 16px 20px; border-top: 1px solid #1C1D20; font-weight: 500; font-size: 15px; white-space: nowrap">Moon day</th><td style="padding: 16px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8">24 Moon hours · 89,888.23 s</td></tr><tr><th scope="row" style="text-align: left; padding: 16px 20px; border-top: 1px solid #1C1D20; font-weight: 500; font-size: 15px; white-space: nowrap">Moon</th><td style="padding: 16px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8">28.3846 Moon days · one mean lunation</td></tr><tr><th scope="row" style="text-align: left; padding: 16px 20px; border-top: 1px solid #1C1D20; font-weight: 500; font-size: 15px; white-space: nowrap">Year</th><td style="padding: 16px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8">13 moons · 369 Moon days</td></tr><tr><th scope="row" style="text-align: left; padding: 16px 20px; border-top: 1px solid #1C1D20; font-weight: 500; font-size: 15px; white-space: nowrap">Moon lengths</th><td style="padding: 16px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8">29, 28, 29, 28, 28, 29, 28, 29, 28, 28, 29, 28, 28</td></tr><tr><th scope="row" style="text-align: left; padding: 16px 20px; border-top: 1px solid #1C1D20; font-weight: 500; font-size: 15px; white-space: nowrap">Epoch</th><td style="padding: 16px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8">−62,165,308,562,978.61 ms Unix · 0000-01-23 02:44 UTC</td></tr><tr><th scope="row" style="text-align: left; padding: 16px 20px; border-top: 1px solid #1C1D20; font-weight: 500; font-size: 15px; white-space: nowrap">Time base</th><td style="padding: 16px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8">Unix time (no leap seconds)</td></tr></tbody></table></div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<div id="endpoints" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">03</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">ENDPOINTS</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">All endpoints are <code>GET</code>, need no key, and return JSON. Times are Moon time unless the field name says <code>utc</code> or <code>unix</code>.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/now</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">The current Moon date, its Moonmark and the moon&#39;s phase. One answer for every caller on Earth: there is no time zone parameter because Moon has none. Never&nbsp;cached.</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl https://api.moon369.org/v1/now</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{{nowJson}}</pre>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/moonmark</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">A Moonmark for the exact moment of an event, nanosecond precise, with the accuracy of the clock that took it and a link you can put in a QR code. Without <code>unix_ns</code> it marks the server&#39;s receive time; with it, the Moonmark is exact and <code>accuracy_ns</code> is <code>null</code>. <code>/v1/stamp</code> is the old name and still works. Open any Moonmark link with <code>/v1/m/{moonmark}</code>.</p>
+<div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse">
+<thead><tr style="text-align: left"><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">PARAM</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">TYPE</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">DESCRIPTION</th></tr></thead>
+<tbody><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">unix_ns</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">string</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Optional. Nanoseconds since 1970-01-01 UTC, as a string.</td></tr></tbody></table></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl "https://api.moon369.org/v1/moonmark\
+  ?unix_ns=1794516299901000000"</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  &quot;moonmark&quot;: &quot;1928.05.03 08:57:39.035909351&quot;,
+  &quot;moonmark_url&quot;: &quot;https://moon369.org/m/1928.05.03-08.57.39.035909351&quot;,
+  &quot;moon_ns&quot;: &quot;61477779459035909351&quot;,
+  &quot;unix_ns&quot;: &quot;1794516299901000000&quot;,
+  &quot;utc&quot;: &quot;2026-11-12T20:44:59.901000000Z&quot;,
+  &quot;accuracy_ns&quot;: null,
+  &quot;clock&quot;: &quot;client&quot;
+}</pre>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/convert</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Standard time to Moon time. Give exactly one of the three inputs. Results are cached forever, since a past instant never&nbsp;changes.</p>
+<div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse">
+<thead><tr style="text-align: left"><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">PARAM</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">TYPE</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">DESCRIPTION</th></tr></thead>
+<tbody><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">unix</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">integer</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Milliseconds since 1970-01-01 UTC.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">unix_ns</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">string</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Nanoseconds since 1970-01-01 UTC, for full precision.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">utc</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">string</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">ISO 8601 with <code>Z</code> or an offset, up to 9 fraction digits.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">format</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">string</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7"><code>object</code> (default) or <code>string</code> for plain text such as <code>1928.05.03 08:57:39.035909351</code>.</td></tr></tbody></table></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl "https://api.moon369.org/v1/convert\
+  ?unix_ns=1794516299901000000"</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  &quot;year&quot;: 1928,
+  &quot;moon&quot;: 5,
+  &quot;day&quot;: 3,
+  &quot;day_of_year&quot;: 117,
+  &quot;moon_length_days&quot;: 28,
+  &quot;time&quot;: &quot;08:57:39&quot;,
+  &quot;moonmark&quot;: &quot;1928.05.03 08:57:39.035909351&quot;,
+  &quot;phase&quot;: {
+    &quot;fraction&quot;: 0.099875,
+    &quot;name&quot;: &quot;Waxing crescent&quot;
+  },
+  &quot;moon_ns&quot;: &quot;61477779459035909351&quot;,
+  &quot;unix_ns&quot;: &quot;1794516299901000000&quot;,
+  &quot;unix_ms&quot;: 1794516299901,
+  &quot;utc&quot;: &quot;2026-11-12T20:44:59.901000000Z&quot;,
+  &quot;time_zone&quot;: null,
+  &quot;dst&quot;: false
+}</pre>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/to-unix</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Moon time back to standard time, for storing or scheduling in existing systems. Send a <code>moonmark</code>, or the separate fields. Impossible dates are&nbsp;rejected.</p>
+<div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse">
+<thead><tr style="text-align: left"><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">PARAM</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">TYPE</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">DESCRIPTION</th></tr></thead>
+<tbody><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">moonmark</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">string</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7"><code>YEAR.MM.DD HH:MM:SS.fraction</code>. Alternative to the fields below.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">year</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">integer</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Moon year, counted from year 0.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">moon</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">integer</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">1 to 13.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">day</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">integer</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">1 to 28 or 29, depending on the moon.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">time</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">string</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7"><code>HH:MM:SS</code> with up to 9 fraction digits. Defaults to 00:00:00.</td></tr></tbody></table></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl "https://api.moon369.org/v1/to-unix\
+  ?moonmark=1928.06.01%2012:30:00.5"</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  &quot;input&quot;: {
+    &quot;year&quot;: 1928,
+    &quot;moon&quot;: 6,
+    &quot;day&quot;: 1,
+    &quot;hour&quot;: 12,
+    &quot;minute&quot;: 30,
+    &quot;second&quot;: 0,
+    &quot;nanosecond&quot;: 500000000
+  },
+  &quot;unix_ns&quot;: &quot;1796866649794167291&quot;,
+  &quot;unix_ms&quot;: 1796866649794,
+  &quot;utc&quot;: &quot;2026-12-10T01:37:29.794167291Z&quot;
+}</pre>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/year/{year}</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">The structure of one Moon year: all 13 moons, their lengths, and the exact standard instant each begins and the year&nbsp;ends.</p>
+<div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse">
+<thead><tr style="text-align: left"><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">PARAM</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">TYPE</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">DESCRIPTION</th></tr></thead>
+<tbody><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">year</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">integer</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Moon year, in the path.</td></tr></tbody></table></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl https://api.moon369.org/v1/year/1928</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  &quot;year&quot;: 1928,
+  &quot;days&quot;: 369,
+  &quot;moons&quot;: [
+    {&quot;moon&quot;: 1, &quot;days&quot;: 29, &quot;starts_unix_ns&quot;: &quot;1784055703622937600&quot;, &quot;starts_utc&quot;: &quot;2026-07-14T19:01:43.622937600Z&quot;},
+    {&quot;moon&quot;: 2, &quot;days&quot;: 28, &quot;starts_unix_ns&quot;: &quot;1786662462334566322&quot;, &quot;starts_utc&quot;: &quot;2026-08-13T23:07:42.334566322Z&quot;},
+    ...
+    {&quot;moon&quot;: 13, &quot;days&quot;: 28, &quot;starts_unix_ns&quot;: &quot;1814707590542433952&quot;, &quot;starts_utc&quot;: &quot;2027-07-04T13:26:30.542433952Z&quot;}
+  ],
+  &quot;ends_unix_ns&quot;: &quot;1817224461022627200&quot;,
+  &quot;ends_utc&quot;: &quot;2027-08-02T16:34:21.022627200Z&quot;
+}</pre>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 40px 0 8px; border-top: 1px solid #1C1D20">
+<div style="font-family: 'Syncopate', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.24em">LIGHT · DARK · HOW PEOPLE LIVE THE DAY</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Moon is the engine and the calendar, and every moment on it is a Moonmark. People live the day by the light: the Light counter starts at <code>00:00:00</code> at first light and counts up in Moon seconds until sunset, then Dark counts up until the next first light, which begins the next Moon day. It needs only where you stand, <code>lat</code> and <code>lon</code>, never a time zone. Add them to <code>/v1/now</code>, <code>/v1/convert</code> or <code>/v1/m/{moonmark}</code> to get a <code>light</code> object. Where the sun doesn't rise or set for weeks, the day starts at solar midnight. <code>/v1/sun</code> still returns the old local clock if you need to show it&nbsp;alongside.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/light</span>
+<span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">LIGHT</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Where you are in the day: Light or Dark, the counter, what remains until sunset or first light, the length of this light or dark, and the day's Moon date and first light, each as a&nbsp;Moonmark.</p>
+<div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse">
+<thead><tr style="text-align: left"><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">PARAM</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">TYPE</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">DESCRIPTION</th></tr></thead>
+<tbody><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">lat, lon</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">number</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Where you stand. Required.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">unix_ns, utc, moonmark</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">string</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">The moment to read. Defaults to now.</td></tr></tbody></table></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl &quot;https://api.moon369.org/v1/light?lat=40.71&amp;lon=-74.01&quot;</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  &quot;moonmark&quot;: &quot;1928.05.04 06:20:50.744869250&quot;,
+  &quot;light&quot;: {
+    &quot;phase&quot;: &quot;light&quot;,
+    &quot;counter&quot;: &quot;07:02:29&quot;,
+    &quot;label&quot;: &quot;Light 07:02:29&quot;,
+    &quot;remaining&quot;: &quot;02:34:09&quot;,
+    &quot;length&quot;: &quot;09:36:39&quot;,
+    &quot;polar&quot;: null,
+    &quot;began&quot;: { &quot;moonmark&quot;: &quot;1928.05.03 23:18:20.927296794&quot; },
+    &quot;ends&quot;:  { &quot;moonmark&quot;: &quot;1928.05.04 08:55:00.531769295&quot; },
+    &quot;day&quot;: {
+      &quot;moon_date&quot;: &quot;1928.05.03&quot;,
+      &quot;first_light&quot;: { &quot;moonmark&quot;: &quot;1928.05.03 23:18:20.927296794&quot; }
+    }
+  }
+}</pre>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/schedule</span>
+<span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">SUN</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">A Light or Dark reading repeated every day, like a standup at Light 06:45. It lands at the same point in the daylight every day, and each occurrence carries its Moon date and Moonmark. Days without that much light are marked <code>skipped</code>.</p>
+<div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse">
+<thead><tr style="text-align: left"><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">PARAM</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">TYPE</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">DESCRIPTION</th></tr></thead>
+<tbody><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">light or dark</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">string</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">The counter to repeat, like <code>06:45</code>.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">lat, lon</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">number</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Where. Required.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">days</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">integer</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">1 to 400. Defaults to 7.</td></tr></tbody></table></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl &quot;https://api.moon369.org/v1/schedule?light=06:45&amp;lat=40.71&amp;lon=-74.01&amp;days=2&quot;</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  &quot;rule&quot;: { &quot;light&quot;: &quot;06:45&quot;, &quot;repeat&quot;: &quot;daily&quot; },
+  &quot;occurrences&quot;: [
+    { &quot;moon_date&quot;: &quot;1928.05.03&quot;, &quot;label&quot;: &quot;Light 06:45&quot;,
+      &quot;moonmark&quot;: &quot;1928.05.04 06:03:20.927209107&quot; },
+    { &quot;moon_date&quot;: &quot;1928.05.04&quot;, &quot;label&quot;: &quot;Light 06:45&quot;,
+      &quot;moonmark&quot;: &quot;1928.05.05 05:08:36.801924733&quot; }
+  ]
+}</pre>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/seasons/{year}</span>
+<span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">SUN</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Every equinox and solstice inside a Moon year, as Moonmarks. A Moon year is 13 moons, so most hold four events and some hold&nbsp;five.</p>
+<div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse">
+<thead><tr style="text-align: left"><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">PARAM</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">TYPE</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">DESCRIPTION</th></tr></thead>
+<tbody><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: nowrap">year</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F; white-space: nowrap">integer</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Moon year, in the path.</td></tr></tbody></table></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl https://api.moon369.org/v1/seasons/1928</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  &quot;moon_year&quot;: 1928,
+  &quot;events&quot;: [
+    { &quot;event&quot;: &quot;September equinox&quot;, &quot;moonmark&quot;: &quot;1928.03.11 11:40:19.069916128&quot;, &quot;utc&quot;: &quot;2026-09-23T00:05:30.637Z&quot; },
+    { &quot;event&quot;: &quot;December solstice&quot;, &quot;moonmark&quot;: &quot;1928.06.12 20:43:18.527430123&quot;, &quot;utc&quot;: &quot;2026-12-21T20:50:13.330Z&quot; },
+    { &quot;event&quot;: &quot;March equinox&quot;,     &quot;moonmark&quot;: &quot;1928.09.12 09:25:33.103147481&quot;, &quot;utc&quot;: &quot;2027-03-20T20:24:54.022Z&quot; },
+    { &quot;event&quot;: &quot;June solstice&quot;,     &quot;moonmark&quot;: &quot;1928.12.16 12:48:55.957935795&quot;, &quot;utc&quot;: &quot;2027-06-21T14:10:42.141Z&quot; }
+  ]
+}</pre>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/spec</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Every constant of the standard, including the exact Moon second as a whole-number ratio. Build your own implementation from this&nbsp;alone.</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl https://api.moon369.org/v1/spec</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  &quot;spec_version&quot;: &quot;1.0.0&quot;,
+  &quot;moon_second_si&quot;: 1.0403730490216803,
+  &quot;moon_second_si_exact&quot;: {
+    &quot;numerator&quot;: &quot;33168757399689600&quot;,
+    &quot;denominator&quot;: &quot;31881600000000000&quot;,
+    &quot;note&quot;: &quot;SI seconds per Moon second = numerator / denominator&quot;
+  },
+  &quot;seconds_per_minute&quot;: 60,
+  &quot;minutes_per_hour&quot;: 60,
+  &quot;hours_per_day&quot;: 24,
+  &quot;days_per_year&quot;: 369,
+  &quot;moons_per_year&quot;: 13,
+  &quot;moon_lengths_days&quot;: [
+    29,
+    28,
+    29,
+    28,
+    28,
+    29,
+    28,
+    29,
+    28,
+    28,
+    29,
+    28,
+    28
+  ],
+  &quot;mean_lunation_ns&quot;: &quot;2551442876899200&quot;,
+  &quot;epoch_unix_ns&quot;: &quot;-62165308562978611200&quot;,
+  &quot;epoch_utc&quot;: &quot;0000-01-23T02:43:57.021388800Z&quot;,
+  &quot;time_base&quot;: &quot;Unix time (no leap seconds)&quot;,
+  &quot;time_zones&quot;: null,
+  &quot;dst&quot;: false,
+  &quot;license&quot;: &quot;MIT&quot;
+}</pre>
+</div>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="errors" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">ERRORS &amp; LIMITS</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Every error returns the same JSON shape with a stable <code>code</code>. Nanosecond values are strings, so no language loses&nbsp;precision.</p>
+</div>
+<div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse">
+<thead><tr style="text-align: left"><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">STATUS</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">CODE</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">MEANING</th></tr></thead>
+<tbody><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px">400</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #B9B6AE">missing_param, bad_param, out_of_range</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Input missing, malformed or an impossible Moon date.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px">401</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #B9B6AE">invalid_key</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">The key sent in Authorization is unknown.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px">404</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #B9B6AE">not_found</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">No such route.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px">405</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #B9B6AE">method_not_allowed</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Only GET (and OPTIONS for CORS).</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px">429</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #B9B6AE">rate_limited</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 14px; color: #A2A3A7">Limit reached. Wait for <code>Retry-After</code> seconds, use a key, or run the reference code locally.</td></tr></tbody></table></div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>ERROR RESPONSE</span><span>400</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;out_of_range&quot;,
+    &quot;message&quot;: &quot;day must be 1 to 28 in moon 2&quot;
+  }
+}</pre>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: #24262A; border: 1px solid #24262A">
+<div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">OPEN</div><div style="font-size: 16px; font-weight: 500">No key</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">Limited per IP address: 120 requests a minute. Over that you get a <code>429</code> with <code>Retry-After</code>.</p></div>
+<div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">KEYED</div><div style="font-size: 16px; font-weight: 500">Free key</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">Send <code>Authorization: Bearer &lt;key&gt;</code>. Limits are set per key. Responses carry <code>X-Moon-Plan</code>.</p></div>
+<div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">CACHING</div><div style="font-size: 16px; font-weight: 500">Past is permanent</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7"><code>/now</code> is never cached. Conversions, years and the spec are cached forever. CORS is open to every&nbsp;origin.</p></div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="precision" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">05</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">PRECISION</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Moonmarks carry 9 decimal places: nanoseconds. Every event gets one exact, sortable moment on the Moon engine, with no time zone to&nbsp;misread.</p>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; padding: 32px 24px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.24em; color: #8A8B8F">FORMAT · YEAR.MOON.DAY HH:MM:SS.NNNNNNNNN</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: clamp(20px, 3vw, 36px); letter-spacing: 0.02em; overflow-wrap: anywhere">1928.05.03 08:57:39.<span style="color: #8A8B8F">035909351</span></div>
+</div>
+<div style="overflow-x: auto; border: 1px solid #24262A"><table style="width: 100%; min-width: 560px; border-collapse: collapse">
+<thead><tr style="text-align: left"><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">CLOCK SOURCE</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">TYPICAL ACCURACY</th><th scope="col" style="padding: 14px 20px; font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: #8A8B8F; font-weight: 400">CLOCK VALUE</th></tr></thead>
+<tbody>
+<tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 15px">Phone or laptop, internet-synced (NTP)</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px">about 1 ms</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #8A8B8F">device-ntp</td></tr>
+<tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 15px">Data center, precision time protocol (PTP)</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px">microseconds</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #8A8B8F">server-ptp</td></tr>
+<tr><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-size: 15px">GPS-disciplined atomic reference</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px">tens of nanoseconds</td><td style="padding: 14px 20px; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #8A8B8F">gps</td></tr>
+</tbody></table></div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Every Moonmark returns <code>accuracy_ns</code> and <code>clock</code>, so the decimals never claim more than the clock that produced them. Moon is defined from the SI second, which is set by cesium atomic clocks. Conversions use whole nanoseconds and the exact ratio of the spec, never floating-point numbers, so every implementation agrees to the last&nbsp;digit.</p>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>moon-precise.js</span><span>MIT</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">// Exact Moon timestamp, nanosecond precision (BigInt, no floating point)
+const EPOCH_NS = -62165308562978611200n;  // Year 0, Moon 1, Day 1, 00:00:00
+const NUM = 31881600000000000n;           // 369 × 86,400 × 10⁹
+const DEN = 33168757399689600n;           // 13 × mean lunation in ns
+const DAY = 86400n * 1000000000n;         // Moon ns per Moon day
+
+function moonmark(unixNs) {              // unixNs: BigInt
+  const mns = (unixNs - EPOCH_NS) * NUM / DEN;
+  const dayIndex = mns / DAY;
+  const year = dayIndex / 369n;
+  const dy = Number(dayIndex - year * 369n);
+  const m = Math.floor(dy * 13 / 369);
+  const day = dy - Math.ceil(m * 369 / 13) + 1;
+  let r = mns - dayIndex * DAY;
+  const ns = r % 1000000000n; r /= 1000000000n;
+  const s = Number(r % 60n), mi = Number(r / 60n % 60n), h = Number(r / 3600n);
+  const p = (x, n = 2) =&gt; String(x).padStart(n, &quot;0&quot;);
+  return `${year}.${p(m + 1)}.${p(day)} ${p(h)}:${p(mi)}:${p(s)}.${p(ns, 9)}`;
+}
+// moonmark(1794516299901000000n) → &quot;1928.05.03 08:57:39.035909351&quot;</pre>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="reference" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">06</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">REFERENCE CODE</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">The complete standard in both directions, MIT licensed. Copy it, port it, ship it. It gives the same result as the API. The repository also includes the full OpenAPI 3.1 spec and 64 tests: github.com/moon369org/moon-369.</p>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>moon.js</span><span>MIT</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">// Moon reference implementation (JavaScript)
+const EPOCH_MS = -62165308562978.61;      // Year 0, Moon 1, Day 1, 00:00:00
+const MOON_SECOND = 1.0403730490216803;   // in SI seconds
+const DAY_MS = 86400000 * MOON_SECOND;
+const firstDay = (m) =&gt; Math.ceil(m * 369 / 13);
+
+function toMoon(unixMs) {
+  const t = unixMs - EPOCH_MS;
+  const dayIndex = Math.floor(t / DAY_MS);
+  const year = Math.floor(dayIndex / 369);
+  const dayOfYear = dayIndex - year * 369;
+  const m = Math.floor(dayOfYear * 13 / 369);
+  let s = (t - dayIndex * DAY_MS) / (1000 * MOON_SECOND);
+  const hour = Math.floor(s / 3600); s -= hour * 3600;
+  const minute = Math.floor(s / 60);
+  const second = Math.floor(s - minute * 60);
+  return { year, moon: m + 1, day: dayOfYear - firstDay(m) + 1,
+           hour, minute, second };
+}
+
+function toUnix({ year, moon, day, hour = 0, minute = 0, second = 0 }) {
+  const days = year * 369 + firstDay(moon - 1) + (day - 1);
+  const secs = days * 86400 + hour * 3600 + minute * 60 + second;
+  return EPOCH_MS + secs * 1000 * MOON_SECOND;
+}</pre>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="attribution" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">07</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">ATTRIBUTION</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">The hosted API is free and open. In exchange, any site or app that displays Moon time from it shows the Powered by Moon badge, linked to the Moon homepage, on every screen where Moon time&nbsp;appears.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px">
+<div style="background: #0B0B0D; border: 1px solid #24262A; padding: 40px; display: flex; flex-direction: column; gap: 20px; align-items: flex-start">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #8A8B8F">ON DARK</div>
+<a href="/" style="display: inline-block; line-height: 0"><img src="assets/badge-dark.svg" alt="Powered by Moon" width="162" height="48" style="display: block; width: 162px; height: 48px"></a>
+<a href="assets/badge-dark.svg" download="moon-dark-badge.svg" style="display: inline-flex; align-items: center; min-height: 44px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #E9E4D8; border-bottom: 1px solid #E9E4D8">DOWNLOAD SVG</a>
+</div>
+<div style="background: #E9E4D8; border: 1px solid #24262A; padding: 40px; display: flex; flex-direction: column; gap: 20px; align-items: flex-start">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #4A4B4F">ON LIGHT</div>
+<a href="/" style="display: inline-block; line-height: 0"><img src="assets/badge-light.svg" alt="Powered by Moon" width="162" height="48" style="display: block; width: 162px; height: 48px"></a>
+<a href="assets/badge-light.svg" download="moon-light-badge.svg" style="display: inline-flex; align-items: center; min-height: 44px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #0B0B0D; border-bottom: 1px solid #0B0B0D">DOWNLOAD SVG</a>
+</div>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>EMBED</span><span>HTML</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">&lt;a href=&quot;https://moon369.org&quot; rel=&quot;noopener&quot;&gt;
+  &lt;img src=&quot;https://moon369.org/assets/badge-dark.svg&quot;
+       alt=&quot;Powered by Moon&quot; width=&quot;162&quot; height=&quot;48&quot;&gt;
+&lt;/a&gt;</pre>
+</div>
+<ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.65; color: #A2A3A7">
+<li>Minimum height 32 px on screen. Keep clear space equal to the mark's height on all&nbsp;sides.</li>
+<li>The link must point to the Moon homepage and stay crawlable (no <code>nofollow</code>).</li>
+<li>Apps without links show the badge in an About or Settings screen with the URL in&nbsp;text.</li>
+<li>Calling the API from a server for internal use with nothing displayed needs no&nbsp;badge.</li>
+</ul>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="brand" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">08</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">BRAND RULES</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Your product keeps its own name and brand. The Moon name and mark belong to Moon and appear only in the badge or in plain-text&nbsp;references.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #E9E4D8">DO</div>
+<div style="font-size: 16px; font-weight: 500">Say it runs on Moon</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.65; color: #A2A3A7">&quot;Built on Moon time&quot; or &quot;Uses the Moon standard&quot; in your copy is&nbsp;welcome.</p>
+</div>
+<div style="border: 1px solid #24262A; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #E9E4D8">DO</div>
+<div style="font-size: 16px; font-weight: 500">Use the official badge</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.65; color: #A2A3A7">Download the badge files as provided, in dark or&nbsp;light.</p>
+</div>
+<div style="border: 1px solid #24262A; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #8A8B8F">DON'T</div>
+<div style="font-size: 16px; font-weight: 500">Don't imply endorsement</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.65; color: #A2A3A7">No partnership, certification or &quot;official&quot; claims without written&nbsp;approval.</p>
+</div>
+<div style="border: 1px solid #24262A; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #8A8B8F">DON'T</div>
+<div style="font-size: 16px; font-weight: 500">Don't alter the mark</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.65; color: #A2A3A7">No recoloring, stretching, effects, or using the linked O's in your own&nbsp;logo.</p>
+</div>
+<div style="border: 1px solid #24262A; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #8A8B8F">DON'T</div>
+<div style="font-size: 16px; font-weight: 500">Don't name products Moon</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.65; color: #A2A3A7">Product, app and domain names can't use &quot;Moon&quot; as their&nbsp;brand.</p>
+</div>
+<div style="border: 1px solid #24262A; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #8A8B8F">DON'T</div>
+<div style="font-size: 16px; font-weight: 500">Don't fork the constants</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.65; color: #A2A3A7">If you change the epoch or the Moon second, it isn't Moon time. Don't call it&nbsp;that.</p>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div id="terms" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">09</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">TERMS</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">The standard and reference code are MIT licensed. The Moon name and mark are trademarks. Using the hosted API means agreeing to the attribution and brand rules&nbsp;above.</p>
+</div>
+<p style="margin: 0; font-size: 16px; line-height: 1.7; color: #A2A3A7; max-width: 720px"><strong style="color: #E9E4D8; font-weight: 500">Privacy.</strong> The API does not store requests or locations. A location sent for Light and Dark is used to compute the answer and then discarded. Two decimal places, about one kilometer, is all it needs, so round before you&nbsp;send.</p>
+</section>
+
+</main>
+</div>
+
+<footer style="border-top: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8A8B8F">
+<div style="display: flex; flex-direction: column; gap: 18px"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #24262A; stroke-width: 9"></path></svg><div>MOON API · V1</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap"><a href="/" style="color: #8A8B8F">HOME</a><a href="/calendar" style="color: #8A8B8F">CALENDAR</a><a href="/api" style="color: #8A8B8F">API</a><a href="/m" style="color: #8A8B8F">MOONMARK</a><a href="/press" style="color: #8A8B8F">PRESS</a></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":7600}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    this.timer = setInterval(() => this.setState({ now: Date.now() }), 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  renderVals() {
+    const EPOCH = -62165308562978.61, K = 1.0403730490216803, DAY = 86400000 * K;
+    const nowMs = (this.state && this.state.now) || Date.now();
+    const t = nowMs - EPOCH, da = Math.floor(t / DAY);
+    const y = Math.floor(da / 369), dy = da - y * 369;
+    const mi = Math.floor(dy * 13 / 369), day = dy - Math.ceil(mi * 369 / 13) + 1;
+    let sec = (t - da * DAY) / (1000 * K);
+    const h = Math.floor(sec / 3600); sec -= h * 3600;
+    const m = Math.floor(sec / 60); const sf = sec - m * 60; sec = Math.floor(sf);
+    const frac = String(Math.floor((sf - sec) * 1e6)).padStart(6, '0') + '000';
+    const p = (x) => String(x).padStart(2, '0');
+    const time = p(h) + ':' + p(m) + ':' + p(sec);
+    const phf = window.MoonPhase.fraction(nowMs);
+    const phn = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'][Math.floor((phf * 8 + 0.5) % 8)];
+    const mlen = Math.ceil((mi + 1) * 369 / 13) - Math.ceil(mi * 369 / 13);
+    const u = new Date(nowMs);
+    const nowJson = '{\n  "year": ' + y + ',\n  "moon": ' + (mi + 1) + ',\n  "day": ' + day + ',\n  "day_of_year": ' + (dy + 1) + ',\n  "moon_length_days": ' + mlen + ',\n  "time": "' + time + '",\n  "moonmark": "' + y + '.' + p(mi + 1) + '.' + p(day) + ' ' + time + '.' + frac + '",\n  "phase": { "fraction": ' + phf.toFixed(6) + ', "name": "' + phn + '" },\n  "unix_ms": ' + Math.floor(nowMs) + ',\n  "utc": "' + u.toISOString().slice(0, -1) + '000000Z",\n  "time_zone": null,\n  "dst": false\n}';
+    const pk = Math.cos(2 * Math.PI * phf), wx = phf < 0.5;
+    const phasePath = 'M0,-10 A10,10 0 0 ' + (wx ? 1 : 0) + ' 0,10 A' + (Math.abs(pk) * 10).toFixed(3) + ',10 0 0 ' + ((wx === (pk > 0)) ? 0 : 1) + ' 0,-10Z';
+    return { phasePath, phaseName: phn, clock: time, dateLine: 'YEAR ' + y + ' · MOON ' + p(mi + 1) + ' · DAY ' + p(day), yNum: String(y), moonNum: p(mi + 1), dayNum: p(day), nowJson };
+  }
+}
+</script>
+<script>
+(function(){
+  if(!('IntersectionObserver' in window))return;
+  function init(){
+    var nav=document.querySelector('nav[aria-label="Docs"]'); if(!nav)return;
+    var links=[].slice.call(nav.querySelectorAll('a[href^="#"]'));
+    var map={}; links.forEach(function(a){var el=document.getElementById(a.getAttribute('href').slice(1)); if(el)map[el.id]=a;});
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){ if(!e.isIntersecting)return; var a=map[e.target.id]; if(!a)return;
+      links.forEach(function(l){l.classList.toggle('ap-on',l===a)});
+      if(window.matchMedia('(max-width: 720px)').matches){ nav.scrollTo({left:a.offsetLeft-20,behavior:'smooth'}); }
+    })},{rootMargin:'-20% 0px -70% 0px'});
+    Object.keys(map).forEach(function(id){io.observe(document.getElementById(id))});
+  }
+  var t=0,iv=setInterval(function(){ if(document.querySelector('nav[aria-label="Docs"] a')||++t>50){clearInterval(iv);init();} },100);
+})();
+</script>
+</body>
+</html>
