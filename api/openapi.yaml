@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Moon API
   version: 1.0.0
-  summary: The open standard for time. 13 moons, 369 lunes, one global clock.
+  summary: The open standard for time. One timestamp for the whole planet, locked to the moon.
   license: { name: MIT, identifier: MIT }
   description: |
     All times are Moon time unless a field name says `utc` or `unix`.
@@ -11,10 +11,6 @@ info:
 servers:
   - url: https://api.moon369.org
 components:
-  parameters:
-    tz: { name: tz, in: query, schema: { type: string, example: America/Denver }, description: IANA time zone for the Sun local clock. Time zones exist only in Sun. }
-    lat: { name: lat, in: query, schema: { type: number, example: 40.71 }, description: Latitude. Adds Light and Dark. Requires lon. }
-    lon: { name: lon, in: query, schema: { type: number, example: -74.01 }, description: Longitude, east positive. Requires lat. }
   securitySchemes:
     key: { type: http, scheme: bearer }
   schemas:
@@ -27,7 +23,7 @@ components:
         day_of_year: { type: integer, minimum: 1, maximum: 369 }
         moon_length_days: { type: integer, enum: [28, 29] }
         time: { type: string, example: "08:57:39" }
-        moonmark: { type: string, example: "1928.05.03 08:57:39.035909351", description: "One exact moment on the Moon engine" }
+        moonmark: { type: string, example: "1928.05.03 08:57:39.035909351", description: "One exact moment, the same everywhere" }
         moonmark_url: { type: string, description: Link that opens this Moonmark. Put it in a QR code. }
         phase:
           type: object
@@ -57,11 +53,6 @@ paths:
   /v1/now:
     get:
       summary: Current Moon date and time
-      description: Add tz for the Sun local clock, and lat and lon for sunrise, sunset and the season.
-      parameters:
-        - $ref: '#/components/parameters/tz'
-        - $ref: '#/components/parameters/lat'
-        - $ref: '#/components/parameters/lon'
       responses:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/MoonTime' } } } }
         '429': { $ref: '#/components/responses/RateLimited' }
@@ -93,10 +84,6 @@ paths:
         - { name: unix, in: query, schema: { type: integer }, description: Unix milliseconds }
         - { name: unix_ns, in: query, schema: { type: string }, description: Unix nanoseconds }
         - { name: utc, in: query, schema: { type: string }, description: ISO 8601 with Z or offset, up to 9 fraction digits }
-        - { name: sun, in: query, schema: { type: string, example: '2026-11-12T14:00' }, description: A local Sun date and time. Needs tz. }
-        - $ref: '#/components/parameters/tz'
-        - $ref: '#/components/parameters/lat'
-        - $ref: '#/components/parameters/lon'
         - { name: format, in: query, schema: { type: string, enum: [object, string] } }
       responses:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/MoonTime' } }, text/plain: { schema: { type: string } } } }
@@ -106,53 +93,8 @@ paths:
       summary: Open a Moonmark link. The URL form is YEAR.MM.DD-HH.MM.SS.fraction, which is what a Moonmark QR code carries.
       parameters:
         - { name: moonmark, in: path, required: true, schema: { type: string, example: '1928.05.03-08.57.39.035909351' } }
-        - $ref: '#/components/parameters/tz'
       responses:
-        '200': { description: The moment, plus the reader's local Sun time when tz is given }
-  /v1/light:
-    get:
-      summary: Light and Dark. The Light counter starts at 00:00:00 at first light and runs to sunset; Dark runs from sunset to the next first light. Counters tick in Moon seconds. Needs only a location.
-      parameters:
-        - $ref: '#/components/parameters/lat'
-        - $ref: '#/components/parameters/lon'
-        - { name: unix_ns, in: query, schema: { type: string }, description: Instant to read. Defaults to now. }
-        - { name: moonmark, in: query, schema: { type: string }, description: A Moonmark to read instead. }
-      responses:
-        '200': { description: 'The reading: phase, counter, label ("Light 06:28:10"), remaining, length, when it began and ends, and first_light (when this day''s light began), as Moonmarks. The Moon date is global and is read from the moonmark.' }
-        '400': { description: Missing or bad lat or lon }
-  /v1/sun:
-    get:
-      summary: Sun, the local layer. Local clock, the local day's Moon date, sunrise, solar noon, sunset, day length and season
-      description: The Moon date is global; read it from the moonmark. The sun object is the old local clock only.
-      parameters:
-        - $ref: '#/components/parameters/tz'
-        - $ref: '#/components/parameters/lat'
-        - $ref: '#/components/parameters/lon'
-        - { name: date, in: query, schema: { type: string, example: '2026-12-21' }, description: Local date. Defaults to today. }
-      responses:
-        '200': { description: OK }
-        '400': { description: Bad tz, lat or lon }
-  /v1/schedule:
-    get:
-      summary: Repeat a Light or Dark reading every day (light=06:45 with lat and lon), each occurrence with its Moon date and Moonmark. The older time and tz form still works.
-      parameters:
-        - { name: light, in: query, schema: { type: string, example: '06:45' }, description: A Light counter to repeat. Or use dark. }
-        - { name: dark, in: query, schema: { type: string, example: '02:30' } }
-        - $ref: '#/components/parameters/lat'
-        - $ref: '#/components/parameters/lon'
-        - { name: time, in: query, schema: { type: string, example: '14:00' }, description: Older form, local clock time. Needs tz. }
-        - { name: tz, in: query, schema: { type: string, example: America/Denver } }
-        - { name: from, in: query, schema: { type: string, example: '2026-11-01' }, description: First local date. Defaults to today in tz. }
-        - { name: days, in: query, schema: { type: integer, minimum: 1, maximum: 400, default: 7 } }
-      responses:
-        '200': { description: OK. Days where clocks skip the time are marked skipped. }
-  /v1/seasons/{year}:
-    get:
-      summary: Every equinox and solstice inside a Moon year, as Moonmarks
-      parameters:
-        - { name: year, in: path, required: true, schema: { type: integer, example: 1928 } }
-      responses:
-        '200': { description: OK }
+        '200': { description: The moment, content: { application/json: { schema: { $ref: '#/components/schemas/MoonTime' } } } }
   /v1/to-unix:
     get:
       summary: Moon time to standard time

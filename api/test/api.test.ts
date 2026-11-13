@@ -122,10 +122,18 @@ describe('limits and keys', () => {
 
 describe('Moonmark links', () => {
   it('GET /v1/m/{moonmark} resolves the URL form a QR code carries', async () => {
-    const b: any = await (await get('/v1/m/1928.05.03-08.57.39.035909351?tz=America/Denver')).json();
+    const b: any = await (await get('/v1/m/1928.05.03-08.57.39.035909351')).json();
     expect(b.moonmark).toBe('1928.05.03 08:57:39.035909351');
     expect(b.unix_ns).toBe('1794516299901000000');
     expect(b.moonmark_url).toBe('https://moon369.org/m/1928.05.03-08.57.39.035909351');
-    expect(b.sun.zone).toBe('America/Denver');
+    expect(b.sun).toBeUndefined();
+    expect(b.light).toBeUndefined();
+  });
+});
+
+describe('core only', () => {
+  it('removed endpoints return 404', async () => {
+    for (const p of ['/v1/light?lat=40.71&lon=-74.01', '/v1/sun?tz=UTC', '/v1/schedule?light=06:45&lat=40.71&lon=-74.01', '/v1/seasons/1928'])
+      expect((await get(p)).status).toBe(404);
   });
 });

@@ -1,20 +1,17 @@
 # Moon API
 
-The open standard for time. One engine, two layers:
+One timestamp for the whole planet, locked to the moon.
 
-- **Moon** is the engine and the calendar: one continuous count underneath everything, read as the date, 13 moons, 369 lunes and the real moon's phase.
-- **Moonmark** is one exact moment on that engine, the same everywhere: `1928.05.03 09:12:04.205379905`. For events, records and systems.
-- **Light and Dark** is how people live the day. The Light counter starts at 00:00:00 at first light and runs to sunset, then Dark runs to the next first light. Light and Dark never change the date: the Moon date is global and changes at the same instant everywhere. It only needs where you stand, never a time zone.
+- **Moon** is one continuous count of time, locked to the real moon, read as the date (year, moon, lune) and the moon's phase. The date is the same everywhere and turns over at the same instant everywhere.
+- **Moonmark** is one exact moment on that count, the same everywhere: `1928.05.03 09:12:04.205379905`.
 
 Hosted at `https://api.moon369.org`. This repo is the hosted API (a Vercel Function) and the reference implementation of the standard.
 
 - `src/moon.ts`: the whole standard. Exact conversions in whole nanoseconds (BigInt), no floating point.
-- `src/light.ts`: Light and Dark counters, and the polar fallback.
-- `src/sun.ts`: Sun, the local layer: local clock, sunrise, sunset, seasons and the local Moon date.
 - `src/index.ts`: the API: routing, rate limits, optional keys, caching, CORS.
 - `api/index.ts` + `vercel.json`: the Vercel Function entry; every path is rewritten to it.
 - `openapi.yaml`: the API contract.
-- `test/`: 64 tests covering the constants, conversions in both directions, boundaries and every route.
+- `test/`: 42 tests covering the constants, conversions in both directions, boundaries and every route.
 
 ## Endpoints
 
@@ -26,12 +23,6 @@ Hosted at `https://api.moon369.org`. This repo is the hosted API (a Vercel Funct
 | `GET /v1/convert?unix=` / `unix_ns=` / `utc=` | Standard time to Moon time (`&format=string` for plain text) |
 | `GET /v1/to-unix?moonmark=` or `year=&moon=&day=&time=` | Moon time to standard time |
 | `GET /v1/year/{year}` | The 13 moons of a year, their lengths and UTC starts |
-| `GET /v1/light?lat=&lon=` | Light and Dark: the counter, what remains, and when this day's light began |
-| `GET /v1/sun` | Sun, the local layer: local clock, sunrise, solar noon, sunset, day length and season (`tz`, `lat`, `lon`, `date`) |
-| `GET /v1/schedule?light=06:45&lat=&lon=` | Repeat a Light or Dark reading every day, each with its Moonmark |
-| `GET /v1/seasons/{year}` | Equinoxes and solstices inside a Moon year, in Moon time |
-
-`/v1/now` and `/v1/convert` also take `tz`, `lat` and `lon` to add a `sun` object, and `/v1/convert` accepts `sun=YYYY-MM-DDTHH:MM&tz=...` to turn a local time into Moon time. Moon has no time zones; they live only in Sun.
 | `GET /v1/spec` | Every constant, including the exact Moon second ratio |
 
 No key needed. Send `Authorization: Bearer <key>` for the higher keyed limit.

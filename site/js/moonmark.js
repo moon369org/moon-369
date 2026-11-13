@@ -32,13 +32,13 @@
     var f = window.MoonPhase ? window.MoonPhase.fraction(ms) : 0;
     var il = window.MoonPhase ? Math.round(window.MoonPhase.illumination(ms) * 100) : 0;
     var nm = window.MoonPhase ? window.MoonPhase.name(f) : '';
-    var zone = (window.MoonSun && window.MoonSun.zone) || 'UTC', local = '', abbr = '';
+    var zone = 'UTC', local = '', abbr = '';
+    try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) {}
     try {
       local = new Intl.DateTimeFormat('en-US', { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(ms);
       var tp = new Intl.DateTimeFormat('en-US', { timeZone: zone, timeZoneName: 'short' }).formatToParts(ms);
       tp.forEach(function (x) { if (x.type === 'timeZoneName') abbr = x.value; });
     } catch (e) {}
-    var season = window.MoonSun ? window.MoonSun.season(ms, window.MoonSun.south).name : '';
     var qr = '';
     try {
       var q = window.qrcode(0, 'M'); q.addData(url); q.make();
@@ -52,9 +52,8 @@
       '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" aria-label="' + nm + '"><circle r="10" fill="#24262A"/><path d="' + ph + '" fill="#E9E4D8"/></svg><span>YEAR ' + mk.y + ' · MOON ' + p(mk.m) + ' · LUNE ' + p(mk.d) + '</span></div>' +
       '<div class="mk-mark">' + text(mk) + '<span>' + nsGroups(mk.ns) + '</span></div>' +
       '<div class="mk-rows">' +
-      '<div><span>YOUR TIME · SUN</span><b>' + local + ' ' + abbr + '</b></div>' +
+      '<div><span>YOUR LOCAL CLOCK</span><b>' + local + ' ' + abbr + '</b></div>' +
       '<div><span>THE MOON THAT NIGHT</span><b>' + nm + ' · ' + il + '% lit</b></div>' +
-      '<div><span>SEASON</span><b>' + season + '</b></div>' +
       '<div><span>UTC</span><b>' + new Date(ms).toISOString().replace('T', ' ').slice(0, 19) + '</b></div>' +
       '</div>' +
       '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>' +

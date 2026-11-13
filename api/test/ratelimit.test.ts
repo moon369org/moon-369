@@ -18,9 +18,4 @@ describe('rate limiting', () => {
     expect(blocked.status).toBe(429);
     expect(blocked.headers.get('Retry-After')).toBe('60');
   });
-  it('/v1/sun is marked deprecated in favor of /v1/light', async () => {
-    const r = await handle(new Request('https://api.moon369.org/v1/sun?lat=40.71&lon=-74.01'), {});
-    expect(r.status).toBe(200);
-    expect(r.headers.get('Deprecation')).toBe('true');
-  });
 });

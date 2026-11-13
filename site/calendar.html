@@ -38,7 +38,6 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
-<script src="js/sun.js" defer></script>
 <script src="js/header.js" defer></script>
 <script src="js/dc-lite.js" defer></script>
 <link rel="stylesheet" href="assets/moon-motion.css">
@@ -139,7 +138,7 @@ footer > div > div:first-child svg{width:64px!important}
 <path d="{{now.ph}}" style="fill: #E9E4D8"></path>
 </svg>
 <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 12px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">TODAY ON MOON<span class="mc-hide-m"> · SINCE FIRST LIGHT</span></div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">TODAY ON MOON</div>
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: 0.14em" class="mc-date"><span class="mc-seg">YEAR {{now.y}}</span><span class="mc-dot"> · </span><span class="mc-seg">MOON {{now.m}}</span><span class="mc-dot"> · </span><span class="mc-seg">LUNE {{now.d}}</span></h1>
 <div style="display: flex; align-items: center; gap: 0.3em; font-family: 'JetBrains Mono', monospace; font-size: clamp(40px, 6vw, 72px); line-height: 1; font-variant-numeric: tabular-nums"><svg class="mc-ph-sm" aria-hidden="true" viewBox="-11 -11 22 22" style="width: 0.82em; height: 0.82em; display: none; flex: none"><circle r="10" style="fill: #24262A"></circle><path d="{{now.ph}}" style="fill: #E9E4D8"></path></svg><div>{{now.clock}}</div></div>
 <div style="font-size: 14px; color: #8A8B8F">{{now.meta}}</div>
@@ -371,12 +370,10 @@ class Component extends DCLogic {
     const EVENT = ['Spring equinox', 'Summer solstice', 'Autumn equinox', 'Winter solstice'];
     const pad = (n) => String(n).padStart(2, '0');
     const nowMs = st.now || Date.now();
-    // People's Moon date: the Moon date in effect at local noon of today.
-    const zone = (window.MoonSun && window.MoonSun.zone) || 'UTC';
+    // The old calendar's zone, only for showing which old days a lune overlaps.
+    let zone = 'UTC'; try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) {}
     const offAt = (ms) => { let o = {}; try { new Intl.DateTimeFormat('en-US', { timeZone: zone, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(ms).forEach((x) => { o[x.type] = x.value; }); } catch (e) { return { off: 0, y: 1970, mo: 1, d: 1 }; } return { off: Date.UTC(+o.year, +o.month - 1, +o.day, +o.hour % 24, +o.minute) - Math.floor(ms / 60000) * 60000, y: +o.year, mo: +o.month, d: +o.day }; };
     const ln = offAt(nowMs);
-    const myLoc = (window.MoonSun && window.MoonSun.where) ? window.MoonSun.where() : { lat: 40.71, lon: -74.01, approx: true };
-    const lr = (window.MoonSun && window.MoonSun.light) ? window.MoonSun.light(nowMs, myLoc.lat, myLoc.lon) : null;
     const today = c.toMoon(nowMs); // the Moon date is global
     const live = c.toMoon(nowMs);
     let fmtLocal = c.fmtLong; try { fmtLocal = new Intl.DateTimeFormat('en-US', { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }); } catch (e) {}
@@ -389,21 +386,21 @@ class Component extends DCLogic {
 
     const sa = c.seasonAt(nowMs);
     const now = {
-      date: 'YEAR ' + today.year + ' · MOON ' + today.moon + ' · DAY ' + today.day,
+      date: 'YEAR ' + today.year + ' · MOON ' + today.moon + ' · LUNE ' + today.day,
       y: today.year, m: pad(today.moon), d: pad(today.day),
-      seasonShort: SEASON[sa.season] + ' · ' + ['Equinox', 'Solstice', 'Equinox', 'Solstice'][sa.next.i] + ' in ' + Math.round((sa.next.t - nowMs) / c.MS_DAY) + ' days',
-      clock: lr ? lr.counter : (fmtClock ? fmtClock.format(nowMs) : pad(live.h) + ':' + pad(live.m) + ':' + pad(live.s)),
-      meta: (lr ? (lr.phase === 'light' ? 'Light' : 'Dark') + (myLoc.approx ? ' in New York' : ' where you are') + ' · ' : '') + c.phaseName(live.phase) + ' · ' + Math.round(window.MoonPhase.illumination(nowMs) * 100) + '% lit · Moonmark ' + live.year + '.' + pad(live.moon) + '.' + pad(live.day) + ' ' + pad(live.h) + ':' + pad(live.m),
+      seasonShort: SEASON[sa.season] + ' · ' + ['Equinox', 'Solstice', 'Equinox', 'Solstice'][sa.next.i] + ' in ' + Math.round((sa.next.t - nowMs) / c.MS_DAY) + ' lunes',
+      clock: pad(live.h) + ':' + pad(live.m) + ':' + pad(live.s),
+      meta: c.phaseName(live.phase) + ' · ' + Math.round(window.MoonPhase.illumination(nowMs) * 100) + '% lit · Moonmark ' + live.year + '.' + pad(live.moon) + '.' + pad(live.day) + ' ' + pad(live.h) + ':' + pad(live.m),
       ph: c.phasePath(live.phase),
       seasonCls: 's' + sa.season,
-      season: SEASON[sa.season] + ' · ' + EVENT[sa.next.i] + ' in ' + ((sa.next.t - nowMs) / c.MS_DAY).toFixed(1) + ' Moon days'
+      season: SEASON[sa.season] + ' · ' + EVENT[sa.next.i] + ' in ' + ((sa.next.t - nowMs) / c.MS_DAY).toFixed(1) + ' lunes'
     };
 
     const sm = c.moonOfDay(sel.dYear), sp = c.dayPhase(sel.year, sel.dYear), si = c.dayIllum(sel.year, sel.dYear);
     const ss = c.dayStart(sel.year, sel.dYear), se = ss + c.MS_DAY;
     const detail = [
-      { k: 'Moon date', v: 'Year ' + sel.year + ', Moon ' + (sm + 1) + ', Day ' + (sel.dYear - c.firstDay(sm) + 1) },
-      { k: 'Day of year', v: (sel.dYear + 1) + ' of 369' },
+      { k: 'Moon date', v: 'Year ' + sel.year + ', Moon ' + (sm + 1) + ', Lune ' + (sel.dYear - c.firstDay(sm) + 1) },
+      { k: 'Lune of year', v: (sel.dYear + 1) + ' of 369' },
       { k: 'Your days', v: (() => { const out = []; for (let t = ss - c.MS_DAY; t < se + c.MS_DAY; t += 3600000 * 6) { const o = offAt(t); const noon = Date.UTC(o.y, o.mo - 1, o.d, 12) - o.off; if (noon >= ss && noon < se && fmtDay) { const lbl = fmtDay.format(noon); if (out.indexOf(lbl) < 0) out.push(lbl); } } return out.length ? out.join(' and ') : 'None'; })() },
       { k: 'Lune runs', v: fmtLocal.format(ss) + ' to ' + fmtLocal.format(se) },
       { k: 'Phase', v: c.phaseName(sp) + ' · ' + Math.round(si * 100) + '% lit' },
@@ -416,7 +413,7 @@ class Component extends DCLogic {
     if (!isNaN(cms)) {
       const t = c.toMoon(cms);
       convOut = [
-        { k: 'Moon date', v: 'Year ' + t.year + ', Moon ' + t.moon + ', Day ' + t.day },
+        { k: 'Moon date', v: 'Year ' + t.year + ', Moon ' + t.moon + ', Lune ' + t.day },
         { k: 'Moon time', v: pad(t.h) + ':' + pad(t.m) + ':' + pad(t.s) },
         { k: 'Phase', v: c.phaseName(t.phase) }
       ];
