@@ -60,6 +60,7 @@ Rate limits and API keys: the router supports an open per-IP limit, a keyed limi
 |---|---|
 | Moon second | 1.0403730490216803 SI seconds, exactly 33,168,757,399,689,600 / 31,881,600,000,000,000 |
 | Minute / hour / day | 60 / 60 / 24 Moon units |
+| Lune | A Moon day: 24 Moon hours, 86,400 Moon seconds (89,888.23 SI seconds). One 369th of a Moon year. Turns over at the same instant everywhere; it is not daylight |
 | Moon | 28.3846 Moon days, one mean lunation (29.530588853 SI days) |
 | Year | 13 moons, 369 Moon days. Moon lengths 29, 28, 29, 28, 28, 29, 28, 29, 28, 28, 29, 28, 28 |
 | Epoch | Year 0, Moon 1, Day 1, 00:00:00 = 0000-01-23 02:43:57.0214 UTC, the first mean new moon of 0 AD, 24,736 lunations before the reference new moon of 2000-01-06 18:14 UTC |

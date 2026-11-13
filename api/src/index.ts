@@ -181,6 +181,7 @@ const SPEC = {
   seconds_per_minute: 60,
   minutes_per_hour: 60,
   hours_per_day: 24,
+  lune: { name: 'lune', definition: 'A lune is a Moon day: one 369th of a Moon year, 86,400 Moon seconds. It turns over at the same instant everywhere. 369 lunes make 13 moons, locked to the real moon. A lune is not daylight; Light and Dark track the sun.', moon_seconds: 86_400, si_seconds: Math.round(86_400 * Number(DEN) / Number(NUM) * 1000) / 1000, per_year: YEAR_DAYS },
   days_per_year: YEAR_DAYS,
   moons_per_year: MOONS,
   moon_lengths_days: Array.from({ length: MOONS }, (_, i) => moonLength(i + 1)),
