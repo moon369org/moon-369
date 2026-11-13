@@ -212,7 +212,7 @@ async function authAndLimit(req: Request, env: Env): Promise<{ plan: string } | 
   }
   const ip = req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'anonymous';
   if (env.RATE_LIMITER && !(await env.RATE_LIMITER.limit({ key: ip })).success) {
-    return json({ error: { code: 'rate_limited', message: 'Open rate limit reached. Use a free key for higher volume, or run the MIT reference code locally.' } }, 429, { 'Retry-After': '60' });
+    return json({ error: { code: 'rate_limited', contact: 'moon369org@proton.me', message: 'Open rate limit reached (120 requests a minute). For higher limits email moon369org@proton.me, or run the MIT reference code locally.' } }, 429, { 'Retry-After': '60' });
   }
   return { plan: 'open' };
 }

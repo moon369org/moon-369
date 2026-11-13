@@ -80,3 +80,7 @@ Code: MIT. The Moon name, mark and badge are trademarks; see the brand rules in 
 - Domain: `api.moon369.org`. Moonmark links point to `https://moon369.org/m/{moonmark}`.
 - Rate limit: 120 requests a minute per IP by default (`RATE_LIMIT_PER_MIN`). Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` so the limit is shared across every server instance; without them each instance limits on its own.
 - Privacy: requests and locations are not logged or stored by the API.
+
+## Higher limits
+
+The open API allows 120 requests a minute per IP. Need more for a larger project? Email moon369org@proton.me.

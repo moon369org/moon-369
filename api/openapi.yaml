@@ -48,9 +48,10 @@ components:
           properties:
             code: { type: string, enum: [missing_param, bad_param, out_of_range, not_found, rate_limited, invalid_key, keys_disabled, method_not_allowed, internal] }
             message: { type: string }
+            contact: { type: string, description: Email for higher limits. Present on rate_limited. }
   responses:
     BadRequest: { description: Invalid input, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-    RateLimited: { description: Rate limit reached, headers: { Retry-After: { schema: { type: integer } } }, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    RateLimited: { description: 'Rate limit reached. For higher limits email moon369org@proton.me.', headers: { Retry-After: { schema: { type: integer } } }, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
 security: [{}, { key: [] }]
 paths:
   /v1/now:
