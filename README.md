@@ -60,6 +60,11 @@ Both parts deploy to Vercel through its Git integration. Every push to `main` go
 2. Add your .org domain to the site project, and `api.[your domain].org` to the API project.
 3. Push.
 
+
+## How Moon evolves
+
+Moon is an open standard, built in public. Anyone can propose a change as a Moon Improvement Proposal (MIP), and the version people actually use becomes the standard. See [`proposals/`](proposals/README.md).
+
 ## License
 
 Code is MIT licensed (see `LICENSE`). The Moon name, the linked-O mark and the "Powered by Moon" badge are trademarks and are not covered by the MIT license; see the brand rules on the press and API pages.
