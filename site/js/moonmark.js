@@ -49,7 +49,7 @@
       '<div class="mk-grid">' +
       '<div class="mk-main">' +
       '<div class="mk-l">' + (fresh ? 'MOONMARK · JUST MARKED' : 'MOONMARK') + '</div>' +
-      '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" aria-label="' + nm + '"><circle r="10" fill="#24262A"/><path d="' + ph + '" fill="#E9E4D8"/></svg><span>YEAR ' + mk.y + ' · MOON ' + p(mk.m) + ' · DAY ' + p(mk.d) + '</span></div>' +
+      '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" aria-label="' + nm + '"><circle r="10" fill="#24262A"/><path d="' + ph + '" fill="#E9E4D8"/></svg><span>YEAR ' + mk.y + ' · MOON ' + p(mk.m) + ' · LUNE ' + p(mk.d) + '</span></div>' +
       '<div class="mk-mark">' + text(mk) + '<span>' + nsGroups(mk.ns) + '</span></div>' +
       '<div class="mk-rows">' +
       '<div><span>YOUR TIME · SUN</span><b>' + local + ' ' + abbr + '</b></div>' +

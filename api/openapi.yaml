@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Moon API
   version: 1.0.0
-  summary: The open standard for time. 13 moons, 369 days, one global clock.
+  summary: The open standard for time. 13 moons, 369 lunes, one global clock.
   license: { name: MIT, identifier: MIT }
   description: |
     All times are Moon time unless a field name says `utc` or `unix`.

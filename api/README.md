@@ -2,7 +2,7 @@
 
 The open standard for time. One engine, two layers:
 
-- **Moon** is the engine and the calendar: one continuous count underneath everything, read as the date, 13 moons, 369 days and the real moon's phase.
+- **Moon** is the engine and the calendar: one continuous count underneath everything, read as the date, 13 moons, 369 lunes and the real moon's phase.
 - **Moonmark** is one exact moment on that engine, the same everywhere: `1928.05.03 09:12:04.205379905`. For events, records and systems.
 - **Light and Dark** is how people live the day. The Light counter starts at 00:00:00 at first light and runs to sunset, then Dark runs to the next first light. Light and Dark never change the date: the Moon date is global and changes at the same instant everywhere. It only needs where you stand, never a time zone.
 
@@ -61,8 +61,8 @@ Rate limits and API keys: the router supports an open per-IP limit, a keyed limi
 | Moon second | 1.0403730490216803 SI seconds, exactly 33,168,757,399,689,600 / 31,881,600,000,000,000 |
 | Minute / hour / day | 60 / 60 / 24 Moon units |
 | Lune | A Moon day: 24 Moon hours, 86,400 Moon seconds (89,888.23 SI seconds). One 369th of a Moon year. Turns over at the same instant everywhere; it is not daylight |
-| Moon | 28.3846 Moon days, one mean lunation (29.530588853 SI days) |
-| Year | 13 moons, 369 Moon days. Moon lengths 29, 28, 29, 28, 28, 29, 28, 29, 28, 28, 29, 28, 28 |
+| Moon | 28.3846 lunes, one mean lunation (29.530588853 SI days) |
+| Year | 13 moons, 369 lunes. Moon lengths 29, 28, 29, 28, 28, 29, 28, 29, 28, 28, 29, 28, 28 |
 | Epoch | Year 0, Moon 1, Day 1, 00:00:00 = 0000-01-23 02:43:57.0214 UTC, the first mean new moon of 0 AD, 24,736 lunations before the reference new moon of 2000-01-06 18:14 UTC |
 | Time base | Unix time (no leap seconds). No time zones. No daylight saving. |
 

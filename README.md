@@ -1,8 +1,8 @@
 # Moon
 
-**The new standard for time.** 13 moons. 369 days. One clock for the whole planet. Open source.
+**The new standard for time.** 13 moons. 369 lunes. One clock for the whole planet. Open source.
 
-Moon counts the year in 13 moons, each one a real lunar cycle, for exactly 369 Moon days, and runs one global clock with no time zones and no daylight saving. This repository holds the whole project: the website, the API and reference implementation, and the brand.
+Moon counts the year in 13 moons, each one a real lunar cycle, for exactly 369 lunes, and runs one global clock with no time zones and no daylight saving. This repository holds the whole project: the website, the API and reference implementation, and the brand.
 
 ```
 moon/
@@ -18,8 +18,8 @@ moon/
 |---|---|
 | Moon second | 1.0403730490216803 SI seconds, exactly 33,168,757,399,689,600 / 31,881,600,000,000,000 |
 | Minute / hour / day | 60 / 60 / 24 Moon units |
-| Moon | 28.3846 Moon days, one mean lunation (29.530588853 SI days) |
-| Year | 13 moons, 369 Moon days. Moon lengths 29, 28, 29, 28, 28, 29, 28, 29, 28, 28, 29, 28, 28 |
+| Moon | 28.3846 lunes, one mean lunation (29.530588853 SI days) |
+| Year | 13 moons, 369 lunes. Moon lengths 29, 28, 29, 28, 28, 29, 28, 29, 28, 28, 29, 28, 28 |
 | Epoch | Year 0, Moon 1, Day 1, 00:00:00 = 0000-01-23 02:43:57.0214 UTC, the first mean new moon of 0 AD |
 | Time base | Unix time (no leap seconds). No time zones. No daylight saving. |
 

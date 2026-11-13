@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <title>Moon Calendar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="13 moons locked to the real moon, 369 days a year. See today, every moon and every phase.">
+<meta name="description" content="13 moons locked to the real moon, 369 lunes a year. See today, every moon and every phase.">
 <link rel="canonical" href="https://moon369.org/calendar">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Moon">
 <meta property="og:url" content="https://moon369.org/calendar">
 <meta property="og:title" content="The Moon Calendar">
-<meta property="og:description" content="13 moons locked to the real moon, 369 days a year. See today, every moon and every phase.">
+<meta property="og:description" content="13 moons locked to the real moon, 369 lunes a year. See today, every moon and every phase.">
 <meta property="og:image" content="https://moon369.org/assets/og/calendar.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The Moon Calendar, over a photograph of the moon">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Moon Calendar">
-<meta name="twitter:description" content="13 moons locked to the real moon, 369 days a year. See today, every moon and every phase.">
+<meta name="twitter:description" content="13 moons locked to the real moon, 369 lunes a year. See today, every moon and every phase.">
 <meta name="twitter:image" content="https://moon369.org/assets/og/calendar.jpg">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "The Moon Calendar", "url": "https://moon369.org/calendar", "isPartOf": {"@id": "https://moon369.org/#site"}}</script>
@@ -140,7 +140,7 @@ footer > div > div:first-child svg{width:64px!important}
 </svg>
 <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 12px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">TODAY ON MOON<span class="mc-hide-m"> · SINCE FIRST LIGHT</span></div>
-<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: 0.14em" class="mc-date"><span class="mc-seg">YEAR {{now.y}}</span><span class="mc-dot"> · </span><span class="mc-seg">MOON {{now.m}}</span><span class="mc-dot"> · </span><span class="mc-seg">DAY {{now.d}}</span></h1>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: 0.14em" class="mc-date"><span class="mc-seg">YEAR {{now.y}}</span><span class="mc-dot"> · </span><span class="mc-seg">MOON {{now.m}}</span><span class="mc-dot"> · </span><span class="mc-seg">LUNE {{now.d}}</span></h1>
 <div style="display: flex; align-items: center; gap: 0.3em; font-family: 'JetBrains Mono', monospace; font-size: clamp(40px, 6vw, 72px); line-height: 1; font-variant-numeric: tabular-nums"><svg class="mc-ph-sm" aria-hidden="true" viewBox="-11 -11 22 22" style="width: 0.82em; height: 0.82em; display: none; flex: none"><circle r="10" style="fill: #24262A"></circle><path d="{{now.ph}}" style="fill: #E9E4D8"></path></svg><div>{{now.clock}}</div></div>
 <div style="font-size: 14px; color: #8A8B8F">{{now.meta}}</div>
 <div class="{{now.seasonCls}}" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; border: 1px solid #24262A; padding: 6px 14px; font-size: 13px">
@@ -167,7 +167,7 @@ footer > div > div:first-child svg{width:64px!important}
 <span class="s1" style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 14px; height: 4px; background: var(--season)"></span>Summer</span>
 <span class="s2" style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 14px; height: 4px; background: var(--season)"></span>Autumn</span>
 <span class="s3" style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 14px; height: 4px; background: var(--season)"></span>Winter</span>
-<span>◆ Equinox or solstice falls on this day · Northern Hemisphere seasons</span>
+<span>◆ Equinox or solstice falls on this lune · Northern Hemisphere seasons</span>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px">
 <sc-for list="{{moons}}" as="mo" hint-placeholder-count="13">
@@ -199,7 +199,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px">
 <div aria-live="polite" style="border: 1px solid #24262A; background: #16171A; padding: 28px; display: flex; flex-direction: column; gap: 16px">
-<h3 style="margin: 0; font-family: 'Syncopate', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em">SELECTED DAY</h3>
+<h3 style="margin: 0; font-family: 'Syncopate', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em">SELECTED LUNE</h3>
 <dl style="margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; font-size: 14px">
 <sc-for list="{{detail}}" as="r" hint-placeholder-count="6">
 <dt style="color: #8A8B8F">{{r.k}}</dt><dd style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{r.v}}</dd>
@@ -231,13 +231,13 @@ footer > div > div:first-child svg{width:64px!important}
 <tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon second</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">base unit</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">1.0403730 s</td></tr>
 <tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon minute</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">60 Moon seconds</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">62.4224 s</td></tr>
 <tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon hour</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">60 Moon minutes</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">1 h 02 m 25.3 s</td></tr>
-<tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon day</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">24 Moon hours</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">24 h 58 m 08.2 s</td></tr>
-<tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">28.3846154 Moon days</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">29.530589 days (one lunation)</td></tr>
-<tr><td style="padding: 10px 12px">Moon year</td><td style="padding: 10px 12px">13 moons, 369 Moon days</td><td style="padding: 10px 12px; font-family: 'JetBrains Mono', monospace">383.8977 days</td></tr>
+<tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Lune</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">24 Moon hours</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">24 h 58 m 08.2 s</td></tr>
+<tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">28.3846154 lunes</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">29.530589 days (one lunation)</td></tr>
+<tr><td style="padding: 10px 12px">Moon year</td><td style="padding: 10px 12px">13 moons, 369 lunes</td><td style="padding: 10px 12px; font-family: 'JetBrains Mono', monospace">383.8977 days</td></tr>
 </tbody>
 </table>
 </div>
-<p style="margin: 0; max-width: 820px; font-size: 13px; line-height: 1.7; color: #8A8B8F">One clock for the whole planet: no time zones, no daylight saving. Year 0 began at the first new moon of 0 AD, 23 January 0000, 02:44 UTC, and the count runs unbroken from there. Each moon has 28 or 29 whole days (five moons get 29), and a day belongs to the moon it starts in. Moon boundaries track the average lunation, so a real new moon can land up to about half a Moon day either side, and that offset never accumulates. Equinoxes and solstices follow Meeus, Astronomical Algorithms ch. 27, accurate to about a&nbsp;minute.</p>
+<p style="margin: 0; max-width: 820px; font-size: 13px; line-height: 1.7; color: #8A8B8F">One clock for the whole planet: no time zones, no daylight saving. Year 0 began at the first new moon of 0 AD, 23 January 0000, 02:44 UTC, and the count runs unbroken from there. Each moon has 28 or 29 whole lunes (five moons get 29), and a lune belongs to the moon it starts in. Moon boundaries track the average lunation, so a real new moon can land up to about half a lune either side, and that offset never accumulates. Equinoxes and solstices follow Meeus, Astronomical Algorithms ch. 27, accurate to about a&nbsp;minute.</p>
 </section>
 
 </div>
@@ -340,14 +340,14 @@ class Component extends DCLogic {
         const hit = evs.find((e) => e.t >= s0 && e.t < s1);
         if (hit) {
           season = hit.i;
-          events.push({ cls: 's' + hit.i, text: EVENT[hit.i] + ' · Day ' + (d - f + 1) + ' · ' + c.fmtLong.format(hit.t) + ' UTC' });
+          events.push({ cls: 's' + hit.i, text: EVENT[hit.i] + ' · Lune ' + (d - f + 1) + ' · ' + c.fmtLong.format(hit.t) + ' UTC' });
         }
         const isToday = today.year === year && today.dYear === d;
         const isSel = sel.year === year && sel.dYear === d;
         days.push({
           n: d - f + 1, g: c.localDays(s0, s1), hit: !!hit, ph: c.phasePath(c.dayPhase(year, d)),
           cls: 'mc-day s' + season + (isToday ? ' today' : '') + (isSel ? ' sel' : ''),
-          label: 'Moon ' + (m + 1) + ', day ' + (d - f + 1) + ', ' + SEASON[season] + (hit ? ', ' + EVENT[hit.i] : ''),
+          label: 'Moon ' + (m + 1) + ', lune ' + (d - f + 1) + ', ' + SEASON[season] + (hit ? ', ' + EVENT[hit.i] : ''),
           pick: () => this.setState({ sel: { year, dYear: d } })
         });
       }
@@ -405,7 +405,7 @@ class Component extends DCLogic {
       { k: 'Moon date', v: 'Year ' + sel.year + ', Moon ' + (sm + 1) + ', Day ' + (sel.dYear - c.firstDay(sm) + 1) },
       { k: 'Day of year', v: (sel.dYear + 1) + ' of 369' },
       { k: 'Your days', v: (() => { const out = []; for (let t = ss - c.MS_DAY; t < se + c.MS_DAY; t += 3600000 * 6) { const o = offAt(t); const noon = Date.UTC(o.y, o.mo - 1, o.d, 12) - o.off; if (noon >= ss && noon < se && fmtDay) { const lbl = fmtDay.format(noon); if (out.indexOf(lbl) < 0) out.push(lbl); } } return out.length ? out.join(' and ') : 'None'; })() },
-      { k: 'Moon day runs', v: fmtLocal.format(ss) + ' to ' + fmtLocal.format(se) },
+      { k: 'Lune runs', v: fmtLocal.format(ss) + ' to ' + fmtLocal.format(se) },
       { k: 'Phase', v: c.phaseName(sp) + ' · ' + Math.round(si * 100) + '% lit' },
       { k: 'Season', v: SEASON[c.seasonAt(se - 1).season] }
     ];
