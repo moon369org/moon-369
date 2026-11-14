@@ -124,7 +124,7 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 </section>
 
-<sc-if value="{{isPreview}}"><section style="background: #2A1E1C; border-bottom: 1px solid #8A4B44"><div style="max-width: 1280px; margin: 0 auto; padding: 18px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #E0A49C">PREVIEW · SAMPLE DATA · NOT THE REAL TIDELINE</div><a href="{{sampleHref}}" download="sample.moonmark.json" style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.22em; color: #E9E4D8; border: 1px solid #E0A49C; padding: 12px 18px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">DOWNLOAD A SAMPLE RECEIPT</a></div></section></sc-if>
+<sc-if value="{{isPreview}}"><section style="background: #2A1E1C; border-bottom: 1px solid #8A4B44"><div style="max-width: 1280px; margin: 0 auto; padding: 18px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #E0A49C">PREVIEW · SAMPLE DATA · NOT THE REAL TIDELINE</div><div style="display: flex; flex-wrap: wrap; gap: 12px"><a href="/tideline" style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.22em; color: #E0A49C; padding: 12px 6px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">EXIT PREVIEW</a><a href="{{sampleHref}}" download="sample.moonmark.json" style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.22em; color: #E9E4D8; border: 1px solid #E0A49C; padding: 12px 18px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">DOWNLOAD A SAMPLE RECEIPT</a></div></div></section></sc-if>
 
 <section>
 <div style="max-width: 1280px; margin: 0 auto; padding: 72px 32px 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 32px; align-items: start">
@@ -181,6 +181,8 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">XRP LEDGER</span><span>{{ex.anchorText}}</span></div>
 </div>
 </div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px"><span style="font-size: 15px; color: #8A8B8F">Want to see it with tides in it?</span><a href="/tideline?preview" style="border: 1px solid #E9E4D8; padding: 16px 26px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em; display: inline-flex; align-items: center">SEE A FULL PREVIEW</a></div>
+
 </sc-if>
 </div>
 </section>
