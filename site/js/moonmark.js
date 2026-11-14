@@ -57,7 +57,7 @@
           '<div class="mk-sig-p">Moon signed this file fingerprint at this exact moment. The signature checks out' + (b.not_before ? ', and a public drand beacon proves it couldn&#39;t have been signed any&nbsp;earlier' : '') + '.</div>' +
           '<div class="mk-sig-r"><span>SHA-256</span><b title="' + rc.sha256 + '">' + short + '</b></div>' +
           '<div class="mk-sig-r"><span>KEY</span><b>' + rc.key_id + ' · Ed25519</b></div>' +
-          (b.not_before ? '<div class="mk-sig-r"><span>NOT BEFORE</span><b title="drand quicknet round ' + b.not_before.round + '">' + esc(b.not_before.utc.replace('T', ' ').slice(0, 19)) + ' UTC</b></div>' : '') +
+          (b.not_before ? '<div class="mk-sig-r"><span style="display:inline-flex;align-items:center">NOT BEFORE<span class="mi"><button type="button" class="mi-b" aria-label="What NOT BEFORE means" aria-expanded="false" aria-describedby="mi-nb">i</button><span role="tooltip" id="mi-nb" class="mi-t">drand is public randomness from the League of Entropy, independent organizations including Cloudflare. A new value every 3 seconds that no one can predict. This receipt includes one, so it couldn&#39;t have been signed before that value existed.</span></span></span><b title="drand quicknet round ' + b.not_before.round + '">' + esc(b.not_before.utc.replace('T', ' ').slice(0, 19)) + ' UTC</b></div>' : '') +
           '<label class="mk-sig-btn">CHECK A FILE<input type="file" data-mk-file></label>' +
           '<a class="mk-sig-btn" href="' + href + '" download="' + rc.moonmark.replace(/[^0-9.]+/g, '_') + '.moonmark.json">SAVE RECEIPT</a>' +
           '<div class="mk-sig-m" data-mk-match></div>';
