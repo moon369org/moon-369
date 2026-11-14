@@ -111,6 +111,13 @@
     root.setAttribute('data-dc-root', '');
     tpl.replaceWith(root);
     render(h(Comp, { __template: template }), root);
+    // The page is built after load, so the browser's own jump to #anchor finds nothing. Jump once it exists.
+    const hash = location.hash && decodeURIComponent(location.hash.slice(1));
+    if (hash) {
+      const go = () => { const el = document.getElementById(hash); if (el) el.scrollIntoView(); };
+      requestAnimationFrame(go);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => requestAnimationFrame(go));
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
