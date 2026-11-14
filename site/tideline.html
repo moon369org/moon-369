@@ -34,6 +34,19 @@ p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
 @keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
 header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+
+/* Tideline hero: the lower part of the word is water, with two swells rolling through it. */
+.tl-ocean{position:relative;display:inline-block;align-self:flex-start}
+.tl-ocean::before,.tl-ocean::after{content:attr(data-text);position:absolute;inset:0;pointer-events:none;color:transparent;-webkit-background-clip:text;background-clip:text;
+  -webkit-mask-repeat:repeat-x;mask-repeat:repeat-x;-webkit-mask-size:4.2em 100%;mask-size:4.2em 100%}
+.tl-ocean::before{background-image:linear-gradient(180deg,#B9CCDB 40%,#81979F 70%,#4A6378);opacity:.55;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20240%20100%27%20preserveAspectRatio%3D%27none%27%3E%3Cpath%20d%3D%27M0%2062%20C%2030.0%2057%2C%2090.0%2057%2C%20120.0%2062%20S%20210.0%2067%2C%20240%2062%20V100%20H0Z%27%20fill%3D%27black%27/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20240%20100%27%20preserveAspectRatio%3D%27none%27%3E%3Cpath%20d%3D%27M0%2062%20C%2030.0%2057%2C%2090.0%2057%2C%20120.0%2062%20S%20210.0%2067%2C%20240%2062%20V100%20H0Z%27%20fill%3D%27black%27/%3E%3C/svg%3E");animation:tlSwellB 9.7s linear infinite}
+.tl-ocean::after{background-image:linear-gradient(180deg,#C9D8E4 45%,#8197AD 68%,#3B5368);
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20240%20100%27%20preserveAspectRatio%3D%27none%27%3E%3Cpath%20d%3D%27M0%2056%20C%2030.0%2049%2C%2090.0%2049%2C%20120.0%2056%20S%20210.0%2063%2C%20240%2056%20V100%20H0Z%27%20fill%3D%27black%27/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20240%20100%27%20preserveAspectRatio%3D%27none%27%3E%3Cpath%20d%3D%27M0%2056%20C%2030.0%2049%2C%2090.0%2049%2C%20120.0%2056%20S%20210.0%2063%2C%20240%2056%20V100%20H0Z%27%20fill%3D%27black%27/%3E%3C/svg%3E");animation:tlSwellA 6.3s linear infinite, tlBob 4.9s ease-in-out infinite}
+@keyframes tlSwellA{from{-webkit-mask-position:0 0;mask-position:0 0}to{-webkit-mask-position:-4.2em 0;mask-position:-4.2em 0}}
+@keyframes tlSwellB{from{-webkit-mask-position:0 0;mask-position:0 0}to{-webkit-mask-position:4.2em 0;mask-position:4.2em 0}}
+@keyframes tlBob{0%,100%{transform:translateY(0)}50%{transform:translateY(0.035em)}}
+@media (prefers-reduced-motion:reduce){.tl-ocean::before,.tl-ocean::after{animation:none}}
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/header.js" defer></script>
@@ -107,10 +120,10 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 </header>
 
-<section style="border-bottom: 1px solid #1C1D20">
+<section id="top" style="border-bottom: 1px solid #1C1D20">
 <div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 80px; display: flex; flex-direction: column; gap: 24px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F; letter-spacing: 0.3em">MOON&#39;S PUBLIC LOG</div>
-<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">TIDELINE</h1>
+<h1 class="tl-ocean" data-text="TIDELINE" style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">TIDELINE</h1>
 <p style="margin: 0; max-width: 720px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Every lune, Moon seals its signed Moonmarks into a tide: one fingerprint of every receipt, chained to the tide before it, signed with Moon&#39;s keys and anchored on the XRP Ledger. After that, no one can add, remove or backdate a receipt, Moon&nbsp;included.</p>
 </div>
 </section>
