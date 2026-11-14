@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tideline · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger.">
+<link rel="canonical" href="https://moon369.org/tideline">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/tideline">
+<meta property="og:title" content="The Tideline · Moon">
+<meta property="og:description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger.">
+<meta property="og:image" content="https://moon369.org/assets/og/tideline.jpg?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Moon Tideline, over a photograph of the moon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Tideline · Moon">
+<meta name="twitter:description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger.">
+<meta name="twitter:image" content="https://moon369.org/assets/og/tideline.jpg?v=1">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<style>x-dc{display:none}html,body{background:#0B0B0D}html{scrollbar-width:thin;scrollbar-color:#2E3035 #0B0B0D}
+*{scrollbar-width:thin;scrollbar-color:#2E3035 transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#24262A;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#3A3B3F;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
+@keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
+header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+</style>
+<script src="js/preact.umd.js" defer></script>
+<script src="js/header.js" defer></script>
+<script src="js/dc-lite.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
+.pk-a,.pk-b,.pk-f{animation-duration:3.2s;animation-iteration-count:infinite;animation-fill-mode:both}
+.pk-a{animation-name:pkA}.pk-b{animation-name:pkB}.pk-f{animation-name:pkF}
+@keyframes pkA{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(-30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkB{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkF{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.6,1)}36%,54%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.6,1)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pk-a,.pk-b,.pk-f{animation:none}}
+@media (max-width: 720px){
+header > div{padding:16px 20px!important;gap:12px 16px!important}
+nav[aria-label="Main"]{gap:10px 18px!important;font-size:10px!important;letter-spacing:.18em!important}
+nav[aria-label="Main"] a{min-height:44px;display:inline-flex!important;align-items:center}
+nav[aria-label="Main"] a[style*="padding: 14px 22px"]{padding:0 14px!important}
+[style*="padding: 140px 32px"],[style*="padding: 160px 32px"],[style*="padding: 120px 32px"]{padding:72px 20px!important}
+[style*="padding: 120px 32px 140px"]{padding:56px 20px 80px!important}
+[style*="padding: 100px 32px 90px"]{padding:56px 20px 48px!important}
+[style*="padding: 64px 32px 120px"],[style*="padding: 80px 32px 120px"]{padding:40px 20px 80px!important}
+[style*="padding: 40px 32px"]{padding:32px 20px!important}
+[style*="padding: 40px 48px"]{padding:28px 22px!important}
+[style*="padding: 40px; display: flex"]{padding:24px!important;gap:24px!important}
+[style*="gap: 104px"]{gap:72px!important}
+[style*="gap: 80px"]{gap:48px!important}
+[style*="gap: 64px"]{gap:40px!important}
+[style*="gap: 56px"]{gap:36px!important}
+pre{font-size:12.5px!important}
+.mw-hint{display:block!important}
+}
+@media (max-width: 720px){
+footer > div{flex-direction:column!important;align-items:center!important;text-align:center;gap:28px!important}
+footer > div > div:first-child{align-items:center!important}
+footer > div > div:last-child{justify-content:center!important;gap:22px!important}
+footer > div > div:first-child svg{width:64px!important}
+}
+</style>
+</helmet>
+<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="/" aria-label="Moon home" style="display: block">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+</svg>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: 'Syncopate', sans-serif; font-size: 11px; letter-spacing: 0.28em">
+<a href="/calendar">CALENDAR</a>
+<a href="/uses">USES</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/#faq">FAQ</a>
+<a href="/#sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
+</nav>
+</div>
+</header>
+
+<section style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 80px; display: flex; flex-direction: column; gap: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F; letter-spacing: 0.3em">MOON&#39;S PUBLIC LOG</div>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">TIDELINE</h1>
+<p style="margin: 0; max-width: 720px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Every lune, Moon seals its signed Moonmarks into a tide: one fingerprint of every receipt, chained to the tide before it, signed with Moon&#39;s keys and anchored on the XRP Ledger. After that, no one can add, remove or backdate a receipt, Moon&nbsp;included.</p>
+</div>
+</section>
+
+<section>
+<div style="max-width: 1280px; margin: 0 auto; padding: 72px 32px 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 32px; align-items: start">
+
+<div style="border: 1px solid #E9E4D8; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><span style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em">THE OPEN LUNE</span><span style="display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #8A8B8F"><img src="/assets/moon-loader.svg" alt="" aria-hidden="true" style="height: 14px; width: auto">LIVE</span></div>
+<div style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(28px, 3.4vw, 40px); letter-spacing: 0.06em">{{openLune}}</div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">RECEIPTS SO FAR</span><span>{{openCount}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">SEALS IN</span><span style="font-variant-numeric: tabular-nums">{{sealsIn}}</span></div>
+<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #8A8B8F">Every file signed on Moon right now lands in this lune. When it ends, the whole lune becomes one tide.</p>
+<a href="/#sign" style="border: 1px solid #E9E4D8; padding: 16px 26px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: relative; overflow: hidden; align-self: flex-start">SIGN A FILE</a>
+</div>
+
+<div style="border: 1px solid #24262A; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<div style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em">CHECK A RECEIPT</div>
+<p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Choose a saved receipt (<code>.moonmark.json</code>). Your browser checks the proof itself: the receipt&#39;s fingerprint, hashed up the tree, must land exactly on the tide&#39;s&nbsp;root.</p>
+<label style="border: 1px solid #E9E4D8; padding: 16px 26px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: relative; overflow: hidden; align-self: flex-start">CHOOSE A RECEIPT<input type="file" accept=".json,application/json" onChange="{{pick}}" style="position: absolute; inset: 0; opacity: 0; cursor: pointer"></label>
+<sc-if value="{{checkText}}"><div role="status" style="font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; color: {{checkColor}}; border-top: 1px solid #1C1D20; padding-top: 14px">{{checkText}}</div></sc-if>
+</div>
+
+</div>
+</section>
+
+<section>
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px 100px; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap"><h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">SEALED TIDES</h2><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">{{status}}</span></div>
+<sc-if value="{{hasTides}}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); gap: 20px">
+<sc-for list="{{tides}}" as="t">
+<div style="border: 1px solid #24262A; background: #0B0B0D; padding: 24px 26px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding-bottom: 8px">
+<div style="display: flex; align-items: baseline; gap: 14px"><span style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.08em">TIDE {{t.lune}}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">{{t.sizeText}}</span></div>
+<sc-if value="{{t.anchorUrl}}"><a href="{{t.anchorUrl}}" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #0B0B0D; background: #E9E4D8; padding: 6px 10px">ANCHORED &rarr;</a></sc-if>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">ROOT</span><span title="{{t.root}}">{{t.rootShort}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">CHAINED TO</span><span>{{t.prevShort}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">SIGNED WITH</span><span>{{t.algs}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">XRP LEDGER</span><span>{{t.anchorText}}</span></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noTides}}">
+<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE; max-width: 720px">The first tide seals when the first lune with signed Moonmarks ends. Here is what each one will look&nbsp;like:</p>
+<div style="max-width: 620px">
+<div style="border: 1px solid #24262A; background: #0B0B0D; padding: 24px 26px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding-bottom: 8px">
+<div style="display: flex; align-items: baseline; gap: 14px"><span style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.08em">TIDE {{ex.lune}}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">{{ex.sizeText}}</span></div>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #E0A49C; border: 1px solid #8A4B44; padding: 6px 10px">EXAMPLE</span>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">ROOT</span><span title="{{ex.root}}">{{ex.rootShort}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">CHAINED TO</span><span>{{ex.prevShort}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">SIGNED WITH</span><span>{{ex.algs}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">XRP LEDGER</span><span>{{ex.anchorText}}</span></div>
+</div>
+</div>
+</sc-if>
+</div>
+</section>
+
+<section style="border-top: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 90px 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">01 · RECORD</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every receipt Moon signs is added to its lune&#39;s list the moment it&#39;s&nbsp;signed.</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">02 · SEAL</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">When the lune ends, its receipts become one Merkle root, the same structure that secures website certificates, signed with Ed25519 and&nbsp;ML-DSA-65.</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">03 · CHAIN</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Each tide includes the previous tide&#39;s fingerprint, so the newest tide vouches for the whole&nbsp;history.</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04 · ANCHOR</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">The tide&#39;s fingerprint is written to the XRP Ledger. Once the ledger closes, the tide can never be quietly&nbsp;changed.</p></div>
+</div>
+</section>
+
+</div>
+
+<footer style="border-top: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8A8B8F">
+<div style="display: flex; flex-direction: column; gap: 18px"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #24262A; stroke-width: 9"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap"><a href="/" style="color: #8A8B8F">HOME</a><a href="/calendar" style="color: #8A8B8F">CALENDAR</a><a href="/api" style="color: #8A8B8F">API</a><a href="/m" style="color: #8A8B8F">MOONMARK</a><a href="/uses" style="color: #8A8B8F">USES</a><a href="/trust" style="color: #8A8B8F">TRUST</a><a href="/tideline" style="color: #8A8B8F">TIDELINE</a><a href="/press" style="color: #8A8B8F">PRESS</a></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3200}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    this.load();
+    this.iv = setInterval(() => this.setState({ now: Date.now() }), 1000);
+    this.iv2 = setInterval(() => this.load(), 30000);
+  }
+  componentWillUnmount() { clearInterval(this.iv); clearInterval(this.iv2); }
+  load() {
+    fetch('https://api.moon369.org/v1/tideline').then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((b) => {
+      this.setState({ tl: b, err: null });
+      return fetch('https://api.moon369.org/v1/tideline/' + b.open_lune).then((r) => r.json()).then((o) => this.setState({ openSize: o.size }));
+    }).catch((e) => this.setState({ err: e === 503 ? 'soon' : 'offline' }));
+  }
+  async inclusion(leaf, index, size, path, root) {
+    const hx = (h) => Uint8Array.from(h.match(/../g) || [], (x) => parseInt(x, 16));
+    const toHex = (b) => Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, '0')).join('');
+    const node = async (l, r) => new Uint8Array(await crypto.subtle.digest('SHA-256', new Uint8Array([1, ...l, ...r])));
+    if (index < 0 || index >= size) return false;
+    let fn = index, sn = size - 1, r = hx(leaf);
+    for (const p of path) {
+      if (sn === 0) return false;
+      const pb = hx(p);
+      if (fn % 2 === 1 || fn === sn) { r = await node(pb, r); if (fn % 2 === 0) while (fn % 2 === 0 && fn !== 0) { fn >>= 1; sn >>= 1; } }
+      else r = await node(r, pb);
+      fn >>= 1; sn >>= 1;
+    }
+    return sn === 0 && toHex(r) === root;
+  }
+  pick(e) {
+    const input = e.target, f = input.files && input.files[0]; input.value = '';
+    if (!f) return;
+    const say = (text, ok) => this.setState({ check: { text, color: ok === true ? '#E9E4D8' : ok === false ? '#E0A49C' : '#8A8B8F' } });
+    say('Reading ' + f.name + '…');
+    f.text().then((t) => {
+      let rc; try { rc = JSON.parse(t); rc = rc.receipt && typeof rc.receipt === 'object' ? rc.receipt : rc; } catch (x) { say('That file is not a Moon receipt.', false); return; }
+      say('Asking the Tideline for its proof…');
+      return fetch('https://api.moon369.org/v1/tideline/proof', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receipt: rc }) })
+        .then((r) => r.json()).then(async (p) => {
+          if (p.status === 'pending') return say('Recorded in lune ' + p.lune + ' as receipt #' + (p.index + 1) + '. It seals into a tide after ' + p.seals_after_utc.replace('T', ' ').slice(0, 16) + ' UTC.', null);
+          if (p.status === 'not_found') return say('This receipt is not in the Tideline. It was either signed before the Tideline started, or it was changed.', false);
+          if (p.status !== 'sealed') return say((p.error && p.error.message) || 'Could not check that receipt.', false);
+          const ok = await this.inclusion(p.leaf, p.index, p.size, p.path, p.root);
+          say(ok ? '✓ Included in tide ' + p.lune + ' as receipt ' + (p.index + 1) + ' of ' + p.size + '. Proven in your browser.' + (p.tide.anchor ? ' Anchored on the XRP Ledger.' : '') : '✕ The proof does not match the tide. Do not rely on this receipt.', ok);
+        });
+    }).catch(() => say('Could not reach Moon. Try again.', false));
+  }
+  renderVals() {
+    const s = this.state || {}, tl = s.tl, now = s.now || Date.now();
+    const short = (h) => h ? h.slice(0, 10) + '…' + h.slice(-6) : 'none (first tide)';
+    const fmt = (t) => ({
+      lune: t.lune, root: t.root, rootShort: short(t.root), prevShort: short(t.prev),
+      sizeText: t.size === 1 ? '1 receipt' : t.size.toLocaleString('en-US') + ' receipts',
+      algs: t.pq ? 'Ed25519 + ML-DSA-65' : 'Ed25519',
+      anchorText: t.anchor ? 'ledger ' + (t.anchor.ledger_index || '').toLocaleString('en-US') : 'not anchored',
+      anchorUrl: t.anchor ? t.anchor.explorer : ''
+    });
+    const tides = tl ? (tl.tides || []).map(fmt) : [];
+    // The open lune and when it ends, from the Moon standard itself (same math as the API).
+    const EPOCH = -62165308562978.61, DAY = 86400000 * 1.0403730490216803;
+    const da = Math.floor((now - EPOCH) / DAY), yy = Math.floor(da / 369), dy = da - yy * 369, mi = Math.floor(dy * 13 / 369);
+    const p2 = (x) => String(x).padStart(2, '0');
+    let openLune = yy + '.' + p2(mi + 1) + '.' + p2(dy - Math.ceil(mi * 369 / 13) + 1), endMs = EPOCH + (da + 1) * DAY, sealsIn = '';
+    if (tl) { openLune = tl.open_lune; endMs = Date.parse(tl.seals_after_utc); }
+    {
+      const ms = Math.max(0, endMs - now);
+      const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, sec = Math.floor(ms / 1000) % 60;
+      sealsIn = h + 'h ' + String(m).padStart(2, '0') + 'm ' + String(sec).padStart(2, '0') + 's';
+    }
+    if (!this._pick) this._pick = (e) => this.pick(e);
+    const c = s.check || {};
+    return {
+      openLune, sealsIn, openCount: s.err ? '–' : s.openSize == null ? '…' : Number(s.openSize).toLocaleString('en-US'),
+      tides, hasTides: tides.length > 0, noTides: tides.length === 0,
+      status: s.err === 'soon' ? 'THE TIDELINE IS STARTING' : s.err ? 'COULD NOT REACH MOON' : tl ? tides.length + (tides.length === 1 ? ' TIDE' : ' TIDES') + ' SHOWN' : 'LOADING',
+      ex: { lune: '1928.05.04', sizeText: '214 receipts', root: '', rootShort: '7f3a91c0d2…e4b81c', prevShort: '19c4e0aa57…02f7d9', algs: 'Ed25519 + ML-DSA-65', anchorText: 'ledger 104,882,113' },
+      pick: this._pick, checkText: c.text || '', checkColor: c.color || '#8A8B8F'
+    };
+  }
+}
+</script>
+</body>
+</html>
