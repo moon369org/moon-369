@@ -75,6 +75,17 @@ nav[aria-label="Main"] a:not([style*="border"]):focus-visible {
 nav[aria-label="Main"] a[aria-current="page"] { color: #E9E4D8; background-size: 100% 1px; }
 @media (max-width: 720px) { html.mm-js [data-dc-root] nav[aria-label="Main"] a[aria-current="page"] { background-size: 0 0; font-weight: 700; } }
 
+/* Footer links: the same underline sweep and glow as the main menu. */
+footer a {
+  background: linear-gradient(#E9E4D8, #E9E4D8) 50% 100% / 0 1px no-repeat;
+  padding-bottom: 4px;
+  transition: background-size .35s cubic-bezier(.16, 1, .3, 1), color .2s, text-shadow .3s;
+}
+footer a:hover, footer a:focus-visible {
+  color: #E9E4D8 !important; background-size: 100% 1px; text-shadow: 0 0 12px rgba(233, 228, 216, 0.55);
+}
+footer a:has(svg) { background: none; padding-bottom: 0; }
+
 /* ---------- Buttons: light sweep + glow ---------- */
 [data-dc-root] a[style*="padding: 18px 30px"],
 [data-dc-root] a[style*="padding: 14px 22px"],
