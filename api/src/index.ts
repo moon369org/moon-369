@@ -136,7 +136,7 @@ const SPEC = {
   time_zones: null,
   dst: false,
   roles: { moon: 'One continuous count of time, locked to the real moon, read as the date (year, moon, lune) and the phase.', moonmark: 'One exact moment on the Moon count, the same everywhere: YEAR.MM.DD HH:MM:SS.NNNNNNNNN.' },
-  date_rule: 'The Moon date is global: one date for the whole planet. A lune turns over at the same instant everywhere.',
+  date_rule: 'The Moon date is global: one date worldwide. A lune turns over at the same instant everywhere.',
   license: 'MIT',
 };
 

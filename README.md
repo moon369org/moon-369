@@ -1,6 +1,6 @@
 # Moon
 
-**One timestamp for the whole planet, locked to the moon.** 13 moons. 369 lunes. Open source.
+**The worldwide timestamp, locked to the moon.** 13 moons. 369 lunes. Open source.
 
 Moon counts the year in 13 moons, each one a real lunar cycle, for exactly 369 lunes, and gives every moment one Moonmark, the same everywhere, with no time zones and no daylight saving. This repository holds the whole project: the website, the API and reference implementation, and the brand.
 

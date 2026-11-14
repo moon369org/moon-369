@@ -2,7 +2,7 @@
 
 ## 1.1.0 (Moon 05, Lune 04, Year 1928)
 
-Moon is now one thing: one timestamp for the whole planet, locked to the moon.
+Moon is now one thing: the worldwide timestamp, locked to the moon.
 
 - **Removed**: `/v1/light`, `/v1/schedule`, `/v1/sun`, `/v1/seasons/{year}`, and the `tz`, `lat`, `lon` and `sun` parameters. Light, Dark and the sun layer were never announced; they can return through the proposals process.
 - **Lune**: the Moon day is called a lune. Field names are unchanged.

@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Moon API
   version: 1.0.0
-  summary: The open standard for time. One timestamp for the whole planet, locked to the moon.
+  summary: The open standard for time. The worldwide timestamp, locked to the moon.
   license: { name: MIT, identifier: MIT }
   description: |
     All times are Moon time unless a field name says `utc` or `unix`.

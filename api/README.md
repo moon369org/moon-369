@@ -1,6 +1,6 @@
 # Moon API
 
-One timestamp for the whole planet, locked to the moon.
+The worldwide timestamp, locked to the moon.
 
 - **Moon** is one continuous count of time, locked to the real moon, read as the date (year, moon, lune) and the moon's phase. The date is the same everywhere and turns over at the same instant everywhere.
 - **Moonmark** is one exact moment on that count, the same everywhere: `1928.05.03 09:12:04.205379905`.
