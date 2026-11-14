@@ -75,6 +75,12 @@ nav[aria-label="Main"] a:not([style*="border"]):focus-visible {
 nav[aria-label="Main"] a[aria-current="page"] { color: #E9E4D8; background-size: 100% 1px; }
 @media (max-width: 720px) { html.mm-js [data-dc-root] nav[aria-label="Main"] a[aria-current="page"] { background-size: 0 0; font-weight: 700; } }
 
+/* Footer, desktop: menu on the left, logo on the right. Phones keep their stacked layout. */
+@media (min-width: 721px) {
+  footer > div { flex-direction: row-reverse; }
+  footer > div > div:first-child { align-items: flex-end; text-align: right; }
+}
+
 /* Footer links: the same underline sweep and glow as the main menu. */
 footer a {
   background: linear-gradient(#E9E4D8, #E9E4D8) 50% 100% / 0 1px no-repeat;
