@@ -53,6 +53,7 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
+<script src="js/livemark.js" defer></script>
 <script src="js/header.js" defer></script>
 <script src="js/dc-lite.js" defer></script>
 <link rel="stylesheet" href="assets/moon-motion.css">
@@ -211,7 +212,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: #8A8B8F">HOW MOON WORKS</div>
 </div>
 <div class="hw" style="display: flex; flex-direction: column; gap: 10px">
-<div class="hw-r" style="border: 1px solid #24262A; background: #101113"><div class="hw-n">02</div><div class="hw-k">MOONMARK</div><div class="hw-t">One exact moment. The same everywhere. Fits in a QR code.</div><a class="hw-v" href="/m/{{markPath}}" style="border-bottom: 1px solid #5E6064">{{mark}}</a></div>
+<div class="hw-r" style="border: 1px solid #24262A; background: #101113"><div class="hw-n">02</div><div class="hw-k">MOONMARK</div><div class="hw-t">One exact moment. The same everywhere. Fits in a QR code.</div><a class="hw-v" data-live-mark href="/m/{{markPath}}" style="border-bottom: 1px solid #5E6064">{{mark}}</a></div>
 <div class="hw-r" style="border: 1px solid #E9E4D8; background: #16171A"><div class="hw-n">01</div><div class="hw-k">MOON</div><div class="hw-t">One count that never stops, locked to the real moon. It sets the date and the 13 moons.</div><div class="hw-v">{{localDateLine}}</div></div>
 </div>
 </section>
