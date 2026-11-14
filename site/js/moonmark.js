@@ -29,9 +29,12 @@
   // A signed link carries the receipt: ?s=<sha256>&u=<unix_ns>&k=<key_id>&g=<signature>
   function receiptFrom(mk) {
     var q = new URLSearchParams(location.search);
-    var s = (q.get('s') || '').toLowerCase(), u = q.get('u'), k = q.get('k'), g = q.get('g');
+    var s = (q.get('s') || '').toLowerCase(), u = q.get('u'), k = q.get('k'), g = q.get('g'), rd = q.get('r'), bs = (q.get('b') || '').toLowerCase();
     if (!/^[0-9a-f]{64}$/.test(s) || !/^-?\d+$/.test(u || '') || !/^[0-9a-f]{16}$/.test(k || '') || !/^[A-Za-z0-9_-]{40,120}$/.test(g || '')) return null;
-    return { receipt: 'moonmark-receipt/1', sha256: s, moonmark: text(mk) + '.' + p(mk.ns, 9), unix_ns: u, key_id: k, signature: g };
+    var rc = { receipt: 'moonmark-receipt/1', sha256: s, moonmark: text(mk) + '.' + p(mk.ns, 9), unix_ns: u, key_id: k };
+    if (/^\d{1,12}$/.test(rd || '') && /^[0-9a-f]{96}$/.test(bs)) { rc.receipt = 'moonmark-receipt/2'; rc.beacon = { network: 'drand-quicknet', round: Number(rd), signature: bs }; }
+    rc.signature = g;
+    return rc;
   }
   var esc = function (x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   function sigBox(root, rc) {
@@ -51,9 +54,10 @@
         box.className = 'mk-sig mk-sig-ok';
         box.innerHTML =
           '<div class="mk-sig-h"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>SIGNED · VERIFIED</div>' +
-          '<div class="mk-sig-p">Moon signed this file fingerprint at this exact moment. The signature checks out.</div>' +
+          '<div class="mk-sig-p">Moon signed this file fingerprint at this exact moment. The signature checks out' + (b.not_before ? ', and a public drand beacon proves it couldn&#39;t have been signed any&nbsp;earlier' : '') + '.</div>' +
           '<div class="mk-sig-r"><span>SHA-256</span><b title="' + rc.sha256 + '">' + short + '</b></div>' +
           '<div class="mk-sig-r"><span>KEY</span><b>' + rc.key_id + ' · Ed25519</b></div>' +
+          (b.not_before ? '<div class="mk-sig-r"><span>NOT BEFORE</span><b title="drand quicknet round ' + b.not_before.round + '">' + esc(b.not_before.utc.replace('T', ' ').slice(0, 19)) + ' UTC</b></div>' : '') +
           '<label class="mk-sig-btn">CHECK A FILE<input type="file" data-mk-file></label>' +
           '<a class="mk-sig-btn" href="' + href + '" download="' + rc.moonmark.replace(/[^0-9.]+/g, '_') + '.moonmark.json">SAVE RECEIPT</a>' +
           '<div class="mk-sig-m" data-mk-match></div>';

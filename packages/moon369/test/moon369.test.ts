@@ -87,3 +87,25 @@ describe('signed Moonmarks', () => {
     expect(await verify(forged, { keys })).toEqual({ valid: false, reason: 'moonmark_mismatch' });
   });
 });
+
+describe('v2 receipts with a drand beacon', () => {
+  const CHAIN = { public_key: '81d320f220ee9c79e60e19dedc838c31e3ab919b15481e9feb52f643628c4f6a13fdc52129493875a818109d767272ca0541cbcdcea9335f2870d781b39b845ba8cbd44fdfe4967781cf72ca5917fc9398bcf97ca0548ed5a709016c4b1ff0f3', period: 3, genesis_time: 1687506816 };
+  const B = { network: 'drand-quicknet' as const, round: 38, signature: '95c93585c513ebbcb4777ff15599b3140e5ec0295faa0e483f3deadd88fa6d43f0d3703e3a4ce106e8fd6c6987f32126' };
+  const signer = new Signer(generateKeyPairSync('ed25519').privateKey);
+  const keys = { [signer.info().key_id]: signer.info().public_key };
+  const nb = (1687506816n + 37n * 3n) * 1_000_000_000n;
+  const ns = nb + 2_000_000_000n;
+  it('verifies offline and reports not_before', async () => {
+    const r = signer.sign('a'.repeat(64), api.formatMoonmark(api.toMoon(ns)), ns, B);
+    expect(await verify(r, { keys, beaconChain: CHAIN })).toMatchObject({ valid: true, not_before: { unix_ns: nb, round: 38 } });
+  });
+  it('catches a fake beacon and backdating', async () => {
+    const fake = signer.sign('a'.repeat(64), api.formatMoonmark(api.toMoon(ns)), ns, { ...B, round: 39 });
+    expect(await verify(fake, { keys, beaconChain: CHAIN })).toEqual({ valid: false, reason: 'bad_beacon' });
+    const early = nb - 60_000_000_000n;
+    const back = signer.sign('a'.repeat(64), api.formatMoonmark(api.toMoon(early)), early, B);
+    expect(await verify(back, { keys, beaconChain: CHAIN })).toEqual({ valid: false, reason: 'beacon_after_moment' });
+    const r = signer.sign('a'.repeat(64), api.formatMoonmark(api.toMoon(ns)), ns, B);
+    expect(await verify(r, { keys })).toEqual({ valid: false, reason: 'bad_beacon' });
+  });
+});

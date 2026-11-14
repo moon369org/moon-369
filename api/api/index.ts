@@ -4,6 +4,7 @@ import { handle } from '../src/index.js';
 import { memoryLimiter, upstashLimiter } from '../src/ratelimit.js';
 import { Signer, loadPrivateKey } from '../src/receipt.js';
 import { envKeyStore } from '../src/keys.js';
+import { beaconSource } from '../src/beacon.js';
 
 // Open tier: requests per minute per IP. Shared across instances when Upstash is configured.
 const PER_MIN = Number(process.env.RATE_LIMIT_PER_MIN ?? 120);
@@ -27,6 +28,9 @@ try { if (process.env.MOON_SIGNING_KEY) SIGNER = new Signer(loadPrivateKey(proce
 let RETIRED_KEYS: Record<string, string> | undefined;
 try { if (process.env.MOON_RETIRED_KEYS) RETIRED_KEYS = JSON.parse(process.env.MOON_RETIRED_KEYS); } catch { RETIRED_KEYS = undefined; }
 
+// drand quicknet beacon for v2 receipts (proves each receipt was signed after a public random value).
+const BEACON = process.env.MOON_BEACON === 'off' ? undefined : beaconSource();
+
 const route = (req: Request) => {
   const url = new URL(req.url);
   url.pathname = url.pathname.replace(/^\/api(?=\/|$)/, '') || '/';
@@ -38,6 +42,7 @@ const route = (req: Request) => {
     API_KEYS,
     SIGNER,
     RETIRED_KEYS,
+    BEACON,
   });
 };
 

@@ -1,24 +1,56 @@
 {
   "name": "moon369",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Moon time, offline: the worldwide timestamp locked to the moon. Moonmarks, Moon dates, moon phase and signed Moonmark verification.",
   "license": "MIT",
   "author": "Moon <moon369org@proton.me>",
   "homepage": "https://moon369.org",
-  "repository": { "type": "git", "url": "git+https://github.com/moon369org/moon-369.git", "directory": "packages/moon369" },
-  "keywords": ["moon", "time", "timestamp", "calendar", "moonmark", "lunar", "ed25519", "provenance"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moon369org/moon-369.git",
+    "directory": "packages/moon369"
+  },
+  "keywords": [
+    "moon",
+    "time",
+    "timestamp",
+    "calendar",
+    "moonmark",
+    "lunar",
+    "ed25519",
+    "provenance"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
-  "files": ["dist", "README.md", "LICENSE"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "test": "vitest run",
     "prepublishOnly": "npm test && npm run build"
   },
-  "dependencies": { "@noble/ed25519": "^3.2.0" },
-  "devDependencies": { "@types/node": "^22.20.5", "typescript": "^5.9.3", "vitest": "^2.1.9" }
+  "dependencies": {
+    "@noble/curves": "^2.4.0",
+    "@noble/ed25519": "^3.2.0",
+    "@noble/hashes": "^2.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  }
 }

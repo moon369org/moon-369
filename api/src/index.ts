@@ -7,6 +7,7 @@ import { cardSvg, shareSvg } from './card.js';
 import { svgToPng } from './png.js';
 import { hashKey } from './keys.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_VERSION, type Receipt } from './receipt.js';
+import { QUICKNET, BEACON_NETWORK, type Beacon, type Chain } from './beacon.js';
 
 /** max overrides the limiter's default requests per minute (used for per-key limits). */
 export interface RateLimiter { limit(o: { key: string; max?: number }): Promise<{ success: boolean }> }
@@ -27,6 +28,10 @@ export interface Env {
   CLOCK_SOURCE?: string;
   /** Signs Moonmark receipts. Without it, /v1/sign answers 503. */
   SIGNER?: Signer;
+  /** Latest drand beacon for v2 receipts. Without it, or if it returns null, /v1/sign issues v1 receipts. */
+  BEACON?: (nowNs: bigint) => Promise<Beacon | null>;
+  /** Beacon network to check against (default drand quicknet). Tests only. */
+  BEACON_CHAIN?: Chain;
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
   RETIRED_KEYS?: Record<string, string>;
 }
@@ -147,7 +152,7 @@ const SPEC = {
   roles: { moon: 'One continuous count of time, locked to the real moon, read as the date (year, moon, lune) and the phase.', moonmark: 'One exact moment on the Moon count, the same everywhere: YEAR.MM.DD HH:MM:SS.NNNNNNNNN.' },
   date_rule: 'The Moon date is global: one date worldwide. A lune turns over at the same instant everywhere.',
   illumination: { meaning: 'Fraction of the moon\'s disc lit by the sun at that instant, seen from Earth (0 to 1). Not the moon\'s age.', method: 'Phase angle from the Moon-Sun elongation, the Moon latitude and the Earth-Moon and Earth-Sun distances, using the principal periodic terms of Meeus, Astronomical Algorithms, ch. 47-48', checked_against: 'PyEphem: within 0.05 percentage points (mean 0.01) at 3,000 random moments, 2000-2050' },
-  signing: { receipt: 'moonmark-receipt/1', alg: 'Ed25519', signed_bytes: 'receipt, "sha256:" + hex, moonmark, unix_ns, key_id joined by newlines (UTF-8)', key_id: 'first 16 hex of SHA-256 of the raw 32-byte public key', keys: '/v1/keys', sign: 'POST /v1/sign {"sha256":"<hex>"}', verify: 'POST /v1/verify {"receipt":{...}}' },
+  signing: { receipt: 'moonmark-receipt/2', alg: 'Ed25519', signed_bytes: 'receipt, "sha256:" + hex, moonmark, unix_ns, key_id and (v2) "drand-quicknet:" + round + ":" + beacon signature hex, joined by newlines (UTF-8)', beacon: { network: BEACON_NETWORK, meaning: 'The latest drand quicknet round Moon had seen when it signed. Its value could not be known before it was published, so the receipt was signed after that round. Check it offline with the League of Entropy public key.', chain_hash: QUICKNET.hash, public_key: QUICKNET.public_key, period_s: QUICKNET.period, genesis_time: QUICKNET.genesis_time, scheme: QUICKNET.scheme }, v1: 'moonmark-receipt/1 receipts have no beacon and stay valid', key_id: 'first 16 hex of SHA-256 of the raw 32-byte public key', keys: '/v1/keys', sign: 'POST /v1/sign {"sha256":"<hex>"}', verify: 'POST /v1/verify {"receipt":{...}}' },
   license: 'MIT',
 };
 
@@ -305,13 +310,15 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const body = await readJson(req);
         const sha = typeof body.sha256 === 'string' ? body.sha256.toLowerCase() : body.sha256;
         if (!isSha256Hex(sha)) throw new HttpError(400, 'bad_param', 'sha256 must be the 64-character hex SHA-256 of your content. Send the fingerprint, never the content.');
+        let beacon: Beacon | null = null;
+        if (env.BEACON) { try { beacon = await env.BEACON(nowUnixNs()); } catch { beacon = null; } }
         const ns = nowUnixNs();
         const mark = formatMoonmark(toMoon(ns));
-        const receipt = env.SIGNER.sign(sha, mark, ns);
+        const receipt = env.SIGNER.sign(sha, mark, ns, beacon);
         return json({
           receipt,
           moonmark_url: MARK_BASE + moonmarkPath(mark),
-          signed_url: MARK_BASE + moonmarkPath(mark) + `?s=${receipt.sha256}&u=${receipt.unix_ns}&k=${receipt.key_id}&g=${receipt.signature}`,
+          signed_url: MARK_BASE + moonmarkPath(mark) + `?s=${receipt.sha256}&u=${receipt.unix_ns}&k=${receipt.key_id}` + (receipt.beacon ? `&r=${receipt.beacon.round}&b=${receipt.beacon.signature}` : '') + `&g=${receipt.signature}`,
           utc: unixNsToIso(ns),
           accuracy_ns: Number(env.CLOCK_ACCURACY_NS ?? 1_000_000),
           clock: env.CLOCK_SOURCE ?? 'server-ntp',
@@ -323,7 +330,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const r = (body.receipt ?? body) as Receipt;
         const keys: Record<string, string> = { ...(env.RETIRED_KEYS ?? {}) };
         if (env.SIGNER) { const i = env.SIGNER.info(); keys[i.key_id] = i.public_key; }
-        let out = verifyReceipt(r, keys);
+        let out = verifyReceipt(r, keys, env.BEACON_CHAIN);
         if (out.valid) {
           // The signed moonmark must be the same moment as the signed unix_ns.
           let same = false;
@@ -334,7 +341,8 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           const want = typeof body.sha256 === 'string' ? body.sha256.toLowerCase() : '';
           if (want !== r.sha256) out = { valid: false, reason: 'content_mismatch' };
         }
-        return json({ ...out, ...(out.valid ? { moonmark: r.moonmark, utc: unixNsToIso(BigInt(r.unix_ns)), key_id: r.key_id } : {}) }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+        const { not_before_unix_ns, beacon_round, ...rest } = out;
+        return json({ ...rest, ...(out.valid ? { moonmark: r.moonmark, utc: unixNsToIso(BigInt(r.unix_ns)), key_id: r.key_id, ...(not_before_unix_ns ? { not_before: { utc: unixNsToIso(BigInt(not_before_unix_ns)), unix_ns: not_before_unix_ns, beacon: BEACON_NETWORK, round: beacon_round } } : {}) } : {}) }, 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
       case path.startsWith(`/${API_VERSION}/year/`): {

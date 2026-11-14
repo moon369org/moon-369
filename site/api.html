@@ -378,7 +378,7 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 </div>
 <div id="signing" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 12px; padding: 40px 0 8px; border-top: 1px solid #1C1D20">
 <div style="font-family: 'Syncopate', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.24em">SIGNED MOONMARKS · PROOF OF WHEN</div>
-<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">A signed Moonmark is a receipt: Moon saw this fingerprint at this exact moment. Hash your content where it lives and send only the SHA-256 fingerprint, never the content. Moon signs it with Ed25519, and anyone can check the receipt offline with the public key, without asking Moon. Signed bytes, in order, one per line: <code>receipt</code>, <code>sha256:</code> plus the hex, <code>moonmark</code>, <code>unix_ns</code>, <code>key_id</code>.</p>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">A signed Moonmark is a receipt: Moon saw this fingerprint at this exact moment. Hash your content where it lives and send only the SHA-256 fingerprint, never the content. Moon signs it with Ed25519, and anyone can check the receipt offline with the public key, without asking Moon. Signed bytes, in order, one per line: <code>receipt</code>, <code>sha256:</code> plus the hex, <code>moonmark</code>, <code>unix_ns</code>, <code>key_id</code>, and <code>drand-quicknet:</code> plus the beacon round and signature. The beacon is the latest round of <a href="https://drand.love" style="color: #F2F2F0">drand</a> quicknet, public randomness from the League of Entropy. Its value can&#39;t be known in advance, so it proves the receipt wasn&#39;t signed earlier, and anyone can check it offline with drand&#39;s public key. <code>/v1/verify</code> returns that bound as <code>not_before</code>.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
@@ -395,11 +395,11 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
 <pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
-  &quot;receipt&quot;: &quot;moonmark-receipt/1&quot;,
+  &quot;receipt&quot;: &quot;moonmark-receipt/2&quot;,
   &quot;signing&quot;: &quot;enabled&quot;,
   &quot;keys&quot;: [
-    { &quot;key_id&quot;: &quot;34dc921efd6625c5&quot;, &quot;alg&quot;: &quot;Ed25519&quot;,
-      &quot;public_key&quot;: &quot;H7vIBh9MWKM8AwAxfQZV9co8KFv5gjmlxw-fawzwJB4&quot;,
+    { &quot;key_id&quot;: &quot;8efd3211b23533ed&quot;, &quot;alg&quot;: &quot;Ed25519&quot;,
+      &quot;public_key&quot;: &quot;5jDbxW9WcpFMgLIjmu0QKtaDpzHzh1MqcNFCR3levJ0&quot;,
       &quot;status&quot;: &quot;active&quot; }
   ]
 }</pre>
@@ -426,11 +426,13 @@ curl -X POST https://api.moon369.org/v1/sign \
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
 <pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
   &quot;receipt&quot;: {
-    &quot;receipt&quot;: &quot;moonmark-receipt/1&quot;,
+    &quot;receipt&quot;: &quot;moonmark-receipt/2&quot;,
     &quot;sha256&quot;: &quot;9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08&quot;,
     &quot;moonmark&quot;: &quot;1928.05.05 00:40:56.209029029&quot;,
     &quot;unix_ns&quot;: &quot;1794665070306000000&quot;,
-    &quot;key_id&quot;: &quot;34dc921efd6625c5&quot;,
+    &quot;key_id&quot;: &quot;8efd3211b23533ed&quot;,
+    &quot;beacon&quot;: { &quot;network&quot;: &quot;drand-quicknet&quot;, &quot;round&quot;: 33754234,
+      &quot;signature&quot;: &quot;a3f1…96 hex…&quot; },
     &quot;signature&quot;: &quot;8B3xZAy0NvQXzfcnFDWhsvWbRc66QCEP_TAkZ-YWZ9RpzOQoi_8oHKJD2Fyq8nzUbNL7-5PlGJ94bBxJ3oSVAQ&quot;
   },
   &quot;moonmark_url&quot;: &quot;https://moon369.org/m/1928.05.05-00.40.56.209029029&quot;,
@@ -447,7 +449,7 @@ curl -X POST https://api.moon369.org/v1/sign \
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/verify</span>
 <span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">SIGNED</span>
 </div>
-<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Check a receipt. Add <code>sha256</code> to also confirm it belongs to your content. Reasons when invalid: <code>bad_signature</code>, <code>unknown_key</code>, <code>content_mismatch</code>, <code>moonmark_mismatch</code>, <code>malformed</code>.</p>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Check a receipt. Add <code>sha256</code> to also confirm it belongs to your content. Reasons when invalid: <code>bad_signature</code>, <code>unknown_key</code>, <code>content_mismatch</code>, <code>moonmark_mismatch</code>, <code>bad_beacon</code>, <code>beacon_after_moment</code>, <code>malformed</code>. Valid v2 receipts also return <code>not_before</code>: the drand round&#39;s time, the earliest the receipt could have been&nbsp;signed.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
@@ -461,7 +463,7 @@ curl -X POST https://api.moon369.org/v1/sign \
   &quot;valid&quot;: true,
   &quot;moonmark&quot;: &quot;1928.05.05 00:40:56.209029029&quot;,
   &quot;utc&quot;: &quot;2026-11-14T14:04:30.306000000Z&quot;,
-  &quot;key_id&quot;: &quot;34dc921efd6625c5&quot;
+  &quot;key_id&quot;: &quot;8efd3211b23533ed&quot;
 }</pre>
 </div>
 </div>

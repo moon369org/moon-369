@@ -244,7 +244,7 @@ footer > div > div:first-child svg{width:64px!important}
 <p style="margin: 0; max-width: 760px; font-size: 18px; line-height: 1.6; color: #8A8B8F; text-wrap: balance">One date worldwide. Every moment gets a&nbsp;Moonmark.</p>
 <div class="gs" style="width: 100%; box-sizing: border-box; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px 32px; border: 1px solid #24262A; padding: 24px 28px; text-align: left">
 <div style="display: flex; flex-direction: column; gap: 8px"><div style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.24em; color: #8A8B8F">MOONMARK · RIGHT NOW</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #5E6064; letter-spacing: 0.06em">Same moment everywhere · UTC {{utc}}</div></div>
-<div style="font-family: 'JetBrains Mono', monospace; font-size: clamp(17px, 2vw, 24px); font-variant-numeric: tabular-nums; letter-spacing: 0.02em">{{mark}}<span class="mn-ns" style="color: #8A8B8F">.000 000 000</span></div>
+<div style="display: flex; align-items: center; gap: 14px; font-family: 'JetBrains Mono', monospace; font-size: clamp(17px, 2vw, 24px); font-variant-numeric: tabular-nums; letter-spacing: 0.02em"><img src="/assets/moon-loader.svg" alt="" aria-hidden="true" style="height: 0.9em; width: auto; flex: none; display: block"><span>{{mark}}<span class="mn-ns" style="color: #8A8B8F">.000 000 000</span></span></div>
 </div>
 </div>
 </section>
@@ -628,14 +628,15 @@ footer > div > div:first-child svg{width:64px!important}
 <div>
 <div style="display: flex; justify-content: space-between; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px 0; border-top: 1px solid #1C1D20"><span style="color: #8A8B8F">FILE</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%">{{sgName}}</span></div>
 <div style="display: flex; justify-content: space-between; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px 0; border-top: 1px solid #1C1D20"><span style="color: #8A8B8F">SHA-256</span><span>{{sgShaShort}}</span></div>
-<div style="display: flex; justify-content: space-between; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px 0; border-top: 1px solid #1C1D20; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">KEY</span><span>{{sgKey}} &middot; Ed25519</span></div>
+<div style="display: flex; justify-content: space-between; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px 0; border-top: 1px solid #1C1D20"><span style="color: #8A8B8F">KEY</span><span>{{sgKey}} &middot; Ed25519</span></div>
+<sc-if value="{{sgHasRound}}"><div style="display: flex; justify-content: space-between; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px 0; border-top: 1px solid #1C1D20; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">NOT BEFORE</span><span>{{sgRound}}</span></div></sc-if>
 </div>
 <div style="display: flex; flex-wrap: wrap; gap: 12px">
 <a href="{{sgUrl}}" style="border: 1px solid #E9E4D8; padding: 18px 30px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.26em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: #E9E4D8; color: #0B0B0D">OPEN MOONMARK</a>
 <a href="{{sgHref}}" download="{{sgFile}}" style="border: 1px solid #E9E4D8; padding: 18px 30px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.26em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center">SAVE RECEIPT</a>
 <label style="border: 1px solid #E9E4D8; padding: 18px 30px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.26em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; border-color: #2E3035; color: #A2A3A7">SIGN ANOTHER<input type="file" onChange="{{sgPick}}" style="position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden"></label>
 </div>
-<div style="font-size: 13px; line-height: 1.6; color: #8A8B8F">Keep the receipt with your file. It proves the file existed at this moment, and anyone can verify it at <code>/v1/verify</code>.</div>
+<div style="font-size: 13px; line-height: 1.6; color: #8A8B8F">Keep the receipt with your file. It proves the file existed at this moment, and the public drand round proves it wasn&#39;t signed earlier. Anyone can verify it at <code>/v1/verify</code>.</div>
 </sc-if>
 <sc-if value="{{sgErr}}">
 <div style="display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center">
@@ -818,7 +819,7 @@ class Component extends DCLogic {
             const rc = b.receipt;
             if (this.state && this.state.sg && this.state.sg.href) URL.revokeObjectURL(this.state.sg.href);
             const href = URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }));
-            const done = { s: 'done', name: file.name, sha, mark: rc.moonmark, key: rc.key_id, url: b.signed_url || (b.moonmark_url + '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + '&g=' + rc.signature), href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' };
+            const done = { s: 'done', name: file.name, sha, mark: rc.moonmark, key: rc.key_id, url: b.signed_url || (b.moonmark_url + '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + (rc.beacon ? '&r=' + rc.beacon.round + '&b=' + rc.beacon.signature : '') + '&g=' + rc.signature), round: rc.beacon ? rc.beacon.round : null, href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' };
             after(() => this.setState({ sg: done }));
           });
       })
@@ -892,7 +893,7 @@ class Component extends DCLogic {
         return {
           sgPick: this._sgPick, sgIdle: g.s === 'idle', sgBusy: g.s === 'busy', sgDone: g.s === 'done', sgErr: g.s === 'err',
           sgBusyText: g.t || '', sgErrText: g.err || '', sgMark: g.mark || '', sgName: g.name || '', sgKey: g.key || '',
-          sgShaShort: g.sha ? g.sha.slice(0, 12) + '…' + g.sha.slice(-8) : '', sgUrl: g.url || '#', sgHref: g.href || '#', sgFile: g.file || 'receipt.json'
+          sgRound: g.round ? 'drand round ' + Number(g.round).toLocaleString('en-US') : '', sgHasRound: !!g.round, sgShaShort: g.sha ? g.sha.slice(0, 12) + '…' + g.sha.slice(-8) : '', sgUrl: g.url || '#', sgHref: g.href || '#', sgFile: g.file || 'receipt.json'
         };
       })()
     };

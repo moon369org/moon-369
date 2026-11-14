@@ -15,7 +15,7 @@ export {
   SPEC_VERSION, EPOCH_UNIX_NS, MOON_SECOND_SI, YEAR_DAYS, MOONS, MoonRangeError,
   type MoonTime, type MoonInput,
 };
-export { verify, fingerprint, fetchKeys, signedBytes, RECEIPT_VERSION, KEYS_URL, type Receipt, type KeySet, type VerifyResult, type VerifyOptions } from './receipt.js';
+export { verify, verifyBeacon, beaconRoundTime, fingerprint, fetchKeys, signedBytes, RECEIPT_VERSION, RECEIPT_V1, RECEIPT_V2, QUICKNET, KEYS_URL, type Receipt, type Beacon, type BeaconChain, type KeySet, type VerifyResult, type VerifyOptions } from './receipt.js';
 
 /** A moment: a Date, Unix milliseconds (number), Unix nanoseconds (bigint), or an ISO string. Default: now. */
 export type Moment = Date | number | bigint | string;

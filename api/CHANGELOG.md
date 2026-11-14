@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0 (Moon 05, Lune 05, Year 1928)
+
+- **Receipts v2 (`moonmark-receipt/2`)**: every signed Moonmark now includes the latest drand quicknet round (public randomness from the League of Entropy, a new value every 3 seconds). It can't be known in advance, so the receipt provably wasn't signed before it. The beacon is part of the signed bytes and is checked against drand's public key, offline.
+- **`/v1/verify`** returns `not_before` (UTC, Unix ns, round) for v2 receipts. v1 receipts still verify.
+- **Signed links** carry the beacon (`r` and `b`), and the Moonmark page shows NOT BEFORE.
+
 ## 1.3.0 (Moon 05, Lune 05, Year 1928)
 
 - **API keys**: customers send `Authorization: Bearer <key>` for their own per-minute limit. Keys are stored only as SHA-256 hashes. A switched-off key gets `403 key_disabled`.

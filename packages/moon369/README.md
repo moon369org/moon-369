@@ -38,6 +38,8 @@ await fingerprint(file);  // SHA-256 hex of a Blob, bytes or text: the only thin
 
 With `keys` passed in, verification is fully offline. Without them, `verify` fetches Moon's public keys once.
 
+Every receipt also carries the latest round of [drand](https://drand.love) quicknet, public randomness from the League of Entropy that no one can know in advance. `verify` checks it against drand's public key and returns `not_before`: the earliest moment the receipt could have been signed.
+
 ## The standard
 
 One Moon year is 13 moons and 369 lunes. A Moon second is 1.0403730 SI seconds, so 13 lunar cycles fit the year exactly. The date is global: it turns over at the same instant everywhere. Full spec: [moon369.org](https://moon369.org).
