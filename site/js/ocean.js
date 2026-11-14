@@ -1,5 +1,5 @@
 /*
- * Tideline hero ocean. One layer of black sea along the bottom of the hero that never stops moving,
+ * Tideline hero ocean. One layer of transparent dark sea along the bottom of the hero that never stops moving,
  * and that you can disturb with the pointer: move across the water to push it and send ripples out.
  * Base swell: slow waves that never line up. Ripples: a 1D wave equation (spring per column).
  */
@@ -34,7 +34,7 @@
   }
   function splash(x, s) {
     var i = Math.round(x * (N - 1));
-    for (var k = -4; k <= 4; k++) { var j = i + k; if (j >= 0 && j < N) v[j] += s * Math.cos(k / 4 * Math.PI / 2) * 6; }
+    for (var k = -10; k <= 10; k++) { var j = i + k; if (j >= 0 && j < N) v[j] += s * Math.cos(k / 10 * Math.PI / 2) * 2.5; }
   }
   function step() {
     // Pointer over (or just above) the water pushes it, in the direction of travel.
@@ -66,14 +66,29 @@
     if (!reduce) step();
     ctx.clearRect(0, 0, W, H);
     var u = H / 220;
-    // One layer of black water. No lines, no highlights: the surface shows only against the sky.
-    ctx.beginPath(); ctx.moveTo(0, H);
+    // More energy for the first few seconds after load, settling to a calm swell.
+    var boost = reduce ? 1 : 1 + 1.4 * Math.exp(-t / 2.6);
+    if (!reduce && t < 3 && Math.random() < 0.05) splash(Math.random(), (0.5 + Math.random()) * (1 - t / 3));
+    // One layer of transparent water. Gerstner-style waves: sharper crests, wider troughs, like real swell.
+    var waves = [[620, 7, 0.55, 1], [360, 4.5, 0.8, -1], [210, 2.6, 1.05, 1], [120, 1.4, 1.4, 1], [70, 0.7, 1.9, -1]];
+    var base = H * 0.45;
+    ctx.beginPath(); ctx.moveTo(-0.1 * W, H);
     for (var i = 0; i <= N - 1; i++) {
-      var x = i / (N - 1);
-      ctx.lineTo(x * W, H * 0.45 + swell(x, t, 0) * 10 * u + h[i] * 1.6 * u);
+      var x0 = (-0.06 + i / (N - 1) * 1.12) * W, dx = 0, dy = 0;   // drawn a little past both edges, so no seam shows
+      for (var w = 0; w < waves.length; w++) {
+        var L = waves[w][0] * dpr, A = waves[w][1] * u * boost, k = 2 * Math.PI / L, ph = k * x0 - waves[w][2] * t * waves[w][3] + w * 1.3;
+        dx -= 0.55 * A * Math.sin(ph);       // horizontal pinch makes crests sharp
+        dy += A * Math.cos(ph);
+      }
+      var hs = ((h[i - 1] !== undefined ? h[i - 1] : h[i]) + 2 * h[i] + (h[i + 1] !== undefined ? h[i + 1] : h[i])) / 4;   // smoothed ripple
+      ctx.lineTo(x0 + dx, base - dy + hs * 1.6 * u);
     }
-    ctx.lineTo(W, H); ctx.closePath();
-    ctx.fillStyle = '#000000'; ctx.fill();
+    ctx.lineTo(1.1 * W, H); ctx.closePath();
+    var g = ctx.createLinearGradient(0, base - 20 * u, 0, H);
+    g.addColorStop(0, 'rgba(0,0,0,0.42)');
+    g.addColorStop(0.5, 'rgba(0,0,0,0.62)');
+    g.addColorStop(1, 'rgba(0,0,0,0.85)');
+    ctx.fillStyle = g; ctx.fill();
     if (!reduce) requestAnimationFrame(draw);
   }
   function start() { if (setup()) requestAnimationFrame(draw); else setTimeout(start, 150); }
