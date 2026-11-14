@@ -41,8 +41,11 @@
     } catch (e) {}
     var qr = '';
     try {
-      var q = window.qrcode(0, 'M'); q.addData(url); q.make();
-      qr = q.createSvgTag({ cellSize: 6, margin: 3, scalable: true }).replace(/fill="white"/g, 'fill="#E9E4D8"').replace(/fill="black"/g, 'fill="#0B0B0D"');
+      if (window.MoonQR) qr = window.MoonQR.svg(url, f);
+      else {
+        var q = window.qrcode(0, 'H'); q.addData(url); q.make();
+        qr = q.createSvgTag({ cellSize: 6, margin: 4, scalable: true }).replace(/fill="white"/g, 'fill="#E9E4D8"').replace(/fill="black"/g, 'fill="#0B0B0D"');
+      }
     } catch (e) {}
     var ph = window.MoonPhase ? window.MoonPhase.path(f, 10) : '';
     root.innerHTML =
