@@ -341,6 +341,29 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 </div>
 </div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/card.svg</span>
+<span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">IMAGE</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">The Today on Moon card as an image: year, moon, lune and the real moon phase. Drop it into any page, app or README with one <code>&lt;img&gt;</code> tag and it stays current, refreshing every minute. Add <code>moonmark</code>, <code>unix_ns</code> or <code>utc</code> to draw any moment, and <code>size</code> for pixels from 120 to&nbsp;2000.</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>EMBED</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">&lt;img src=&quot;https://api.moon369.org/v1/card.svg&quot;
+     width=&quot;300&quot; height=&quot;300&quot;
+     alt=&quot;Today on Moon&quot;&gt;
+
+&lt;!-- any moment --&gt;
+&lt;img src=&quot;https://api.moon369.org/v1/card.svg?moonmark=1928.05.12-15.00.00.0&quot;&gt;</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>LIVE</span><span>image/svg+xml</span></div>
+<div style="padding: 24px 20px; display: flex; justify-content: center"><img src="https://api.moon369.org/v1/card.svg?size=300" width="300" height="300" alt="Today on Moon: the live Moon date and moon phase" loading="lazy" style="max-width: 100%; height: auto"></div>
+</div>
+</div>
+</div>
 <div style="display: flex; flex-direction: column; gap: 12px; padding: 40px 0 8px; border-top: 1px solid #1C1D20">
 <div style="font-family: 'Syncopate', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.24em">SIGNED MOONMARKS · PROOF OF WHEN</div>
 <p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">A signed Moonmark is a receipt: Moon saw this fingerprint at this exact moment. Hash your content where it lives and send only the SHA-256 fingerprint, never the content. Moon signs it with Ed25519, and anyone can check the receipt offline with the public key, without asking Moon. Signed bytes, in order, one per line: <code>receipt</code>, <code>sha256:</code> plus the hex, <code>moonmark</code>, <code>unix_ns</code>, <code>key_id</code>.</p>

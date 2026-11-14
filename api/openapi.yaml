@@ -135,6 +135,16 @@ paths:
       responses:
         '200': { description: OK }
         '400': { $ref: '#/components/responses/BadRequest' }
+  /v1/card.svg:
+    get:
+      summary: The Today on Moon card as an SVG image
+      description: Live by default (cached 60 seconds). Add moonmark, unix_ns, unix or utc for any moment (cached forever).
+      parameters:
+        - { name: moonmark, in: query, schema: { type: string, example: '1928.05.12-15.00.00.0' } }
+        - { name: size, in: query, schema: { type: integer, minimum: 120, maximum: 2000, default: 600 } }
+      responses:
+        '200': { description: The card, content: { image/svg+xml: { schema: { type: string } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
   /v1/keys:
     get:
       summary: Moon's public signing keys, active and retired

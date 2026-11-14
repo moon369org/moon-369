@@ -3,6 +3,7 @@ import {
   toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, phaseName, unixNsToIso, yearInfo,
   moonLength, MoonRangeError, type MoonTime,
 } from './moon.js';
+import { cardSvg } from './card.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_VERSION, type Receipt } from './receipt.js';
 
 export interface RateLimiter { limit(o: { key: string }): Promise<{ success: boolean }> }
@@ -182,7 +183,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/keys', 'POST /v1/sign', 'POST /v1/verify'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/keys', 'POST /v1/sign', 'POST /v1/verify'] });
   if (path === '/health') return json({ ok: true });
 
   const gate = await authAndLimit(req, env);
@@ -223,6 +224,27 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           return new Response(formatMoonmark(t), { headers: { 'Content-Type': 'text/plain; charset=utf-8', ...CORS, ...FOREVER, ...planHdr } });
         }
         return json(moonBody(t, ns), 200, { ...FOREVER, ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/card.svg`: {
+        // The Today on Moon card as an image: <img src="https://api.moon369.org/v1/card.svg">
+        const mark = q.get('moonmark');
+        let ns = mark ? toUnixNs(parseMoonmark(mark)) : unixNsFromQuery(q);
+        const fixed = ns !== null;
+        if (ns === null) ns = nowUnixNs();
+        const sizeRaw = q.get('size');
+        const size = sizeRaw === null ? 600 : Number(sizeRaw);
+        if (!Number.isInteger(size) || size < 120 || size > 2000) throw new HttpError(400, 'bad_param', 'size must be a whole number of pixels from 120 to 2000');
+        const t = toMoon(ns), ph = truePhase(ns);
+        const svg = cardSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, illumination: illumination(ns), name: phaseName(ph), title: fixed ? 'MOONMARK' : undefined }, size);
+        return new Response(req.method === 'HEAD' ? null : svg, { status: 200, headers: {
+          'Content-Type': 'image/svg+xml; charset=utf-8',
+          'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; font-src data:",
+          'X-Content-Type-Options': 'nosniff',
+          'Access-Control-Allow-Origin': '*',
+          ...(fixed ? FOREVER : { 'Cache-Control': 'public, max-age=60' }),
+          ...planHdr,
+        } });
       }
 
       case path.startsWith(`/${API_VERSION}/m/`): {
