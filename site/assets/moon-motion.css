@@ -144,6 +144,7 @@ nav[aria-label="Main"] a:not([style*="border"]):focus-visible {
 /* ---------- Live clocks glow ---------- */
 #clock div[style*="font-size: clamp(56px"],
 [data-dc-root] div[style*="font-size: clamp(48px, 8vw, 112px)"],
+[data-dc-root] .mk-panel div[style*="font-size: clamp(48px, 7vw, 104px)"],
 [data-dc-root] div[style*="font-size: 40px; line-height: 1"] {
   text-shadow: 0 0 28px rgba(233, 228, 216, 0.35), 0 0 2px rgba(233, 228, 216, 0.6);
 }
