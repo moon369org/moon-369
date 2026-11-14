@@ -124,6 +124,8 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 </section>
 
+<sc-if value="{{isPreview}}"><section style="background: #2A1E1C; border-bottom: 1px solid #8A4B44"><div style="max-width: 1280px; margin: 0 auto; padding: 18px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #E0A49C">PREVIEW · SAMPLE DATA · NOT THE REAL TIDELINE</div><a href="{{sampleHref}}" download="sample.moonmark.json" style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.22em; color: #E9E4D8; border: 1px solid #E0A49C; padding: 12px 18px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">DOWNLOAD A SAMPLE RECEIPT</a></div></section></sc-if>
+
 <section>
 <div style="max-width: 1280px; margin: 0 auto; padding: 72px 32px 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 32px; align-items: start">
 
@@ -206,16 +208,64 @@ footer > div > div:first-child svg{width:64px!important}
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3200}}'>
 class Component extends DCLogic {
   componentDidMount() {
+    this.isPreview = /[?&]preview\b/.test(location.search);
+    if (this.isPreview) { this.buildPreview(); this.iv = setInterval(() => this.setState({ now: Date.now() }), 1000); this.iv3 = setInterval(() => this.setState({ openSize: (this.state.openSize || 0) + (Math.random() < 0.45 ? 1 : 0) }), 2000); return; }
     this.load();
     this.iv = setInterval(() => this.setState({ now: Date.now() }), 1000);
     this.iv2 = setInterval(() => this.load(), 30000);
   }
-  componentWillUnmount() { clearInterval(this.iv); clearInterval(this.iv2); }
+  componentWillUnmount() { clearInterval(this.iv); clearInterval(this.iv2); clearInterval(this.iv3); }
   load() {
     fetch('https://api.moon369.org/v1/tideline').then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((b) => {
       this.setState({ tl: b, err: null });
       return fetch('https://api.moon369.org/v1/tideline/' + b.open_lune).then((r) => r.json()).then((o) => this.setState({ openSize: o.size }));
     }).catch((e) => this.setState({ err: e === 503 ? 'soon' : 'offline' }));
+  }
+
+  // ---------- Preview mode (?preview): sample data built in the browser with the real Merkle math ----------
+  async buildPreview() {
+    const enc = new TextEncoder();
+    const hex = (b) => Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, '0')).join('');
+    const unhex = (h) => Uint8Array.from(h.match(/../g) || [], (x) => parseInt(x, 16));
+    const sha = async (u8) => new Uint8Array(await crypto.subtle.digest('SHA-256', u8));
+    const cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let i = 0; for (const x of a) { o.set(x, i); i += x.length; } return o; };
+    const EPOCH = -62165308562978.61, K = 1.0403730490216803, DAY = 86400000 * K, p2 = (x) => String(x).padStart(2, '0');
+    const moonAt = (ms) => {
+      const t = ms - EPOCH, da = Math.floor(t / DAY), y = Math.floor(da / 369), dy = da - y * 369, mi = Math.floor(dy * 13 / 369), d = dy - Math.ceil(mi * 369 / 13) + 1;
+      let sec = (t - da * DAY) / (1000 * K); const h = Math.floor(sec / 3600); sec -= h * 3600; const m = Math.floor(sec / 60); sec -= m * 60;
+      const whole = Math.floor(sec), ns = String(Math.floor((sec - whole) * 1e9)).padStart(9, '0');
+      return { da, lune: y + '.' + p2(mi + 1) + '.' + p2(d), mark: y + '.' + p2(mi + 1) + '.' + p2(d) + ' ' + p2(h) + ':' + p2(m) + ':' + p2(whole) + '.' + ns };
+    };
+    const leafOf = async (r) => hex(await sha(cat(new Uint8Array([0]), enc.encode([r.receipt, 'sha256:' + r.sha256, r.moonmark, r.unix_ns, r.key_id, 'ml-dsa-65:' + r.pq.key_id].join('\n')))));
+    const rootOf = async (ls) => { if (!ls.length) return hex(await sha(new Uint8Array(0))); if (ls.length === 1) return hex(ls[0]); let k = 1; while (k * 2 < ls.length) k *= 2; return hex(await sha(cat(new Uint8Array([1]), unhex(await rootOf(ls.slice(0, k))), unhex(await rootOf(ls.slice(k)))))); };
+    const pathOf = async (i, ls) => { if (ls.length <= 1) return []; let k = 1; while (k * 2 < ls.length) k *= 2; return i < k ? [...await pathOf(i, ls.slice(0, k)), await rootOf(ls.slice(k))] : [...await pathOf(i - k, ls.slice(k)), await rootOf(ls.slice(0, k))]; };
+    const now = Date.now(), today = moonAt(now).da;
+    const tides = [], book = new Map(); let prev = null, sample = null;
+    for (let back = 6; back >= 1; back--) {
+      const start = EPOCH + (today - back) * DAY, n = 20 + Math.floor(Math.random() * 180), receipts = [], leaves = [];
+      for (let i = 0; i < n; i++) {
+        const ms = start + ((i + Math.random()) / n) * DAY;
+        const r = { receipt: 'moonmark-receipt/3', sha256: hex(crypto.getRandomValues(new Uint8Array(32))), moonmark: moonAt(ms).mark, unix_ns: String(Math.floor(ms)) + '000000', key_id: 'sample0000000000', pq: { alg: 'ML-DSA-65', key_id: 'sample0000000001', signature: 'SAMPLE' }, signature: 'SAMPLE' };
+        receipts.push(r); leaves.push(unhex(await leafOf(r)));
+      }
+      const root = await rootOf(leaves), lune = moonAt(start + DAY / 2).lune;
+      const hash = hex(await sha(enc.encode(['tideline/1', 'lune:' + lune, 'size:' + n, 'root:' + root, 'prev:' + (prev || 'none')].join('\n'))));
+      const tide = { tideline: 'tideline/1', lune, size: n, root, prev, hash, pq: { alg: 'ML-DSA-65' }, anchor: { network: 'xrpl', ledger_index: 104880000 + (7 - back) * 22300, explorer: '' } };
+      tides.unshift(tide); prev = hash;
+      book.set(lune, { tide, receipts, leaves });
+      if (back === 2) sample = receipts[Math.floor(receipts.length / 2)];
+    }
+    this.pv = { book, leafOf, pathOf, hex };
+    const href = URL.createObjectURL(new Blob([JSON.stringify(sample, null, 2) + '\n'], { type: 'application/json' }));
+    const open = moonAt(now), end = EPOCH + (today + 1) * DAY;
+    this.setState({ tl: { tideline: 'tideline/1', open_lune: open.lune, seals_after_utc: new Date(end).toISOString(), tides }, openSize: 12 + Math.floor(Math.random() * 30), sampleHref: href, err: null });
+  }
+  async previewProof(rc) {
+    const lune = String(rc.moonmark || '').slice(0, 10), e = this.pv && this.pv.book.get(lune);
+    if (!e) return { status: 'not_found', lune };
+    const leaf = await this.pv.leafOf(rc), idx = e.leaves.findIndex((l) => this.pv.hex(l) === leaf);
+    if (idx < 0) return { status: 'not_found', lune };
+    return { status: 'sealed', lune, leaf, index: idx, size: e.tide.size, path: await this.pv.pathOf(idx, e.leaves), root: e.tide.root, tide: e.tide };
   }
   async inclusion(leaf, index, size, path, root) {
     const hx = (h) => Uint8Array.from(h.match(/../g) || [], (x) => parseInt(x, 16));
@@ -240,13 +290,13 @@ class Component extends DCLogic {
     f.text().then((t) => {
       let rc; try { rc = JSON.parse(t); rc = rc.receipt && typeof rc.receipt === 'object' ? rc.receipt : rc; } catch (x) { say('That file is not a Moon receipt.', false); return; }
       say('Asking the Tideline for its proof…');
-      return fetch('https://api.moon369.org/v1/tideline/proof', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receipt: rc }) })
-        .then((r) => r.json()).then(async (p) => {
+      return (this.isPreview ? this.previewProof(rc) : fetch('https://api.moon369.org/v1/tideline/proof', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receipt: rc }) }).then((r) => r.json()))
+        .then(async (p) => {
           if (p.status === 'pending') return say('Recorded in lune ' + p.lune + ' as receipt #' + (p.index + 1) + '. It seals into a tide after ' + p.seals_after_utc.replace('T', ' ').slice(0, 16) + ' UTC.', null);
           if (p.status === 'not_found') return say('This receipt is not in the Tideline. It was either signed before the Tideline started, or it was changed.', false);
           if (p.status !== 'sealed') return say((p.error && p.error.message) || 'Could not check that receipt.', false);
           const ok = await this.inclusion(p.leaf, p.index, p.size, p.path, p.root);
-          say(ok ? '✓ Included in tide ' + p.lune + ' as receipt ' + (p.index + 1) + ' of ' + p.size + '. Proven in your browser.' + (p.tide.anchor ? ' Anchored on the XRP Ledger.' : '') : '✕ The proof does not match the tide. Do not rely on this receipt.', ok);
+          say(ok ? '✓ Included in tide ' + p.lune + ' as receipt ' + (p.index + 1) + ' of ' + p.size + '. Proven in your browser.' + (this.isPreview ? ' (Sample data.)' : p.tide.anchor ? ' Anchored on the XRP Ledger.' : '') : '✕ The proof does not match the tide. Do not rely on this receipt.', ok);
         });
     }).catch(() => say('Could not reach Moon. Try again.', false));
   }
@@ -257,7 +307,7 @@ class Component extends DCLogic {
       lune: t.lune, root: t.root, rootShort: short(t.root), prevShort: short(t.prev),
       sizeText: t.size === 1 ? '1 receipt' : t.size.toLocaleString('en-US') + ' receipts',
       algs: t.pq ? 'Ed25519 + ML-DSA-65' : 'Ed25519',
-      anchorText: t.anchor ? 'ledger ' + (t.anchor.ledger_index || '').toLocaleString('en-US') : 'not anchored',
+      anchorText: t.anchor ? 'ledger ' + (t.anchor.ledger_index || '').toLocaleString('en-US') + (t.anchor.explorer ? '' : ' (sample)') : 'not anchored',
       anchorUrl: t.anchor ? t.anchor.explorer : ''
     });
     const tides = tl ? (tl.tides || []).map(fmt) : [];
@@ -277,9 +327,9 @@ class Component extends DCLogic {
     return {
       openLune, sealsIn, openCount: s.err ? '–' : s.openSize == null ? '…' : Number(s.openSize).toLocaleString('en-US'),
       tides, hasTides: tides.length > 0, noTides: tides.length === 0,
-      status: s.err === 'soon' ? 'THE TIDELINE IS STARTING' : s.err ? 'COULD NOT REACH MOON' : tl ? tides.length + (tides.length === 1 ? ' TIDE' : ' TIDES') + ' SHOWN' : 'LOADING',
+      status: this.isPreview ? 'SAMPLE TIDES' : s.err === 'soon' ? 'THE TIDELINE IS STARTING' : s.err ? 'COULD NOT REACH MOON' : tl ? tides.length + (tides.length === 1 ? ' TIDE' : ' TIDES') + ' SHOWN' : 'LOADING',
       ex: { lune: '1928.05.04', sizeText: '214 receipts', root: '', rootShort: '7f3a91c0d2…e4b81c', prevShort: '19c4e0aa57…02f7d9', algs: 'Ed25519 + ML-DSA-65', anchorText: 'ledger 104,882,113' },
-      pick: this._pick, checkText: c.text || '', checkColor: c.color || '#8A8B8F'
+      isPreview: !!this.isPreview, sampleHref: s.sampleHref || '#', pick: this._pick, checkText: c.text || '', checkColor: c.color || '#8A8B8F'
     };
   }
 }
