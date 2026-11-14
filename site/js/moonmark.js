@@ -32,7 +32,9 @@
     var s = (q.get('s') || '').toLowerCase(), u = q.get('u'), k = q.get('k'), g = q.get('g'), rd = q.get('r'), bs = (q.get('b') || '').toLowerCase();
     if (!/^[0-9a-f]{64}$/.test(s) || !/^-?\d+$/.test(u || '') || !/^[0-9a-f]{16}$/.test(k || '') || !/^[A-Za-z0-9_-]{40,120}$/.test(g || '')) return null;
     var rc = { receipt: 'moonmark-receipt/1', sha256: s, moonmark: text(mk) + '.' + p(mk.ns, 9), unix_ns: u, key_id: k };
-    if (/^\d{1,12}$/.test(rd || '') && /^[0-9a-f]{96}$/.test(bs)) { rc.receipt = 'moonmark-receipt/2'; rc.beacon = { network: 'drand-quicknet', round: Number(rd), signature: bs }; }
+    var hasB = /^\d{1,12}$/.test(rd || '') && /^[0-9a-f]{96}$/.test(bs), pqk = (q.get('q') || '').toLowerCase();
+    if (hasB) { rc.receipt = 'moonmark-receipt/2'; rc.beacon = { network: 'drand-quicknet', round: Number(rd), signature: bs }; }
+    if (/^[0-9a-f]{16}$/.test(pqk)) { rc.receipt = 'moonmark-receipt/3'; rc.pq = { alg: 'ML-DSA-65', key_id: pqk }; }
     rc.signature = g;
     return rc;
   }
@@ -57,6 +59,7 @@
           '<div class="mk-sig-p">Moon signed this file fingerprint at this exact moment. The signature checks out' + (b.not_before ? ', and a public drand beacon proves it couldn&#39;t have been signed any&nbsp;earlier' : '') + '.</div>' +
           '<div class="mk-sig-r"><span>SHA-256</span><b title="' + rc.sha256 + '">' + short + '</b></div>' +
           '<div class="mk-sig-r"><span>KEY</span><b>' + rc.key_id + ' · Ed25519</b></div>' +
+          (rc.pq ? '<div class="mk-sig-r"><span>POST-QUANTUM</span><b>ML-DSA-65 · in the saved receipt</b></div>' : '') +
           (b.not_before ? '<div class="mk-sig-r"><span style="display:inline-flex;align-items:center">NOT BEFORE<span class="mi"><button type="button" class="mi-b" aria-label="What NOT BEFORE means" aria-expanded="false" aria-describedby="mi-nb">i</button><span role="tooltip" id="mi-nb" class="mi-t">drand is public randomness from the League of Entropy, independent organizations including Cloudflare. A new value every 3 seconds that no one can predict. This receipt includes one, so it couldn&#39;t have been signed before that value existed.</span></span></span><b title="drand quicknet round ' + b.not_before.round + '">' + esc(b.not_before.utc.replace('T', ' ').slice(0, 19)) + ' UTC</b></div>' : '') +
           '<label class="mk-sig-btn">CHECK A FILE<input type="file" data-mk-file></label>' +
           '<a class="mk-sig-btn" href="' + href + '" download="' + rc.moonmark.replace(/[^0-9.]+/g, '_') + '.moonmark.json">SAVE RECEIPT</a>' +

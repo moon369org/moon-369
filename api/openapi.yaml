@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moon API
-  version: 1.4.0
+  version: 1.5.0
   summary: The open standard for time. The worldwide timestamp, locked to the moon.
   license: { name: MIT, identifier: MIT }
   description: |
@@ -47,10 +47,10 @@ components:
             contact: { type: string, description: Email for higher limits. Present on rate_limited. }
     Receipt:
       type: object
-      description: 'A signed Moonmark. Signed bytes are receipt, "sha256:" + sha256, moonmark, unix_ns, key_id and (v2) "drand-quicknet:" + round + ":" + beacon signature, joined by newlines (UTF-8), signed with Ed25519.'
+      description: 'A signed Moonmark. Signed bytes are receipt, "sha256:" + sha256, moonmark, unix_ns, key_id, then "drand-quicknet:" + round + ":" + beacon signature (v2, and v3 when present), then "ml-dsa-65:" + post-quantum key_id (v3), joined by newlines (UTF-8), signed with Ed25519.'
       required: [receipt, sha256, moonmark, unix_ns, key_id, signature]
       properties:
-        receipt: { type: string, enum: [moonmark-receipt/1, moonmark-receipt/2] }
+        receipt: { type: string, enum: [moonmark-receipt/1, moonmark-receipt/2, moonmark-receipt/3] }
         sha256: { type: string, pattern: '^[0-9a-f]{64}$', description: Fingerprint of the signed content }
         moonmark: { type: string, example: '1928.05.05 00:40:56.209029029' }
         unix_ns: { type: string, description: The same moment in Unix nanoseconds }
@@ -62,6 +62,13 @@ components:
             network: { type: string, enum: [drand-quicknet] }
             round: { type: integer }
             signature: { type: string, description: 96 hex BLS signature from drand }
+        pq:
+          type: object
+          description: 'v3: the post-quantum signature. ML-DSA-65 (FIPS 204) over the same bytes as the Ed25519 signature. A full v3 receipt is valid only if both check out.'
+          properties:
+            alg: { type: string, enum: [ML-DSA-65] }
+            key_id: { type: string }
+            signature: { type: string, description: base64url ML-DSA-65 signature (3,309 bytes) }
         signature: { type: string, description: base64url Ed25519 signature }
   responses:
     BadRequest: { description: Invalid input, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
@@ -201,7 +208,7 @@ paths:
         required: true
         content: { application/json: { schema: { type: object, required: [receipt], properties: { receipt: { $ref: '#/components/schemas/Receipt' }, sha256: { type: string } } } } }
       responses:
-        '200': { description: 'valid true with moonmark, utc and key_id, or valid false with a reason: bad_signature, unknown_key, content_mismatch, moonmark_mismatch, bad_beacon, beacon_after_moment, malformed, unknown_version, not_a_receipt. Valid v2 receipts also return not_before (utc, unix_ns, round)' }
+        '200': { description: 'valid true with moonmark, utc and key_id, or valid false with a reason: bad_signature, unknown_key, content_mismatch, moonmark_mismatch, bad_beacon, beacon_after_moment, bad_pq_signature, malformed, unknown_version, not_a_receipt. Valid v2 receipts also return not_before (utc, unix_ns, round)' }
         '400': { $ref: '#/components/responses/BadRequest' }
   /v1/spec:
     get:

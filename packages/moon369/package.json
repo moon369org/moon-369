@@ -1,6 +1,6 @@
 {
   "name": "moon369",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Moon time, offline: the worldwide timestamp locked to the moon. Moonmarks, Moon dates, moon phase and signed Moonmark verification.",
   "license": "MIT",
   "author": "Moon <moon369org@proton.me>",
@@ -46,7 +46,8 @@
   "dependencies": {
     "@noble/curves": "^2.4.0",
     "@noble/ed25519": "^3.2.0",
-    "@noble/hashes": "^2.4.0"
+    "@noble/hashes": "^2.4.0",
+    "@noble/post-quantum": "^0.7.1"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

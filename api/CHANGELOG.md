@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0 (Moon 05, Lune 05, Year 1928)
+
+- **Hybrid receipts (`moonmark-receipt/3`)**: every receipt is signed twice over the same bytes, with Ed25519 and ML-DSA-65 (NIST FIPS 204, post-quantum). A full receipt is valid only if both check out, so it stays unforgeable while either algorithm holds. `/v1/keys` lists both keys; `/v1/verify` returns `signatures` and `post_quantum`.
+- **Built to upgrade**: every receipt names its version, and every version ever issued stays verifiable. `/v1/keys` lists `receipts_accepted`.
+
 ## 1.4.0 (Moon 05, Lune 05, Year 1928)
 
 - **Receipts v2 (`moonmark-receipt/2`)**: every signed Moonmark now includes the latest drand quicknet round (public randomness from the League of Entropy, a new value every 3 seconds). It can't be known in advance, so the receipt provably wasn't signed before it. The beacon is part of the signed bytes and is checked against drand's public key, offline.

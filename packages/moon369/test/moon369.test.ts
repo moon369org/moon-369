@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { generateKeyPairSync } from 'node:crypto';
-import { Signer } from '../../../api/src/receipt.js';
+import { Signer, PqSigner } from '../../../api/src/receipt.js';
+import { randomBytes } from 'node:crypto';
 import * as api from '../../../api/src/moon.js';
 import { moonmark, moon, fromMoonmark, moonmarkToDate, moonmarkUrl, moonPhase, toNs, nowNs, verify, fingerprint } from '../src/index.js';
 
@@ -107,5 +108,20 @@ describe('v2 receipts with a drand beacon', () => {
     expect(await verify(back, { keys, beaconChain: CHAIN })).toEqual({ valid: false, reason: 'beacon_after_moment' });
     const r = signer.sign('a'.repeat(64), api.formatMoonmark(api.toMoon(ns)), ns, B);
     expect(await verify(r, { keys })).toEqual({ valid: false, reason: 'bad_beacon' });
+  });
+});
+
+describe('hybrid v3 receipts', () => {
+  const pq = new PqSigner(new Uint8Array(randomBytes(32)));
+  const signer = new Signer(generateKeyPairSync('ed25519').privateKey, pq);
+  const keys = { [signer.keyId]: signer.info().public_key, [pq.keyId]: pq.info().public_key };
+  const ns = 1_794_682_325_123_456_789n;
+  it('verifies both signatures offline', async () => {
+    const r = signer.sign('e'.repeat(64), api.formatMoonmark(api.toMoon(ns)), ns, null);
+    expect(await verify(r, { keys })).toMatchObject({ valid: true, post_quantum: true });
+    const bad = { ...r, pq: { ...r.pq!, signature: r.pq!.signature!.replace(/^./, (c) => (c === 'A' ? 'B' : 'A')) } };
+    expect(await verify(bad, { keys })).toEqual({ valid: false, reason: 'bad_pq_signature' });
+    const { signature: _s, ...short } = r.pq!;
+    expect(await verify({ ...r, pq: short }, { keys })).toMatchObject({ valid: true, post_quantum: false });
   });
 });

@@ -628,7 +628,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div>
 <div style="display: flex; justify-content: space-between; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px 0; border-top: 1px solid #1C1D20"><span style="color: #8A8B8F">FILE</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%">{{sgName}}</span></div>
 <div style="display: flex; justify-content: space-between; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px 0; border-top: 1px solid #1C1D20"><span style="color: #8A8B8F">SHA-256</span><span>{{sgShaShort}}</span></div>
-<div style="display: flex; justify-content: space-between; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px 0; border-top: 1px solid #1C1D20"><span style="color: #8A8B8F">KEY</span><span>{{sgKey}} &middot; Ed25519</span></div>
+<div style="display: flex; justify-content: space-between; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px 0; border-top: 1px solid #1C1D20"><span style="color: #8A8B8F">SIGNED WITH</span><span style="text-align: right">{{sgAlgs}}</span></div>
 <sc-if value="{{sgHasRound}}"><div style="position: relative; display: flex; justify-content: space-between; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px 0; border-top: 1px solid #1C1D20; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F; display: inline-flex; align-items: center">NOT BEFORE<span class="mi"><button type="button" class="mi-b" aria-label="What NOT BEFORE means" aria-expanded="false" aria-describedby="mi-nb">i</button><span role="tooltip" id="mi-nb" class="mi-t">drand is public randomness from the League of Entropy, independent organizations including Cloudflare. A new value every 3 seconds that no one can predict. This receipt includes one, so it couldn&#39;t have been signed before that value existed.</span></span></span><span>{{sgRound}}</span></div></sc-if>
 </div>
 <div style="display: flex; flex-wrap: wrap; gap: 12px">
@@ -819,7 +819,7 @@ class Component extends DCLogic {
             const rc = b.receipt;
             if (this.state && this.state.sg && this.state.sg.href) URL.revokeObjectURL(this.state.sg.href);
             const href = URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }));
-            const done = { s: 'done', name: file.name, sha, mark: rc.moonmark, key: rc.key_id, url: b.signed_url || (b.moonmark_url + '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + (rc.beacon ? '&r=' + rc.beacon.round + '&b=' + rc.beacon.signature : '') + '&g=' + rc.signature), round: rc.beacon ? rc.beacon.round : null, href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' };
+            const done = { s: 'done', name: file.name, sha, mark: rc.moonmark, key: rc.key_id, url: b.signed_url || (b.moonmark_url + '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + (rc.beacon ? '&r=' + rc.beacon.round + '&b=' + rc.beacon.signature : '') + (rc.pq ? '&q=' + rc.pq.key_id : '') + '&g=' + rc.signature), algs: rc.pq ? 'Ed25519 + ML-DSA-65' : 'Ed25519', round: rc.beacon ? rc.beacon.round : null, href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' };
             after(() => this.setState({ sg: done }));
           });
       })
@@ -892,7 +892,7 @@ class Component extends DCLogic {
         if (!this._sgPick) this._sgPick = (e) => this.sgPick(e);
         return {
           sgPick: this._sgPick, sgIdle: g.s === 'idle', sgBusy: g.s === 'busy', sgDone: g.s === 'done', sgErr: g.s === 'err',
-          sgBusyText: g.t || '', sgErrText: g.err || '', sgMark: g.mark || '', sgName: g.name || '', sgKey: g.key || '',
+          sgBusyText: g.t || '', sgErrText: g.err || '', sgMark: g.mark || '', sgName: g.name || '', sgKey: g.key || '', sgAlgs: g.algs || 'Ed25519',
           sgRound: g.round ? 'drand round ' + Number(g.round).toLocaleString('en-US') : '', sgHasRound: !!g.round, sgShaShort: g.sha ? g.sha.slice(0, 12) + '…' + g.sha.slice(-8) : '', sgUrl: g.url || '#', sgHref: g.href || '#', sgFile: g.file || 'receipt.json'
         };
       })()

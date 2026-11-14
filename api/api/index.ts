@@ -2,7 +2,7 @@
 // so the router always sees the public path (/v1/now, not /api/v1/now).
 import { handle } from '../src/index.js';
 import { memoryLimiter, upstashLimiter } from '../src/ratelimit.js';
-import { Signer, loadPrivateKey } from '../src/receipt.js';
+import { Signer, PqSigner, loadPrivateKey } from '../src/receipt.js';
 import { envKeyStore } from '../src/keys.js';
 import { beaconSource } from '../src/beacon.js';
 
@@ -23,7 +23,10 @@ const RATE_LIMITER_KEYED = process.env.UPSTASH_REDIS_REST_URL && process.env.UPS
 
 // Signing key for Moonmark receipts (MOON_SIGNING_KEY: Ed25519, PEM or base64 PKCS8).
 let SIGNER: Signer | undefined;
-try { if (process.env.MOON_SIGNING_KEY) SIGNER = new Signer(loadPrivateKey(process.env.MOON_SIGNING_KEY)); } catch { SIGNER = undefined; }
+// Post-quantum key (MOON_PQ_KEY: 32-byte ML-DSA-65 seed, base64). With it, receipts are hybrid v3 (Ed25519 + ML-DSA-65).
+let PQ: PqSigner | undefined;
+try { if (process.env.MOON_PQ_KEY) PQ = PqSigner.fromEnv(process.env.MOON_PQ_KEY); } catch { PQ = undefined; }
+try { if (process.env.MOON_SIGNING_KEY) SIGNER = new Signer(loadPrivateKey(process.env.MOON_SIGNING_KEY), PQ); } catch { SIGNER = undefined; }
 // Retired public keys, so old receipts keep verifying: JSON {"key_id":"base64url raw key"}.
 let RETIRED_KEYS: Record<string, string> | undefined;
 try { if (process.env.MOON_RETIRED_KEYS) RETIRED_KEYS = JSON.parse(process.env.MOON_RETIRED_KEYS); } catch { RETIRED_KEYS = undefined; }

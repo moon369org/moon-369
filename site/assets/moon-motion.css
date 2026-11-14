@@ -37,7 +37,7 @@
 /* ---------- Scroll progress beam ---------- */
 @supports (animation-timeline: scroll()) {
   body::before {
-    content: ""; position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 50;
+    content: ""; position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 70; pointer-events: none;
     background: linear-gradient(90deg, transparent, #E9E4D8 40%, #FFFFFF);
     box-shadow: 0 0 12px rgba(233, 228, 216, 0.6);
     transform-origin: 0 50%; transform: scaleX(0);

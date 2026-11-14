@@ -107,7 +107,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 90px; display: flex; flex-direction: column; gap: 24px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F; letter-spacing: 0.3em">WHY YOU CAN TRUST IT</div>
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">TRUST</h1>
-<p style="margin: 0; max-width: 680px; font-size: 18px; line-height: 1.65; color: #B9B6AE">A signed Moonmark is proof anyone can check for themselves, without taking Moon&#39;s word for it. Here is the key, why a signature can&#39;t be faked, and what Moon&nbsp;promises.</p>
+<p style="margin: 0; max-width: 680px; font-size: 18px; line-height: 1.65; color: #B9B6AE">A signed Moonmark is proof anyone can check for themselves, without taking Moon&#39;s word for it. Here are the keys, why a signature can&#39;t be faked, what Moon promises, and how it stays strong as cryptography&nbsp;changes.</p>
 </div>
 </section>
 
@@ -120,9 +120,10 @@ footer > div > div:first-child svg{width:64px!important}
 <p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE">Every signed Moonmark is signed with Moon&#39;s key and carries a value from a public beacon Moon doesn&#39;t control. Both public keys are below. They&#39;re all anyone needs to check a receipt.</p>
 </div>
 <div style="border: 1px solid #E9E4D8; background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 8px; max-width: 880px">
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 12px"><span style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em">MOON&#39;S SIGNING KEY</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #0B0B0D; background: #E9E4D8; padding: 6px 10px">{{keyStatus}}</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 12px"><span style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em">MOON&#39;S SIGNING KEYS</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #0B0B0D; background: #E9E4D8; padding: 6px 10px">{{keyStatus}}</span></div>
 <div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 14px"><span style="color: #8A8B8F">KEY ID</span><span>{{keyId}}</span></div>
 <div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 14px"><span style="color: #8A8B8F">ALGORITHM</span><span>Ed25519</span></div>
+<sc-if value="{{hasPq}}"><div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 14px; flex-wrap: wrap"><span style="color: #8A8B8F">POST-QUANTUM KEY</span><span style="text-align: right">{{pqId}} &middot; ML-DSA-65</span></div></sc-if>
 <div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 14px; flex-wrap: wrap"><span style="color: #8A8B8F">PUBLIC KEY</span><span style="word-break: break-all; text-align: right; flex: 1 1 280px">{{keyPub}}</span></div>
 <div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 14px"><span style="color: #8A8B8F">SOURCE</span><a href="https://api.moon369.org/v1/keys" style="color: #E9E4D8; text-decoration: underline; text-underline-offset: 3px">api.moon369.org/v1/keys</a></div>
 </div>
@@ -180,6 +181,14 @@ await verify(receipt, { content: file });
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: #24262A; border: 1px solid #24262A"><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Receipts never expire</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">If Moon ever moves to a new key, the old one stays published as retired, so every receipt it signed keeps&nbsp;checking.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Changes are public</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Any new key is listed at <code>/v1/keys</code> and announced before it signs anything.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Your file stays yours</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Moon only ever receives a fingerprint. It can&#39;t see, store or rebuild your file from&nbsp;it.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Checking is free, forever</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Verifying a signed Moonmark costs nothing, needs no account, and works&nbsp;offline.</p></div></div>
 </article>
 
+<article id="upgrade" style="border-top: 1px solid #1C1D20; padding: 72px 0; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">06</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">BUILT TO UPGRADE</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE">Cryptography ages. Quantum computers will one day break the signatures most of the internet uses today. Moon is designed to upgrade its cryptography without breaking anything it has already&nbsp;signed.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: #24262A; border: 1px solid #24262A"><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Two signatures today</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every receipt is signed twice over the same bytes: Ed25519, today&#39;s standard, and ML-DSA-65, NIST&#39;s post-quantum standard (FIPS 204). A receipt counts only when both check out, so forging one means breaking&nbsp;both.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Every receipt names its method</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Each receipt starts with its version, like <code>moonmark-receipt/3</code>. That tells anyone exactly how to check it, so Moon can adopt new cryptography without breaking a single old&nbsp;receipt.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Old receipts keep working</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every version Moon has ever issued stays verifiable. Retired keys stay published, and checkers accept every past&nbsp;version.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Re-sealed over time</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Coming with the public log: old receipts get re-anchored with fresh, stronger fingerprints and signatures, so a receipt from 2026 is still provable in 2056 after today&#39;s algorithms&nbsp;age.</p></div></div>
+</article>
 </div>
 </section>
 
@@ -208,13 +217,15 @@ await verify(receipt, { content: file });
 class Component extends DCLogic {
   componentDidMount() {
     fetch('https://api.moon369.org/v1/keys').then((r) => r.json()).then((b) => {
-      const k = (b.keys || []).find((x) => x.status === 'active');
-      if (k) this.setState({ key: k });
+      const ks = (b.keys || []).filter((x) => x.status === 'active');
+      const k = ks.find((x) => x.alg === 'Ed25519'), q = ks.find((x) => x.alg === 'ML-DSA-65');
+      if (k) this.setState({ key: k, pq: q || null });
     }).catch(() => {});
   }
   renderVals() {
     const k = (this.state && this.state.key) || { key_id: '8efd3211b23533ed', public_key: '5jDbxW9WcpFMgLIjmu0QKtaDpzHzh1MqcNFCR3levJ0', status: 'active' };
-    return { keyId: k.key_id, keyPub: k.public_key, keyStatus: String(k.status || 'active').toUpperCase() };
+    const q = this.state && this.state.pq;
+    return { keyId: k.key_id, keyPub: k.public_key, keyStatus: String(k.status || 'active').toUpperCase(), hasPq: !!q, pqId: q ? q.key_id : '' };
   }
 }
 </script>
