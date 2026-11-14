@@ -65,19 +65,10 @@ html.mm-js [data-dc-root] section:has(.mi.open),html.mm-js [data-dc-root] sectio
 
 @media (max-width: 900px){.mk-panel{grid-template-columns:1fr!important;padding:32px 24px!important}.mk-ns-row{padding-left:0!important;flex-wrap:wrap}.mk-meters{border-left:0!important;padding-left:0!important;border-top:1px solid #24262A;padding-top:28px}}
 
-/* Today on Moon: the lit limb glows and its surface shimmers. Durations don't share a beat, so the motion never visibly repeats. */
-.hm-moon .hm-glow-a{transform-origin:0 0;animation:hmGlowA 7.3s ease-in-out infinite}
-.hm-moon .hm-glow-b{transform-origin:0 0;animation:hmGlowB 11.9s ease-in-out infinite}
-.hm-moon .hm-grain{opacity:.22;animation:hmGrain 23s linear infinite}
-.hm-moon .hm-sheen{animation:hmSheen 17.7s ease-in-out infinite}
-@keyframes hmGlowA{0%{opacity:.55;transform:scale(1)}21%{opacity:.85;transform:scale(1.03)}37%{opacity:.5;transform:scale(1.01)}58%{opacity:.95;transform:scale(1.05)}79%{opacity:.62;transform:scale(1.02)}100%{opacity:.55;transform:scale(1)}}
-@keyframes hmGlowB{0%{opacity:.18}17%{opacity:.34}43%{opacity:.14}61%{opacity:.4}86%{opacity:.22}100%{opacity:.18}}
-@keyframes hmGrain{0%{transform:translate(0,0)}25%{transform:translate(-4px,3px)}50%{transform:translate(2px,-5px)}75%{transform:translate(5px,2px)}100%{transform:translate(0,0)}}
-@keyframes hmSheen{0%{transform:translate(4px,-3px);opacity:.35}23%{transform:translate(7px,2px);opacity:.6}41%{transform:translate(3px,5px);opacity:.3}67%{transform:translate(8px,-1px);opacity:.65}84%{transform:translate(5px,-5px);opacity:.4}100%{transform:translate(4px,-3px);opacity:.35}}
-@media (prefers-reduced-motion:reduce){.hm-moon .hm-glow-a,.hm-moon .hm-glow-b,.hm-moon .hm-grain,.hm-moon .hm-sheen{animation:none}}
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
+<script src="js/moonglow.js" defer></script>
 <script src="js/livemark.js" defer></script>
 <script src="js/header.js" defer></script>
 <script src="js/dc-lite.js" defer></script>
@@ -245,7 +236,7 @@ footer > div > div:first-child svg{width:64px!important}
 <section id="clock" style="background: #050506; border-top: 1px solid #1C1D20; border-bottom: 1px solid #1C1D20">
 <div style="max-width: 1280px; margin: 0 auto; padding: 140px 32px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 48px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">TODAY ON MOON</div>
-<svg class="hm-moon" role="img" aria-label="{{phaseName}}" viewBox="-11 -11 22 22" style="width: clamp(72px, 9vw, 120px); height: clamp(72px, 9vw, 120px); display: block; overflow: visible"><defs><filter id="hmGlowA" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.4"></feGaussianBlur></filter><filter id="hmGlowB" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3.2"></feGaussianBlur></filter><filter id="hmGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="3" seed="11"></feTurbulence><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 -0.12"></feColorMatrix></filter><radialGradient id="hmSheen"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.55"></stop><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"></stop></radialGradient><clipPath id="hmLit"><path d="{{phasePath}}"></path></clipPath></defs><path class="hm-glow-b" d="{{phasePath}}" style="fill: #E9E4D8" filter="url(#hmGlowB)"></path><path class="hm-glow-a" d="{{phasePath}}" style="fill: #F4F0E6" filter="url(#hmGlowA)"></path><circle r="10" style="fill: #24262A"></circle><path d="{{phasePath}}" style="fill: #E9E4D8"></path><g clip-path="url(#hmLit)"><rect class="hm-grain" x="-22" y="-22" width="44" height="44" filter="url(#hmGrain)"></rect><circle class="hm-sheen" r="6" style="fill: url(#hmSheen)"></circle></g></svg>
+<canvas class="hm-moonglow" role="img" aria-label="{{phaseName}}" style="width: calc(clamp(72px, 9vw, 120px) * 1.9); height: calc(clamp(72px, 9vw, 120px) * 1.9); margin: calc(clamp(72px, 9vw, 120px) * -0.45); display: block; pointer-events: none"></canvas>
 <div class="hm-hide-m" style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(20px, 3.2vw, 44px); letter-spacing: 0.12em; line-height: 1.15; padding-left: 0.12em; white-space: nowrap">{{localDateLine}}</div>
 <div class="hm-date" style="display: none">
 <div class="hm-date-c"><div class="hm-date-l">YEAR</div><div class="hm-date-v">{{ly}}</div></div>
