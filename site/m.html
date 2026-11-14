@@ -89,10 +89,19 @@ footer > div > div:first-child svg{width:64px!important}
 .mk-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:48px;align-items:start}
 .mk-main{display:flex;flex-direction:column;gap:26px}
 .mk-l{font-family:'Syncopate',sans-serif;font-size:10px;letter-spacing:.26em;color:#8A8B8F}
-.mk-date{display:flex;align-items:center;gap:18px;font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(16px,2.2vw,26px);letter-spacing:.12em}
-.mk-ph{width:56px;height:56px;flex:none}
-.mk-mark{font-family:'JetBrains Mono',monospace;font-size:clamp(24px,3.6vw,44px);font-variant-numeric:tabular-nums;letter-spacing:.01em}
-.mk-mark span{color:#8A8B8F}
+.mk-date{display:flex;align-items:center;gap:24px}
+.mk-ph{width:64px;height:64px;flex:none}
+.mk-cells{display:grid;grid-template-columns:auto auto auto;border:1px solid #24262A}
+.mk-cells div{display:flex;flex-direction:column;gap:8px;padding:14px 22px;border-left:1px solid #24262A}
+.mk-cells div:first-child{border-left:0}
+.mk-cells i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.24em;color:#8A8B8F}
+.mk-cells b{font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(18px,2.2vw,26px);letter-spacing:.06em}
+.mk-mark{font-family:'JetBrains Mono',monospace;font-size:clamp(24px,3.6vw,44px);font-variant-numeric:tabular-nums;letter-spacing:.01em;line-height:1.25}
+.mk-mark>span{white-space:nowrap}
+.mk-ns{color:#8A8B8F}
+.mk-rows div:last-child:nth-child(odd){grid-column:1/-1}
+.mk-mark>span{display:block}
+.mk-ey span{white-space:nowrap}
 .mk-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:#1C1D20;border:1px solid #1C1D20}
 .mk-rows div{background:#0B0B0D;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
 .mk-rows span{font-family:'Syncopate',sans-serif;font-size:9.5px;letter-spacing:.22em;color:#8A8B8F}
@@ -104,7 +113,9 @@ footer > div > div:first-child svg{width:64px!important}
 .mk-qr{background:#E9E4D8;padding:0}.mk-qr svg{display:block;width:100%;height:auto}
 .mk-cap{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#8A8B8F;letter-spacing:.04em}
 .mk-note{font-size:13px;line-height:1.55;color:#5E6064;border-top:1px solid #1C1D20;padding-top:14px}
-@media (max-width:720px){.mk-grid{grid-template-columns:1fr;gap:32px}.mk-side{max-width:280px}.mk-rows{grid-template-columns:1fr}.mk-mark{font-size:20px}.mk-ph{width:40px;height:40px}}
+@media (max-width:720px){.mk-grid{grid-template-columns:1fr;gap:32px}.mk-side{max-width:320px;width:100%}.mk-rows{grid-template-columns:1fr}.mk-ey{letter-spacing:.22em!important;line-height:1.9}.mk-ey span{display:block}.mk-sep{display:none!important}.mk-date{gap:16px}.mk-ph{width:52px;height:52px}.mk-cells{flex:1;grid-template-columns:repeat(3,minmax(0,1fr))}.mk-cells div{padding:12px 12px;gap:6px}.mk-cells b{font-size:clamp(15px,4.6vw,20px)}.mk-mark{font-size:clamp(20px,6.9vw,30px)}.mk-btns{display:grid;grid-template-columns:1fr}.mk-btns button{width:100%}.mk-mark>span{display:block}.mk-main{gap:22px}.mk-rows b{font-size:13.5px}}
+[style*="padding: 100px 32px 140px"]{}
+@media (max-width:720px){[style*="padding: 100px 32px 140px"]{padding:44px 20px 80px!important;gap:28px!important}}
 </style>
 </helmet>
 <div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
@@ -131,7 +142,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 140px; display: flex; flex-direction: column; gap: 40px">
 <div style="display: flex; flex-direction: column; gap: 18px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">ONE EXACT MOMENT · THE SAME EVERYWHERE</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F" class="mk-ey"><span>ONE EXACT MOMENT</span><span class="mk-sep"> · </span><span>THE SAME EVERYWHERE</span></div>
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">MOONMARK</h1>
 </div>
 <div data-mk-root></div>

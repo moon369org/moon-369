@@ -51,9 +51,10 @@
     root.innerHTML =
       '<div class="mk-grid">' +
       '<div class="mk-main">' +
-      '<div class="mk-l">' + (fresh ? 'MOONMARK · JUST MARKED' : 'MOONMARK') + '</div>' +
-      '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" aria-label="' + nm + '"><circle r="10" fill="#24262A"/><path d="' + ph + '" fill="#E9E4D8"/></svg><span>YEAR ' + mk.y + ' · MOON ' + p(mk.m) + ' · LUNE ' + p(mk.d) + '</span></div>' +
-      '<div class="mk-mark">' + text(mk) + '<span>' + nsGroups(mk.ns) + '</span></div>' +
+      (fresh ? '<div class="mk-l">JUST MARKED</div>' : '') +
+      '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" role="img" aria-label="' + nm + '"><circle r="10" fill="#24262A"/><path d="' + ph + '" fill="#E9E4D8"/></svg>' +
+      '<div class="mk-cells"><div><i>YEAR</i><b>' + mk.y + '</b></div><div><i>MOON</i><b>' + p(mk.m) + '</b></div><div><i>LUNE</i><b>' + p(mk.d) + '</b></div></div></div>' +
+      '<div class="mk-mark" aria-label="Moonmark ' + text(mk) + '.' + p(mk.ns, 9) + '"><span>' + mk.y + '.' + p(mk.m) + '.' + p(mk.d) + '</span> <span>' + p(mk.h) + ':' + p(mk.mi) + ':' + p(mk.s) + '<span class="mk-ns">' + nsGroups(mk.ns) + '</span></span></div>' +
       '<div class="mk-rows">' +
       '<div><span>YOUR LOCAL CLOCK</span><b>' + local + ' ' + abbr + '</b></div>' +
       '<div><span>THE MOON THAT NIGHT</span><b>' + nm + ' · ' + il + '% lit</b></div>' +
