@@ -1,5 +1,5 @@
 /*
- * The living moon on the homepage ("Edge Corona").
+ * The living moon on the homepage ("Edge Corona"). Drawn into every canvas.hm-moonglow.
  *
  * Rules (keep them when changing anything here):
  *  1. No gap. The glow is the lit crescent itself, blurred, and every ray starts just inside
@@ -88,12 +88,13 @@
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var t0 = performance.now(), last = 0;
   function frame(now) {
-    var cv = document.querySelector('canvas.hm-moonglow');
-    if (cv) {
-      var r = cv.getBoundingClientRect();
+    var all = document.querySelectorAll('canvas.hm-moonglow'), drew = false;
+    for (var c = 0; c < all.length; c++) {
+      var r = all[c].getBoundingClientRect();
       var onScreen = r.bottom > 0 && r.top < (window.innerHeight || 800);
-      if (onScreen && (!reduce || now - last > 60000)) { draw(cv, reduce ? 12 : (now - t0) / 1000 + 40); last = now; }
+      if (onScreen && (!reduce || now - last > 60000)) { draw(all[c], reduce ? 12 : (now - t0) / 1000 + 40 + c * 17); drew = true; }
     }
+    if (drew) last = now;
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

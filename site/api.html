@@ -45,6 +45,7 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
+<script src="js/moonglow.js" defer></script>
 <script src="js/header.js" defer></script>
 <script src="js/dc-lite.js" defer></script>
 <link rel="stylesheet" href="assets/moon-motion.css">
@@ -138,7 +139,7 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 <div style="flex: 0 1 380px; border: 1px solid #24262A; padding: 24px; display: flex; flex-direction: column; gap: 10px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.24em; color: #8A8B8F">LIVE · MOONMARK · GET /v1/now</div>
-<div style="display: flex; align-items: center; gap: 0.3em; font-family: 'JetBrains Mono', monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums"><svg role="img" aria-label="{{phaseName}}" viewBox="-11 -11 22 22" style="width: 0.82em; height: 0.82em; display: block; flex: none"><circle r="10" style="fill: #24262A"></circle><path d="{{phasePath}}" style="fill: #E9E4D8"></path></svg><div>{{clock}}</div></div>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: 'JetBrains Mono', monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums"><canvas class="hm-moonglow" role="img" aria-label="{{phaseName}}" style="width: calc(0.82em * 1.9); height: calc(0.82em * 1.9); margin: calc(0.82em * -0.45); display: block; flex: none; pointer-events: none"></canvas><div>{{clock}}</div></div>
 <div class="ap-hide-m" style="font-family: 'Syncopate', sans-serif; font-size: 12px; letter-spacing: 0.24em">{{dateLine}}</div>
 <div class="ap-date" style="display: none"><div class="ap-date-c"><div class="ap-date-l">YEAR</div><div class="ap-date-v">{{yNum}}</div></div><div class="ap-date-c"><div class="ap-date-l">MOON</div><div class="ap-date-v">{{moonNum}}</div></div><div class="ap-date-c"><div class="ap-date-l">LUNE</div><div class="ap-date-v">{{dayNum}}</div></div></div>
 </div>
@@ -750,7 +751,7 @@ class Component extends DCLogic {
     const nowJson = '{\n  "year": ' + y + ',\n  "moon": ' + (mi + 1) + ',\n  "day": ' + day + ',\n  "day_of_year": ' + (dy + 1) + ',\n  "moon_length_days": ' + mlen + ',\n  "time": "' + time + '",\n  "moonmark": "' + y + '.' + p(mi + 1) + '.' + p(day) + ' ' + time + '.' + frac + '",\n  "phase": { "fraction": ' + phf.toFixed(6) + ', "name": "' + phn + '" },\n  "unix_ms": ' + Math.floor(nowMs) + ',\n  "utc": "' + u.toISOString().slice(0, -1) + '000000Z",\n  "time_zone": null,\n  "dst": false\n}';
     const pk = Math.cos(2 * Math.PI * phf), wx = phf < 0.5;
     const phasePath = 'M0,-10 A10,10 0 0 ' + (wx ? 1 : 0) + ' 0,10 A' + (Math.abs(pk) * 10).toFixed(3) + ',10 0 0 ' + ((wx === (pk > 0)) ? 0 : 1) + ' 0,-10Z';
-    return { phasePath, phaseName: phn, clock: time, dateLine: 'YEAR ' + y + ' · MOON ' + p(mi + 1) + ' · DAY ' + p(day), yNum: String(y), moonNum: p(mi + 1), dayNum: p(day), nowJson };
+    return { phasePath, phaseName: phn, clock: time, dateLine: 'YEAR ' + y + ' · MOON ' + p(mi + 1) + ' · LUNE ' + p(day), yNum: String(y), moonNum: p(mi + 1), dayNum: p(day), nowJson };
   }
 }
 </script>
