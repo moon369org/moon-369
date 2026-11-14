@@ -3,6 +3,7 @@ import {
   toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, phaseName, unixNsToIso, yearInfo,
   moonLength, MoonRangeError, type MoonTime,
 } from './moon.js';
+import { Signer, verifyReceipt, isSha256Hex, RECEIPT_VERSION, type Receipt } from './receipt.js';
 
 export interface RateLimiter { limit(o: { key: string }): Promise<{ success: boolean }> }
 
@@ -20,12 +21,16 @@ export interface Env {
   CLOCK_ACCURACY_NS?: string;
   /** Label for the clock source returned with Moonmarks (default "server-ntp"). */
   CLOCK_SOURCE?: string;
+  /** Signs Moonmark receipts. Without it, /v1/sign answers 503. */
+  SIGNER?: Signer;
+  /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
+  RETIRED_KEYS?: Record<string, string>;
 }
 
 const API_VERSION = 'v1';
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Authorization, Content-Type',
   'Access-Control-Max-Age': '86400',
 };
@@ -137,6 +142,7 @@ const SPEC = {
   dst: false,
   roles: { moon: 'One continuous count of time, locked to the real moon, read as the date (year, moon, lune) and the phase.', moonmark: 'One exact moment on the Moon count, the same everywhere: YEAR.MM.DD HH:MM:SS.NNNNNNNNN.' },
   date_rule: 'The Moon date is global: one date worldwide. A lune turns over at the same instant everywhere.',
+  signing: { receipt: 'moonmark-receipt/1', alg: 'Ed25519', signed_bytes: 'receipt, "sha256:" + hex, moonmark, unix_ns, key_id joined by newlines (UTF-8)', key_id: 'first 16 hex of SHA-256 of the raw 32-byte public key', keys: '/v1/keys', sign: 'POST /v1/sign {"sha256":"<hex>"}', verify: 'POST /v1/verify {"receipt":{...}}' },
   license: 'MIT',
 };
 
@@ -160,15 +166,23 @@ async function authAndLimit(req: Request, env: Env): Promise<{ plan: string } | 
   return { plan: 'open' };
 }
 
+async function readJson(req: Request): Promise<Record<string, unknown>> {
+  const text = await req.text();
+  if (text.length > 16_384) throw new HttpError(413, 'too_large', 'Send only the SHA-256 fingerprint or the receipt, not the content');
+  try { const v = JSON.parse(text); if (v && typeof v === 'object' && !Array.isArray(v)) return v; } catch { /* fall through */ }
+  throw new HttpError(400, 'bad_json', 'Body must be a JSON object');
+}
+
 export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
-  if (req.method !== 'GET' && req.method !== 'HEAD') return json({ error: { code: 'method_not_allowed', message: 'Use GET' } }, 405);
-
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, '') || '/';
   const q = url.searchParams;
+  const postOnly = path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/verify`;
+  if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
+    return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/keys', 'POST /v1/sign', 'POST /v1/verify'] });
   if (path === '/health') return json({ ok: true });
 
   const gate = await authAndLimit(req, env);
@@ -222,6 +236,50 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const input = moonInputFromQuery(q);
         const ns = toUnixNs(input);
         return json({ input, unix_ns: ns, unix_ms: Number(ns / 1_000_000n), utc: unixNsToIso(ns) }, 200, { ...FOREVER, ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/keys`: {
+        const keys = [
+          ...(env.SIGNER ? [env.SIGNER.info()] : []),
+          ...Object.entries(env.RETIRED_KEYS ?? {}).map(([key_id, public_key]) => ({ key_id, alg: 'Ed25519', public_key, status: 'retired' })),
+        ];
+        return json({ receipt: RECEIPT_VERSION, keys, signing: env.SIGNER ? 'enabled' : 'not_configured' }, 200, { 'Cache-Control': 'public, max-age=300', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/sign`: {
+        if (!env.SIGNER) throw new HttpError(503, 'signing_unavailable', 'Signing is not configured on this deployment');
+        const body = await readJson(req);
+        const sha = typeof body.sha256 === 'string' ? body.sha256.toLowerCase() : body.sha256;
+        if (!isSha256Hex(sha)) throw new HttpError(400, 'bad_param', 'sha256 must be the 64-character hex SHA-256 of your content. Send the fingerprint, never the content.');
+        const ns = nowUnixNs();
+        const mark = formatMoonmark(toMoon(ns));
+        const receipt = env.SIGNER.sign(sha, mark, ns);
+        return json({
+          receipt,
+          moonmark_url: MARK_BASE + moonmarkPath(mark),
+          utc: unixNsToIso(ns),
+          accuracy_ns: Number(env.CLOCK_ACCURACY_NS ?? 1_000_000),
+          clock: env.CLOCK_SOURCE ?? 'server-ntp',
+        }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/verify`: {
+        const body = await readJson(req);
+        const r = (body.receipt ?? body) as Receipt;
+        const keys: Record<string, string> = { ...(env.RETIRED_KEYS ?? {}) };
+        if (env.SIGNER) { const i = env.SIGNER.info(); keys[i.key_id] = i.public_key; }
+        let out = verifyReceipt(r, keys);
+        if (out.valid) {
+          // The signed moonmark must be the same moment as the signed unix_ns.
+          let same = false;
+          try { same = formatMoonmark(toMoon(BigInt(r.unix_ns))) === r.moonmark; } catch { same = false; }
+          if (!same) out = { valid: false, reason: 'moonmark_mismatch' };
+        }
+        if (out.valid && body.sha256 !== undefined) {
+          const want = typeof body.sha256 === 'string' ? body.sha256.toLowerCase() : '';
+          if (want !== r.sha256) out = { valid: false, reason: 'content_mismatch' };
+        }
+        return json({ ...out, ...(out.valid ? { moonmark: r.moonmark, utc: unixNsToIso(BigInt(r.unix_ns)), key_id: r.key_id } : {}) }, 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
       case path.startsWith(`/${API_VERSION}/year/`): {

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 (Moon 05, Lune 05, Year 1928)
+
+- **Signed Moonmarks**: `POST /v1/sign` signs a SHA-256 fingerprint at the current moment and returns an Ed25519 receipt. `POST /v1/verify` checks one, and `GET /v1/keys` publishes the public keys so anyone can verify offline. Content never leaves the caller: only the fingerprint is sent.
+
 ## 1.1.0 (Moon 05, Lune 04, Year 1928)
 
 Moon is now one thing: the worldwide timestamp, locked to the moon.

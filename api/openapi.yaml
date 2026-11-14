@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moon API
-  version: 1.0.0
+  version: 1.2.0
   summary: The open standard for time. The worldwide timestamp, locked to the moon.
   license: { name: MIT, identifier: MIT }
   description: |
@@ -42,9 +42,20 @@ components:
         error:
           type: object
           properties:
-            code: { type: string, enum: [missing_param, bad_param, out_of_range, not_found, rate_limited, invalid_key, keys_disabled, method_not_allowed, internal] }
+            code: { type: string, enum: [missing_param, bad_param, bad_json, too_large, out_of_range, not_found, rate_limited, invalid_key, keys_disabled, method_not_allowed, signing_unavailable, internal] }
             message: { type: string }
             contact: { type: string, description: Email for higher limits. Present on rate_limited. }
+    Receipt:
+      type: object
+      description: 'A signed Moonmark. Signed bytes are receipt, "sha256:" + sha256, moonmark, unix_ns and key_id joined by newlines (UTF-8), signed with Ed25519.'
+      required: [receipt, sha256, moonmark, unix_ns, key_id, signature]
+      properties:
+        receipt: { type: string, enum: [moonmark-receipt/1] }
+        sha256: { type: string, pattern: '^[0-9a-f]{64}$', description: Fingerprint of the signed content }
+        moonmark: { type: string, example: '1928.05.05 00:40:56.209029029' }
+        unix_ns: { type: string, description: The same moment in Unix nanoseconds }
+        key_id: { type: string, description: First 16 hex characters of SHA-256 of the raw public key }
+        signature: { type: string, description: base64url Ed25519 signature }
   responses:
     BadRequest: { description: Invalid input, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
     RateLimited: { description: 'Rate limit reached. For higher limits email moon369org@proton.me.', headers: { Retry-After: { schema: { type: integer } } }, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
@@ -123,6 +134,32 @@ paths:
         - { name: year, in: path, required: true, schema: { type: integer } }
       responses:
         '200': { description: OK }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /v1/keys:
+    get:
+      summary: Moon's public signing keys, active and retired
+      responses:
+        '200': { description: 'Keys as base64url raw Ed25519 public keys, with key_id and status' }
+  /v1/sign:
+    post:
+      summary: Sign a SHA-256 fingerprint at this moment and get a receipt
+      description: Send only the fingerprint, never the content.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [sha256], properties: { sha256: { type: string, pattern: '^[0-9a-fA-F]{64}$' } } } } }
+      responses:
+        '200': { description: 'The receipt, its Moonmark link, utc, accuracy_ns and clock', content: { application/json: { schema: { type: object, properties: { receipt: { $ref: '#/components/schemas/Receipt' }, moonmark_url: { type: string }, utc: { type: string }, accuracy_ns: { type: integer }, clock: { type: string } } } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { description: Signing is not configured on this deployment }
+  /v1/verify:
+    post:
+      summary: Check a receipt, and optionally that it matches your content
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [receipt], properties: { receipt: { $ref: '#/components/schemas/Receipt' }, sha256: { type: string } } } } }
+      responses:
+        '200': { description: 'valid true with moonmark, utc and key_id, or valid false with a reason: bad_signature, unknown_key, content_mismatch, moonmark_mismatch, malformed, unknown_version, not_a_receipt' }
         '400': { $ref: '#/components/responses/BadRequest' }
   /v1/spec:
     get:

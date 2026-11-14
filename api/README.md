@@ -11,7 +11,8 @@ Hosted at `https://api.moon369.org`. This repo is the hosted API (a Vercel Funct
 - `src/index.ts`: the API: routing, rate limits, optional keys, caching, CORS.
 - `api/index.ts` + `vercel.json`: the Vercel Function entry; every path is rewritten to it.
 - `openapi.yaml`: the API contract.
-- `test/`: 42 tests covering the constants, conversions in both directions, boundaries and every route.
+- `src/receipt.ts`: signed Moonmarks: Ed25519 receipts and an offline verifier.
+- `test/`: 50 tests covering the constants, conversions in both directions, boundaries and every route.
 
 ## Endpoints
 
@@ -24,6 +25,9 @@ Hosted at `https://api.moon369.org`. This repo is the hosted API (a Vercel Funct
 | `GET /v1/to-unix?moonmark=` or `year=&moon=&day=&time=` | Moon time to standard time |
 | `GET /v1/year/{year}` | The 13 moons of a year, their lengths and UTC starts |
 | `GET /v1/spec` | Every constant, including the exact Moon second ratio |
+| `GET /v1/keys` | Moon's public signing keys |
+| `POST /v1/sign` | Sign a SHA-256 fingerprint at this moment: `{"sha256":"<hex>"}`. Send the fingerprint, never the content |
+| `POST /v1/verify` | Check a receipt: `{"receipt":{...},"sha256":"<optional hex>"}` |
 
 No key needed. Send `Authorization: Bearer <key>` for the higher keyed limit.
 
@@ -72,6 +76,16 @@ Code: MIT. The Moon name, mark and badge are trademarks; see the brand rules in 
 - Domain: `api.moon369.org`. Moonmark links point to `https://moon369.org/m/{moonmark}`.
 - Rate limit: 120 requests a minute per IP by default (`RATE_LIMIT_PER_MIN`). Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` so the limit is shared across every server instance; without them each instance limits on its own.
 - Privacy: requests and locations are not logged or stored by the API.
+
+## Signing key
+
+Signed Moonmarks need one environment variable on the API project: `MOON_SIGNING_KEY`, an Ed25519 private key (PEM, or base64 PKCS8 DER). Generate one with:
+
+```
+node -e "console.log(require('crypto').generateKeyPairSync('ed25519').privateKey.export({format:'der',type:'pkcs8'}).toString('base64'))"
+```
+
+Keep it secret. To rotate, publish the old public key in `MOON_RETIRED_KEYS` (JSON: `{"key_id":"base64url public key"}`) so old receipts keep verifying.
 
 ## Higher limits
 
