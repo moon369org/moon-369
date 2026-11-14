@@ -155,7 +155,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">TODAY ON MOON</div>
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: 0.14em" class="mc-date"><span class="mc-seg">YEAR {{now.y}}</span><span class="mc-dot"> · </span><span class="mc-seg">MOON {{now.m}}</span><span class="mc-dot"> · </span><span class="mc-seg">LUNE {{now.d}}</span></h1>
 <div style="display: flex; align-items: center; gap: 0.3em; font-family: 'JetBrains Mono', monospace; font-size: clamp(40px, 6vw, 72px); line-height: 1; font-variant-numeric: tabular-nums"><canvas class="mc-ph-sm hm-moonglow" aria-hidden="true" style="width: calc(0.82em * 1.9); height: calc(0.82em * 1.9); margin: calc(0.82em * -0.45); display: none; flex: none; pointer-events: none"></canvas><div>{{now.clock}}</div></div>
-<div class="mi-host" style="font-size: 14px; color: #8A8B8F">{{now.meta}}<span class="mi"><button type="button" class="mi-b" aria-label="What the lit percentage means" aria-expanded="false" aria-describedby="mi-t2">i</button><span role="tooltip" id="mi-t2" class="mi-t">Share of the moon&#39;s face lit by the sun at this moment, as seen from Earth. Moon calculates it from the moon&#39;s real position (Meeus, Astronomical Algorithms) and checks it against PyEphem, a standard astronomy library: they agree within 0.05 percentage&nbsp;points.</span></span></div>
+<div class="mi-host" style="font-size: 14px; color: #8A8B8F">{{now.meta}}<span class="mi"><button type="button" class="mi-b" aria-label="What the lit percentage means" aria-expanded="false" aria-describedby="mi-t2">i</button><span role="tooltip" id="mi-t2" class="mi-t">Share of the moon&#39;s face lit by the sun at this moment, as seen from Earth. Moon calculates it from the moon&#39;s real position (Meeus, Astronomical Algorithms) and checks it against PyEphem, a standard astronomy library: they agree within 0.05 percentage points. Shown live to 0.001 so you can watch it&nbsp;change.</span></span></div>
 <div class="{{now.seasonCls}}" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; border: 1px solid #24262A; padding: 6px 14px; font-size: 13px">
 <span aria-hidden="true" style="width: 9px; height: 9px; border-radius: 50%; background: var(--season)"></span>
 <span class="mc-hide-m">{{now.season}}</span><span class="mc-show-m">{{now.seasonShort}}</span>
@@ -404,7 +404,7 @@ class Component extends DCLogic {
       y: today.year, m: pad(today.moon), d: pad(today.day),
       seasonShort: SEASON[sa.season] + ' · ' + ['Equinox', 'Solstice', 'Equinox', 'Solstice'][sa.next.i] + ' in ' + Math.round((sa.next.t - nowMs) / c.MS_DAY) + ' lunes',
       clock: pad(live.h) + ':' + pad(live.m) + ':' + pad(live.s),
-      meta: c.phaseName(live.phase) + ' · ' + (window.MoonPhase.illumination(nowMs) * 100).toFixed(1) + '% lit · Moonmark ' + live.year + '.' + pad(live.moon) + '.' + pad(live.day) + ' ' + pad(live.h) + ':' + pad(live.m),
+      meta: c.phaseName(live.phase) + ' · ' + (window.MoonPhase.illumination(Date.now()) * 100).toFixed(3) + '% lit · Moonmark ' + live.year + '.' + pad(live.moon) + '.' + pad(live.day) + ' ' + pad(live.h) + ':' + pad(live.m),
       ph: c.phasePath(live.phase),
       seasonCls: 's' + sa.season,
       season: SEASON[sa.season] + ' · ' + EVENT[sa.next.i] + ' in ' + ((sa.next.t - nowMs) / c.MS_DAY).toFixed(1) + ' lunes'
