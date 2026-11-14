@@ -177,7 +177,27 @@ export function elongation(unixNs: bigint): number {
 /** The real moon's phase: 0 = new, 0.25 = first quarter, 0.5 = full, 0.75 = last quarter. */
 export const truePhase = (unixNs: bigint): number => elongation(unixNs) / 360;
 /** Fraction of the Moon's disc that is lit, 0..1. */
-export const illumination = (unixNs: bigint): number => (1 - Math.cos(elongation(unixNs) * RAD)) / 2;
+// Lit fraction from the true phase angle: Moon latitude and the Earth-Moon and
+// Earth-Sun distances (Meeus ch. 47-48). Matches PyEphem within 0.05 points.
+export function illumination(unixNs: bigint): number {
+  const cosD = (d: number) => Math.cos(d * RAD);
+  const ms = Number(unixNs / 1_000_000n);
+  const T = (ms / 86_400_000 + 2440587.5 - 2451545.0) / 36525;
+  const D = norm360(297.8501921 + 445267.1114034 * T - 0.0018819 * T * T + T ** 3 / 545868);
+  const M = norm360(357.5291092 + 35999.0502909 * T - 0.0001536 * T * T);
+  const Mp = norm360(134.9633964 + 477198.8675055 * T + 0.0087414 * T * T + T ** 3 / 69699);
+  const F = norm360(93.272095 + 483202.0175233 * T - 0.0036539 * T * T);
+  const E = 1 - 0.002516 * T - 0.0000074 * T * T;
+  const beta = 5.128122 * sinD(F) + 0.280602 * sinD(Mp + F) + 0.277693 * sinD(Mp - F) + 0.173237 * sinD(2 * D - F) +
+    0.055413 * sinD(2 * D - Mp + F) + 0.046271 * sinD(2 * D - Mp - F) + 0.032573 * sinD(2 * D + F) + 0.017198 * sinD(2 * Mp + F);
+  const dist = 385000.56 - 20905.355 * cosD(Mp) - 3699.111 * cosD(2 * D - Mp) - 2955.968 * cosD(2 * D) - 569.925 * cosD(2 * Mp) +
+    48.888 * E * cosD(M) - 3.149 * cosD(2 * F) + 246.158 * cosD(2 * D - 2 * Mp) - 152.138 * E * cosD(2 * D - M - Mp) -
+    170.733 * cosD(2 * D + Mp) - 204.586 * E * cosD(2 * D - M) - 129.62 * E * cosD(M - Mp) + 108.743 * cosD(D) + 104.755 * E * cosD(M + Mp);
+  const R = 149597870.7 * (1.00014 - 0.016708 * cosD(M) - 0.000141 * cosD(2 * M));
+  const psi = Math.acos(Math.max(-1, Math.min(1, cosD(beta) * cosD(elongation(unixNs)))));
+  const i = Math.atan2(R * Math.sin(psi), dist - R * Math.cos(psi));
+  return (1 + Math.cos(i)) / 2;
+}
 
 export const PHASE_NAMES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
 export const phaseName = (f: number): string => PHASE_NAMES[Math.floor((f * 8 + 0.5) % 8)];

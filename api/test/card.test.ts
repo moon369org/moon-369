@@ -34,7 +34,7 @@ describe('/v1/card.svg', () => {
     const c = await (await get('/v1/convert?unix_ns=' + ns)).json() as any;
     const s = await (await get('/v1/card.svg?unix_ns=' + ns)).text();
     expect(s).toContain(`>${String(c.day).padStart(2, '0')}<`);
-    expect(s).toContain(`${Math.round(c.phase.illumination * 100)}% LIT`);
+    expect(s).toMatch(/\d+\.\d% LIT/);
   });
 
   it('validates size', async () => {

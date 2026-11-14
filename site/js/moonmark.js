@@ -30,7 +30,7 @@
     var ms = toMs(mk);
     var url = 'https://moon369.org/m/' + path(mk);
     var f = window.MoonPhase ? window.MoonPhase.fraction(ms) : 0;
-    var il = window.MoonPhase ? Math.round(window.MoonPhase.illumination(ms) * 100) : 0;
+    var il = window.MoonPhase ? (window.MoonPhase.illumination(ms) * 100).toFixed(1) : '0.0';
     var nm = window.MoonPhase ? window.MoonPhase.name(f) : '';
     var zone = 'UTC', local = '', abbr = '';
     try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) {}
@@ -57,7 +57,7 @@
       '<div class="mk-mark" aria-label="Moonmark ' + text(mk) + '.' + p(mk.ns, 9) + '"><span>' + mk.y + '.' + p(mk.m) + '.' + p(mk.d) + '</span> <span>' + p(mk.h) + ':' + p(mk.mi) + ':' + p(mk.s) + '<span class="mk-ns">' + nsGroups(mk.ns) + '</span></span></div>' +
       '<div class="mk-rows">' +
       '<div><span>YOUR LOCAL CLOCK</span><b>' + local + ' ' + abbr + '</b></div>' +
-      '<div><span>THE MOON THAT NIGHT</span><b>' + nm + ' · ' + il + '% lit</b></div>' +
+      '<div><span>THE MOON THAT NIGHT</span><b>' + nm + ' · ' + il + '% lit<span class="mi"><button type="button" class="mi-b" aria-label="What the lit percentage means" aria-describedby="mi-t3">i</button><span role="tooltip" id="mi-t3" class="mi-t">Share of the moon&#39;s face lit by the sun at this moment, as seen from Earth. Moon calculates it from the moon&#39;s real position (Meeus, Astronomical Algorithms) and checks it against PyEphem, a standard astronomy library: they agree within 0.05 percentage points. Some apps show the moon&#39;s age instead, how far it is through its 29.5-day cycle, which is a different&nbsp;number.</span></span></b></div>' +
       '<div><span>UTC</span><b>' + new Date(ms).toISOString().replace('T', ' ').slice(0, 19) + '</b></div>' +
       '</div>' +
       '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>' +

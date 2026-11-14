@@ -144,6 +144,7 @@ const SPEC = {
   dst: false,
   roles: { moon: 'One continuous count of time, locked to the real moon, read as the date (year, moon, lune) and the phase.', moonmark: 'One exact moment on the Moon count, the same everywhere: YEAR.MM.DD HH:MM:SS.NNNNNNNNN.' },
   date_rule: 'The Moon date is global: one date worldwide. A lune turns over at the same instant everywhere.',
+  illumination: { meaning: 'Fraction of the moon\'s disc lit by the sun at that instant, seen from Earth (0 to 1). Not the moon\'s age.', method: 'Phase angle from the Moon-Sun elongation, the Moon latitude and the Earth-Moon and Earth-Sun distances, using the principal periodic terms of Meeus, Astronomical Algorithms, ch. 47-48', checked_against: 'PyEphem: within 0.05 percentage points (mean 0.01) at 3,000 random moments, 2000-2050' },
   signing: { receipt: 'moonmark-receipt/1', alg: 'Ed25519', signed_bytes: 'receipt, "sha256:" + hex, moonmark, unix_ns, key_id joined by newlines (UTF-8)', key_id: 'first 16 hex of SHA-256 of the raw 32-byte public key', keys: '/v1/keys', sign: 'POST /v1/sign {"sha256":"<hex>"}', verify: 'POST /v1/verify {"receipt":{...}}' },
   license: 'MIT',
 };

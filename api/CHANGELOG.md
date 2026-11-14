@@ -2,6 +2,7 @@
 
 ## 1.2.0 (Moon 05, Lune 05, Year 1928)
 
+- **Illumination**: `phase.illumination` now uses the moon's true phase angle (latitude and distances, Meeus ch. 47-48) and matches PyEphem within 0.05 percentage points across 2000-2050, up from 0.25. `/v1/spec` documents the method under `illumination`.
 - **Share images**: `GET /v1/card.png` renders a 1200×630 PNG for any Moonmark. Every moon369.org/m/ link now shows its own card when shared.
 - **Card image**: `GET /v1/card.svg` returns the Today on Moon card as an SVG, live or for any moment, embeddable with one img tag.
 

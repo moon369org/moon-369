@@ -120,8 +120,10 @@ describe('year and phase', () => {
     expect(off(truePhase(at('2026-11-01T20:28:00Z')), 0.75)).toBeLessThan(tol);
     expect(off(truePhase(at('2000-01-06T18:14:00Z')), 0)).toBeLessThan(tol);
   });
-  it('illumination is 0 at new moon and 1 at full moon', () => {
-    expect(illumination(BigInt(Date.parse('2026-11-09T07:02:00Z')) * 1_000_000n)).toBeLessThan(0.001);
-    expect(illumination(BigInt(Date.parse('2026-11-24T14:53:00Z')) * 1_000_000n)).toBeGreaterThan(0.999);
+  it('illumination is near 0 at new moon and near 1 at full moon', () => {
+    // The moon sits slightly above or below the sun's path, so even exact new and full moons
+    // are not perfectly 0% or 100% lit. PyEphem: 0.19% and 99.81% for these two.
+    expect(illumination(BigInt(Date.parse('2026-11-09T07:02:00Z')) * 1_000_000n)).toBeLessThan(0.003);
+    expect(illumination(BigInt(Date.parse('2026-11-24T14:53:00Z')) * 1_000_000n)).toBeGreaterThan(0.997);
   });
 });

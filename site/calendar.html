@@ -35,6 +35,18 @@ p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
 @keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
 header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+.mi{position:relative;display:inline-flex;vertical-align:middle;margin-left:6px}
+.mi-b{all:unset;box-sizing:border-box;width:18px;height:18px;border:1px solid #5E6064;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1;letter-spacing:0;color:#B9B6AE;cursor:help}
+.mi-b::before{content:"";position:absolute;inset:-13px}
+.mi-b:hover,.mi-b:focus-visible{border-color:#E9E4D8;color:#E9E4D8}
+.mi-t{position:absolute;z-index:50;top:calc(100% + 10px);left:50%;transform:translateX(-50%);width:min(300px,calc(100vw - 40px));padding:14px 16px;background:#141517;border:1px solid #3A3C41;color:#D7D3CA;font-family:Inter,sans-serif;font-size:13px;line-height:1.55;letter-spacing:0;text-transform:none;text-align:left;font-weight:400;opacity:0;visibility:hidden;transition:opacity .15s}
+.mi:hover .mi-t,.mi:focus-within .mi-t{opacity:1;visibility:visible}
+.mi-host{position:relative}
+.mi-host:focus-within,.mi-host:hover{z-index:40}
+html.mm-js [data-dc-root] section:has(.mi:focus-within),html.mm-js [data-dc-root] section:has(.mi:hover),section:has(.mi:focus-within){z-index:50}
+
+.mi-t{font-family:Inter,sans-serif!important;font-size:13px!important;letter-spacing:0!important;text-transform:none!important;color:#D7D3CA!important;font-weight:400!important}
+@media (max-width:720px){.mi{position:static}.mi-t{left:0;right:0;width:auto;transform:none}}
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
@@ -142,7 +154,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">TODAY ON MOON</div>
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: 0.14em" class="mc-date"><span class="mc-seg">YEAR {{now.y}}</span><span class="mc-dot"> · </span><span class="mc-seg">MOON {{now.m}}</span><span class="mc-dot"> · </span><span class="mc-seg">LUNE {{now.d}}</span></h1>
 <div style="display: flex; align-items: center; gap: 0.3em; font-family: 'JetBrains Mono', monospace; font-size: clamp(40px, 6vw, 72px); line-height: 1; font-variant-numeric: tabular-nums"><svg class="mc-ph-sm" aria-hidden="true" viewBox="-11 -11 22 22" style="width: 0.82em; height: 0.82em; display: none; flex: none"><circle r="10" style="fill: #24262A"></circle><path d="{{now.ph}}" style="fill: #E9E4D8"></path></svg><div>{{now.clock}}</div></div>
-<div style="font-size: 14px; color: #8A8B8F">{{now.meta}}</div>
+<div class="mi-host" style="font-size: 14px; color: #8A8B8F">{{now.meta}}<span class="mi"><button type="button" class="mi-b" aria-label="What the lit percentage means" aria-describedby="mi-t2">i</button><span role="tooltip" id="mi-t2" class="mi-t">Share of the moon&#39;s face lit by the sun at this moment, as seen from Earth. Moon calculates it from the moon&#39;s real position (Meeus, Astronomical Algorithms) and checks it against PyEphem, a standard astronomy library: they agree within 0.05 percentage points. Some apps show the moon&#39;s age instead, how far it is through its 29.5-day cycle, which is a different&nbsp;number.</span></span></div>
 <div class="{{now.seasonCls}}" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; border: 1px solid #24262A; padding: 6px 14px; font-size: 13px">
 <span aria-hidden="true" style="width: 9px; height: 9px; border-radius: 50%; background: var(--season)"></span>
 <span class="mc-hide-m">{{now.season}}</span><span class="mc-show-m">{{now.seasonShort}}</span>
@@ -391,7 +403,7 @@ class Component extends DCLogic {
       y: today.year, m: pad(today.moon), d: pad(today.day),
       seasonShort: SEASON[sa.season] + ' · ' + ['Equinox', 'Solstice', 'Equinox', 'Solstice'][sa.next.i] + ' in ' + Math.round((sa.next.t - nowMs) / c.MS_DAY) + ' lunes',
       clock: pad(live.h) + ':' + pad(live.m) + ':' + pad(live.s),
-      meta: c.phaseName(live.phase) + ' · ' + Math.round(window.MoonPhase.illumination(nowMs) * 100) + '% lit · Moonmark ' + live.year + '.' + pad(live.moon) + '.' + pad(live.day) + ' ' + pad(live.h) + ':' + pad(live.m),
+      meta: c.phaseName(live.phase) + ' · ' + (window.MoonPhase.illumination(nowMs) * 100).toFixed(1) + '% lit · Moonmark ' + live.year + '.' + pad(live.moon) + '.' + pad(live.day) + ' ' + pad(live.h) + ':' + pad(live.m),
       ph: c.phasePath(live.phase),
       seasonCls: 's' + sa.season,
       season: SEASON[sa.season] + ' · ' + EVENT[sa.next.i] + ' in ' + ((sa.next.t - nowMs) / c.MS_DAY).toFixed(1) + ' lunes'
@@ -404,7 +416,7 @@ class Component extends DCLogic {
       { k: 'Lune of year', v: (sel.dYear + 1) + ' of 369' },
       { k: 'Your days', v: (() => { const out = []; for (let t = ss - c.MS_DAY; t < se + c.MS_DAY; t += 3600000 * 6) { const o = offAt(t); const noon = Date.UTC(o.y, o.mo - 1, o.d, 12) - o.off; if (noon >= ss && noon < se && fmtDay) { const lbl = fmtDay.format(noon); if (out.indexOf(lbl) < 0) out.push(lbl); } } return out.length ? out.join(' and ') : 'None'; })() },
       { k: 'Lune runs', v: fmtLocal.format(ss) + ' to ' + fmtLocal.format(se) },
-      { k: 'Phase', v: c.phaseName(sp) + ' · ' + Math.round(si * 100) + '% lit' },
+      { k: 'Phase', v: c.phaseName(sp) + ' · ' + (si * 100).toFixed(1) + '% lit' },
       { k: 'Season', v: SEASON[c.seasonAt(se - 1).season] }
     ];
 

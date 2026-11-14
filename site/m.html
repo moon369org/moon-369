@@ -35,6 +35,18 @@ p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
 @keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
 header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+.mi{position:relative;display:inline-flex;vertical-align:middle;margin-left:6px}
+.mi-b{all:unset;box-sizing:border-box;width:18px;height:18px;border:1px solid #5E6064;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1;letter-spacing:0;color:#B9B6AE;cursor:help}
+.mi-b::before{content:"";position:absolute;inset:-13px}
+.mi-b:hover,.mi-b:focus-visible{border-color:#E9E4D8;color:#E9E4D8}
+.mi-t{position:absolute;z-index:50;top:calc(100% + 10px);left:50%;transform:translateX(-50%);width:min(300px,calc(100vw - 40px));padding:14px 16px;background:#141517;border:1px solid #3A3C41;color:#D7D3CA;font-family:Inter,sans-serif;font-size:13px;line-height:1.55;letter-spacing:0;text-transform:none;text-align:left;font-weight:400;opacity:0;visibility:hidden;transition:opacity .15s}
+.mi:hover .mi-t,.mi:focus-within .mi-t{opacity:1;visibility:visible}
+.mi-host{position:relative}
+.mi-host:focus-within,.mi-host:hover{z-index:40}
+html.mm-js [data-dc-root] section:has(.mi:focus-within),html.mm-js [data-dc-root] section:has(.mi:hover),section:has(.mi:focus-within){z-index:50}
+.mi-t{font-family:Inter,sans-serif!important;font-size:13px!important;letter-spacing:0!important;text-transform:none!important;color:#D7D3CA!important;font-weight:400!important}
+@media (max-width:720px){.mi{position:static}.mi-t{left:0;right:0;width:auto;transform:none}}
+.mk-rows div:focus-within{z-index:40}
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
@@ -103,7 +115,7 @@ footer > div > div:first-child svg{width:64px!important}
 .mk-mark>span{display:block}
 .mk-ey span{white-space:nowrap}
 .mk-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:#1C1D20;border:1px solid #1C1D20}
-.mk-rows div{background:#0B0B0D;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.mk-rows div{position:relative;background:#0B0B0D;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
 .mk-rows span{font-family:'Syncopate',sans-serif;font-size:9.5px;letter-spacing:.22em;color:#8A8B8F}
 .mk-rows b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:14px}
 .mk-btns{display:flex;gap:12px;flex-wrap:wrap}
