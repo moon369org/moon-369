@@ -823,7 +823,7 @@ class Component extends DCLogic {
             const rc = b.receipt;
             if (this.state && this.state.sg && this.state.sg.href) URL.revokeObjectURL(this.state.sg.href);
             const href = URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }));
-            this.setState({ sg: { s: 'done', name: file.name, sha, mark: rc.moonmark, key: rc.key_id, url: b.moonmark_url, href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' } });
+            this.setState({ sg: { s: 'done', name: file.name, sha, mark: rc.moonmark, key: rc.key_id, url: b.signed_url || (b.moonmark_url + '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + '&g=' + rc.signature), href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' } });
           });
       })
       .catch((err) => this.setState({ sg: { s: 'err', err: (err && err.message && !/fetch|network/i.test(err.message)) ? err.message : 'Could not reach Moon. Check your connection and try again.' } }));

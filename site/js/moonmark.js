@@ -26,9 +26,53 @@
   var path = function (mk) { return mk.y + '.' + p(mk.m) + '.' + p(mk.d) + '-' + p(mk.h) + '.' + p(mk.mi) + '.' + p(mk.s) + '.' + p(mk.ns, 9); };
   var nsGroups = function (ns) { var d = p(ns, 9); return '.' + d.slice(0, 3) + ' ' + d.slice(3, 6) + ' ' + d.slice(6); };
 
-  function render(root, mk, fresh) {
+  // A signed link carries the receipt: ?s=<sha256>&u=<unix_ns>&k=<key_id>&g=<signature>
+  function receiptFrom(mk) {
+    var q = new URLSearchParams(location.search);
+    var s = (q.get('s') || '').toLowerCase(), u = q.get('u'), k = q.get('k'), g = q.get('g');
+    if (!/^[0-9a-f]{64}$/.test(s) || !/^-?\d+$/.test(u || '') || !/^[0-9a-f]{16}$/.test(k || '') || !/^[A-Za-z0-9_-]{40,120}$/.test(g || '')) return null;
+    return { receipt: 'moonmark-receipt/1', sha256: s, moonmark: text(mk) + '.' + p(mk.ns, 9), unix_ns: u, key_id: k, signature: g };
+  }
+  var esc = function (x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  function sigBox(root, rc) {
+    var box = root.querySelector('[data-mk-sig]'); if (!box) return;
+    var short = rc.sha256.slice(0, 12) + '…' + rc.sha256.slice(-8);
+    box.className = 'mk-sig';
+    box.innerHTML = '<div class="mk-sig-h">CHECKING SIGNATURE…</div>';
+    fetch('https://api.moon369.org/v1/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receipt: rc }) })
+      .then(function (r) { return r.json(); })
+      .then(function (b) {
+        if (!b || !b.valid) {
+          box.className = 'mk-sig mk-sig-bad';
+          box.innerHTML = '<div class="mk-sig-h">SIGNATURE DOES NOT CHECK OUT</div><div class="mk-sig-p">This link&#39;s receipt is not valid' + (b && b.reason ? ' (' + esc(b.reason) + ')' : '') + '. Do not rely on it.</div>';
+          return;
+        }
+        var href = URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }));
+        box.className = 'mk-sig mk-sig-ok';
+        box.innerHTML =
+          '<div class="mk-sig-h"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>SIGNED · VERIFIED</div>' +
+          '<div class="mk-sig-p">Moon signed this file fingerprint at this exact moment. The signature checks out.</div>' +
+          '<div class="mk-sig-r"><span>SHA-256</span><b title="' + rc.sha256 + '">' + short + '</b></div>' +
+          '<div class="mk-sig-r"><span>KEY</span><b>' + rc.key_id + ' · Ed25519</b></div>' +
+          '<label class="mk-sig-btn">CHECK A FILE<input type="file" data-mk-file></label>' +
+          '<a class="mk-sig-btn" href="' + href + '" download="' + rc.moonmark.replace(/[^0-9.]+/g, '_') + '.moonmark.json">SAVE RECEIPT</a>' +
+          '<div class="mk-sig-m" data-mk-match></div>';
+        var inp = box.querySelector('[data-mk-file]'), out = box.querySelector('[data-mk-match]');
+        inp.onchange = function () {
+          var f = inp.files && inp.files[0]; inp.value = ''; if (!f) return;
+          out.textContent = 'Fingerprinting ' + f.name + '…';
+          f.arrayBuffer().then(function (b2) { return crypto.subtle.digest('SHA-256', b2); }).then(function (d) {
+            var h = Array.from(new Uint8Array(d), function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+            out.className = 'mk-sig-m ' + (h === rc.sha256 ? 'yes' : 'no');
+            out.textContent = h === rc.sha256 ? '✓ ' + f.name + ' is the exact file Moon signed.' : '✕ ' + f.name + ' is not the file Moon signed.';
+          }).catch(function () { out.textContent = 'Could not read that file.'; });
+        };
+      })
+      .catch(function () { box.innerHTML = '<div class="mk-sig-h">COULD NOT REACH MOON TO CHECK THE SIGNATURE</div>'; });
+  }
+  function render(root, mk, fresh, rc) {
     var ms = toMs(mk);
-    var url = 'https://moon369.org/m/' + path(mk);
+    var url = 'https://moon369.org/m/' + path(mk) + (rc ? '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + '&g=' + rc.signature : '');
     var f = window.MoonPhase ? window.MoonPhase.fraction(ms) : 0;
     var il = window.MoonPhase ? (window.MoonPhase.illumination(ms) * 100).toFixed(1) : '0.0';
     var nm = window.MoonPhase ? window.MoonPhase.name(f) : '';
@@ -52,6 +96,7 @@
       '<div class="mk-grid">' +
       '<div class="mk-main">' +
       (fresh ? '<div class="mk-l">JUST MARKED</div>' : '') +
+      (rc ? '<div data-mk-sig></div>' : '') +
       '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" role="img" aria-label="' + nm + '"><circle r="10" fill="#24262A"/><path d="' + ph + '" fill="#E9E4D8"/></svg>' +
       '<div class="mk-cells"><div><i>YEAR</i><b>' + mk.y + '</b></div><div><i>MOON</i><b>' + p(mk.m) + '</b></div><div><i>LUNE</i><b>' + p(mk.d) + '</b></div></div></div>' +
       '<div class="mk-mark" aria-label="Moonmark ' + text(mk) + '.' + p(mk.ns, 9) + '"><span>' + mk.y + '.' + p(mk.m) + '.' + p(mk.d) + '</span> <span>' + p(mk.h) + ':' + p(mk.mi) + ':' + p(mk.s) + '<span class="mk-ns">' + nsGroups(mk.ns) + '</span></span></div>' +
@@ -63,8 +108,9 @@
       '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>' +
       '</div>' +
       '<div class="mk-side"><div class="mk-qr">' + qr + '</div><div class="mk-cap">Scan to open this Moonmark in your own local time.</div>' +
-      '<div class="mk-note">This Moonmark is unsigned. A signed Moonmark from Moon proves when something happened.</div></div>' +
+      (rc ? '' : '<div class="mk-note">This Moonmark is unsigned. A signed Moonmark from Moon proves when something happened.</div>') + '</div>' +
       '</div>';
+    if (rc) sigBox(root, rc);
     root.querySelector('[data-mk-copy]').onclick = function (e) {
       try { navigator.clipboard.writeText(url); e.target.textContent = 'COPIED'; } catch (err) { e.target.textContent = url; }
     };
@@ -83,7 +129,7 @@
     if (q && !mk) { root.innerHTML = '<div class="mk-l">THAT IS NOT A VALID MOONMARK</div>'; mk = null; }
     var fresh = false;
     if (!mk) { mk = fromMs(Date.now()); fresh = !q; }
-    render(root, mk, false);
+    render(root, mk, false, mk ? receiptFrom(mk) : null);
     return true;
   }
   var t = 0, iv = setInterval(function () { if ((window.MoonPhase && window.qrcode && start()) || ++t > 80) clearInterval(iv); }, 100);

@@ -4,7 +4,7 @@ const MARK = /^(\d{1,7})\.(\d{1,2})\.(\d{1,2})(?:[-T ](\d{1,2})[.:](\d{2})(?:[.:
 const p2 = (n) => String(n).padStart(2, '0');
 const escAttr = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
-export function previewTags(html, raw) {
+export function previewTags(html, raw, signed = false) {
   const m = MARK.exec(raw || '');
   if (!m) return html;
   const [, y, mo, d, h = '0', mi = '0', s = '0', ns = ''] = m;
@@ -13,8 +13,10 @@ export function previewTags(html, raw) {
   const path = `${+y}.${p2(+mo)}.${p2(+d)}-${p2(+h)}.${p2(+mi)}.${p2(+s)}.${nine}`;
   const pageUrl = `https://moon369.org/m/${path}`;
   const img = `https://api.moon369.org/v1/card.png?moonmark=${path}`;
-  const title = `Moonmark ${+y}.${p2(+mo)}.${p2(+d)} ${p2(+h)}:${p2(+mi)}:${p2(+s)}`;
-  const desc = `One exact moment, the same everywhere: Year ${+y}, Moon ${p2(+mo)}, Lune ${p2(+d)}. Open it in your own local time.`;
+  const title = `${signed ? 'Signed ' : ''}Moonmark ${+y}.${p2(+mo)}.${p2(+d)} ${p2(+h)}:${p2(+mi)}:${p2(+s)}`;
+  const desc = signed
+    ? `Moon signed a file fingerprint at this exact moment: Year ${+y}, Moon ${p2(+mo)}, Lune ${p2(+d)}. Open it to check the signature.`
+    : `One exact moment, the same everywhere: Year ${+y}, Moon ${p2(+mo)}, Lune ${p2(+d)}. Open it in your own local time.`;
   const set = (re, val) => { html = html.replace(re, (_, a, b) => a + escAttr(val) + b); };
   set(/(<link rel="canonical" href=")[^"]*(")/, pageUrl);
   set(/(<meta property="og:url" content=")[^"]*(")/, pageUrl);
@@ -36,7 +38,7 @@ export async function GET(request) {
   try {
     const page = await fetch(new URL('/m', url.origin));
     if (!page.ok) throw new Error('page ' + page.status);
-    const html = previewTags(await page.text(), raw);
+    const html = previewTags(await page.text(), raw, /^[0-9a-f]{64}$/i.test(url.searchParams.get('s') || ''));
     return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=0, s-maxage=86400' } });
   } catch (e) {
     return Response.redirect(new URL('/m?m=' + encodeURIComponent(raw), url.origin).toString(), 302);

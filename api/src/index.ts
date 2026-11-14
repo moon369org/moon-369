@@ -311,6 +311,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         return json({
           receipt,
           moonmark_url: MARK_BASE + moonmarkPath(mark),
+          signed_url: MARK_BASE + moonmarkPath(mark) + `?s=${receipt.sha256}&u=${receipt.unix_ns}&k=${receipt.key_id}&g=${receipt.signature}`,
           utc: unixNsToIso(ns),
           accuracy_ns: Number(env.CLOCK_ACCURACY_NS ?? 1_000_000),
           clock: env.CLOCK_SOURCE ?? 'server-ntp',
