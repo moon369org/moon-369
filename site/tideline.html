@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <title>Tideline · Moon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger.">
+<meta name="description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger and Bitcoin.">
 <link rel="canonical" href="https://moon369.org/tideline">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Moon">
 <meta property="og:url" content="https://moon369.org/tideline">
 <meta property="og:title" content="The Tideline · Moon">
-<meta property="og:description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger.">
+<meta property="og:description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger and Bitcoin.">
 <meta property="og:image" content="https://moon369.org/assets/og/tideline.jpg?v=1">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Moon Tideline, over a photograph of the moon">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Tideline · Moon">
-<meta name="twitter:description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger.">
+<meta name="twitter:description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger and Bitcoin.">
 <meta name="twitter:image" content="https://moon369.org/assets/og/tideline.jpg?v=1">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <meta name="theme-color" content="#0B0B0D">
@@ -120,7 +120,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 100px 32px 240px; display: flex; flex-direction: column; gap: 24px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F; letter-spacing: 0.3em">MOON&#39;S PUBLIC LOG</div>
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">TIDELINE</h1>
-<p style="margin: 0; max-width: 720px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Every lune, Moon seals its signed Moonmarks into a tide: one fingerprint of every receipt, chained to the tide before it, signed with Moon&#39;s keys and anchored on the XRP Ledger. After that, no one can add, remove or backdate a receipt, Moon&nbsp;included.</p>
+<p style="margin: 0; max-width: 720px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Every lune, Moon seals its signed Moonmarks into a tide: one fingerprint of every receipt, chained to the tide before it, signed with Moon&#39;s keys and anchored on the XRP Ledger and Bitcoin. After that, no one can add, remove or backdate a receipt, Moon&nbsp;included.</p>
 </div>
 </section>
 
@@ -162,7 +162,8 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">ROOT</span><span title="{{t.root}}">{{t.rootShort}}</span></div>
 <div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">CHAINED TO</span><span>{{t.prevShort}}</span></div>
 <div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">SIGNED WITH</span><span>{{t.algs}}</span></div>
-<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">XRP LEDGER</span><span>{{t.anchorText}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">XRP LEDGER</span><span>{{t.anchorText}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">BITCOIN</span><span>{{t.btcText}}<sc-if value="{{t.otsUrl}}"> &middot; <a href="{{t.otsUrl}}" style="color: #E9E4D8; text-decoration: underline; text-underline-offset: 3px">.ots</a></sc-if></span></div>
 </div>
 </sc-for>
 </div>
@@ -178,7 +179,8 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">ROOT</span><span title="{{ex.root}}">{{ex.rootShort}}</span></div>
 <div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">CHAINED TO</span><span>{{ex.prevShort}}</span></div>
 <div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">SIGNED WITH</span><span>{{ex.algs}}</span></div>
-<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">XRP LEDGER</span><span>{{ex.anchorText}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">XRP LEDGER</span><span>{{ex.anchorText}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">BITCOIN</span><span>{{ex.btcText}}<sc-if value="{{ex.otsUrl}}"> &middot; <a href="{{ex.otsUrl}}" style="color: #E9E4D8; text-decoration: underline; text-underline-offset: 3px">.ots</a></sc-if></span></div>
 </div>
 </div>
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px"><span style="font-size: 15px; color: #8A8B8F">Want to see it with tides in it?</span><a href="/tideline?preview" style="border: 1px solid #E9E4D8; padding: 16px 26px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em; display: inline-flex; align-items: center">SEE A FULL PREVIEW</a></div>
@@ -192,7 +194,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">01 · RECORD</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every receipt Moon signs is added to its lune&#39;s list the moment it&#39;s&nbsp;signed.</p></div>
 <div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">02 · SEAL</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">When the lune ends, its receipts become one Merkle root, the same structure that secures website certificates, signed with Ed25519 and&nbsp;ML-DSA-65.</p></div>
 <div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">03 · CHAIN</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Each tide includes the previous tide&#39;s fingerprint, so the newest tide vouches for the whole&nbsp;history.</p></div>
-<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04 · ANCHOR</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">The tide&#39;s fingerprint is written to the XRP Ledger. Once the ledger closes, the tide can never be quietly&nbsp;changed.</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04 · ANCHOR</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">The tide&#39;s fingerprint is written to the XRP Ledger in seconds, and into Bitcoin through OpenTimestamps within hours. After that, the tide can never be quietly&nbsp;changed.</p></div>
 </div>
 </section>
 
@@ -252,7 +254,7 @@ class Component extends DCLogic {
       }
       const root = await rootOf(leaves), lune = moonAt(start + DAY / 2).lune;
       const hash = hex(await sha(enc.encode(['tideline/1', 'lune:' + lune, 'size:' + n, 'root:' + root, 'prev:' + (prev || 'none')].join('\n'))));
-      const tide = { tideline: 'tideline/1', lune, size: n, root, prev, hash, pq: { alg: 'ML-DSA-65' }, anchor: { network: 'xrpl', ledger_index: 104880000 + (7 - back) * 22300, explorer: '' } };
+      const tide = { tideline: 'tideline/1', lune, size: n, root, prev, hash, pq: { alg: 'ML-DSA-65' }, anchor: { network: 'xrpl', ledger_index: 104880000 + (7 - back) * 22300, explorer: '' }, bitcoin: back === 1 ? { status: 'pending' } : { status: 'confirmed', block_height: 927300 + (7 - back) * 144 } };
       tides.unshift(tide); prev = hash;
       book.set(lune, { tide, receipts, leaves });
       if (back === 2) sample = receipts[Math.floor(receipts.length / 2)];
@@ -310,7 +312,9 @@ class Component extends DCLogic {
       sizeText: t.size === 1 ? '1 receipt' : t.size.toLocaleString('en-US') + ' receipts',
       algs: t.pq ? 'Ed25519 + ML-DSA-65' : 'Ed25519',
       anchorText: t.anchor ? 'ledger ' + (t.anchor.ledger_index || '').toLocaleString('en-US') + (t.anchor.explorer ? '' : ' (sample)') : 'not anchored',
-      anchorUrl: t.anchor ? t.anchor.explorer : ''
+      anchorUrl: t.anchor ? t.anchor.explorer : '',
+      btcText: !t.bitcoin ? 'not yet' : t.bitcoin.status === 'confirmed' ? 'block ' + Number(t.bitcoin.block_height).toLocaleString('en-US') + (t.bitcoin.ots ? '' : ' (sample)') : 'confirming, a few hours',
+      otsUrl: t.bitcoin && t.bitcoin.ots ? 'https://api.moon369.org' + t.bitcoin.ots : ''
     });
     const tides = tl ? (tl.tides || []).map(fmt) : [];
     // The open lune and when it ends, from the Moon standard itself (same math as the API).
@@ -330,7 +334,7 @@ class Component extends DCLogic {
       openLune, sealsIn, openCount: s.err ? '–' : s.openSize == null ? '…' : Number(s.openSize).toLocaleString('en-US'),
       tides, hasTides: tides.length > 0, noTides: tides.length === 0,
       status: this.isPreview ? 'SAMPLE TIDES' : s.err === 'soon' ? 'THE TIDELINE IS STARTING' : s.err ? 'COULD NOT REACH MOON' : tl ? tides.length + (tides.length === 1 ? ' TIDE' : ' TIDES') + ' SHOWN' : 'LOADING',
-      ex: { lune: '1928.05.04', sizeText: '214 receipts', root: '', rootShort: '7f3a91c0d2…e4b81c', prevShort: '19c4e0aa57…02f7d9', algs: 'Ed25519 + ML-DSA-65', anchorText: 'ledger 104,882,113' },
+      ex: { lune: '1928.05.04', sizeText: '214 receipts', root: '', rootShort: '7f3a91c0d2…e4b81c', prevShort: '19c4e0aa57…02f7d9', algs: 'Ed25519 + ML-DSA-65', anchorText: 'ledger 104,882,113', btcText: 'block 927,418', otsUrl: '' },
       isPreview: !!this.isPreview, sampleHref: s.sampleHref || '#', pick: this._pick, checkText: c.text || '', checkColor: c.color || '#8A8B8F'
     };
   }

@@ -77,3 +77,38 @@ describe('the Tideline', () => {
     expect((await handle(new Request('https://api.example.org/v1/tideline'), {})).status).toBe(503);
   });
 });
+
+describe('Tideline in Bitcoin (OpenTimestamps, calendars mocked)', () => {
+  it('stamps each tide when sealed, serves the proof, and records confirmation later', async () => {
+    const { stamp, upgrade, summarize, serializeNode, parseOtsFile } = await import('../src/ots');
+    const { readFileSync } = await import('node:fs');
+    const fx = (n: string) => readFileSync(new URL('./fixtures/' + n, import.meta.url));
+    const pending = serializeNode(parseOtsFile(fx('incomplete.txt.ots')).root);
+    const hw = parseOtsFile(fx('hello-world.txt.ots')).root;
+    const find = (n: any): any => n.atts.some((a: any) => a.tag === '0588960d73d71901') ? n : n.ops.map((o: any) => find(o.child)).find(Boolean);
+    const confirmedSub = serializeNode(find(hw));
+    let confirmed = false;
+    const fakeFetch = (async (url: string) => url.endsWith('/digest') ? new Response(pending) : confirmed ? new Response(confirmedSub) : new Response('', { status: 404 })) as unknown as typeof fetch;
+    const btc = { stamp: (d: string) => stamp(d, fakeFetch, ['https://cal.example']), upgrade: (f: Buffer) => upgrade(f, fakeFetch), summarize };
+    const store = memoryStore();
+    const l = luneOf(1_794_682_325_000_000_000n);
+    await record(store, signAt(luneStartNs(l) + 1n, 1));
+    const [tide] = await sealDue(store, signer, luneEndNs(l), undefined, 40, btc);
+    expect(tide.bitcoin).toMatchObject({ status: 'pending', ots: `/v1/tideline/${tide.lune}.ots` });
+    expect(summarize((await store.getOts(l))!).digest).toBe(tide.hash);   // the proof commits to the tide hash
+    // not yet in a block
+    const { upgradeBitcoin } = await import('../src/tideline');
+    expect(await upgradeBitcoin(store, btc)).toEqual([]);
+    // the calendar's transaction confirms
+    confirmed = true;
+    expect(await upgradeBitcoin(store, btc)).toEqual([tide.lune]);
+    expect((await store.getTide(l))!.bitcoin).toMatchObject({ status: 'confirmed', block_height: 358391 });
+    // API serves the tide text and its .ots
+    const env: Env = { TIDES: store };
+    const txt = await handle(new Request(`https://api.example.org/v1/tideline/${tide.lune}.txt`), env);
+    expect(await txt.text()).toContain('tideline/1\nlune:' + tide.lune);
+    const ots = await handle(new Request(`https://api.example.org/v1/tideline/${tide.lune}.ots`), env);
+    expect(ots.headers.get('Content-Type')).toBe('application/vnd.opentimestamps.v1');
+    expect(summarize(Buffer.from(await ots.arrayBuffer())).bitcoin).toEqual([358391]);
+  });
+});

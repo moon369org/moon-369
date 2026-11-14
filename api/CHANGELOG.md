@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.0 (Moon 05, Lune 05, Year 1928)
+
+- **Tides in Bitcoin**: every tide is also stamped through OpenTimestamps (free, no keys) and confirmed in a Bitcoin block within hours. The daily run upgrades pending proofs. Each tide shows `bitcoin` (status and block height), and `GET /v1/tideline/{lune}.ots` with `GET /v1/tideline/{lune}.txt` let anyone check it with the standard tools: `ots verify -f tide-<lune>.txt tide-<lune>.txt.ots`.
+
 ## 1.6.0 (Moon 05, Lune 05, Year 1928)
 
 - **The Tideline**: Moon's public, append-only log. Every signed Moonmark is recorded in its lune (`/v1/sign` returns `tideline`). When a lune ends, Moon seals it into a tide: the Merkle root (RFC 9162) of its receipts, chained to the previous tide, signed with Ed25519 and ML-DSA-65, and anchored on the XRP Ledger.

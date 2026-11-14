@@ -45,10 +45,15 @@ export interface TideStore {
   first(): Promise<number | null>;
   markFirst(lune: number): Promise<void>;
   recent(n: number): Promise<number[]>;
+  /** Replace a tide (only its anchors ever change after sealing). */
+  updateTide(tide: Tide): Promise<void>;
+  /** The tide's OpenTimestamps proof (.ots bytes). */
+  getOts(lune: number): Promise<Buffer | null>;
+  putOts(lune: number, file: Buffer): Promise<void>;
 }
 
 export function memoryStore(): TideStore {
-  const L = new Map<number, string[]>(), T = new Map<number, Tide>(); let h: number | null = null, f: number | null = null;
+  const L = new Map<number, string[]>(), T = new Map<number, Tide>(), O = new Map<number, Buffer>(); let h: number | null = null, f: number | null = null;
   return {
     async append(l, x) { const a = L.get(l) ?? []; a.push(x); L.set(l, a); return a.length - 1; },
     async leaves(l) { return [...(L.get(l) ?? [])]; },
@@ -57,6 +62,9 @@ export function memoryStore(): TideStore {
     async head() { return h; }, async setHead(l) { h = l; },
     async first() { return f; }, async markFirst(l) { if (f === null) f = l; },
     async recent(n) { return [...T.keys()].sort((a, b) => b - a).slice(0, n); },
+    async updateTide(t) { T.set(t.lune_index, t); },
+    async getOts(l) { return O.get(l) ?? null; },
+    async putOts(l, f) { O.set(l, f); },
   };
 }
 
@@ -79,6 +87,9 @@ export function upstashStore(url: string, token: string): TideStore {
     async first() { const [v] = await call([['GET', 'tl:first']]); return v === null || v === undefined ? null : Number(v); },
     async markFirst(l) { await call([['SET', 'tl:first', l, 'NX']]); },
     async recent(n) { const [a] = await call([['ZRANGE', 'tl:tides', 0, n - 1, 'REV']]); return ((a as string[]) ?? []).map(Number); },
+    async updateTide(t) { await call([['SET', `tl:tide:${t.lune_index}`, JSON.stringify(t)]]); },
+    async getOts(l) { const [v] = await call([['GET', `tl:ots:${l}`]]); return v ? Buffer.from(v as string, 'base64') : null; },
+    async putOts(l, f) { await call([['SET', `tl:ots:${l}`, f.toString('base64')]]); },
   };
 }
 
@@ -96,6 +107,7 @@ export interface Tide {
   key_id: string; signature: string;                       // Ed25519 over tideBytes
   pq?: { alg: 'ML-DSA-65'; key_id: string; signature: string };
   anchor?: Anchor | null;  // XRP Ledger transaction carrying the tide hash
+  bitcoin?: { status: 'pending' | 'confirmed'; calendars: number; block_height?: number; ots: string } | null; // OpenTimestamps
   hash: string;            // SHA-256 of tideBytes: the tide's identity
 }
 
@@ -119,12 +131,14 @@ export async function record(store: TideStore, r: Receipt): Promise<{ lune: stri
 }
 
 export type Anchorer = (tide: Tide) => Promise<Anchor | null>;
+/** Bitcoin anchoring through OpenTimestamps: stamp a digest, later upgrade the proof. */
+export interface BitcoinStamper { stamp(digestHex: string): Promise<Buffer | null>; upgrade(file: Buffer): Promise<{ file: Buffer; changed: boolean }>; summarize(file: Buffer): { bitcoin: number[]; pending: string[] } }
 
 /**
  * Seal every finished lune that isn't sealed yet, oldest first (idempotent; safe to run any time).
  * Empty lunes are sealed too, so the chain has no gaps.
  */
-export async function sealDue(store: TideStore, signer: Signer, nowNs: bigint, anchor?: Anchorer, max = 40): Promise<Tide[]> {
+export async function sealDue(store: TideStore, signer: Signer, nowNs: bigint, anchor?: Anchorer, max = 40, btc?: BitcoinStamper): Promise<Tide[]> {
   const head = await store.head(), first = await store.first();
   if (first === null) return [];
   let next = head === null ? first : head + 1;
@@ -139,6 +153,12 @@ export async function sealDue(store: TideStore, signer: Signer, nowNs: bigint, a
     const s = signer.signBytes(bytes);
     const tide: Tide = { tideline: TIDELINE, ...body, key_id: s.key_id, signature: s.signature, ...(s.pq ? { pq: s.pq as Tide['pq'] } : {}), hash: sha(bytes), anchor: null };
     if (anchor) { try { tide.anchor = await anchor(tide); } catch { tide.anchor = null; } }
+    if (btc) {
+      try {
+        const f = await btc.stamp(tide.hash);
+        if (f) { await store.putOts(next, f); tide.bitcoin = { status: 'pending', calendars: btc.summarize(f).pending.length, ots: `/v1/tideline/${tide.lune}.ots` }; }
+      } catch { /* the next run can stamp it */ }
+    }
     if (await store.putTide(tide)) out.push(tide);
     await store.setHead(next);
     prevHash = tide.hash;
@@ -160,3 +180,33 @@ export async function proofFor(store: TideStore, r: Receipt) {
 
 /** Check a tide's own signatures and hash (pure). Pair with verifyInclusion for a receipt. */
 export function tideHashOk(t: Tide): boolean { return sha(tideBytes(t)) === t.hash; }
+
+/** Ask the calendars whether recent tides have reached Bitcoin, and record it when they have. */
+export async function upgradeBitcoin(store: TideStore, btc: BitcoinStamper, recentN = 30): Promise<string[]> {
+  const done: string[] = [];
+  for (const l of await store.recent(recentN)) {
+    const t = await store.getTide(l);
+    if (!t) continue;
+    let f = await store.getOts(l);
+    if (!f && !t.bitcoin) {   // sealed while the calendars were unreachable: stamp it now
+      try { f = await btc.stamp(t.hash); } catch { f = null; }
+      if (!f) continue;
+      await store.putOts(l, f);
+      t.bitcoin = { status: 'pending', calendars: btc.summarize(f).pending.length, ots: `/v1/tideline/${t.lune}.ots` };
+      await store.updateTide(t);
+      continue;
+    }
+    if (!f || t.bitcoin?.status === 'confirmed') continue;
+    try {
+      const u = await btc.upgrade(f);
+      const blocks = btc.summarize(u.file).bitcoin;
+      if (u.changed && blocks.length) {
+        await store.putOts(l, u.file);
+        t.bitcoin = { status: 'confirmed', calendars: t.bitcoin?.calendars ?? 0, block_height: Math.min(...blocks), ots: `/v1/tideline/${t.lune}.ots` };
+        await store.updateTide(t);
+        done.push(t.lune);
+      }
+    } catch { /* try again next run */ }
+  }
+  return done;
+}

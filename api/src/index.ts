@@ -8,7 +8,7 @@ import { svgToPng } from './png.js';
 import { hashKey } from './keys.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
 import { QUICKNET, BEACON_NETWORK, type Beacon, type Chain } from './beacon.js';
-import { TIDELINE, record, sealDue, proofFor, parseLune, luneLabel, luneOf, luneEndNs, type TideStore, type Anchorer } from './tideline.js';
+import { TIDELINE, record, sealDue, upgradeBitcoin, proofFor, parseLune, luneLabel, luneOf, luneEndNs, tideBytes, type TideStore, type Anchorer, type BitcoinStamper } from './tideline.js';
 
 /** max overrides the limiter's default requests per minute (used for per-key limits). */
 export interface RateLimiter { limit(o: { key: string; max?: number }): Promise<{ success: boolean }> }
@@ -35,6 +35,8 @@ export interface Env {
   TIDES?: TideStore;
   /** Anchors each sealed tide (XRP Ledger). Optional. */
   ANCHOR?: Anchorer;
+  /** Anchors each tide in Bitcoin through OpenTimestamps. Optional. */
+  BITCOIN?: BitcoinStamper;
   /** Required on /v1/tideline/seal (Vercel Cron sends it as a Bearer token). */
   CRON_SECRET?: string;
   /** Beacon network to check against (default drand quicknet). Tests only. */
@@ -359,8 +361,9 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
       case path === `/${API_VERSION}/tideline/seal`: {
         if (!env.CRON_SECRET || req.headers.get('Authorization') !== `Bearer ${env.CRON_SECRET}`) throw new HttpError(403, 'forbidden', 'Sealing runs on Moon\'s schedule');
         if (!env.TIDES || !env.SIGNER) throw new HttpError(503, 'tideline_unavailable', 'The Tideline is not configured on this deployment');
-        const sealed = await sealDue(env.TIDES, env.SIGNER, nowUnixNs(), env.ANCHOR);
-        return json({ sealed: sealed.map((t) => ({ lune: t.lune, size: t.size, hash: t.hash, anchored: !!t.anchor })) }, 200, { 'Cache-Control': 'no-store' });
+        const sealed = await sealDue(env.TIDES, env.SIGNER, nowUnixNs(), env.ANCHOR, 40, env.BITCOIN);
+        const confirmed = env.BITCOIN ? await upgradeBitcoin(env.TIDES, env.BITCOIN) : [];
+        return json({ sealed: sealed.map((t) => ({ lune: t.lune, size: t.size, hash: t.hash, anchored: !!t.anchor, bitcoin: t.bitcoin?.status ?? null })), bitcoin_confirmed: confirmed }, 200, { 'Cache-Control': 'no-store' });
       }
 
       case path === `/${API_VERSION}/tideline/proof`: {
@@ -381,11 +384,19 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
 
       case path.startsWith(`/${API_VERSION}/tideline/`): {
         if (!env.TIDES) throw new HttpError(503, 'tideline_unavailable', 'The Tideline is not configured on this deployment');
-        const label = decodeURIComponent(path.slice(`/${API_VERSION}/tideline/`.length));
+        let label = decodeURIComponent(path.slice(`/${API_VERSION}/tideline/`.length));
+        const fmt = /\.ots$/.test(label) ? 'ots' : /\.txt$/.test(label) ? 'txt' : 'json';
+        label = label.replace(/\.(ots|txt)$/, '');
         const lune = parseLune(label);
         if (lune === null) throw new HttpError(400, 'bad_param', 'Use a lune like 1928.05.05');
         const tide = await env.TIDES.getTide(lune);
-        if (tide) return json(tide, 200, { ...FOREVER, ...planHdr });
+        if (tide && fmt === 'txt') return new Response(Buffer.from(tideBytes(tide)), { headers: { ...CORS, 'Content-Type': 'text/plain; charset=utf-8', 'Content-Disposition': `attachment; filename="tide-${tide.lune}.txt"`, 'Cache-Control': 'public, max-age=31536000, immutable' } });
+        if (tide && fmt === 'ots') {
+          const f = await env.TIDES.getOts(lune);
+          if (!f) throw new HttpError(404, 'not_found', 'This tide has no Bitcoin proof yet');
+          return new Response(new Uint8Array(f), { headers: { ...CORS, 'Content-Type': 'application/vnd.opentimestamps.v1', 'Content-Disposition': `attachment; filename="tide-${tide.lune}.txt.ots"`, 'Cache-Control': 'public, max-age=300' } });
+        }
+        if (tide) return json(tide, 200, { 'Cache-Control': 'public, max-age=300', ...planHdr });
         const size = (await env.TIDES.leaves(lune)).length;
         return json({ tideline: TIDELINE, lune: luneLabel(lune), status: luneEndNs(lune) > nowUnixNs() ? 'open' : 'pending', size, seals_after_utc: unixNsToIso(luneEndNs(lune)) }, 200, { 'Cache-Control': 'public, max-age=60', ...planHdr });
       }
