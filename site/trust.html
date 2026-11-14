@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trust · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Why a signed Moonmark can be trusted: Moon's public key, why a signature can't be faked, three ways to check one, and Moon's promises.">
+<link rel="canonical" href="https://moon369.org/trust">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/trust">
+<meta property="og:title" content="Why you can trust a signed Moonmark">
+<meta property="og:description" content="Why a signed Moonmark can be trusted: Moon's public key, why a signature can't be faked, three ways to check one, and Moon's promises.">
+<meta property="og:image" content="https://moon369.org/assets/og/home.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Moon, over a photograph of the moon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Why you can trust a signed Moonmark">
+<meta name="twitter:description" content="Why a signed Moonmark can be trusted: Moon's public key, why a signature can't be faked, three ways to check one, and Moon's promises.">
+<meta name="twitter:image" content="https://moon369.org/assets/og/home.jpg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<style>x-dc{display:none}html,body{background:#0B0B0D}html{scrollbar-width:thin;scrollbar-color:#2E3035 #0B0B0D}
+*{scrollbar-width:thin;scrollbar-color:#2E3035 transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#24262A;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#3A3B3F;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
+@keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
+header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+</style>
+<script src="js/preact.umd.js" defer></script>
+<script src="js/header.js" defer></script>
+<script src="js/dc-lite.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
+.pk-a,.pk-b,.pk-f{animation-duration:3.2s;animation-iteration-count:infinite;animation-fill-mode:both}
+.pk-a{animation-name:pkA}.pk-b{animation-name:pkB}.pk-f{animation-name:pkF}
+@keyframes pkA{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(-30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkB{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkF{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.6,1)}36%,54%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.6,1)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pk-a,.pk-b,.pk-f{animation:none}}
+@media (max-width: 720px){
+header > div{padding:16px 20px!important;gap:12px 16px!important}
+nav[aria-label="Main"]{gap:10px 18px!important;font-size:10px!important;letter-spacing:.18em!important}
+nav[aria-label="Main"] a{min-height:44px;display:inline-flex!important;align-items:center}
+nav[aria-label="Main"] a[style*="padding: 14px 22px"]{padding:0 14px!important}
+[style*="padding: 140px 32px"],[style*="padding: 160px 32px"],[style*="padding: 120px 32px"]{padding:72px 20px!important}
+[style*="padding: 120px 32px 140px"]{padding:56px 20px 80px!important}
+[style*="padding: 100px 32px 90px"]{padding:56px 20px 48px!important}
+[style*="padding: 64px 32px 120px"],[style*="padding: 80px 32px 120px"]{padding:40px 20px 80px!important}
+[style*="padding: 40px 32px"]{padding:32px 20px!important}
+[style*="padding: 40px 48px"]{padding:28px 22px!important}
+[style*="padding: 40px; display: flex"]{padding:24px!important;gap:24px!important}
+[style*="gap: 104px"]{gap:72px!important}
+[style*="gap: 80px"]{gap:48px!important}
+[style*="gap: 64px"]{gap:40px!important}
+[style*="gap: 56px"]{gap:36px!important}
+pre{font-size:12.5px!important}
+.mw-hint{display:block!important}
+}
+@media (max-width: 720px){
+footer > div{flex-direction:column!important;align-items:center!important;text-align:center;gap:28px!important}
+footer > div > div:first-child{align-items:center!important}
+footer > div > div:last-child{justify-content:center!important;gap:22px!important}
+footer > div > div:first-child svg{width:64px!important}
+}
+</style>
+</helmet>
+<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="/" aria-label="Moon home" style="display: block"><svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+</svg></a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: 'Syncopate', sans-serif; font-size: 11px; letter-spacing: 0.28em">
+<a href="/">HOME</a>
+<a href="/calendar">CALENDAR</a>
+<a href="/api">API</a>
+<a href="/uses" aria-current="page">USES</a>
+</nav>
+</div>
+</header>
+
+<section style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 90px; display: flex; flex-direction: column; gap: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F; letter-spacing: 0.3em">WHY YOU CAN TRUST IT</div>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">TRUST</h1>
+<p style="margin: 0; max-width: 680px; font-size: 18px; line-height: 1.65; color: #B9B6AE">A signed Moonmark is proof anyone can check for themselves, without taking Moon&#39;s word for it. Here is the key, why a signature can&#39;t be faked, and what Moon&nbsp;promises.</p>
+</div>
+</section>
+
+<section>
+<div style="max-width: 1280px; margin: 0 auto; padding: 0 32px">
+<article style="border-top: 1px solid #1C1D20; padding: 72px 0; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">01</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">MOON&#39;S KEY</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE">Every signed Moonmark is signed with this key. The private half never leaves Moon. The public half below is all anyone needs to check a signature, and it&#39;s published for everyone.</p>
+</div>
+<div style="border: 1px solid #E9E4D8; background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 8px; max-width: 880px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 12px"><span style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em">MOON&#39;S SIGNING KEY</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #0B0B0D; background: #E9E4D8; padding: 6px 10px">{{keyStatus}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 14px"><span style="color: #8A8B8F">KEY ID</span><span>{{keyId}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 14px"><span style="color: #8A8B8F">ALGORITHM</span><span>Ed25519</span></div>
+<div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 14px; flex-wrap: wrap"><span style="color: #8A8B8F">PUBLIC KEY</span><span style="word-break: break-all; text-align: right; flex: 1 1 280px">{{keyPub}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 14px"><span style="color: #8A8B8F">SOURCE</span><a href="https://api.moon369.org/v1/keys" style="color: #E9E4D8; text-decoration: underline; text-underline-offset: 3px">api.moon369.org/v1/keys</a></div>
+</div>
+</article>
+
+<article style="border-top: 1px solid #1C1D20; padding: 72px 0; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">02</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">WHY IT CAN&#39;T BE FAKED</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE">A signature is math, not a promise. Here is what makes it hold.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: #24262A; border: 1px solid #24262A"><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Only Moon can sign</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Signing needs Moon&#39;s private key, which no one else has. Copying Moon&#39;s code gives you everything except the ability to sign as&nbsp;Moon.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Change one bit, it breaks</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">The signature covers the file&#39;s fingerprint, the exact moment and the key together. Edit any of them and the check&nbsp;fails.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Moon&#39;s clock, not yours</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Moon stamps the moment it receives the fingerprint, down to the nanosecond. No one can pick the time, so no one can&nbsp;backdate.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Nothing hidden</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">The signing and checking code is open source on GitHub. Anyone can read exactly what a signature means and how it&#39;s&nbsp;made.</p></div></div>
+</article>
+
+<article style="border-top: 1px solid #1C1D20; padding: 72px 0; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">03</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">WHAT IT PROVES</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE">A signed Moonmark is precise about what it says. That&#39;s what makes it strong.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1px; background: #24262A; border: 1px solid #24262A">
+<div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">IT PROVES</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7; color: #E9E4D8">This exact file existed no later than this exact moment. Change a single pixel or character and the proof no longer&nbsp;matches.</p></div>
+<div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">IT DOES NOT PROVE</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Who made the file, or that it&#39;s original. Pair a signed Moonmark with your name, your account or your contract for&nbsp;that.</p></div>
+</div>
+</article>
+
+<article style="border-top: 1px solid #1C1D20; padding: 72px 0; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">CHECK ONE THREE WAYS</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE">The same answer every way. The third needs nothing from Moon at all.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px"><div style="display: flex; flex-direction: column; gap: 14px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">01 · WEBSITE</div><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Open the link</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every signed Moonmark has a link. Open it and Moon checks the signature in front of you. Drop in the file to confirm it&#39;s the exact one that was signed.</p><a href="/#sign" style="align-self: flex-start; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8; min-height: 44px; display: inline-flex; align-items: center">Sign a file to try it &rarr;</a></div><div style="display: flex; flex-direction: column; gap: 14px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">02 · API</div><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Ask Moon</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Send the receipt to <code>/v1/verify</code>. Add the file&#39;s fingerprint and Moon also confirms it matches.</p><pre style="margin: 0; padding: 18px 20px; background: #08080A; border: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; color: #E9E4D8; overflow-x: auto; white-space: pre">curl -X POST https://api.moon369.org/v1/verify \
+  -d '{"receipt": {...}}'
+# { "valid": true, ... }</pre></div><div style="display: flex; flex-direction: column; gap: 14px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">03 · OFFLINE</div><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Check it yourself</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">With the public key, anyone can check a receipt on their own machine. No Moon servers, no network, no trust in Moon&#39;s word.</p><pre style="margin: 0; padding: 18px 20px; background: #08080A; border: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; color: #E9E4D8; overflow-x: auto; white-space: pre">import { verify } from 'moon369';
+await verify(receipt, { content: file });
+// { valid: true, ... }</pre></div></div>
+</article>
+
+<article style="border-top: 1px solid #1C1D20; padding: 72px 0; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">05</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">MOON&#39;S PROMISES</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE">What you can rely on, for every receipt Moon has ever signed.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: #24262A; border: 1px solid #24262A"><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Receipts never expire</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">If Moon ever moves to a new key, the old one stays published as retired, so every receipt it signed keeps&nbsp;checking.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Changes are public</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Any new key is listed at <code>/v1/keys</code> and announced before it signs anything.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Your file stays yours</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Moon only ever receives a fingerprint. It can&#39;t see, store or rebuild your file from&nbsp;it.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Checking is free, forever</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Verifying a signed Moonmark costs nothing, needs no account, and works&nbsp;offline.</p></div></div>
+</article>
+
+</div>
+</section>
+
+<section style="border-top: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 90px; display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-end; justify-content: space-between">
+<div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">SIGN SOMETHING</h2>
+<p style="margin: 0; max-width: 620px; font-size: 17px; line-height: 1.65; color: #B9B6AE">Choose a file and get a signed Moonmark in seconds. Your file never leaves your&nbsp;device.</p>
+</div>
+<a href="/#sign" style="display: inline-flex; align-items: center; min-height: 48px; padding: 14px 28px; background: #E9E4D8; color: #0B0B0D; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em">TRY IT</a>
+</div>
+</section>
+
+</div>
+
+<footer style="border-top: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8A8B8F">
+<div style="display: flex; flex-direction: column; gap: 18px"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #24262A; stroke-width: 9"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap"><a href="/" style="color: #8A8B8F">HOME</a><a href="/calendar" style="color: #8A8B8F">CALENDAR</a><a href="/api" style="color: #8A8B8F">API</a><a href="/m" style="color: #8A8B8F">MOONMARK</a><a href="/uses" style="color: #8A8B8F">USES</a><a href="/trust" style="color: #8A8B8F">TRUST</a><a href="/press" style="color: #8A8B8F">PRESS</a></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":5200}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    fetch('https://api.moon369.org/v1/keys').then((r) => r.json()).then((b) => {
+      const k = (b.keys || []).find((x) => x.status === 'active');
+      if (k) this.setState({ key: k });
+    }).catch(() => {});
+  }
+  renderVals() {
+    const k = (this.state && this.state.key) || { key_id: '8efd3211b23533ed', public_key: '5jDbxW9WcpFMgLIjmu0QKtaDpzHzh1MqcNFCR3levJ0', status: 'active' };
+    return { keyId: k.key_id, keyPub: k.public_key, keyStatus: String(k.status || 'active').toUpperCase() };
+  }
+}
+</script>
+</body>
+</html>
