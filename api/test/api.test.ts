@@ -1,3 +1,4 @@
+import { hashKey, envKeyStore, newKey } from '../src/keys';
 import { describe, it, expect } from 'vitest';
 import { handle, type Env, type KeyStore, type RateLimiter } from '../src/index';
 
@@ -106,7 +107,7 @@ describe('limits and keys', () => {
     expect(r.headers.get('Retry-After')).toBe('60');
   });
   it('valid key uses the keyed tier', async () => {
-    const env: Env = { RATE_LIMITER: limiter(false), RATE_LIMITER_KEYED: limiter(true), API_KEYS: kv({ k_123: '{"plan":"pro"}' }) };
+    const env: Env = { RATE_LIMITER: limiter(false), RATE_LIMITER_KEYED: limiter(true), API_KEYS: kv({ [hashKey('k_123')]: '{"plan":"pro"}' }) };
     const r = await get('/v1/now', env, { Authorization: 'Bearer k_123' });
     expect(r.status).toBe(200);
     expect(r.headers.get('X-Moon-Plan')).toBe('pro');
@@ -114,6 +115,28 @@ describe('limits and keys', () => {
   it('401 on unknown key', async () => {
     const r = await get('/v1/now', { API_KEYS: kv({}) }, { Authorization: 'Bearer nope' });
     expect(r.status).toBe(401);
+  });
+  it('keys are looked up by hash, never raw', async () => {
+    const r = await get('/v1/now', { API_KEYS: kv({ k_123: '{"plan":"pro"}' }) }, { Authorization: 'Bearer k_123' });
+    expect(r.status).toBe(401);
+  });
+  it('403 on a switched-off key', async () => {
+    const r = await get('/v1/now', { API_KEYS: kv({ [hashKey('k_off')]: '{"plan":"pro","active":false}' }) }, { Authorization: 'Bearer k_off' });
+    expect(r.status).toBe(403);
+  });
+  it('per-key limit is passed to the limiter', async () => {
+    let seen: number | undefined;
+    const env: Env = { RATE_LIMITER_KEYED: { async limit(o) { seen = o.max; return { success: false }; } }, API_KEYS: kv({ [hashKey('k_9')]: '{"plan":"pro","per_min":5}' }) };
+    const r = await get('/v1/now', env, { Authorization: 'Bearer k_9' });
+    expect(seen).toBe(5);
+    expect(r.status).toBe(429);
+  });
+  it('GET /v1/me reports the plan', async () => {
+    const env: Env = { API_KEYS: envKeyStore(JSON.stringify({ [hashKey('k_me')]: { owner: 'Acme', plan: 'pro', per_min: 2000 } })) };
+    const b: any = await (await get('/v1/me', env, { Authorization: 'Bearer k_me' })).json();
+    expect(b).toMatchObject({ plan: 'pro', owner: 'Acme', per_min: 2000, keyed: true });
+    const o: any = await (await get('/v1/me', {})).json();
+    expect(o.plan).toBe('open');
   });
   it('health and index bypass limits', async () => {
     expect((await get('/health', { RATE_LIMITER: limiter(false) })).status).toBe(200);
@@ -135,5 +158,17 @@ describe('core only', () => {
   it('removed endpoints return 404', async () => {
     for (const p of ['/v1/light?lat=40.71&lon=-74.01', '/v1/sun?tz=UTC', '/v1/schedule?light=06:45&lat=40.71&lon=-74.01', '/v1/seasons/1928'])
       expect((await get(p)).status).toBe(404);
+  });
+});
+
+describe('key helpers', () => {
+  it('newKey makes moon_ keys that hash to 64 hex', () => {
+    const k = newKey();
+    expect(k).toMatch(/^moon_[A-Za-z0-9_-]{32}$/);
+    expect(hashKey(k)).toMatch(/^[0-9a-f]{64}$/);
+    expect(newKey()).not.toBe(k);
+  });
+  it('envKeyStore rejects a non-object', () => {
+    expect(() => envKeyStore('[]')).toThrow();
   });
 });

@@ -19,3 +19,11 @@ describe('rate limiting', () => {
     expect(blocked.headers.get('Retry-After')).toBe('60');
   });
 });
+
+describe('per-key max', () => {
+  it('max overrides the default', async () => {
+    const l = memoryLimiter(100);
+    expect((await l.limit({ key: 'a', max: 1 })).success).toBe(true);
+    expect((await l.limit({ key: 'a', max: 1 })).success).toBe(false);
+  });
+});

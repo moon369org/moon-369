@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 (Moon 05, Lune 05, Year 1928)
+
+- **API keys**: customers send `Authorization: Bearer <key>` for their own per-minute limit. Keys are stored only as SHA-256 hashes. A switched-off key gets `403 key_disabled`.
+- **`GET /v1/me`**: shows your plan and limit.
+
 ## 1.2.0 (Moon 05, Lune 05, Year 1928)
 
 - **Illumination**: `phase.illumination` now uses the moon's true phase angle (latitude and distances, Meeus ch. 47-48) and matches PyEphem within 0.05 percentage points across 2000-2050, up from 0.25. `/v1/spec` documents the method under `illumination`.

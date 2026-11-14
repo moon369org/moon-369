@@ -30,16 +30,17 @@ Hosted at `https://api.moon369.org`. This repo is the hosted API (a Vercel Funct
 | `GET /v1/card.svg` | The Today on Moon card as an image. `moonmark`, `unix_ns` or `utc` for any moment, `size` in pixels |
 | `GET /v1/card.png` | A 1200×630 PNG share image for any Moonmark, used for link previews |
 | `GET /v1/keys` | Moon's public signing keys |
+| `GET /v1/me` | Your plan and per-minute limit (send your key to see it) |
 | `POST /v1/sign` | Sign a SHA-256 fingerprint at this moment: `{"sha256":"<hex>"}`. Send the fingerprint, never the content |
 | `POST /v1/verify` | Check a receipt: `{"receipt":{...},"sha256":"<optional hex>"}` |
 
-No key needed. Send `Authorization: Bearer <key>` for the higher keyed limit.
+No key needed. Customers with an API key send `Authorization: Bearer <key>` for their own higher limit.
 
 ## Run it
 
 ```bash
 npm install
-npm test          # 36 tests
+npm test
 npm run dev       # vercel dev, local server at http://localhost:3000
 ```
 
@@ -51,7 +52,17 @@ npm run dev       # vercel dev, local server at http://localhost:3000
 
 Optional environment variables: `CLOCK_ACCURACY_NS` (default `1000000`) and `CLOCK_SOURCE` (default `server-ntp`).
 
-Rate limits and API keys: the router supports an open per-IP limit, a keyed limit and a key store (`RATE_LIMITER`, `RATE_LIMITER_KEYED`, `API_KEYS` in `src/index.ts`), but none are wired up on Vercel yet, so the deployment has no limit and rejects keys with `keys_disabled`. Use a Vercel Firewall rate-limit rule for the open tier, or back them with Upstash Redis.
+Signing: `MOON_SIGNING_KEY` (Ed25519, PEM or base64 PKCS8). Old keys stay verifiable through `MOON_RETIRED_KEYS`.
+
+Rate limits: the open tier allows `RATE_LIMIT_PER_MIN` requests a minute per IP (default 120). Without Upstash the count is per server instance; set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to share it.
+
+API keys: `MOON_API_KEYS` holds only the SHA-256 of each key, never the key, as JSON:
+
+```json
+{ "<sha256 of key>": { "owner": "Acme Clocks", "plan": "pro", "per_min": 1000, "active": true } }
+```
+
+Make a key with `node scripts/new-key.mjs "Acme Clocks" pro 1000`. It prints the key for the customer and the line to add. Change `per_min` to raise or lower a limit, set `active` to `false` to switch a key off, then redeploy. Keys without `per_min` get `KEY_RATE_LIMIT_PER_MIN` (default 1000).
 
 ## The standard (v1)
 

@@ -5,19 +5,21 @@ import {
 } from './moon.js';
 import { cardSvg, shareSvg } from './card.js';
 import { svgToPng } from './png.js';
+import { hashKey } from './keys.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_VERSION, type Receipt } from './receipt.js';
 
-export interface RateLimiter { limit(o: { key: string }): Promise<{ success: boolean }> }
+/** max overrides the limiter's default requests per minute (used for per-key limits). */
+export interface RateLimiter { limit(o: { key: string; max?: number }): Promise<{ success: boolean }> }
 
-/** Read-only key/value lookup (Upstash Redis, Vercel Global Config or similar). */
-export interface KeyStore { get(key: string): Promise<string | null> }
+/** Read-only lookup of API keys by the SHA-256 hex of the key -> JSON { owner, plan, per_min, active }. */
+export interface KeyStore { get(keyHash: string): Promise<string | null> }
 
 export interface Env {
   /** Open tier, keyed by client IP. Optional: without it, no limit is enforced. */
   RATE_LIMITER?: RateLimiter;
   /** Keyed tier, keyed by API key. */
   RATE_LIMITER_KEYED?: RateLimiter;
-  /** Store of valid API keys: key -> JSON { owner, plan }. Optional. */
+  /** Store of valid API keys, looked up by SHA-256 of the key. Optional. */
   API_KEYS?: KeyStore;
   /** Accuracy of this deployment's clock, in ns (default 1,000,000 = 1 ms). */
   CLOCK_ACCURACY_NS?: string;
@@ -149,18 +151,24 @@ const SPEC = {
   license: 'MIT',
 };
 
-async function authAndLimit(req: Request, env: Env): Promise<{ plan: string } | Response> {
+type Gate = { plan: string; owner?: string; per_min?: number };
+
+async function authAndLimit(req: Request, env: Env): Promise<Gate | Response> {
   const auth = req.headers.get('Authorization');
   const key = auth?.startsWith('Bearer ') ? auth.slice(7).trim() : null;
   if (key) {
     if (!env.API_KEYS) return json({ error: { code: 'keys_disabled', message: 'This deployment does not accept API keys' } }, 400);
-    const rec = await env.API_KEYS.get(key);
+    const hash = hashKey(key);
+    const raw = await env.API_KEYS.get(hash);
+    let rec: { plan?: string; owner?: string; per_min?: number; active?: boolean } | null = null;
+    try { rec = raw ? JSON.parse(raw) : null; } catch { rec = null; }
     if (!rec) return json({ error: { code: 'invalid_key', message: 'Unknown API key' } }, 401);
-    const plan = (() => { try { return JSON.parse(rec).plan ?? 'keyed'; } catch { return 'keyed'; } })();
-    if (env.RATE_LIMITER_KEYED && !(await env.RATE_LIMITER_KEYED.limit({ key })).success) {
-      return json({ error: { code: 'rate_limited', message: 'Key rate limit reached' } }, 429, { 'Retry-After': '60' });
+    if (rec.active === false) return json({ error: { code: 'key_disabled', contact: 'moon369org@proton.me', message: 'This API key is switched off. Email moon369org@proton.me.' } }, 403);
+    const per_min = Number.isFinite(rec.per_min) && rec.per_min! > 0 ? Math.floor(rec.per_min!) : undefined;
+    if (env.RATE_LIMITER_KEYED && !(await env.RATE_LIMITER_KEYED.limit({ key: hash.slice(0, 32), max: per_min })).success) {
+      return json({ error: { code: 'rate_limited', contact: 'moon369org@proton.me', message: `Key rate limit reached${per_min ? ` (${per_min} requests a minute)` : ''}. For a higher limit email moon369org@proton.me.` } }, 429, { 'Retry-After': '60' });
     }
-    return { plan };
+    return { plan: rec.plan ?? 'keyed', owner: rec.owner, per_min };
   }
   const ip = req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'anonymous';
   if (env.RATE_LIMITER && !(await env.RATE_LIMITER.limit({ key: ip })).success) {
@@ -185,7 +193,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', 'POST /v1/sign', 'POST /v1/verify'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify'] });
   if (path === '/health') return json({ ok: true });
 
   const gate = await authAndLimit(req, env);
@@ -280,6 +288,9 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const ns = toUnixNs(input);
         return json({ input, unix_ns: ns, unix_ms: Number(ns / 1_000_000n), utc: unixNsToIso(ns) }, 200, { ...FOREVER, ...planHdr });
       }
+
+      case path === `/${API_VERSION}/me`:
+        return json({ plan: gate.plan, ...(gate.owner ? { owner: gate.owner } : {}), per_min: gate.per_min ?? null, keyed: gate.plan !== 'open' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
 
       case path === `/${API_VERSION}/keys`: {
         const keys = [

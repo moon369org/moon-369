@@ -3,12 +3,22 @@
 import { handle } from '../src/index.js';
 import { memoryLimiter, upstashLimiter } from '../src/ratelimit.js';
 import { Signer, loadPrivateKey } from '../src/receipt.js';
+import { envKeyStore } from '../src/keys.js';
 
 // Open tier: requests per minute per IP. Shared across instances when Upstash is configured.
 const PER_MIN = Number(process.env.RATE_LIMIT_PER_MIN ?? 120);
 const RATE_LIMITER = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
   ? upstashLimiter(process.env.UPSTASH_REDIS_REST_URL, process.env.UPSTASH_REDIS_REST_TOKEN, PER_MIN)
   : memoryLimiter(PER_MIN);
+
+// Customer API keys: MOON_API_KEYS is JSON of SHA-256(key) -> { owner, plan, per_min, active }.
+// Each key gets its own per-minute limit (per_min, default KEY_RATE_LIMIT_PER_MIN).
+const KEY_PER_MIN = Number(process.env.KEY_RATE_LIMIT_PER_MIN ?? 1000);
+let API_KEYS: ReturnType<typeof envKeyStore> | undefined;
+try { if (process.env.MOON_API_KEYS) API_KEYS = envKeyStore(process.env.MOON_API_KEYS); } catch { API_KEYS = undefined; }
+const RATE_LIMITER_KEYED = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? upstashLimiter(process.env.UPSTASH_REDIS_REST_URL, process.env.UPSTASH_REDIS_REST_TOKEN, KEY_PER_MIN, 'moon:rlk')
+  : memoryLimiter(KEY_PER_MIN);
 
 // Signing key for Moonmark receipts (MOON_SIGNING_KEY: Ed25519, PEM or base64 PKCS8).
 let SIGNER: Signer | undefined;
@@ -24,6 +34,8 @@ const route = (req: Request) => {
     CLOCK_ACCURACY_NS: process.env.CLOCK_ACCURACY_NS,
     CLOCK_SOURCE: process.env.CLOCK_SOURCE,
     RATE_LIMITER,
+    RATE_LIMITER_KEYED,
+    API_KEYS,
     SIGNER,
     RETIRED_KEYS,
   });
