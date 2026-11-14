@@ -13,7 +13,8 @@ Hosted at `https://api.moon369.org`. This repo is the hosted API (a Vercel Funct
 - `openapi.yaml`: the API contract.
 - `src/card.ts`: the Today on Moon card as SVG, with embedded font subsets (SIL OFL).
 - `src/receipt.ts`: signed Moonmarks: Ed25519 receipts and an offline verifier.
-- `test/`: 55 tests covering the constants, conversions in both directions, boundaries and every route.
+- `src/png.ts`: renders share images to PNG with resvg.
+- `test/`: 56 tests covering the constants, conversions in both directions, boundaries and every route.
 
 ## Endpoints
 
@@ -27,6 +28,7 @@ Hosted at `https://api.moon369.org`. This repo is the hosted API (a Vercel Funct
 | `GET /v1/year/{year}` | The 13 moons of a year, their lengths and UTC starts |
 | `GET /v1/spec` | Every constant, including the exact Moon second ratio |
 | `GET /v1/card.svg` | The Today on Moon card as an image. `moonmark`, `unix_ns` or `utc` for any moment, `size` in pixels |
+| `GET /v1/card.png` | A 1200×630 PNG share image for any Moonmark, used for link previews |
 | `GET /v1/keys` | Moon's public signing keys |
 | `POST /v1/sign` | Sign a SHA-256 fingerprint at this moment: `{"sha256":"<hex>"}`. Send the fingerprint, never the content |
 | `POST /v1/verify` | Check a receipt: `{"receipt":{...},"sha256":"<optional hex>"}` |

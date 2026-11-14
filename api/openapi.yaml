@@ -145,6 +145,15 @@ paths:
       responses:
         '200': { description: The card, content: { image/svg+xml: { schema: { type: string } } } }
         '400': { $ref: '#/components/responses/BadRequest' }
+  /v1/card.png:
+    get:
+      summary: A 1200x630 PNG share image for one Moonmark
+      description: The link-preview image for moon369.org/m/{moonmark}. Live by default (cached 60 seconds); fixed moments are cached forever.
+      parameters:
+        - { name: moonmark, in: query, schema: { type: string, example: '1928.05.05-04.04.24.251136779' } }
+      responses:
+        '200': { description: The image, content: { image/png: { schema: { type: string, format: binary } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
   /v1/keys:
     get:
       summary: Moon's public signing keys, active and retired

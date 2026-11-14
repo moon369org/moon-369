@@ -2,5 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [{ "source": "/m/:mark", "destination": "/m" }]
+  "rewrites": [
+    {
+      "source": "/m/:mark",
+      "destination": "/api/m?mark=:mark"
+    }
+  ]
 }

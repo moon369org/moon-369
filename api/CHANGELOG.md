@@ -2,6 +2,7 @@
 
 ## 1.2.0 (Moon 05, Lune 05, Year 1928)
 
+- **Share images**: `GET /v1/card.png` renders a 1200×630 PNG for any Moonmark. Every moon369.org/m/ link now shows its own card when shared.
 - **Card image**: `GET /v1/card.svg` returns the Today on Moon card as an SVG, live or for any moment, embeddable with one img tag.
 
 - **Signed Moonmarks**: `POST /v1/sign` signs a SHA-256 fingerprint at the current moment and returns an Ed25519 receipt. `POST /v1/verify` checks one, and `GET /v1/keys` publishes the public keys so anyone can verify offline. Content never leaves the caller: only the fingerprint is sent.

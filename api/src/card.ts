@@ -54,3 +54,34 @@ export function cardSvg(d: CardData, size = 600): string {
     `<text x="300" y="560" class="f">${foot}</text>` +
     `</svg>`;
 }
+
+export interface ShareData extends CardData { time: string; ns: string }
+
+/** A 1200x630 share image for one Moonmark (X, iMessage, Slack and other link previews). */
+export function shareSvg(d: ShareData): string {
+  const pct = Math.round(d.illumination * 100);
+  const nsG = '.' + d.ns.slice(0, 3) + ' ' + d.ns.slice(3, 6) + ' ' + d.ns.slice(6, 9);
+  const cells = [['YEAR', String(d.year)], ['MOON', pad2(d.moon)], ['LUNE', pad2(d.lune)]];
+  const cw = 176;
+  const grid = cells.map(([k, v], i) => {
+    const x = 560 + cw * i;
+    const fs = v.length > 5 ? Math.max(22, 34 - (v.length - 5) * 4) : 34;
+    return `<text x="${x + 22}" y="452" font-family="JetBrains Mono" font-size="15" letter-spacing="4" fill="${ASH}">${k}</text>` +
+      `<text x="${x + 22}" y="500" font-family="Syncopate" font-weight="700" font-size="${fs}" letter-spacing="1.5" fill="${PAPER}">${esc(v)}</text>`;
+  }).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">` +
+    `<defs><radialGradient id="g" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="${PAPER}" stop-opacity="0.09"/><stop offset="1" stop-color="${PAPER}" stop-opacity="0"/></radialGradient></defs>` +
+    `<rect width="1200" height="630" fill="${INK}"/>` +
+    `<svg x="66" y="62" width="148" height="42" viewBox="-10 -10 424 120"><path d="M4,100 V4 L48,64 L92,4 V100" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/><path d="M312,100 V4 L400,96 V0" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/><defs><mask id="mwA" maskUnits="userSpaceOnUse" x="-10" y="-10" width="424" height="120"><rect x="-10" y="-10" width="424" height="120" fill="#fff"/><circle cx="232.0" cy="50" r="46" fill="none" stroke="#000" stroke-width="18"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#fff" stroke-width="18"/></mask><mask id="mwB" maskUnits="userSpaceOnUse" x="-10" y="-10" width="424" height="120"><rect x="-10" y="-10" width="424" height="120" fill="#fff"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#000" stroke-width="18"/></mask></defs><circle cx="172.0" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8" mask="url(#mwA)"/><circle cx="232.0" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8" mask="url(#mwB)"/></svg>` +
+    `<circle cx="290" cy="345" r="250" fill="url(#g)"/>` +
+    `<g transform="translate(290,345)"><circle r="150" fill="${SHADOW}"/><path d="${phasePath(d.fraction, 150)}" fill="${PAPER}"/></g>` +
+    `<text x="560" y="150" font-family="JetBrains Mono" font-size="18" letter-spacing="7" fill="${ASH}">${esc((d.title ?? 'MOONMARK').toUpperCase())}</text>` +
+    `<text x="556" y="232" font-family="JetBrains Mono" font-size="64" fill="${PAPER}">${d.year}.${pad2(d.moon)}.${pad2(d.lune)}</text>` +
+    `<text x="556" y="310" font-family="JetBrains Mono" font-size="64" fill="${PAPER}">${esc(d.time)}</text>` +
+    `<text x="560" y="362" font-family="JetBrains Mono" font-size="34" fill="${ASH}">${nsG}</text>` +
+    `<path d="M560 412H1088M560 528H1088M${560 + cw} 412V528M${560 + 2 * cw} 412V528" stroke="${LINE}" stroke-width="2" fill="none"/>` +
+    grid +
+    `<text x="560" y="584" font-family="JetBrains Mono" font-size="17" letter-spacing="3" fill="#B9B6AE">${esc(d.name.toUpperCase())} · ${pct}% LIT</text>` +
+    `<text x="1088" y="584" font-family="JetBrains Mono" font-size="17" letter-spacing="3" fill="${ASH}" text-anchor="end">MOON369.ORG</text>` +
+    `</svg>`;
+}

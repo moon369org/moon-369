@@ -47,3 +47,17 @@ describe('/v1/card.svg', () => {
     expect(phasePath(0.25, 10)).toContain('A0.000,10');
   });
 });
+
+describe('/v1/card.png', () => {
+  it('renders a 1200x630 PNG share image for a Moonmark', async () => {
+    const r = await get('/v1/card.png?moonmark=1928.05.05-04.04.24.251136779');
+    expect(r.status).toBe(200);
+    expect(r.headers.get('content-type')).toBe('image/png');
+    expect(r.headers.get('cache-control')).toContain('immutable');
+    const b = new Uint8Array(await r.arrayBuffer());
+    expect([...b.slice(1, 4)].map((c) => String.fromCharCode(c)).join('')).toBe('PNG');
+    const view = new DataView(b.buffer);
+    expect(view.getUint32(16)).toBe(1200);
+    expect(view.getUint32(20)).toBe(630);
+  });
+});

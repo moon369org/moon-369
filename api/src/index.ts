@@ -3,7 +3,8 @@ import {
   toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, phaseName, unixNsToIso, yearInfo,
   moonLength, MoonRangeError, type MoonTime,
 } from './moon.js';
-import { cardSvg } from './card.js';
+import { cardSvg, shareSvg } from './card.js';
+import { svgToPng } from './png.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_VERSION, type Receipt } from './receipt.js';
 
 export interface RateLimiter { limit(o: { key: string }): Promise<{ success: boolean }> }
@@ -183,7 +184,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/keys', 'POST /v1/sign', 'POST /v1/verify'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', 'POST /v1/sign', 'POST /v1/verify'] });
   if (path === '/health') return json({ ok: true });
 
   const gate = await authAndLimit(req, env);
@@ -241,6 +242,25 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           'Content-Type': 'image/svg+xml; charset=utf-8',
           'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; font-src data:",
           'X-Content-Type-Options': 'nosniff',
+          'Access-Control-Allow-Origin': '*',
+          ...(fixed ? FOREVER : { 'Cache-Control': 'public, max-age=60' }),
+          ...planHdr,
+        } });
+      }
+
+      case path === `/${API_VERSION}/card.png`: {
+        // A 1200x630 share image for one Moonmark, for link previews on X, iMessage and Slack.
+        const mark = q.get('moonmark');
+        let ns = mark ? toUnixNs(parseMoonmark(mark)) : unixNsFromQuery(q);
+        const fixed = ns !== null;
+        if (ns === null) ns = nowUnixNs();
+        const t = toMoon(ns), ph = truePhase(ns);
+        const p2 = (n: number) => String(n).padStart(2, '0');
+        const svg = shareSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, illumination: illumination(ns), name: phaseName(ph),
+          time: `${p2(t.hour)}:${p2(t.minute)}:${p2(t.second)}`, ns: String(t.nanosecond).padStart(9, '0'), title: fixed ? 'MOONMARK' : 'TODAY ON MOON' });
+        const png = svgToPng(svg, 1200);
+        return new Response(req.method === 'HEAD' ? null : new Uint8Array(png), { status: 200, headers: {
+          'Content-Type': 'image/png',
           'Access-Control-Allow-Origin': '*',
           ...(fixed ? FOREVER : { 'Cache-Control': 'public, max-age=60' }),
           ...planHdr,
