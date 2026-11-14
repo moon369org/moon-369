@@ -86,6 +86,13 @@ export class Signer {
   readonly pub: KeyObject; readonly keyId: string;
   constructor(private readonly priv: KeyObject, readonly pq?: PqSigner) { this.pub = createPublicKey(priv); this.keyId = keyIdOf(this.pub); }
   info(): PublicKeyInfo { return { key_id: this.keyId, alg: 'Ed25519', public_key: rawPublic(this.pub).toString('base64url'), status: 'active' }; }
+  /** Sign arbitrary bytes with every key Moon holds (used for Tideline tides). */
+  signBytes(bytes: Uint8Array): { key_id: string; signature: string; pq?: { alg: typeof PQ_ALG; key_id: string; signature: string } } {
+    return {
+      key_id: this.keyId, signature: sign(null, bytes, this.priv).toString('base64url'),
+      ...(this.pq ? { pq: { alg: PQ_ALG, key_id: this.pq.keyId, signature: this.pq.sign(bytes) } } : {}),
+    };
+  }
   sign(sha256: string, moonmark: string, unixNs: bigint, beacon?: Beacon | null): Receipt {
     const base = { sha256, moonmark, unix_ns: unixNs.toString(), key_id: this.keyId };
     if (this.pq) {
@@ -103,6 +110,15 @@ export type VerifyOut = {
   /** v3: true when the post-quantum signature was present and checked. A v3 receipt without it (as in a short link) is checked with Ed25519 only. */
   post_quantum?: boolean;
 };
+
+/** Check an Ed25519 signature (and, when present, the ML-DSA-65 one) over bytes. Both must hold. */
+export function verifySignedBytes(bytes: Uint8Array, sig: { key_id: string; signature: string; pq?: { key_id: string; signature: string } }, keys: Record<string, string>): boolean {
+  const pk = keys[sig.key_id]; if (!pk) return false;
+  try { if (!verify(null, bytes, publicKeyFromRaw(pk), Buffer.from(sig.signature, 'base64url'))) return false; } catch { return false; }
+  if (!sig.pq) return true;
+  const ppk = keys[sig.pq.key_id]; if (!ppk) return false;
+  try { return ml_dsa65.verify(new Uint8Array(Buffer.from(sig.pq.signature, 'base64url')), bytes, new Uint8Array(Buffer.from(ppk, 'base64url'))); } catch { return false; }
+}
 
 /** Verify a receipt against known public keys (key_id -> base64url raw key; Ed25519 or ML-DSA-65). Pure and offline. */
 export function verifyReceipt(r: unknown, keys: Record<string, string>, chain: Chain = QUICKNET): VerifyOut {

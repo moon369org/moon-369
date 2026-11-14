@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moon API
-  version: 1.5.0
+  version: 1.6.0
   summary: The open standard for time. The worldwide timestamp, locked to the moon.
   license: { name: MIT, identifier: MIT }
   description: |
@@ -184,6 +184,20 @@ paths:
                   owner: { type: string, example: Acme Clocks }
                   per_min: { type: [integer, 'null'], example: 1000 }
                   keyed: { type: boolean }
+  /v1/tideline:
+    get:
+      summary: The Tideline, Moon's public log. Recent tides (sealed lunes) and the open lune.
+      responses: { '200': { description: Tides, newest first } }
+  /v1/tideline/{lune}:
+    get:
+      summary: One lune's tide (Merkle root, chain link, signatures, XRP Ledger anchor), or its status if not sealed yet
+      parameters: [{ name: lune, in: path, required: true, schema: { type: string, example: '1928.05.05' } }]
+      responses: { '200': { description: A tide, or status open/pending with the receipt count so far } }
+  /v1/tideline/proof:
+    post:
+      summary: Inclusion proof that a receipt is in its lune's tide
+      requestBody: { content: { application/json: { schema: { type: object, properties: { receipt: { $ref: '#/components/schemas/Receipt' } } } } } }
+      responses: { '200': { description: 'status sealed (index, size, path, root, tide), pending, or not_found' } }
   /v1/keys:
     get:
       summary: Moon's public signing keys, active and retired

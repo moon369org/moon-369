@@ -61,3 +61,5 @@ export function moonPhase(m?: Moment): { phase: number; illumination: number; na
   const f = truePhase(ns);
   return { phase: f, illumination: illum(ns), name: phaseName(f) };
 }
+
+export { receiptLeaf, verifyInclusion, verifyTide, tideBytes, type Tide } from './tideline.js';

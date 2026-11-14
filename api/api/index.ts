@@ -5,11 +5,17 @@ import { memoryLimiter, upstashLimiter } from '../src/ratelimit.js';
 import { Signer, PqSigner, loadPrivateKey } from '../src/receipt.js';
 import { envKeyStore } from '../src/keys.js';
 import { beaconSource } from '../src/beacon.js';
+import { upstashStore } from '../src/tideline.js';
+import { xrplAnchorer } from '../src/anchor.js';
+
+// Upstash Redis, from the Vercel Marketplace (KV_*) or set by hand (UPSTASH_*). Shared by rate limits and the Tideline.
+const RL_URL = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+const RL_TOKEN = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
 
 // Open tier: requests per minute per IP. Shared across instances when Upstash is configured.
 const PER_MIN = Number(process.env.RATE_LIMIT_PER_MIN ?? 120);
-const RATE_LIMITER = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? upstashLimiter(process.env.UPSTASH_REDIS_REST_URL, process.env.UPSTASH_REDIS_REST_TOKEN, PER_MIN)
+const RATE_LIMITER = RL_URL && RL_TOKEN
+  ? upstashLimiter(RL_URL, RL_TOKEN, PER_MIN)
   : memoryLimiter(PER_MIN);
 
 // Customer API keys: MOON_API_KEYS is JSON of SHA-256(key) -> { owner, plan, per_min, active }.
@@ -17,8 +23,8 @@ const RATE_LIMITER = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_R
 const KEY_PER_MIN = Number(process.env.KEY_RATE_LIMIT_PER_MIN ?? 1000);
 let API_KEYS: ReturnType<typeof envKeyStore> | undefined;
 try { if (process.env.MOON_API_KEYS) API_KEYS = envKeyStore(process.env.MOON_API_KEYS); } catch { API_KEYS = undefined; }
-const RATE_LIMITER_KEYED = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? upstashLimiter(process.env.UPSTASH_REDIS_REST_URL, process.env.UPSTASH_REDIS_REST_TOKEN, KEY_PER_MIN, 'moon:rlk')
+const RATE_LIMITER_KEYED = RL_URL && RL_TOKEN
+  ? upstashLimiter(RL_URL, RL_TOKEN, KEY_PER_MIN, 'moon:rlk')
   : memoryLimiter(KEY_PER_MIN);
 
 // Signing key for Moonmark receipts (MOON_SIGNING_KEY: Ed25519, PEM or base64 PKCS8).
@@ -34,6 +40,13 @@ try { if (process.env.MOON_RETIRED_KEYS) RETIRED_KEYS = JSON.parse(process.env.M
 // drand quicknet beacon for v2 receipts (proves each receipt was signed after a public random value).
 const BEACON = process.env.MOON_BEACON === 'off' ? undefined : beaconSource();
 
+// The Tideline: Upstash Redis (from the Vercel Marketplace: KV_REST_API_URL/TOKEN, or UPSTASH_REDIS_REST_URL/TOKEN).
+const TL_URL = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+const TL_TOKEN = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+const TIDES = TL_URL && TL_TOKEN ? upstashStore(TL_URL, TL_TOKEN) : undefined;
+// Anchoring on the XRP Ledger (XRPL_SEED: the wallet's secret seed).
+const ANCHOR = process.env.XRPL_SEED ? xrplAnchorer(process.env.XRPL_SEED, process.env.XRPL_SERVER) : undefined;
+
 const route = (req: Request) => {
   const url = new URL(req.url);
   url.pathname = url.pathname.replace(/^\/api(?=\/|$)/, '') || '/';
@@ -46,6 +59,9 @@ const route = (req: Request) => {
     SIGNER,
     RETIRED_KEYS,
     BEACON,
+    TIDES,
+    ANCHOR,
+    CRON_SECRET: process.env.CRON_SECRET,
   });
 };
 

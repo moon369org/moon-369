@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { generateKeyPairSync } from 'node:crypto';
 import { Signer, PqSigner } from '../../../api/src/receipt.js';
+import * as TL from '../../../api/src/tideline.js';
 import { randomBytes } from 'node:crypto';
 import * as api from '../../../api/src/moon.js';
+import { receiptLeaf, verifyInclusion as libIncl, verifyTide } from '../src/index.js';
 import { moonmark, moon, fromMoonmark, moonmarkToDate, moonmarkUrl, moonPhase, toNs, nowNs, verify, fingerprint } from '../src/index.js';
 
 describe('same math as the API', () => {
@@ -123,5 +125,25 @@ describe('hybrid v3 receipts', () => {
     expect(await verify(bad, { keys })).toEqual({ valid: false, reason: 'bad_pq_signature' });
     const { signature: _s, ...short } = r.pq!;
     expect(await verify({ ...r, pq: short }, { keys })).toMatchObject({ valid: true, post_quantum: false });
+  });
+});
+
+describe('Tideline checks', () => {
+  it('leaf, inclusion and tide match the API exactly', async () => {
+    const pq2 = new PqSigner(new Uint8Array(randomBytes(32)));
+    const sg = new Signer(generateKeyPairSync('ed25519').privateKey, pq2);
+    const keys = { [sg.keyId]: sg.info().public_key, [pq2.keyId]: pq2.info().public_key };
+    const store = TL.memoryStore();
+    const l = TL.luneOf(1_794_682_325_000_000_000n);
+    const rs = [];
+    for (let i = 0; i < 5; i++) { const ns = TL.luneStartNs(l) + BigInt(i + 1) * 1000n; const r = sg.sign(String(i).repeat(64), api.formatMoonmark(api.toMoon(ns)), ns, null); rs.push(r); await TL.record(store, r); }
+    const [tide] = await TL.sealDue(store, sg, TL.luneEndNs(l));
+    expect(await verifyTide(tide as any, keys)).toBe(true);
+    expect(await verifyTide({ ...(tide as any), size: 6 }, keys)).toBe(false);
+    for (const r of rs) {
+      expect(receiptLeaf(r as any)).toBe(TL.receiptLeaf(r));
+      const p: any = await TL.proofFor(store, r);
+      expect(libIncl(receiptLeaf(r as any), p.index, p.size, p.path, p.root)).toBe(true);
+    }
   });
 });

@@ -8,6 +8,7 @@ import { svgToPng } from './png.js';
 import { hashKey } from './keys.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
 import { QUICKNET, BEACON_NETWORK, type Beacon, type Chain } from './beacon.js';
+import { TIDELINE, record, sealDue, proofFor, parseLune, luneLabel, luneOf, luneEndNs, type TideStore, type Anchorer } from './tideline.js';
 
 /** max overrides the limiter's default requests per minute (used for per-key limits). */
 export interface RateLimiter { limit(o: { key: string; max?: number }): Promise<{ success: boolean }> }
@@ -30,6 +31,12 @@ export interface Env {
   SIGNER?: Signer;
   /** Latest drand beacon for v2 receipts. Without it, or if it returns null, /v1/sign issues v1 receipts. */
   BEACON?: (nowNs: bigint) => Promise<Beacon | null>;
+  /** The Tideline store. Without it, receipts aren't logged and /v1/tideline answers 503. */
+  TIDES?: TideStore;
+  /** Anchors each sealed tide (XRP Ledger). Optional. */
+  ANCHOR?: Anchorer;
+  /** Required on /v1/tideline/seal (Vercel Cron sends it as a Bearer token). */
+  CRON_SECRET?: string;
   /** Beacon network to check against (default drand quicknet). Tests only. */
   BEACON_CHAIN?: Chain;
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
@@ -194,11 +201,11 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, '') || '/';
   const q = url.searchParams;
-  const postOnly = path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/verify`;
+  const postOnly = path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/tideline/proof`;
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof'] });
   if (path === '/health') return json({ ok: true });
 
   const gate = await authAndLimit(req, env);
@@ -316,8 +323,11 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const ns = nowUnixNs();
         const mark = formatMoonmark(toMoon(ns));
         const receipt = env.SIGNER.sign(sha, mark, ns, beacon);
+        let tideline: Record<string, unknown> | null = null;
+        if (env.TIDES) { try { tideline = { ...(await record(env.TIDES, receipt)), status: 'pending', seals_after_utc: unixNsToIso(luneEndNs(luneOf(ns))) }; } catch { tideline = null; } }
         return json({
           receipt,
+          tideline,
           moonmark_url: MARK_BASE + moonmarkPath(mark),
           signed_url: MARK_BASE + moonmarkPath(mark) + `?s=${receipt.sha256}&u=${receipt.unix_ns}&k=${receipt.key_id}` + (receipt.beacon ? `&r=${receipt.beacon.round}&b=${receipt.beacon.signature}` : '') + (receipt.pq ? `&q=${receipt.pq.key_id}` : '') + `&g=${receipt.signature}`,
           utc: unixNsToIso(ns),
@@ -344,6 +354,40 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         }
         const { not_before_unix_ns, beacon_round, post_quantum, ...rest } = out;
         return json({ ...rest, ...(out.valid ? { moonmark: r.moonmark, utc: unixNsToIso(BigInt(r.unix_ns)), key_id: r.key_id, ...(post_quantum !== undefined ? { signatures: post_quantum ? ['Ed25519', PQ_ALG] : ['Ed25519'], post_quantum } : { signatures: ['Ed25519'] }), ...(not_before_unix_ns ? { not_before: { utc: unixNsToIso(BigInt(not_before_unix_ns)), unix_ns: not_before_unix_ns, beacon: BEACON_NETWORK, round: beacon_round } } : {}) } : {}) }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/tideline/seal`: {
+        if (!env.CRON_SECRET || req.headers.get('Authorization') !== `Bearer ${env.CRON_SECRET}`) throw new HttpError(403, 'forbidden', 'Sealing runs on Moon\'s schedule');
+        if (!env.TIDES || !env.SIGNER) throw new HttpError(503, 'tideline_unavailable', 'The Tideline is not configured on this deployment');
+        const sealed = await sealDue(env.TIDES, env.SIGNER, nowUnixNs(), env.ANCHOR);
+        return json({ sealed: sealed.map((t) => ({ lune: t.lune, size: t.size, hash: t.hash, anchored: !!t.anchor })) }, 200, { 'Cache-Control': 'no-store' });
+      }
+
+      case path === `/${API_VERSION}/tideline/proof`: {
+        if (!env.TIDES) throw new HttpError(503, 'tideline_unavailable', 'The Tideline is not configured on this deployment');
+        const body = await readJson(req);
+        const r = (body.receipt ?? body) as Receipt;
+        if (!r || typeof r !== 'object' || typeof (r as Receipt).unix_ns !== 'string' || !/^-?\d+$/.test((r as Receipt).unix_ns)) throw new HttpError(400, 'bad_param', 'Send a signed Moonmark receipt');
+        return json(await proofFor(env.TIDES, r), 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/tideline`: {
+        if (!env.TIDES) throw new HttpError(503, 'tideline_unavailable', 'The Tideline is not configured on this deployment');
+        const idx = await env.TIDES.recent(30);
+        const tides = (await Promise.all(idx.map((i) => env.TIDES!.getTide(i)))).filter(Boolean);
+        const open = luneOf(nowUnixNs());
+        return json({ tideline: TIDELINE, about: 'Every lune, Moon seals its signed Moonmarks into a tide: a Merkle root, chained to the previous tide, signed and anchored on the XRP Ledger.', open_lune: luneLabel(open), seals_after_utc: unixNsToIso(luneEndNs(open)), head: tides[0] ?? null, tides }, 200, { 'Cache-Control': 'public, max-age=60', ...planHdr });
+      }
+
+      case path.startsWith(`/${API_VERSION}/tideline/`): {
+        if (!env.TIDES) throw new HttpError(503, 'tideline_unavailable', 'The Tideline is not configured on this deployment');
+        const label = decodeURIComponent(path.slice(`/${API_VERSION}/tideline/`.length));
+        const lune = parseLune(label);
+        if (lune === null) throw new HttpError(400, 'bad_param', 'Use a lune like 1928.05.05');
+        const tide = await env.TIDES.getTide(lune);
+        if (tide) return json(tide, 200, { ...FOREVER, ...planHdr });
+        const size = (await env.TIDES.leaves(lune)).length;
+        return json({ tideline: TIDELINE, lune: luneLabel(lune), status: luneEndNs(lune) > nowUnixNs() ? 'open' : 'pending', size, seals_after_utc: unixNsToIso(luneEndNs(lune)) }, 200, { 'Cache-Control': 'public, max-age=60', ...planHdr });
       }
 
       case path.startsWith(`/${API_VERSION}/year/`): {

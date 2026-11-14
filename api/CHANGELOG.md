@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.0 (Moon 05, Lune 05, Year 1928)
+
+- **The Tideline**: Moon's public, append-only log. Every signed Moonmark is recorded in its lune (`/v1/sign` returns `tideline`). When a lune ends, Moon seals it into a tide: the Merkle root (RFC 9162) of its receipts, chained to the previous tide, signed with Ed25519 and ML-DSA-65, and anchored on the XRP Ledger.
+- **`GET /v1/tideline`**, **`GET /v1/tideline/{lune}`** and **`POST /v1/tideline/proof`** (an inclusion proof for a receipt).
+
 ## 1.5.0 (Moon 05, Lune 05, Year 1928)
 
 - **Hybrid receipts (`moonmark-receipt/3`)**: every receipt is signed twice over the same bytes, with Ed25519 and ML-DSA-65 (NIST FIPS 204, post-quantum). A full receipt is valid only if both check out, so it stays unforgeable while either algorithm holds. `/v1/keys` lists both keys; `/v1/verify` returns `signatures` and `post_quantum`.

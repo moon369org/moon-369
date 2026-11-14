@@ -72,6 +72,9 @@ nav[aria-label="Main"] a:not([style*="border"]):focus-visible {
   background-size: 100% 1px; text-shadow: 0 0 12px rgba(233, 228, 216, 0.55);
 }
 
+nav[aria-label="Main"] a[aria-current="page"] { color: #E9E4D8; background-size: 100% 1px; }
+@media (max-width: 720px) { html.mm-js [data-dc-root] nav[aria-label="Main"] a[aria-current="page"] { background-size: 0 0; font-weight: 700; } }
+
 /* ---------- Buttons: light sweep + glow ---------- */
 [data-dc-root] a[style*="padding: 18px 30px"],
 [data-dc-root] a[style*="padding: 14px 22px"],

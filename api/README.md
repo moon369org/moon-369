@@ -56,6 +56,8 @@ Signing: `MOON_SIGNING_KEY` (Ed25519, PEM or base64 PKCS8). Old keys stay verifi
 
 Rate limits: the open tier allows `RATE_LIMIT_PER_MIN` requests a minute per IP (default 120). Without Upstash the count is per server instance; set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to share it.
 
+The Tideline (public log): connect Upstash Redis from the Vercel Marketplace (it adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`), set `CRON_SECRET` (Vercel Cron sends it to `/v1/tideline/seal` once a day), and optionally `XRPL_SEED` to anchor each tide on the XRP Ledger.
+
 API keys: `MOON_API_KEYS` holds only the SHA-256 of each key, never the key, as JSON:
 
 ```json
