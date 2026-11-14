@@ -40,13 +40,14 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .mi-b::before{content:"";position:absolute;inset:-13px}
 .mi-b:hover,.mi-b:focus-visible{border-color:#E9E4D8;color:#E9E4D8}
 .mi-t{position:absolute;z-index:50;top:calc(100% + 10px);left:50%;transform:translateX(-50%);width:min(300px,calc(100vw - 40px));padding:14px 16px;background:#141517;border:1px solid #3A3C41;color:#D7D3CA;font-family:Inter,sans-serif;font-size:13px;line-height:1.55;letter-spacing:0;text-transform:none;text-align:left;font-weight:400;opacity:0;visibility:hidden;transition:opacity .15s}
-.mi:hover .mi-t,.mi:focus-within .mi-t{opacity:1;visibility:visible}
+.mi.open .mi-t,.mi:has(.mi-b:focus-visible) .mi-t{opacity:1;visibility:visible}
+@media (hover:hover) and (pointer:fine){.mi:hover .mi-t{opacity:1;visibility:visible}}
 .mi-host{position:relative}
-.mi-host:focus-within,.mi-host:hover{z-index:40}
-html.mm-js [data-dc-root] section:has(.mi:focus-within),html.mm-js [data-dc-root] section:has(.mi:hover),section:has(.mi:focus-within){z-index:50}
+.mi-host:has(.mi.open),.mi-host:hover,.mi-host:has(.mi-b:focus-visible){z-index:40}
+html.mm-js [data-dc-root] section:has(.mi.open),html.mm-js [data-dc-root] section:has(.mi:hover),html.mm-js [data-dc-root] section:has(.mi-b:focus-visible),section:has(.mi.open){z-index:50}
 .mi-t{font-family:Inter,sans-serif!important;font-size:13px!important;letter-spacing:0!important;text-transform:none!important;color:#D7D3CA!important;font-weight:400!important}
 @media (max-width:720px){.mi{position:static}.mi-t{left:0;right:0;width:auto;transform:none}}
-.mk-rows div:focus-within{z-index:40}
+.mk-rows div:has(.mi.open){z-index:40}
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
@@ -57,6 +58,7 @@ html.mm-js [data-dc-root] section:has(.mi:focus-within),html.mm-js [data-dc-root
 <script src="js/dc-lite.js" defer></script>
 <link rel="stylesheet" href="assets/moon-motion.css">
 <script src="js/moon-motion.js" defer></script>
+<script src="js/infotip.js" defer></script>
 </head>
 <body>
 <x-dc>
