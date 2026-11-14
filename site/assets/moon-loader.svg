@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-90 -70 180 140" role="img" aria-label="Loading">
+<style>
+.mn-a,.mn-b,.mn-fill{animation-duration:3.2s;animation-iteration-count:infinite;animation-fill-mode:both}
+.mn-a{animation-name:mnA}.mn-b{animation-name:mnB}.mn-fill{animation-name:mnFill}
+@keyframes mnA{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(-30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes mnB{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes mnFill{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.6,1)}36%,54%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.6,1)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.mn-a,.mn-b,.mn-fill{animation:none}}
+</style>
+<g class="mn-b"><circle cx="0" cy="0" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/></g>
+<g class="mn-a"><circle class="mn-fill" cx="0" cy="0" r="50" fill="#E9E4D8"/><circle cx="0" cy="0" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/></g>
+</svg>

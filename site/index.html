@@ -615,7 +615,10 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 </sc-if>
 <sc-if value="{{sgBusy}}">
-<div style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.24em; color: #8A8B8F; font-size: 12px">{{sgBusyText}}</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 22px">
+<img src="/assets/moon-loader.svg" alt="" aria-hidden="true" style="width: 132px; height: auto; display: block">
+<div role="status" style="text-align: center; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.24em; color: #8A8B8F; font-size: 12px">{{sgBusyText}}</div>
+</div>
 </sc-if>
 <sc-if value="{{sgDone}}">
 <div style="display: flex; flex-direction: column; gap: 6px">
@@ -800,6 +803,8 @@ class Component extends DCLogic {
     input.value = '';
     if (!file) return;
     if (file.size > 1024 * 1024 * 1024) { this.setState({ sg: { s: 'err', err: 'That file is over 1 GB. Fingerprint it yourself and send the SHA-256 to the API.' } }); return; }
+    const t0 = Date.now();
+    const after = (fn) => setTimeout(fn, Math.max(0, 2000 - (Date.now() - t0)));
     this.setState({ sg: { s: 'busy', t: 'FINGERPRINTING ' + file.name.toUpperCase().slice(0, 40) } });
     file.arrayBuffer()
       .then((buf) => crypto.subtle.digest('SHA-256', buf))
@@ -813,10 +818,11 @@ class Component extends DCLogic {
             const rc = b.receipt;
             if (this.state && this.state.sg && this.state.sg.href) URL.revokeObjectURL(this.state.sg.href);
             const href = URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }));
-            this.setState({ sg: { s: 'done', name: file.name, sha, mark: rc.moonmark, key: rc.key_id, url: b.signed_url || (b.moonmark_url + '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + '&g=' + rc.signature), href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' } });
+            const done = { s: 'done', name: file.name, sha, mark: rc.moonmark, key: rc.key_id, url: b.signed_url || (b.moonmark_url + '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + '&g=' + rc.signature), href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' };
+            after(() => this.setState({ sg: done }));
           });
       })
-      .catch((err) => this.setState({ sg: { s: 'err', err: (err && err.message && !/fetch|network/i.test(err.message)) ? err.message : 'Could not reach Moon. Check your connection and try again.' } }));
+      .catch((err) => after(() => this.setState({ sg: { s: 'err', err: (err && err.message && !/fetch|network/i.test(err.message)) ? err.message : 'Could not reach Moon. Check your connection and try again.' } })));
   }
   renderVals() {
     const EPOCH = -62165308562978.61, K = 1.0403730490216803, DAY = 86400000 * K;
