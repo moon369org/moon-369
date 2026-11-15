@@ -20,6 +20,11 @@
   }
 
 
+  // A beam that is widest where it leaves the moon and narrows to nothing at its tip.
+  function taper(o, x0, y0, x1, y1, w0) {
+    var dx = x1 - x0, dy = y1 - y0, L = Math.sqrt(dx * dx + dy * dy) || 1, nx = -dy / L * w0 / 2, ny = dx / L * w0 / 2;
+    o.beginPath(); o.moveTo(x0 + nx, y0 + ny); o.lineTo(x1, y1); o.lineTo(x0 - nx, y0 - ny); o.closePath(); o.fill();
+  }
   function cap(o, cx, cy, R) { o.beginPath(); o.arc(cx, cy, R, 0, Math.PI * 2); }
 
   function draw(cv, t, now) {
@@ -41,7 +46,7 @@
     R = R * 3; ch = Math.max(2, ch * 3 - 20 * dpr / 2);
     chord = 2 * Math.sqrt(2 * R * ch - ch * ch);
     // Keep that width, but sit the moon just above the line: only a sliver shows.
-    ch = Math.max(2, 8 * dpr / 2); R = (chord * chord / 4 + ch * ch) / (2 * ch);
+    ch = Math.max(2, 30 * dpr / 2); chord = w * 0.74; R = (chord * chord / 4 + ch * ch) / (2 * ch); // curve shows, sides go dark
     var cy = h + R - ch;
     var span = Math.asin(Math.min(1, (chord / 2) / R));
 
@@ -77,8 +82,7 @@
       g.addColorStop(0.35, 'rgba(' + INK + ',' + a * 0.55 + ')');
       g.addColorStop(0.7, 'rgba(' + INK + ',' + a * 0.15 + ')');
       g.addColorStop(1, 'rgba(' + INK + ',0)');               // Rule 2: always fade to nothing
-      o.strokeStyle = g; o.lineWidth = Math.max(1.4, w / 450);
-      o.beginPath(); o.moveTo(x0, y0); o.lineTo(x1, y1); o.stroke();
+      o.fillStyle = g; taper(o, x0, y0, x1, y1, Math.max(2, w / 260));
     }
 
     // Long beams.
@@ -97,17 +101,19 @@
       bg.addColorStop(0.45, 'rgba(' + INK + ',' + ba * 0.12 + ')');
       bg.addColorStop(0.75, 'rgba(' + INK + ',' + ba * 0.03 + ')');
       bg.addColorStop(1, 'rgba(' + INK + ',0)');                // Rule 2
-      // Some beams are crisp, some soft: a soft beam trades its core for a wide halo.
+      // Some beams are crisp, some soft: a soft beam trades its core for a wider halo.
+      // Every layer tapers, so the light spreads at the start and narrows as it travels.
       var bw = Math.max(1, (w / 600) * B.width);
-      o.strokeStyle = bg;
-      o.globalAlpha = 1 - B.soft * 0.75; o.lineWidth = bw;
-      o.beginPath(); o.moveTo(bx0, by0); o.lineTo(bx1, by1); o.stroke();
+      o.fillStyle = bg;
+      o.globalAlpha = 1 - B.soft * 0.7; taper(o, bx0, by0, bx1, by1, bw * 2.2);
       if (B.soft > 0.15) {
-        o.globalAlpha = 0.35 * B.soft; o.lineWidth = bw * (2 + 4 * B.soft);
-        o.beginPath(); o.moveTo(bx0, by0); o.lineTo(bx1, by1); o.stroke();
-        o.globalAlpha = 0.18 * B.soft; o.lineWidth = bw * (5 + 9 * B.soft);
-        o.beginPath(); o.moveTo(bx0, by0); o.lineTo(bx1, by1); o.stroke();
+        o.globalAlpha = 0.35 * B.soft; taper(o, bx0, by0, bx1, by1, bw * (4 + 6 * B.soft));
+        o.globalAlpha = 0.18 * B.soft; taper(o, bx0, by0, bx1, by1, bw * (8 + 12 * B.soft));
       }
+      // A soft bloom where the beam leaves the surface.
+      var bl0 = o.createRadialGradient(bx0, by0, 0, bx0, by0, bw * 6);
+      bl0.addColorStop(0, 'rgba(' + INK + ',' + ba * 0.5 + ')'); bl0.addColorStop(1, 'rgba(' + INK + ',0)');
+      o.globalAlpha = 1; o.fillStyle = bl0; o.fillRect(bx0 - bw * 6, by0 - bw * 6, bw * 12, bw * 12);
       o.globalAlpha = 1;
     }
 
