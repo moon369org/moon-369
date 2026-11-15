@@ -31,7 +31,7 @@
 
     // Rule 1 + 2: glow made from the lit cap, blurred at three radii (as js/moonglow.js).
     o.globalCompositeOperation = 'lighter';
-    var layers = [[18, 0.45], [40, 0.25], [90, 0.14]];
+    var layers = [[18, 0.45], [40, 0.4], [90, 0.4], [200, 0.5]]; // tight layers keep the edge bright
     for (var i = 0; i < layers.length; i++) {
       o.filter = 'blur(' + Math.max(1, Math.round(w / layers[i][0] / 2)) + 'px)';
       o.globalAlpha = layers[i][1];
@@ -51,13 +51,13 @@
       var roll = 0.5 + 0.5 * Math.sin(v * 11 - t * 0.55 + wave(t * 0.3, v * 4) * 1.6);
       var lift = wave(t * 0.4, v * 5) * h * 0.04 * env;
       var len = (h * 0.16 + h * 0.2 * (0.5 + 0.5 * Math.sin(v * 17 + t * 0.12))) * lenv + lift;
-      var a = Math.min(1, (0.35 + 0.65 * roll) * env * 0.8);
+      var a = Math.min(1, (0.35 + 0.65 * roll) * env * 1.1);
       var dx = Math.sin(ang), dy = -Math.cos(ang);
       var x0 = cx + dx * R * 0.995, y0 = cy + dy * R * 0.995;   // Rule 1: start inside the white
       var x1 = cx + dx * (R + len), y1 = cy + dy * (R + len);
       var g = o.createLinearGradient(x0, y0, x1, y1);
-      g.addColorStop(0, 'rgba(' + INK + ',' + a * 0.3 + ')');
-      g.addColorStop(0.12, 'rgba(' + INK + ',' + a + ')');
+      g.addColorStop(0, 'rgba(' + INK + ',' + a * 0.8 + ')');
+      g.addColorStop(0.08, 'rgba(' + INK + ',' + a + ')');
       g.addColorStop(0.35, 'rgba(' + INK + ',' + a * 0.55 + ')');
       g.addColorStop(0.7, 'rgba(' + INK + ',' + a * 0.15 + ')');
       g.addColorStop(1, 'rgba(' + INK + ',0)');               // Rule 2: always fade to nothing
@@ -90,7 +90,7 @@
       for (var c = 0; c < all.length; c++) {
         var r = all[c].getBoundingClientRect();
         if (r.bottom > 0 && r.top < (window.innerHeight || 800) && (!reduce || !all[c].width)) {
-          draw(all[c], reduce ? 12 : (now - t0) / 1000 + 40); last = now;
+          draw(all[c], reduce ? 12 : (now - t0) / 1000 * 3 + 40); last = now;
         }
       }
     }
