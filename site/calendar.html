@@ -251,7 +251,7 @@ footer > div > div:first-child svg{width:64px!important}
 </tbody>
 </table>
 </div>
-<p style="margin: 0; max-width: 820px; font-size: 13px; line-height: 1.7; color: #8A8B8F">One worldwide timestamp, with no time zones or daylight saving. Year 0 began at the first new moon of 0 AD, 23 January 0000, 02:44 UTC, and the count runs unbroken from there. Each moon has 28 or 29 whole lunes (five moons get 29), and a lune belongs to the moon it starts in. Moons track the average lunar cycle, so a moon starts between about 10 hours before and 41 hours after the real new moon, typically about 15 hours after, and that offset never accumulates. Equinoxes and solstices follow Meeus, Astronomical Algorithms ch. 27, accurate to about a&nbsp;minute.</p>
+<p style="margin: 0; max-width: 820px; font-size: 13px; line-height: 1.7; color: #8A8B8F">One worldwide timestamp, with no time zones or daylight saving. Cycle 0 began at the first new moon of 0 AD, 23 January 0000, 02:44 UTC, and the count runs unbroken from there. Each moon has 28 or 29 whole lunes (five moons get 29), and a lune belongs to the moon it starts in. Moons track the average lunar cycle, so a moon starts between about 10 hours before and 41 hours after the real new moon, typically about 15 hours after, and that offset never accumulates. Equinoxes and solstices follow Meeus, Astronomical Algorithms ch. 27, accurate to about a&nbsp;minute.</p>
 </section>
 
 </div>
@@ -401,7 +401,7 @@ class Component extends DCLogic {
 
     const sa = c.seasonAt(nowMs);
     const now = {
-      date: 'YEAR ' + today.year + ' · MOON ' + today.moon + ' · LUNE ' + today.day,
+      date: 'CYCLE ' + today.year + ' · MOON ' + today.moon + ' · LUNE ' + today.day,
       y: today.year, m: pad(today.moon), d: pad(today.day),
       seasonShort: SEASON[sa.season] + ' · ' + ['Equinox', 'Solstice', 'Equinox', 'Solstice'][sa.next.i] + ' in ' + Math.round((sa.next.t - nowMs) / c.MS_DAY) + ' lunes',
       clock: pad(live.h) + ':' + pad(live.m) + ':' + pad(live.s),
@@ -414,8 +414,8 @@ class Component extends DCLogic {
     const sm = c.moonOfDay(sel.dYear), sp = c.dayPhase(sel.year, sel.dYear), si = c.dayIllum(sel.year, sel.dYear);
     const ss = c.dayStart(sel.year, sel.dYear), se = ss + c.MS_DAY;
     const detail = [
-      { k: 'Moon date', v: 'Year ' + sel.year + ', Moon ' + (sm + 1) + ', Lune ' + (sel.dYear - c.firstDay(sm) + 1) },
-      { k: 'Lune of year', v: (sel.dYear + 1) + ' of 369' },
+      { k: 'Moon date', v: 'Cycle ' + sel.year + ', Moon ' + (sm + 1) + ', Lune ' + (sel.dYear - c.firstDay(sm) + 1) },
+      { k: 'Lune of cycle', v: (sel.dYear + 1) + ' of 369' },
       { k: 'Your days', v: (() => { const out = []; for (let t = ss - c.MS_DAY; t < se + c.MS_DAY; t += 3600000 * 6) { const o = offAt(t); const noon = Date.UTC(o.y, o.mo - 1, o.d, 12) - o.off; if (noon >= ss && noon < se && fmtDay) { const lbl = fmtDay.format(noon); if (out.indexOf(lbl) < 0) out.push(lbl); } } return out.length ? out.join(' and ') : 'None'; })() },
       { k: 'Lune runs', v: fmtLocal.format(ss) + ' to ' + fmtLocal.format(se) },
       { k: 'Phase', v: c.phaseName(sp) + ' · ' + (si * 100).toFixed(1) + '% lit' },
@@ -428,14 +428,14 @@ class Component extends DCLogic {
     if (!isNaN(cms)) {
       const t = c.toMoon(cms);
       convOut = [
-        { k: 'Moon date', v: 'Year ' + t.year + ', Moon ' + t.moon + ', Lune ' + t.day },
+        { k: 'Moon date', v: 'Cycle ' + t.year + ', Moon ' + t.moon + ', Lune ' + t.day },
         { k: 'Moon time', v: pad(t.h) + ':' + pad(t.m) + ':' + pad(t.s) },
         { k: 'Phase', v: c.phaseName(t.phase) }
       ];
     }
 
     return {
-      now, moons: yd.moons, yearTitle: 'YEAR ' + year, yearRange: yd.range, yearRangeShort: yd.rangeShort,
+      now, moons: yd.moons, yearTitle: 'CYCLE ' + year, yearRange: yd.range, yearRangeShort: yd.rangeShort,
       prevYear: () => this.setState({ year: year - 1 }),
       nextYear: () => this.setState({ year: year + 1 }),
       thisYear: () => this.setState({ year: today.year }),

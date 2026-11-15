@@ -358,7 +358,7 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/card.svg</span>
 <span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">IMAGE</span>
 </div>
-<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">The Today on Moon card as an image: year, moon, lune and the real moon phase. Drop it into any page, app or README with one <code>&lt;img&gt;</code> tag and it stays current, refreshing every minute. Add <code>moonmark</code>, <code>unix_ns</code> or <code>utc</code> to draw any moment, and <code>size</code> for pixels from 120 to&nbsp;2000. For link previews, <code>/v1/card.png</code> returns a 1200×630 PNG of any Moonmark, the image every Moonmark link shows when&nbsp;shared.</p>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">The Today on Moon card as an image: cycle, moon, lune and the real moon phase. Drop it into any page, app or README with one <code>&lt;img&gt;</code> tag and it stays current, refreshing every minute. Add <code>moonmark</code>, <code>unix_ns</code> or <code>utc</code> to draw any moment, and <code>size</code> for pixels from 120 to&nbsp;2000. For link previews, <code>/v1/card.png</code> returns a 1200×630 PNG of any Moonmark, the image every Moonmark link shows when&nbsp;shared.</p>
 <p style="margin: 0; max-width: 720px; font-size: 14px; line-height: 1.7; color: #8A8B8F"><code>phase.illumination</code> in every response is the share of the moon&#39;s face lit by the sun at that instant, not the moon&#39;s age. It comes from the moon&#39;s real position (Meeus, Astronomical Algorithms, ch. 47–49): its phase angle, latitude and distance and matches PyEphem within 0.05 percentage points across 2000–2050. <code>/v1/spec</code> lists the method under <code>illumination</code>.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start">
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
@@ -621,7 +621,7 @@ openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>moon-precise.js</span><span>MIT</span></div>
 <pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">// Exact Moon timestamp, nanosecond precision (BigInt, no floating point)
-const EPOCH_NS = -62165308562978611200n;  // Year 0, Moon 1, Day 1, 00:00:00
+const EPOCH_NS = -62165308562978611200n;  // Cycle 0, Moon 1, Lune 1, 00:00:00
 const NUM = 31881600000000000n;           // 369 × 86,400 × 10⁹
 const DEN = 33168757399689600n;           // 13 × mean lunation in ns
 const DAY = 86400n * 1000000000n;         // Moon ns per Moon day
@@ -629,15 +629,15 @@ const DAY = 86400n * 1000000000n;         // Moon ns per Moon day
 function moonmark(unixNs) {              // unixNs: BigInt
   const mns = (unixNs - EPOCH_NS) * NUM / DEN;
   const dayIndex = mns / DAY;
-  const year = dayIndex / 369n;
-  const dy = Number(dayIndex - year * 369n);
+  const cycle = dayIndex / 369n;
+  const dy = Number(dayIndex - cycle * 369n);
   const m = Math.floor(dy * 13 / 369);
   const day = dy - Math.ceil(m * 369 / 13) + 1;
   let r = mns - dayIndex * DAY;
   const ns = r % 1000000000n; r /= 1000000000n;
   const s = Number(r % 60n), mi = Number(r / 60n % 60n), h = Number(r / 3600n);
   const p = (x, n = 2) =&gt; String(x).padStart(n, &quot;0&quot;);
-  return `${year}.${p(m + 1)}.${p(day)} ${p(h)}:${p(mi)}:${p(s)}.${p(ns, 9)}`;
+  return `${cycle}.${p(m + 1)}.${p(day)} ${p(h)}:${p(mi)}:${p(s)}.${p(ns, 9)}`;
 }
 // moonmark(1794516299901000000n) → &quot;1928.05.03 08:57:39.035909351&quot;</pre>
 </div>
@@ -652,7 +652,7 @@ function moonmark(unixNs) {              // unixNs: BigInt
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>moon.js</span><span>MIT</span></div>
 <pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">// Moon reference implementation (JavaScript)
-const EPOCH_MS = -62165308562978.61;      // Year 0, Moon 1, Day 1, 00:00:00
+const EPOCH_MS = -62165308562978.61;      // Cycle 0, Moon 1, Lune 1, 00:00:00
 const MOON_SECOND = 1.0403730490216803;   // in SI seconds
 const DAY_MS = 86400000 * MOON_SECOND;
 const firstDay = (m) =&gt; Math.ceil(m * 369 / 13);
@@ -660,19 +660,19 @@ const firstDay = (m) =&gt; Math.ceil(m * 369 / 13);
 function toMoon(unixMs) {
   const t = unixMs - EPOCH_MS;
   const dayIndex = Math.floor(t / DAY_MS);
-  const year = Math.floor(dayIndex / 369);
-  const dayOfYear = dayIndex - year * 369;
-  const m = Math.floor(dayOfYear * 13 / 369);
+  const cycle = Math.floor(dayIndex / 369);
+  const dayOfCycle = dayIndex - cycle * 369;
+  const m = Math.floor(dayOfCycle * 13 / 369);
   let s = (t - dayIndex * DAY_MS) / (1000 * MOON_SECOND);
   const hour = Math.floor(s / 3600); s -= hour * 3600;
   const minute = Math.floor(s / 60);
   const second = Math.floor(s - minute * 60);
-  return { year, moon: m + 1, day: dayOfYear - firstDay(m) + 1,
+  return { cycle, moon: m + 1, day: dayOfCycle - firstDay(m) + 1,
            hour, minute, second };
 }
 
-function toUnix({ year, moon, day, hour = 0, minute = 0, second = 0 }) {
-  const days = year * 369 + firstDay(moon - 1) + (day - 1);
+function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
+  const days = cycle * 369 + firstDay(moon - 1) + (day - 1);
   const secs = days * 86400 + hour * 3600 + minute * 60 + second;
   return EPOCH_MS + secs * 1000 * MOON_SECOND;
 }</pre>
@@ -800,7 +800,7 @@ class Component extends DCLogic {
     const nowJson = '{\n  "cycle": ' + y + ',\n  "moon": ' + (mi + 1) + ',\n  "day": ' + day + ',\n  "day_of_cycle": ' + (dy + 1) + ',\n  "moon_length_days": ' + mlen + ',\n  "time": "' + time + '",\n  "moonmark": "' + y + '.' + p(mi + 1) + '.' + p(day) + ' ' + time + '.' + frac + '",\n  "phase": { "fraction": ' + phf.toFixed(6) + ', "name": "' + phn + '" },\n  "unix_ms": ' + Math.floor(nowMs) + ',\n  "utc": "' + u.toISOString().slice(0, -1) + '000000Z",\n  "time_zone": null,\n  "dst": false\n}';
     const pk = Math.cos(2 * Math.PI * phf), wx = phf < 0.5;
     const phasePath = 'M0,-10 A10,10 0 0 ' + (wx ? 1 : 0) + ' 0,10 A' + (Math.abs(pk) * 10).toFixed(3) + ',10 0 0 ' + ((wx === (pk > 0)) ? 0 : 1) + ' 0,-10Z';
-    return { phasePath, phaseName: phn, clock: time, dateLine: 'YEAR ' + y + ' · MOON ' + p(mi + 1) + ' · LUNE ' + p(day), yNum: String(y), moonNum: p(mi + 1), dayNum: p(day), nowJson };
+    return { phasePath, phaseName: phn, clock: time, dateLine: 'CYCLE ' + y + ' · MOON ' + p(mi + 1) + ' · LUNE ' + p(day), yNum: String(y), moonNum: p(mi + 1), dayNum: p(day), nowJson };
   }
 }
 </script>
