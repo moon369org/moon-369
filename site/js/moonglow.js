@@ -102,7 +102,7 @@
     ctx.drawImage(st, 0, 0);
 
     // Rays on the lit limb only.
-    blurDraw(ctx, W, W, Math.max(1, Math.round(W / 340)), 1, 'lighter', function (ctx) {
+    blurDraw(ctx, W, W, Math.max(1, Math.round(W / 340)), BLUR_OK ? 1 : 0.2, 'lighter', function (ctx) {   // iPhone: rays 80% softer
     ctx.lineCap = 'round'; ctx.lineWidth = 2.2 * u;
     var n = 150;
     var sides = Math.abs(f - 0.5) < 0.02 ? [side, -side] : [side];   // near full, the whole limb is lit
