@@ -130,8 +130,8 @@
       ticks += '<span style="left:' + pc.toFixed(2) + '%">' + lab + '</span>';
     }
     q('ticks').innerHTML = ticks;
-    var PLAY = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0L10 6L0 12Z" fill="currentColor"/></svg> PLAY',
-      PAUSE = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0h3.5v12H0zM6.5 0H10v12H6.5z" fill="currentColor"/></svg> PAUSE';
+    var PLAY = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0L10 6L0 12Z" fill="currentColor"/></svg><span class="sk-pl">PLAY</span>',
+      PAUSE = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0h3.5v12H0zM6.5 0H10v12H6.5z" fill="currentColor"/></svg><span class="sk-pl">PAUSE</span>';
     q('play').innerHTML = PLAY;
     var setStat = function (i, ev, sub) { q('v' + i).textContent = ev ? clock(ev.t) : '—'; q('s' + i).textContent = ev ? sub : (i === 1 ? 'not up' : 'not that day'); };
     setStat(0, sky.rise, sky.rise && 'in the ' + compass(sky.rise.az) + tag(sky.rise.t));
@@ -215,7 +215,9 @@
         cx.beginPath(); cx.arc(gx, hz + 70 * dpr, 10 * dpr, 0, 7); cx.stroke(); cx.setLineDash([]);
       }
       range.value = toV(at);
-      q('now').textContent = clock(at) + tag(at).toUpperCase() + (m.alt > RISE ? '  ·  MOON UP' : '  ·  BELOW THE HORIZON');
+      // break only between the parts, so it wraps cleanly onto two lines on phones
+      q('now').innerHTML = [clock(at), tag(at).replace(' · ', '').toUpperCase(), m.alt > RISE ? 'MOON UP' : 'BELOW THE HORIZON']
+        .filter(Boolean).map(function (x, i, all) { return '<span>' + x + (i < all.length - 1 ? ' ·' : '') + '</span>'; }).join(' ');
       if (cfg.onTime) cfg.onTime(at, m);
     }
     function stop() { if (playing) { cancelAnimationFrame(playing.raf); playing = null; } q('play').setAttribute('aria-pressed', 'false'); q('play').innerHTML = PLAY; }
