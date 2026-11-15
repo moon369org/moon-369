@@ -132,7 +132,7 @@
     ctx.filter = 'none';
     // Space dust, lit by the moon: brighter near it, barely there further away.
     var dt = lastDust ? Math.min(0.1, (now - lastDust) / 1000) : 0; lastDust = now;
-    var mx = cx * 2, my = cy * 2, MR = R * 2, reach = H * 0.9;
+    var mx = cx * 2, my = cy * 2, MR = R * 2, reach = H * 0.7;
     ctx.globalAlpha = 1;
     for (var q = 0; q < dust.length; q++) {
       var P = dust[q];
@@ -143,8 +143,8 @@
       var px = P.x * W, py = P.y * H;
       var dd = Math.sqrt((px - mx) * (px - mx) + (py - my) * (py - my)) - MR;
       if (dd < 0) continue;                                       // never in front of the moon
-      var lit = Math.max(0, 1 - dd / reach); lit = lit * lit;
-      var al = P.a * (0.55 + 0.45 * Math.sin(now / 1000 * P.sp + P.ph)) * (0.3 + 0.7 * lit);
+      var lit = Math.max(0, 1 - dd / reach); lit = lit * lit * lit;      // brightest right by the moon
+      var al = (0.05 + 0.95 * lit) * (0.6 + 0.4 * Math.sin(now / 1000 * P.sp + P.ph)) * (0.75 + 0.25 * P.a);
       if (al < 0.01) continue;
       var pr = P.r * dpr;
       var sg = ctx.createRadialGradient(px, py, 0, px, py, pr * 2.2);
