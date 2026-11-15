@@ -45,6 +45,7 @@
           '<div class="sl-btns sl-btns2">' +
             '<a class="sl-l" data-a="open">Open Moonmark &rarr;</a>' +
             '<a class="sl-l" data-a="receipt">Save receipt</a>' +
+            '<a class="sl-l" href="/night">The moon on your birthday &rarr;</a>' +
             '<button type="button" class="sl-l" data-a="done">Done</button>' +
           '</div>' +
         '</div>' +
