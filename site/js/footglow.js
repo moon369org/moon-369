@@ -17,7 +17,7 @@
   // Space dust: tiny specks drifting in the moonlight. Positions are 0..1 of the canvas.
   var dust = [];
   for (var d = 0; d < 150; d++) dust.push({
-    x: Math.random(), y: Math.random(), r: 0.5 + Math.pow(Math.random(), 3) * 1.3,
+    x: Math.random(), y: Math.random(), r: 0.35 + Math.pow(Math.random(), 3) * 0.45,
     vx: (Math.random() - 0.5) * 0.004, vy: -0.002 - Math.random() * 0.006,
     ph: Math.random() * 6.28, sp: 0.4 + Math.random() * 1.2, a: 0.25 + Math.random() * 0.6 });
   var lastDust = 0;
@@ -50,7 +50,7 @@
     // that its sides fall away into the dark and it reads as a round moon.
     var chord = w * 0.7, ch = Math.max(4, Math.min(70 * dpr / 2, chord / 14));   // same shape on every screen
     var R = (chord * chord / 4 + ch * ch) / (2 * ch), cx = w / 2;
-    ch = ch * 0.3; chord = 2 * Math.sqrt(2 * R * ch - ch * ch);   // same moon, sunk 70%
+    ch = ch * 0.15; chord = 2 * Math.sqrt(2 * R * ch - ch * ch);   // same moon, sunk 70%
     var cy = h + R - ch;
     var span = Math.asin(Math.min(1, (chord / 2) / R)) * 2.4;    // the moon continues under the line: light still rises off its hidden sides
 
@@ -66,17 +66,18 @@
 
     // Rays, radial from the centre. Each one brightens and dims on its own clock, so
     // nothing travels sideways along the edge (that read as flowing water).
-    var n = Math.round(Math.max(80, chord / 3.2) * 2.2);
+    var n = Math.round(Math.max(80, chord / 3.2) * 1.1);
     for (var j = 0; j < n; j++) {
       var v = j / (n - 1);
-      var ang = -span + v * span * 2;
+      var seed3 = Math.sin(j * 39.425) * 24634.63; seed3 -= Math.floor(seed3);
+      var ang = -span + (v + (seed3 - 0.5) * 1.6 / n) * span * 2;   // uneven spacing
       var base = Math.max(0, Math.cos((v - 0.5) * Math.PI));
       var env = Math.pow(base, 0.6);
       if (env < 0.02) continue;
       var seed = Math.sin(j * 12.9898) * 43758.5453; seed -= Math.floor(seed);
       var seed2 = Math.sin(j * 78.233) * 12543.31; seed2 -= Math.floor(seed2);
       var tw = 0.5 + 0.5 * Math.sin(t * (0.6 + seed * 1.4) + seed2 * 6.28);
-      var len = h * (0.1 + 0.28 * seed2) * (0.75 + 0.25 * tw) * env;
+      var len = h * (0.06 + 0.36 * seed2 * seed2) * (0.75 + 0.25 * tw) * env;
       var a = Math.min(1, (0.25 + 0.75 * tw) * env * 0.9);
       var dx = Math.sin(ang), dy = -Math.cos(ang);
       var x0 = cx + dx * R * 0.997, y0 = cy + dy * R * 0.997;   // Rule 1: start inside the white
@@ -87,7 +88,7 @@
       g.addColorStop(0.18, 'rgba(' + INK + ',' + a * 0.5 + ')');
       g.addColorStop(0.45, 'rgba(' + INK + ',' + a * 0.15 + ')');
       g.addColorStop(1, 'rgba(' + INK + ',0)');               // Rule 2: always fade to nothing
-      o.fillStyle = g; taper(o, x0, y0, x1, y1, Math.max(1.5, w / 360));
+      o.fillStyle = g; taper(o, x0, y0, x1, y1, Math.max(1.5, w / 300) * (0.5 + 2.2 * seed3 * seed3));   // random thickness, widest at the base
     }
 
     // Long beams.
