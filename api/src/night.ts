@@ -126,7 +126,7 @@ export function nightSvg(n: NightInput, f: ReturnType<typeof nightFacts>, fmt: '
   const title = OCCASIONS[n.occasion], date = dateLine(n);
   const time = n.h !== null ? `${pad2(n.h)}:${pad2(n.mi)}  ·  ` : '';
   const sub = `${time}${f.phase.toUpperCase()}  ·  ${(f.illumination * 100).toFixed(0)}% LIT`;
-  const ret = f.eclipse ? `A ${f.eclipse.toUpperCase()} SOLAR ECLIPSE THAT DAY` : f.returns ? `THIS MOON RETURNS TO THIS DATE IN ${f.returns}` : '';
+  const ret = f.eclipse ? `${/^[aeiou]/.test(f.eclipse) ? 'AN' : 'A'} ${f.eclipse.toUpperCase()} SOLAR ECLIPSE THAT DAY` : f.returns ? `THIS MOON RETURNS TO THIS DATE IN ${f.returns}` : '';
   // On an eclipse day the picture is the eclipse, drawn like the living eclipses on the site.
   const art = (cx: number, cy: number, r: number, id: string) => f.eclipse
     ? eclipseIcon(f.eclipse, Math.round(r / 0.26), false, id).replace('<svg ', `<svg x="${(cx - r / 0.52).toFixed(1)}" y="${(cy - r / 0.52).toFixed(1)}" `)

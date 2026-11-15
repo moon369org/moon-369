@@ -101,7 +101,8 @@
       if (e.next) { $('[data-ec-nextone]').href = '/eclipse/' + e.next.date; } else $('[data-ec-nextone]').hidden = true;
       var url = 'https://moon369.org/eclipse/' + e.date;
       var future = e.unix_ms > Date.now();
-      var text = (future ? 'A ' + NAME[e.type].toLowerCase() + ' is coming on ' : 'A ' + NAME[e.type].toLowerCase() + ' happened on ') + longDate(e.date) + '.\nEvery solar eclipse from 2000 BCE to 3000 CE:';
+      var name = NAME[e.type].toLowerCase(), art = /^[aeiou]/.test(name) ? 'An ' : 'A ';
+      var text = art + name + (future ? ' is coming on ' : ' happened on ') + longDate(e.date) + '.\nEvery solar eclipse from 2000 BCE to 3000 CE:';
       $('[data-ec-x]').href = 'https://x.com/intent/post?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
       document.addEventListener('click', function (ev) {
         var t = ev.target.closest && ev.target.closest('[data-ec-share],[data-ec-copy]'); if (!t) return;

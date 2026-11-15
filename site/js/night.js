@@ -10,6 +10,7 @@
   var EPOCH = -62165308562978.61, SEC = 1000 * 1.0403730490216803;
   var $ = function (s) { return document.querySelector(s); };
   var p2 = function (n) { return String(n).padStart(2, '0'); };
+  var an = function (w) { return /^[aeiou]/i.test(w) ? 'an ' : 'a '; };   // an annular eclipse, a total one
   // Shown and hidden with data-off: the page renderer drops plain hidden attributes.
   var vis = function (el, on) { if (on) el.removeAttribute('data-off'); else el.setAttribute('data-off', ''); };
   var occasion = 'born', current = null, cardBlob = null, cardFor = '';
@@ -64,7 +65,8 @@
       born: 'The moon when I was born: ', met: 'The moon the day we met: ', wed: 'The moon on our wedding day: ',
       kid: 'The moon when my child was born: ', day: 'The moon on ' + dateText(n) + ': ',
     }[n.occasion] + ph + ', ' + pct + '.';
-    var back = r.eclipse ? '\nAnd there was a ' + r.eclipse + ' solar eclipse that day.' : r.returns ? '\nIt comes back to ' + ANNIV[n.occasion] + ' in ' + r.returns + '.' : '';
+    var future = msOf(n) > Date.now();
+    var back = r.eclipse ? '\nAnd there ' + (future ? 'will be ' : 'was ') + an(r.eclipse) + r.eclipse + ' solar eclipse that day.' : r.returns ? '\nIt comes back to ' + ANNIV[n.occasion] + ' in ' + r.returns + '.' : '';
     return head + back + '\n\nWhat did yours look like?';
   }
 
@@ -83,7 +85,7 @@
     $('[data-nt-cycle]').textContent = md.cycle; $('[data-nt-mo]').textContent = p2(md.moon); $('[data-nt-lune]').textContent = p2(md.lune);
     var badge = $('[data-nt-badge]'), who = n.occasion === 'born' ? 'BORN' : n.occasion === 'kid' ? 'BORN' : n.occasion === 'met' ? 'MET' : n.occasion === 'wed' ? 'MARRIED' : '';
     if (who && (r.phase === 'Full moon' || r.phase === 'New moon')) { badge.textContent = who + ' UNDER A ' + r.phase.toUpperCase(); vis(badge, true); } else vis(badge, false);
-    $('[data-nt-note]').innerHTML = 'In Moon time that was <a href="/m/' + md.path + '.000000000">Cycle ' + md.cycle + ', Moon ' + p2(md.moon) + ', Lune ' + p2(md.lune) + '</a>.' +
+    $('[data-nt-note]').innerHTML = 'In Moon time that ' + (ms > Date.now() ? 'will be' : 'was') + ' <a href="/m/' + md.path + '.000000000">Cycle ' + md.cycle + ', Moon ' + p2(md.moon) + ', Lune ' + p2(md.lune) + '</a>.' +
       (r.returns ? ' The moon looks like this on ' + ANNIV[n.occasion] + ' again in <b style="color:#E9E4D8;font-weight:500">' + r.returns + '</b>.' : '') +
       (n.h == null ? ' No time given, so this is the moon at midday.' : '');
     $('[data-nt-x]').href = 'https://x.com/intent/post?text=' + encodeURIComponent(postText(n, r)) + '&url=' + encodeURIComponent(pageUrl(n));
@@ -104,8 +106,8 @@
         // On an eclipse day the moon you'd have seen was the eclipse itself.
         current.r.eclipse = e.type;
         $('[data-nt-x]').href = 'https://x.com/intent/post?text=' + encodeURIComponent(postText(n, current.r)) + '&url=' + encodeURIComponent(pageUrl(n));
-        if (ecCv) { ecCv.setAttribute('data-type', e.type); ecCv.setAttribute('aria-label', 'A ' + e.type + ' solar eclipse'); vis(moonCv, false); vis(ecCv, true); }
-        ecl.querySelector('b').textContent = 'A ' + e.type.toUpperCase() + ' SOLAR ECLIPSE THAT DAY';
+        if (ecCv) { ecCv.setAttribute('data-type', e.type); ecCv.setAttribute('aria-label', an(e.type).replace('a', 'A') + e.type + ' solar eclipse'); vis(moonCv, false); vis(ecCv, true); }
+        ecl.querySelector('b').textContent = (an(e.type) + e.type + ' solar eclipse that day').toUpperCase();
         vis(ecl, true);
       }).catch(function () {});
     }
