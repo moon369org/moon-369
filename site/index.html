@@ -838,11 +838,14 @@ class Component extends DCLogic {
     const t0 = Date.now();
     const after = (fn) => setTimeout(fn, Math.max(0, 2000 - (Date.now() - t0)));
     this.setState({ sg: { s: 'busy', t: 'FINGERPRINTING ' + file.name.toUpperCase().slice(0, 40) } });
+    const seal = (d) => { try { window.dispatchEvent(new CustomEvent('moon:seal', { detail: d })); } catch (x) {} };
+    seal({ phase: 'start', name: file.name });
     file.arrayBuffer()
       .then((buf) => crypto.subtle.digest('SHA-256', buf))
       .then((d) => {
         const sha = Array.from(new Uint8Array(d), (b) => b.toString(16).padStart(2, '0')).join('');
         this.setState({ sg: { s: 'busy', t: 'SIGNING' } });
+        seal({ phase: 'hashed', sha });
         return fetch('https://api.moon369.org/v1/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sha256: sha }) })
           .then((r) => r.json().then((b) => ({ ok: r.ok, status: r.status, b })))
           .then(({ ok, status, b }) => {
@@ -851,10 +854,11 @@ class Component extends DCLogic {
             if (this.state && this.state.sg && this.state.sg.href) URL.revokeObjectURL(this.state.sg.href);
             const href = URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }));
             const done = { s: 'done', name: file.name, sha, mark: rc.moonmark, key: rc.key_id, url: b.signed_url || (b.moonmark_url + '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + (rc.beacon ? '&r=' + rc.beacon.round + '&b=' + rc.beacon.signature : '') + (rc.pq ? '&q=' + rc.pq.key_id : '') + '&g=' + rc.signature), algs: rc.pq ? 'Ed25519 + ML-DSA-65' : 'Ed25519', round: rc.beacon ? rc.beacon.round : null, href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' };
+            seal({ phase: 'signed', receipt: rc, tideline: b.tideline || null, url: done.url, href, file: done.file });
             after(() => this.setState({ sg: done }));
           });
       })
-      .catch((err) => after(() => this.setState({ sg: { s: 'err', err: (err && err.message && !/fetch|network/i.test(err.message)) ? err.message : 'Could not reach Moon. Check your connection and try again.' } })));
+      .catch((err) => { const msg = (err && err.message && !/fetch|network/i.test(err.message)) ? err.message : 'Could not reach Moon. Check your connection and try again.'; seal({ phase: 'error', message: msg }); after(() => this.setState({ sg: { s: 'err', err: msg } })); });
   }
   renderVals() {
     const EPOCH = -62165308562978.61, K = 1.0403730490216803, DAY = 86400000 * K;
@@ -953,6 +957,8 @@ class Component extends DCLogic {
   requestAnimationFrame(f);
 })();
 </script>
+<script src="js/qrcode.js" defer></script>
+<script src="js/seal.js" defer></script>
 <script src="js/footglow.js" defer></script>
 </body>
 </html>
