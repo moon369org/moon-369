@@ -15,7 +15,7 @@
   var beams = [];
   function spawn(now) {
     var v = 0.03 + Math.random() * 0.94;                         // anywhere on the visible surface
-    beams.push({ v: v, born: now, life: 2200 + Math.random() * 2600,
+    beams.push({ v: v, born: now, life: 4400 + Math.random() * 5200,
       len: 0.12 + Math.pow(Math.random(), 0.8) * 0.85, soft: Math.random(), width: 0.5 + Math.random() * 1.1, peak: 0.2 + Math.pow(Math.random(), 1.5) * 0.8 });
   }
 
@@ -43,21 +43,21 @@
     var R = (chord * chord / 4 + ch * ch) / (2 * ch), cx = w / 2;
     ch = ch * 0.3; chord = 2 * Math.sqrt(2 * R * ch - ch * ch);   // same moon, sunk 70%
     var cy = h + R - ch;
-    var span = Math.asin(Math.min(1, (chord / 2) / R)) * 1.08;   // a touch past the line, so rays fade below it
+    var span = Math.asin(Math.min(1, (chord / 2) / R)) * 2.4;    // the moon continues under the line: light still rises off its hidden sides
 
     // Halo: rings centred on the moon itself, so the light is perfectly round (Rule 1 + 2).
     o.globalCompositeOperation = 'lighter';
-    var halo = o.createRadialGradient(cx, cy, R * 0.995, cx, cy, R + h * 0.42);
-    halo.addColorStop(0, 'rgba(' + INK + ',0.75)');
-    halo.addColorStop(0.04, 'rgba(' + INK + ',0.45)');
-    halo.addColorStop(0.15, 'rgba(' + INK + ',0.2)');
-    halo.addColorStop(0.4, 'rgba(' + INK + ',0.07)');
+    var halo = o.createRadialGradient(cx, cy, R * 0.995, cx, cy, R + h * 0.2);
+    halo.addColorStop(0, 'rgba(' + INK + ',1)');            // bright right on the surface
+    halo.addColorStop(0.05, 'rgba(' + INK + ',0.7)');
+    halo.addColorStop(0.15, 'rgba(' + INK + ',0.3)');
+    halo.addColorStop(0.4, 'rgba(' + INK + ',0.06)');
     halo.addColorStop(1, 'rgba(' + INK + ',0)');
     o.fillStyle = halo; o.fillRect(0, 0, w, h);
 
     // Rays, radial from the centre. Each one brightens and dims on its own clock, so
     // nothing travels sideways along the edge (that read as flowing water).
-    var n = Math.round(Math.max(160, chord / 1.6));
+    var n = Math.round(Math.max(80, chord / 3.2) * 2.2);
     for (var j = 0; j < n; j++) {
       var v = j / (n - 1);
       var ang = -span + v * span * 2;
@@ -133,13 +133,13 @@
   var t0 = performance.now(), last = 0;
   var nextBeam = 0;
   function frame(now) {
-    if (!reduce && now > nextBeam && beams.length < 20) { spawn(now); nextBeam = now + 80 + Math.random() * 280; }
+    if (!reduce && now > nextBeam && beams.length < 22) { spawn(now); nextBeam = now + 160 + Math.random() * 560; }
     if (now - last > 33) {
       var all = document.querySelectorAll('canvas.ft-glow');
       for (var c = 0; c < all.length; c++) {
         var r = all[c].getBoundingClientRect();
         if (r.bottom > 0 && r.top < (window.innerHeight || 800) && (!reduce || !all[c].width)) {
-          draw(all[c], reduce ? 12 : (now - t0) / 1000 * 3 + 40, now); last = now;
+          draw(all[c], reduce ? 12 : (now - t0) / 1000 * 1.5 + 40, now); last = now;
         }
       }
     }
