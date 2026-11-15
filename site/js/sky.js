@@ -224,6 +224,7 @@
     range.addEventListener('input', function () { stop(); at = toT(+range.value); draw(); });
     q('play').addEventListener('click', function () {
       if (playing) { stop(); return; }
+      if (window.moonTrack) window.moonTrack('Sky played', {});
       if (at >= t1 - 60000) at = t0;
       q('play').setAttribute('aria-pressed', 'true'); q('play').innerHTML = PAUSE;
       var last = performance.now();

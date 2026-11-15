@@ -105,7 +105,9 @@
       var text = art + name + (future ? ' is coming on ' : ' happened on ') + longDate(e.date) + '.\nEvery solar eclipse from 2000 BCE to 3000 CE:';
       $('[data-ec-x]').href = 'https://x.com/intent/post?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
       document.addEventListener('click', function (ev) {
+        var xl = ev.target.closest && ev.target.closest('[data-ec-x]'); if (xl && window.moonTrack) window.moonTrack('Share', { page: 'eclipse', via: 'x' });
         var t = ev.target.closest && ev.target.closest('[data-ec-share],[data-ec-copy]'); if (!t) return;
+        if (window.moonTrack) window.moonTrack('Share', { page: 'eclipse', via: t.hasAttribute('data-ec-share') && navigator.share ? 'share' : 'copy link' });
         if (t.hasAttribute('data-ec-share') && navigator.share) { navigator.share({ title: title, text: text, url: url }).catch(function () {}); return; }
         (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { toast('LINK COPIED'); }, function () { window.prompt('Copy this link', url); });
       });

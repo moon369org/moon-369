@@ -64,7 +64,8 @@
       j.r.forEach(function (r) {
         var prov = j.p[r[1]], cc = j.c[r[2]].split('|'), base = ascii(r[0] + ' ' + prov + ' ' + cc[1]);
         var k = (seen[base] || 0) + 1; seen[base] = k;
-        var near = WITH_PROVINCE[cc[1]] && prov && prov !== r[0] ? prov : cc[0];
+        // same rule as the card labels (api/src/places.ts): Washington, D.C. stands alone; São Paulo, Brazil, not São Paulo, São Paulo
+        var near = r[0].indexOf(',') >= 0 ? '' : WITH_PROVINCE[cc[1]] && prov && fold(prov) !== fold(r[0]) ? prov : cc[0];
         list.push({ slug: k > 1 ? base + '-' + k : base, name: r[0], prov: prov, country: cc[0], near: near, tz: j.z[r[3]], lat: r[4], lng: r[5], key: fold(r[0] + ' ' + prov + ' ' + cc[0]) , nkey: fold(r[0]) });
       });
       try {
@@ -141,7 +142,7 @@
     $('[data-nt-title]').textContent = TITLES[n.occasion];
     $('[data-nt-date]').textContent = dateText(n).toUpperCase();
     drawSky(n, ms, f);
-    var pl = $('[data-nt-place]'); if (pl) { pl.textContent = n.place ? 'IN ' + (n.place.name + ', ' + n.place.near).toUpperCase() : ''; vis(pl, !!n.place); }
+    var pl = $('[data-nt-place]'); if (pl) { pl.textContent = n.place ? 'IN ' + whereText(n.place).toUpperCase() : ''; vis(pl, !!n.place); }
     $('[data-nt-sub]').textContent = (n.h != null ? p2(n.h) + ':' + p2(n.mi) + '  ·  ' : '') + r.phase.toUpperCase() + '  ·  ' + Math.round(lit * 100) + '% LIT  ·  ' + r.age.toFixed(1) + ' DAYS OLD';
     $('[data-nt-cycle]').textContent = md.cycle; $('[data-nt-mo]').textContent = p2(md.moon); $('[data-nt-lune]').textContent = p2(md.lune);
     var badge = $('[data-nt-badge]'), who = n.occasion === 'born' ? 'BORN' : n.occasion === 'kid' ? 'BORN' : n.occasion === 'met' ? 'MET' : n.occasion === 'wed' ? 'MARRIED' : '';
@@ -221,6 +222,7 @@
   }
   function fileName() { var n = current.n; return 'moon-' + n.y + '-' + p2(n.mo) + '-' + p2(n.d) + '.png'; }
   function save() {
+    if (window.moonTrack) window.moonTrack('Share', { page: 'night', via: 'save image' });
     getCard().then(function (b) {
       var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = fileName();
       document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
@@ -229,6 +231,7 @@
   }
   function share() {
     var n = current.n, text = postText(n, current.r), url = pageUrl(n);
+    if (window.moonTrack) window.moonTrack('Share', { page: 'night', via: 'share' });
     if (!navigator.share) { copy(); return; }
     getCard().then(function (b) {
       var file = new File([b], fileName(), { type: 'image/png' });
@@ -237,6 +240,7 @@
     }).catch(function (e) { if (e && e.name === 'AbortError') return; navigator.share({ text: text, url: url }).catch(function () {}); });
   }
   function copy() {
+    if (window.moonTrack) window.moonTrack('Share', { page: 'night', via: 'copy link' });
     var url = pageUrl(current.n);
     (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { toast('LINK COPIED'); }, function () { window.prompt('Copy this link', url); });
   }
@@ -301,7 +305,7 @@
     var b = e.target.closest && e.target.closest('[data-nt-addplace]'); if (!b) return;
     var w = $('input[name=where]'); $('[data-nt-form]').scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(function () { w.focus({ preventScroll: true }); }, 350);
   });
-  function whereText(p) { return p.slug ? p.name + ', ' + p.near : p.name; }
+  function whereText(p) { return p.slug && p.near ? p.name + ', ' + p.near : p.name; }
   function tzHint() {
     var h = $('[data-nt-tz]'); if (!h) return;
     var tz = place ? place.tz : MY_TZ; if (!tz) { h.textContent = ''; return; }
@@ -355,6 +359,7 @@
     var loc = e.target.closest && e.target.closest('[data-nt-locate]');
     if (!loc) return;
     if (!navigator.geolocation) { toast('LOCATION IS NOT AVAILABLE HERE'); return; }
+    if (window.moonTrack) window.moonTrack('Use my location', { page: 'night' });
     loc.setAttribute('aria-busy', 'true');
     Promise.all([loadCities(), new Promise(function (ok, no) { navigator.geolocation.getCurrentPosition(ok, no, { timeout: 10000, maximumAge: 600000 }); })]).then(function (a) {
       var la = a[1].coords.latitude, lo = a[1].coords.longitude, k = Math.cos(la * Math.PI / 180), best = null, bd = 1e9;
@@ -364,6 +369,7 @@
   });
 
   document.addEventListener('click', function (e) {
+    var xl = e.target.closest && e.target.closest('[data-nt-x]'); if (xl) if (window.moonTrack) window.moonTrack('Share', { page: 'night', via: 'x' });
     var t = e.target.closest && e.target.closest('.nt-chip,[data-try],[data-nt-share],[data-nt-save],[data-nt-copy],[data-nt-reset]');
     if (!t) return;
     if (t.classList.contains('nt-chip')) { setOccasion(t.getAttribute('data-for')); if (current && $('input[name=d]').value) { var n0 = fromForm(); if (n0) show(n0, false); } return; }
@@ -382,7 +388,7 @@
   document.addEventListener('submit', function (e) {
     if (!e.target.matches || !e.target.matches('[data-nt-form]')) return;
     e.preventDefault();
-    var n = fromForm(); if (n) show(n, true);
+    var n = fromForm(); if (n) { show(n, true); if (window.moonTrack) window.moonTrack('Your Moon', { from: 'night', occasion: n.occasion, place: n.place ? 'yes' : 'no', time: n.h != null ? 'yes' : 'no' }); }
   });
 
   // dc-lite renders the page after load; wait for the form, then open a shared moon if the URL has one.
@@ -391,6 +397,12 @@
     var n = fromUrl();
     if (n) {
       $('[data-nt-root]').classList.add('nt-shared'); fill(n); show(n, false);
+      // Counted here, not on the homepage, so the event is not lost as the page changes.
+      var ref = document.referrer, home = false;
+      try { var u = new URL(ref); home = u.host === location.host && /^\/(index\.html)?$/.test(u.pathname); } catch (e) {}
+      if (window.moonTrack) window.moonTrack(home ? 'Your Moon' : 'Your Moon opened from a link', home
+        ? { from: 'home', occasion: n.occasion, place: n.slug ? 'yes' : 'no', time: n.h != null ? 'yes' : 'no' }
+        : { occasion: n.occasion, place: n.slug ? 'yes' : 'no' });
       if (n.slug) loadCities().then(function () {
         var hit = CITIES.filter(function (c) { return c.slug === n.slug; })[0];
         if (hit && current && current.n === n) { n.place = hit; fill(n); show(n, false); }

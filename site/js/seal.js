@@ -210,6 +210,7 @@
   function onAct(e) {
     var t = e.target.closest('[data-a]'); if (!t || !st || !st.signed) return;
     var a = t.getAttribute('data-a'), s = st.signed, rc = s.receipt;
+    if (a && a !== 'done' && window.moonTrack) window.moonTrack('Share', { page: 'seal', via: a });
     if (a === 'done') { close(); return; }
     if (a === 'share') {
       e.preventDefault();
@@ -299,7 +300,7 @@
           if (!x.ok) throw new Error(x.status === 429 ? 'Too many requests right now. Try again in a minute.' : ((x.b && x.b.error && x.b.error.message) || 'Signing failed. Try again.'));
           var rc = x.b.receipt;
           var href = URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }));
-          emit({ phase: 'signed', receipt: rc, tideline: x.b.tideline || null, url: x.b.signed_url, href: href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' });
+          if (window.moonTrack) window.moonTrack('Moonmark signed', {}); emit({ phase: 'signed', receipt: rc, tideline: x.b.tideline || null, url: x.b.signed_url, href: href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' });
         });
     }).catch(function (err) {
       emit({ phase: 'error', message: (err && err.message && !/fetch|network/i.test(err.message)) ? err.message : 'Could not reach Moon. Check your connection and try again.' });
