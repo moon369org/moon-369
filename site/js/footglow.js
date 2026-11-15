@@ -73,8 +73,9 @@
       var x0 = cx + dx * R * 0.997, y0 = cy + dy * R * 0.997;   // Rule 1: start inside the white
       var x1 = cx + dx * (R + len), y1 = cy + dy * (R + len);
       var g = o.createLinearGradient(x0, y0, x1, y1);
-      g.addColorStop(0, 'rgba(' + INK + ',' + a + ')');
-      g.addColorStop(0.15, 'rgba(' + INK + ',' + a * 0.55 + ')');
+      g.addColorStop(0, 'rgba(' + INK + ',' + a * 0.25 + ')');      // the surface glow carries the base, so the edge stays smooth
+      g.addColorStop(0.08, 'rgba(' + INK + ',' + a * 0.7 + ')');
+      g.addColorStop(0.18, 'rgba(' + INK + ',' + a * 0.5 + ')');
       g.addColorStop(0.45, 'rgba(' + INK + ',' + a * 0.15 + ')');
       g.addColorStop(1, 'rgba(' + INK + ',0)');               // Rule 2: always fade to nothing
       o.fillStyle = g; taper(o, x0, y0, x1, y1, Math.max(1.5, w / 360));
@@ -107,7 +108,7 @@
       }
       // A soft bloom where the beam leaves the surface.
       var bl0 = o.createRadialGradient(bx0, by0, 0, bx0, by0, bw * 6);
-      bl0.addColorStop(0, 'rgba(' + INK + ',' + ba * 0.5 + ')'); bl0.addColorStop(1, 'rgba(' + INK + ',0)');
+      bl0.addColorStop(0, 'rgba(' + INK + ',' + ba * 0.15 + ')'); bl0.addColorStop(1, 'rgba(' + INK + ',0)');
       o.globalAlpha = 1; o.fillStyle = bl0; o.fillRect(bx0 - bw * 6, by0 - bw * 6, bw * 12, bw * 12);
       o.globalAlpha = 1;
     }
@@ -124,9 +125,20 @@
     top.addColorStop(0, 'rgba(0,0,0,0)');
     top.addColorStop(0.55, 'rgba(0,0,0,1)');
     ctx.globalAlpha = 1; ctx.fillStyle = top; ctx.fillRect(0, 0, W, H);
-    // The moon itself, crisp, on top.
-    ctx.globalCompositeOperation = 'source-over';
+    // The moon itself, with its edge melting into the glow: a stack of tight blurs right on
+    // the surface, then the disc with the faintest softening, so the white falls off smoothly.
+    var u = Math.max(1, cv.clientWidth / 1440) * dpr;
+    ctx.globalCompositeOperation = 'lighter';
+    var edge = [[30, 0.3], [16, 0.45], [8, 0.55], [4, 0.6]];
+    for (var e = 0; e < edge.length; e++) {
+      ctx.filter = 'blur(' + Math.max(1, Math.round(edge[e][0] * u)) + 'px)';
+      ctx.globalAlpha = edge[e][1];
+      cap(ctx, cx * 2, cy * 2, R * 2); ctx.fillStyle = 'rgb(' + INK + ')'; ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    ctx.filter = 'blur(' + Math.max(1, Math.round(1.5 * u)) + 'px)';
     cap(ctx, cx * 2, cy * 2, R * 2); ctx.fillStyle = 'rgb(' + INK + ')'; ctx.fill();
+    ctx.filter = 'none';
   }
 
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
