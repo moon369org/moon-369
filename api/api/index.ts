@@ -9,6 +9,8 @@ import { upstashStore } from '../src/tideline.js';
 import { xrplAnchorer } from '../src/anchor.js';
 import { stamp, upgrade, summarize } from '../src/ots.js';
 import { waitUntil } from '@vercel/functions';
+import { TsaSigner } from '../src/tsa.js';
+import { MOON_TSA_PEM } from '../src/tsa-certs.js';
 
 // Upstash Redis, from the Vercel Marketplace (KV_*) or set by hand (UPSTASH_*). Shared by rate limits and the Tideline.
 const RL_URL = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
@@ -51,6 +53,11 @@ const TIDES = TL_URL && TL_TOKEN ? upstashStore(TL_URL, TL_TOKEN) : undefined;
 const BITCOIN = process.env.MOON_OTS === 'off' ? undefined : { stamp: (d: string) => stamp(d), upgrade: (f: Buffer) => upgrade(f), summarize };
 const ANCHOR = process.env.XRPL_SEED ? xrplAnchorer(process.env.XRPL_SEED, process.env.XRPL_SERVER) : undefined;
 
+// RFC 3161 Time-Stamp Authority (MOON_TSA_KEY: EC P-256 private key, PEM or base64 of the PEM).
+// The certificate is public and ships in the code; MOON_TSA_CERT overrides it with a PEM chain.
+let TSA: TsaSigner | undefined;
+try { if (process.env.MOON_TSA_KEY) TSA = new TsaSigner(process.env.MOON_TSA_KEY, process.env.MOON_TSA_CERT ?? MOON_TSA_PEM); } catch { TSA = undefined; }
+
 const route = (req: Request) => {
   const url = new URL(req.url);
   url.pathname = url.pathname.replace(/^\/api(?=\/|$)/, '') || '/';
@@ -66,6 +73,7 @@ const route = (req: Request) => {
     TIDES,
     ANCHOR,
     BITCOIN,
+    TSA,
     DEFER: (p: Promise<unknown>) => waitUntil(p),
     CRON_SECRET: process.env.CRON_SECRET,
   });

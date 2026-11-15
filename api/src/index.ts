@@ -5,6 +5,8 @@ import {
   moonLength, MoonRangeError, type MoonTime,
 } from './moon.js';
 import { cardSvg, shareSvg } from './card.js';
+import { TsaSigner, TsaReject, parseRequest as parseTsq, issue as issueTst, reject as tsaReject, FAIL as TSA_FAIL, TSA_POLICY, TSA_EXT_MOONMARK } from './tsa.js';
+import { MOON_ROOT_PEM } from './tsa-certs.js';
 import { svgToPng } from './png.js';
 import { hashKey } from './keys.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
@@ -44,6 +46,8 @@ export interface Env {
   CRON_SECRET?: string;
   /** Beacon network to check against (default drand quicknet). Tests only. */
   BEACON_CHAIN?: Chain;
+  /** RFC 3161 Time-Stamp Authority signer (MOON_TSA_KEY + certificate). Optional. */
+  TSA?: TsaSigner;
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
   RETIRED_KEYS?: Record<string, string>;
 }
@@ -276,16 +280,68 @@ async function evidence(r: Receipt, sha256: unknown, env: Env) {
   return { statement, signature, signed_bytes: `${EVIDENCE} + newline + canonical JSON of statement (keys sorted)`, receipt: r, proof };
 }
 
+/** Signs a SHA-256 fingerprint now: receipt, Tideline record, and links. Shared by /v1/sign and the TSA. */
+async function signNow(env: Env, sha: string, at?: bigint) {
+  const S = env.SIGNER!;
+  let beacon: Beacon | null = null;
+  if (env.BEACON) { try { beacon = await env.BEACON(nowUnixNs()); } catch { beacon = null; } }
+  const ns = at ?? nowUnixNs();
+  const mark = formatMoonmark(toMoon(ns));
+  const receipt = S.sign(sha, mark, ns, beacon);
+  let tideline: Record<string, unknown> | null = null;
+  if (env.TIDES) { try { tideline = { ...(await record(env.TIDES, receipt)), status: 'pending', seals_after_utc: unixNsToIso(luneEndNs(luneOf(ns))) }; } catch { tideline = null; } }
+  if (tideline && env.TIDES && env.ANCHOR && env.DEFER) {
+    const T = env.TIDES, A = env.ANCHOR;
+    env.DEFER(checkpointSoon(T, S, nowUnixNs, A).catch(() => null));   // locks recent receipts on the XRP Ledger about once a minute
+    tideline.checkpoint = 'within about a minute';
+  }
+  return {
+    receipt,
+    tideline,
+    moonmark_url: MARK_BASE + moonmarkPath(mark),
+    signed_url: MARK_BASE + moonmarkPath(mark) + `?s=${receipt.sha256}&u=${receipt.unix_ns}&k=${receipt.key_id}` + (receipt.beacon ? `&r=${receipt.beacon.round}&b=${receipt.beacon.signature}` : '') + (receipt.pq ? `&q=${receipt.pq.key_id}` : '') + `&g=${receipt.signature}`,
+    utc: unixNsToIso(ns),
+    accuracy_ns: Number(env.CLOCK_ACCURACY_NS ?? 1_000_000),
+    clock: env.CLOCK_SOURCE ?? 'server-ntp',
+  };
+}
+
+/** RFC 3161 time-stamping: DER in, DER out. */
+async function tsaResponse(req: Request, env: Env, planHdr: Record<string, string>): Promise<Response> {
+  const hdr = { 'Content-Type': 'application/timestamp-reply', 'Cache-Control': 'no-store', ...CORS, ...planHdr };
+  const reply = (der: Uint8Array, extra: Record<string, string> = {}) => new Response(Buffer.from(der), { status: 200, headers: { ...hdr, ...extra } });
+  const ct = (req.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
+  if (ct && ct !== 'application/timestamp-query' && ct !== 'application/octet-stream') return reply(tsaReject(TSA_FAIL.badRequest, 'Content-Type must be application/timestamp-query'));
+  if (!env.TSA) return reply(tsaReject(TSA_FAIL.systemFailure, 'Time-stamping is not configured on this deployment'));
+  const body = new Uint8Array(await req.arrayBuffer());
+  if (body.length === 0 || body.length > 8192) return reply(tsaReject(TSA_FAIL.badDataFormat, 'Send one DER TimeStampReq'));
+  let parsed;
+  try { parsed = parseTsq(body); } catch (e) { return reply(tsaReject(e instanceof TsaReject ? e.fail : TSA_FAIL.badDataFormat, e instanceof Error ? e.message : 'Bad request')); }
+  const ns = nowUnixNs();
+  let moonmarkUrl: string | undefined, mark: string | undefined;
+  if (parsed.hashName === 'SHA-256' && env.SIGNER) {
+    try { const out = await signNow(env, Buffer.from(parsed.digest).toString('hex'), ns); moonmarkUrl = out.signed_url; mark = out.receipt.moonmark; } catch { moonmarkUrl = undefined; }
+  }
+  const serial = (ns << 16n) | BigInt(Math.floor(Math.random() * 65536));
+  const der = issueTst(env.TSA, parsed, { unixNs: ns, serial, accuracyMs: Math.max(1, Math.round(Number(env.CLOCK_ACCURACY_NS ?? 1_000_000) / 1e6)), moonmarkUrl });
+  return reply(der, mark ? { 'X-Moon-Moonmark': mark, ...(moonmarkUrl ? { 'X-Moon-Url': moonmarkUrl } : {}) } : {});
+}
+
 export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, '') || '/';
   const q = url.searchParams;
+  if (path === `/${API_VERSION}/tsa` && req.method === 'POST') {
+    const gate = await authAndLimit(req, env);
+    if (gate instanceof Response) return gate;
+    return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan });
+  }
   const postOnly = path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof`;
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa'] });
   if (path === '/health') return json({ ok: true });
 
   const gate = await authAndLimit(req, env);
@@ -398,28 +454,26 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const body = await readJson(req);
         const sha = typeof body.sha256 === 'string' ? body.sha256.toLowerCase() : body.sha256;
         if (!isSha256Hex(sha)) throw new HttpError(400, 'bad_param', 'sha256 must be the 64-character hex SHA-256 of your content. Send the fingerprint, never the content.');
-        let beacon: Beacon | null = null;
-        if (env.BEACON) { try { beacon = await env.BEACON(nowUnixNs()); } catch { beacon = null; } }
-        const ns = nowUnixNs();
-        const mark = formatMoonmark(toMoon(ns));
-        const receipt = env.SIGNER.sign(sha, mark, ns, beacon);
-        let tideline: Record<string, unknown> | null = null;
-        if (env.TIDES) { try { tideline = { ...(await record(env.TIDES, receipt)), status: 'pending', seals_after_utc: unixNsToIso(luneEndNs(luneOf(ns))) }; } catch { tideline = null; } }
-        if (tideline && env.TIDES && env.ANCHOR && env.DEFER) {
-          const T = env.TIDES, A = env.ANCHOR, S = env.SIGNER;
-          env.DEFER(checkpointSoon(T, S, nowUnixNs, A).catch(() => null));   // locks recent receipts on the XRP Ledger about once a minute
-          tideline.checkpoint = 'within about a minute';
-        }
-        return json({
-          receipt,
-          tideline,
-          moonmark_url: MARK_BASE + moonmarkPath(mark),
-          signed_url: MARK_BASE + moonmarkPath(mark) + `?s=${receipt.sha256}&u=${receipt.unix_ns}&k=${receipt.key_id}` + (receipt.beacon ? `&r=${receipt.beacon.round}&b=${receipt.beacon.signature}` : '') + (receipt.pq ? `&q=${receipt.pq.key_id}` : '') + `&g=${receipt.signature}`,
-          utc: unixNsToIso(ns),
-          accuracy_ns: Number(env.CLOCK_ACCURACY_NS ?? 1_000_000),
-          clock: env.CLOCK_SOURCE ?? 'server-ntp',
-        }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+        return json(await signNow(env, sha), 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
+
+      case path === `/${API_VERSION}/tsa`:
+        return json({
+          tsa: 'RFC 3161',
+          url: 'https://api.moon369.org/v1/tsa',
+          status: env.TSA ? 'enabled' : 'not_configured',
+          request: 'POST a DER TimeStampReq with Content-Type: application/timestamp-query',
+          hashes: ['SHA-256', 'SHA-384', 'SHA-512'],
+          policy: TSA_POLICY,
+          signature: 'ECDSA P-256 with SHA-256',
+          certificates: '/v1/tsa/certs.pem',
+          moon: 'For SHA-256 requests Moon also signs a Moonmark (Ed25519 + ML-DSA-65) for the same moment, logs it on the Tideline, and puts its link in the token (extension ' + TSA_EXT_MOONMARK + ') and the X-Moon-Url header.',
+          example: 'openssl ts -query -data file -sha256 -cert -out req.tsq && curl -s -H "Content-Type: application/timestamp-query" --data-binary @req.tsq https://api.moon369.org/v1/tsa -o resp.tsr',
+        }, 200, { 'Cache-Control': 'public, max-age=300', ...planHdr });
+
+      case path === `/${API_VERSION}/tsa/certs.pem`:
+        if (!env.TSA) throw new HttpError(503, 'tsa_unavailable', 'Time-stamping is not configured on this deployment');
+        return new Response(env.TSA.pem() + MOON_ROOT_PEM, { headers: { 'Content-Type': 'application/x-pem-file', 'Content-Disposition': 'inline; filename="moon-tsa.pem"', 'Cache-Control': 'public, max-age=86400', ...CORS, ...planHdr } });
 
       case path === `/${API_VERSION}/verify`: {
         const body = await readJson(req);

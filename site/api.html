@@ -470,6 +470,24 @@ curl -X POST https://api.moon369.org/v1/sign \
 </div>
 </div>
 </div>
+<div id="tsa" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; border: 1px solid #E9E4D8; color: #E9E4D8">POST</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/tsa</span>
+<span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">RFC 3161</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">A standard RFC 3161 time-stamp authority. Cameras, Content Credentials (C2PA) tools, code signing and PDF signers already speak this protocol, so they can timestamp with Moon by pointing at this URL. Send a DER <code>TimeStampReq</code> (SHA-256, SHA-384 or SHA-512) with <code>Content-Type: application/timestamp-query</code>. For SHA-256, Moon also signs a Moonmark for the same moment, logs it on the Tideline, and links it in the token and the <code>X-Moon-Url</code> header. Certificates: <a href="https://api.moon369.org/v1/tsa/certs.pem" style="color: #E9E4D8; text-decoration: underline; text-underline-offset: 3px">/v1/tsa/certs.pem</a>.</p>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>OPENSSL</span><span>application/timestamp-reply</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">openssl ts -query -data photo.jpg -sha256 -cert -out req.tsq
+curl -s -H &quot;Content-Type: application/timestamp-query&quot; \
+  --data-binary @req.tsq https://api.moon369.org/v1/tsa -o resp.tsr
+
+curl -s https://api.moon369.org/v1/tsa/certs.pem -o moon.pem
+openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
+# Verification: OK</pre>
+</div>
+</div>
 <div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; border: 1px solid #E9E4D8; color: #E9E4D8">POST</span>
