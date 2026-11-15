@@ -24,48 +24,55 @@
     // which sits exactly on that line.
     o.globalCompositeOperation = 'lighter';
     // Soft glow hugging the line (Rule 1: light runs straight out of the edge).
-    o.save(); o.translate(w / 2, h); o.scale((w * 0.5) / (h * 0.55), 1);
-    var gl = o.createRadialGradient(0, 0, 0, 0, 0, h * 0.55);
-    gl.addColorStop(0, 'rgba(' + INK + ',0.34)');
-    gl.addColorStop(0.3, 'rgba(' + INK + ',0.16)');
+    o.save(); o.translate(w / 2, h); o.scale((w * 0.5) / (h * 0.3), 1);
+    var gl = o.createRadialGradient(0, 0, 0, 0, 0, h * 0.3);
+    gl.addColorStop(0, 'rgba(' + INK + ',0.55)');
+    gl.addColorStop(0.15, 'rgba(' + INK + ',0.3)');
+    gl.addColorStop(0.45, 'rgba(' + INK + ',0.1)');
     gl.addColorStop(1, 'rgba(' + INK + ',0)');
     o.fillStyle = gl; o.fillRect(-h, -h, h * 2, h * 2);
     o.restore();
+    // The lit edge itself: a thin bright band right on the line, fading toward the sides.
+    var eb = o.createLinearGradient(0, 0, w, 0);
+    eb.addColorStop(0, 'rgba(' + INK + ',0)'); eb.addColorStop(0.2, 'rgba(' + INK + ',0.25)');
+    eb.addColorStop(0.5, 'rgba(' + INK + ',0.7)'); eb.addColorStop(0.8, 'rgba(' + INK + ',0.25)');
+    eb.addColorStop(1, 'rgba(' + INK + ',0)');
+    o.fillStyle = eb; o.fillRect(0, h - Math.max(2, h * 0.012), w, h);
 
     o.lineCap = 'round';
-    var n = 220;
+    var n = 150;
     for (var j = 0; j < n; j++) {
-      var v = j / (n - 1);
+      var v = (j + 0.5 * Math.sin(j * 12.9898) ) / (n - 1); // uneven spacing, like real light
       var env = Math.pow(Math.max(0, Math.cos((v - 0.5) * Math.PI)), 0.9); // Rule 3: zero at the ends
       if (env < 0.02) continue;
-      var roll = 0.5 + 0.5 * Math.sin(v * 13 - t * 0.55 + wave(t * 0.3, v * 4) * 1.6);
+      var roll = Math.pow(0.5 + 0.5 * Math.sin(v * 13 - t * 0.55 + wave(t * 0.3, v * 4) * 1.6), 1.5); // beams, with dark gaps between
       var sway = Math.sin(t * 0.21 + v * 11) * w * 0.004;
-      var len = (h * 0.5 + h * 0.4 * (0.5 + 0.5 * Math.sin(v * 23 + t * 0.12))) * env * (1 + wave(t * 0.4, v * 5) * 0.15);
+      var len = (h * 0.55 + h * 0.45 * (0.5 + 0.5 * Math.sin(v * 23 + t * 0.12))) * env * (1 + wave(t * 0.4, v * 5) * 0.15);
       var a = Math.min(1, roll * env * 0.9);
       var fan = (v - 0.5) * 0.6;                               // rays lean gently outward
       var x0 = v * w + sway, y0 = h + 2;
       var x1 = x0 + Math.sin(fan) * len, y1 = y0 - Math.cos(fan) * len;
       var g = o.createLinearGradient(x0, y0, x1, y1);
-      g.addColorStop(0, 'rgba(' + INK + ',' + a * 0.5 + ')');
-      g.addColorStop(0.1, 'rgba(' + INK + ',' + a + ')');
-      g.addColorStop(0.35, 'rgba(' + INK + ',' + a * 0.5 + ')');
-      g.addColorStop(0.7, 'rgba(' + INK + ',' + a * 0.12 + ')');
+      g.addColorStop(0, 'rgba(' + INK + ',' + a + ')');             // brightest where it leaves the edge
+      g.addColorStop(0.15, 'rgba(' + INK + ',' + a * 0.55 + ')');
+      g.addColorStop(0.4, 'rgba(' + INK + ',' + a * 0.2 + ')');
+      g.addColorStop(0.75, 'rgba(' + INK + ',' + a * 0.05 + ')');
       g.addColorStop(1, 'rgba(' + INK + ',0)');               // Rule 2: always fade to nothing
-      o.strokeStyle = g; o.lineWidth = Math.max(1.2, w / 380);
+      o.strokeStyle = g; o.lineWidth = Math.max(1, (w / 450) * (0.7 + 2 * Math.pow(0.5 + 0.5 * Math.sin(j * 4.1 + 1.3), 3)));
       o.beginPath(); o.moveTo(x0, y0); o.lineTo(x1, y1); o.stroke();
     }
 
     var ctx = cv.getContext('2d');
     ctx.clearRect(0, 0, W, H);
     ctx.globalAlpha = ALPHA * Math.max(0.45, Math.min(1, cv.clientWidth / 1200)); // gentler on phones
-    ctx.filter = 'blur(' + Math.max(2, Math.round(W / 520)) + 'px)';
+    ctx.filter = 'blur(' + Math.max(2, Math.round(W / 600)) + 'px)';
     ctx.drawImage(off, 0, 0, W, H);
     ctx.filter = 'none';
     // Rule 2 at the top: fade the whole thing out before it reaches anything above.
     ctx.globalCompositeOperation = 'destination-in';
     var top = ctx.createLinearGradient(0, 0, 0, H);
     top.addColorStop(0, 'rgba(0,0,0,0)');
-    top.addColorStop(0.45, 'rgba(0,0,0,1)');
+    top.addColorStop(0.6, 'rgba(0,0,0,1)');
     ctx.globalAlpha = 1; ctx.fillStyle = top; ctx.fillRect(0, 0, W, H);
     ctx.globalCompositeOperation = 'source-over';
   }
@@ -78,7 +85,7 @@
       for (var c = 0; c < all.length; c++) {
         var r = all[c].getBoundingClientRect();
         if (r.bottom > 0 && r.top < (window.innerHeight || 800) && (!reduce || !all[c].width)) {
-          draw(all[c], reduce ? 12 : (now - t0) / 1000 + 40); last = now;
+          draw(all[c], reduce ? 12 : (now - t0) / 1000 * 1.6 + 40); last = now;
         }
       }
     }
