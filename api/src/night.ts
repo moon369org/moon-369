@@ -4,6 +4,9 @@
 // local noon is used. The occasion is one of a fixed list, never free text, so nobody can put
 // their own words on an image served from Moon.
 import { moonSvg } from './card.js';
+import { LOGO } from './logo.js';
+import { eclipseByDate, type EclipseType } from './eclipses.js';
+import { eclipseIcon } from './eclipse-icon.js';
 import { toMoon, truePhase, illumination, moonLength, formatMoonmark } from './moon.js';
 /** A bad query parameter; the API turns it into a 400. */
 export class NightParamError extends Error {}
@@ -91,6 +94,7 @@ export function nightFacts(n: NightInput, nowMs: number) {
     phase_fraction: f, phase: phaseLabel(f), illumination: illumination(ns(ms)),
     age_days: f * SYNODIC_DAYS,
     returns: nextReturn(n, nowMs),
+    eclipse: (eclipseByDate(`${String(n.y).padStart(4, '0')}-${pad2(n.mo)}-${pad2(n.d)}`)?.type ?? null) as EclipseType | null,
   };
 }
 
@@ -98,7 +102,6 @@ const dateLine = (n: NightInput) => `${n.d} ${MONTHS[n.mo - 1]} ${n.y}`;
 /** Syncopate is wide: about 0.92em per character with its letter spacing. */
 const fit = (text: string, width: number, max: number) => Math.min(max, Math.floor(width / (text.length * 0.92)));
 
-export const LOGO = (x: number, y: number, w: number) => `<svg x="${x}" y="${y}" width="${w}" height="${(w * 120 / 424).toFixed(1)}" viewBox="-10 -10 424 120"><path d="M4,100 V4 L48,64 L92,4 V100" fill="none" stroke="${PAPER}" stroke-width="8" stroke-linejoin="bevel"/><path d="M312,100 V4 L400,96 V0" fill="none" stroke="${PAPER}" stroke-width="8" stroke-linejoin="bevel"/><defs><mask id="nlA" maskUnits="userSpaceOnUse" x="-10" y="-10" width="424" height="120"><rect x="-10" y="-10" width="424" height="120" fill="#fff"/><circle cx="232" cy="50" r="46" fill="none" stroke="#000" stroke-width="18"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#fff" stroke-width="18"/></mask><mask id="nlB" maskUnits="userSpaceOnUse" x="-10" y="-10" width="424" height="120"><rect x="-10" y="-10" width="424" height="120" fill="#fff"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#000" stroke-width="18"/></mask></defs><circle cx="172" cy="50" r="46" fill="none" stroke="${PAPER}" stroke-width="8" mask="url(#nlA)"/><circle cx="232" cy="50" r="46" fill="none" stroke="${PAPER}" stroke-width="8" mask="url(#nlB)"/></svg>`;
 
 function stars(w: number, h: number, count: number, seed: number): string {
   let s = seed >>> 0 || 1, out = '';
@@ -123,15 +126,19 @@ export function nightSvg(n: NightInput, f: ReturnType<typeof nightFacts>, fmt: '
   const title = OCCASIONS[n.occasion], date = dateLine(n);
   const time = n.h !== null ? `${pad2(n.h)}:${pad2(n.mi)}  ·  ` : '';
   const sub = `${time}${f.phase.toUpperCase()}  ·  ${(f.illumination * 100).toFixed(0)}% LIT`;
-  const ret = f.returns ? `THIS MOON RETURNS TO THIS DATE IN ${f.returns}` : '';
+  const ret = f.eclipse ? `A ${f.eclipse.toUpperCase()} SOLAR ECLIPSE THAT DAY` : f.returns ? `THIS MOON RETURNS TO THIS DATE IN ${f.returns}` : '';
+  // On an eclipse day the picture is the eclipse, drawn like the living eclipses on the site.
+  const art = (cx: number, cy: number, r: number, id: string) => f.eclipse
+    ? eclipseIcon(f.eclipse, Math.round(r / 0.26), false, id).replace('<svg ', `<svg x="${(cx - r / 0.52).toFixed(1)}" y="${(cy - r / 0.52).toFixed(1)}" `)
+    : `<g transform="translate(${cx},${cy})">${moonSvg(f.phase_fraction, r, id)}</g>`;
   const seed = n.y * 10000 + n.mo * 100 + n.d;
   if (fmt === 'og') {
     const dfs = fit(date, 590, 56);
     return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">` +
       `<defs><radialGradient id="g" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="${PAPER}" stop-opacity="0.10"/><stop offset="1" stop-color="${PAPER}" stop-opacity="0"/></radialGradient></defs>` +
       `<rect width="1200" height="630" fill="${INK}"/>${stars(1200, 630, 90, seed)}` +
-      `<circle cx="300" cy="315" r="270" fill="url(#g)"/>` +
-      `<g transform="translate(300,315)">${moonSvg(f.phase_fraction, 165, 'no')}</g>` +
+      (f.eclipse ? '' : `<circle cx="300" cy="315" r="270" fill="url(#g)"/>`) +
+      art(300, 315, 165, 'no') +
       `<text x="580" y="128" font-family="JetBrains Mono" font-size="19" letter-spacing="5" fill="${ASH}">${title}</text>` +
       `<text x="576" y="202" font-family="Syncopate" font-weight="700" font-size="${dfs}" letter-spacing="2" fill="${PAPER}">${date}</text>` +
       `<text x="580" y="262" font-family="JetBrains Mono" font-size="20" letter-spacing="3" fill="${SOFT}">${sub}</text>` +
@@ -147,8 +154,8 @@ export function nightSvg(n: NightInput, f: ReturnType<typeof nightFacts>, fmt: '
     `<rect width="1080" height="1350" fill="${INK}"/>${stars(1080, 1350, 160, seed)}` +
     LOGO(470, 84, 140) +
     `<text x="540" y="230" font-family="JetBrains Mono" font-size="24" letter-spacing="6" fill="${ASH}" text-anchor="middle">${title}</text>` +
-    `<circle cx="540" cy="560" r="330" fill="url(#g)"/>` +
-    `<g transform="translate(540,560)">${moonSvg(f.phase_fraction, 210, 'ns')}</g>` +
+    (f.eclipse ? '' : `<circle cx="540" cy="560" r="330" fill="url(#g)"/>`) +
+    art(540, 560, 210, 'ns') +
     `<text x="540" y="912" font-family="Syncopate" font-weight="700" font-size="${dfs}" letter-spacing="2" fill="${PAPER}" text-anchor="middle">${date}</text>` +
     `<text x="540" y="972" font-family="JetBrains Mono" font-size="25" letter-spacing="3" fill="${SOFT}" text-anchor="middle">${sub}</text>` +
     grid(120, 1020, 280, 18, 44, f, true) +

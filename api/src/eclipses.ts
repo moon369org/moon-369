@@ -13,7 +13,7 @@
 
 import { toMoon, formatMoonmark, unixNsToIso } from './moon.js';
 import { eclipseIcon } from './eclipse-icon.js';
-import { LOGO } from './night.js';
+import { LOGO } from './logo.js';
 
 export type EclipseType = 'total' | 'annular' | 'hybrid' | 'partial';
 

@@ -80,7 +80,7 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .nt-sh [data-nt-hero]{display:none}.nt-sh [data-nt-root]{padding-top:64px}
 [data-nt-root]{display:flex;flex-direction:column}
 .nt-shared .nt-form{order:2;margin-top:80px}.nt-shared .nt-res{order:0;padding-top:8px}.nt-shared .nt-card{order:1}.nt-shared .nt-again{display:none!important}.nt-shared .nt-shared-k{display:block}
-.nt-ecl{display:flex;align-items:center;gap:14px;align-self:flex-start;border:1px solid #2E3035;padding:10px 18px 10px 10px}.nt-ecl[hidden]{display:none}.nt-ecl:hover{border-color:#E9E4D8}.nt-ecl img{width:44px;height:44px}.nt-ecl b{font-family:'Syncopate',sans-serif;font-size:10px;letter-spacing:.2em}
+.nt-ecl{display:flex;align-items:center;gap:14px;align-self:flex-start;border:1px solid #2E3035;padding:10px 18px 10px 10px}.nt-ecl[hidden]{display:none}.nt-ecl:hover{border-color:#E9E4D8}.nt-ecl img,.nt-ecl canvas{width:44px;height:44px;display:block;flex:none}.nt-ecl b{font-family:'Syncopate',sans-serif;font-size:10px;letter-spacing:.2em}
 .nt-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;background:#E9E4D8;color:#0B0B0D;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10px;letter-spacing:.2em;padding:14px 20px;transition:opacity .25s,transform .25s;z-index:100;pointer-events:none}
 .nt-toast.on{opacity:1;transform:translate(-50%,0)}
 @media (max-width:900px){.nt-res{grid-template-columns:1fr;gap:24px;padding-top:48px}.nt-moon{margin:-14% 0 -12%}.nt-sub{font-size:13px;letter-spacing:.1em;line-height:1.7}.nt-moon canvas{width:min(100%,420px)}.nt-card{grid-template-columns:1fr;gap:24px}.nt-card img{max-width:360px}}
@@ -95,6 +95,7 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 <script src="js/moon-motion.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
 <script src="js/moonglow.js" defer></script>
+<script src="js/eclipseglow.js" defer></script>
 <script src="js/night.js" defer></script>
 <!-- page styles -->
 <style>
@@ -192,13 +193,13 @@ footer > div > div:first-child svg{width:64px!important}
 </form>
 
 <div class="nt-res" data-nt-res="" data-off="" aria-live="polite">
-<div class="nt-moon"><canvas class="hm-moonglow" data-nt-canvas="" role="img" aria-label=""></canvas></div>
+<div class="nt-moon"><canvas class="hm-moonglow" data-nt-canvas="" role="img" aria-label=""></canvas><canvas class="ec-glow" data-nt-ecanvas="" data-type="total" data-off="" role="img" aria-label=""></canvas></div>
 <div class="nt-info">
 <div class="nt-title" data-nt-title=""></div>
 <h2 class="nt-date" data-nt-date=""></h2>
 <div class="nt-sub" data-nt-sub=""></div>
 <div class="nt-badge" data-nt-badge="" data-off=""></div>
-<a class="nt-ecl" data-nt-eclipse="" data-off=""><img src="assets/eclipse/total.svg" alt="" width="44" height="44"><b></b></a>
+<a class="nt-ecl" data-nt-eclipse="" data-off=""><canvas class="ec-glow" data-type="total" aria-hidden="true"></canvas><b></b></a>
 <div class="nt-grid"><div><span class="nt-k">CYCLE</span><b data-nt-cycle=""></b></div><div><span class="nt-k">MOON</span><b data-nt-mo=""></b></div><div><span class="nt-k">LUNE</span><b data-nt-lune=""></b></div></div>
 <p class="nt-note" data-nt-note=""></p>
 <div class="nt-share">
@@ -296,13 +297,13 @@ footer > div > div:first-child svg{width:64px!important}
 </form>
 
 <div class="nt-res" data-nt-res data-off aria-live="polite">
-<div class="nt-moon"><canvas class="hm-moonglow" data-nt-canvas role="img" aria-label=""></canvas></div>
+<div class="nt-moon"><canvas class="hm-moonglow" data-nt-canvas role="img" aria-label=""></canvas><canvas class="ec-glow" data-nt-ecanvas data-type="total" data-off role="img" aria-label=""></canvas></div>
 <div class="nt-info">
 <div class="nt-title" data-nt-title></div>
 <h2 class="nt-date" data-nt-date></h2>
 <div class="nt-sub" data-nt-sub></div>
 <div class="nt-badge" data-nt-badge data-off></div>
-<a class="nt-ecl" data-nt-eclipse data-off><img src="assets/eclipse/total.svg" alt="" width="44" height="44"><b></b></a>
+<a class="nt-ecl" data-nt-eclipse data-off><canvas class="ec-glow" data-type="total" aria-hidden="true"></canvas><b></b></a>
 <div class="nt-grid"><div><span class="nt-k">CYCLE</span><b data-nt-cycle></b></div><div><span class="nt-k">MOON</span><b data-nt-mo></b></div><div><span class="nt-k">LUNE</span><b data-nt-lune></b></div></div>
 <p class="nt-note" data-nt-note></p>
 <div class="nt-share">

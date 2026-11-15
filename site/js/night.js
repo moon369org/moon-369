@@ -64,7 +64,7 @@
       born: 'The moon when I was born: ', met: 'The moon the day we met: ', wed: 'The moon on our wedding day: ',
       kid: 'The moon when my child was born: ', day: 'The moon on ' + dateText(n) + ': ',
     }[n.occasion] + ph + ', ' + pct + '.';
-    var back = r.returns ? '\nIt comes back to ' + ANNIV[n.occasion] + ' in ' + r.returns + '.' : '';
+    var back = r.eclipse ? '\nAnd there was a ' + r.eclipse + ' solar eclipse that day.' : r.returns ? '\nIt comes back to ' + ANNIV[n.occasion] + ' in ' + r.returns + '.' : '';
     return head + back + '\n\nWhat did yours look like?';
   }
 
@@ -92,14 +92,19 @@
     vis(res, true);
     try { history.replaceState(null, '', path(n)); } catch (e) {}
     document.title = TITLES[n.occasion].charAt(0) + TITLES[n.occasion].slice(1).toLowerCase() + ' · ' + dateText(n) + ' · Moon';
-    var ecl = $('[data-nt-eclipse]');
+    var ecl = $('[data-nt-eclipse]'), moonCv = $('[data-nt-canvas]'), ecCv = $('[data-nt-ecanvas]');
+    if (ecCv) { vis(moonCv, true); vis(ecCv, false); }
     if (ecl) {
       vis(ecl, false);
       var ed = ymd(n), seq = (current.seq = (current.seq || 0) + 1);
       fetch(API + '/v1/eclipses/' + ed).then(function (r) { return r.ok ? r.json() : null; }).then(function (e) {
         if (!e || current.n !== n) return;
         ecl.href = '/eclipse/' + e.date;
-        ecl.querySelector('img').src = 'assets/eclipse/' + e.type + '.svg';
+        ecl.querySelector('canvas').setAttribute('data-type', e.type);
+        // On an eclipse day the moon you'd have seen was the eclipse itself.
+        current.r.eclipse = e.type;
+        $('[data-nt-x]').href = 'https://x.com/intent/post?text=' + encodeURIComponent(postText(n, current.r)) + '&url=' + encodeURIComponent(pageUrl(n));
+        if (ecCv) { ecCv.setAttribute('data-type', e.type); ecCv.setAttribute('aria-label', 'A ' + e.type + ' solar eclipse'); vis(moonCv, false); vis(ecCv, true); }
         ecl.querySelector('b').textContent = 'A ' + e.type.toUpperCase() + ' SOLAR ECLIPSE THAT DAY';
         vis(ecl, true);
       }).catch(function () {});
