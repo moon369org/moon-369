@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Evidence · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Turn a signed Moonmark into court-ready evidence: every check, the Tideline proof, the XRP Ledger and Bitcoin anchors, and a statement signed by Moon.">
+<link rel="canonical" href="https://moon369.org/evidence">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/evidence">
+<meta property="og:title" content="Moon Evidence Pack">
+<meta property="og:description" content="Turn a signed Moonmark into court-ready evidence: every check, the Tideline proof, the XRP Ledger and Bitcoin anchors, and a statement signed by Moon.">
+<meta property="og:image" content="https://moon369.org/assets/og/home.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Moon, over a photograph of the moon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Moon Evidence Pack">
+<meta name="twitter:description" content="Turn a signed Moonmark into court-ready evidence: every check, the Tideline proof, the XRP Ledger and Bitcoin anchors, and a statement signed by Moon.">
+<meta name="twitter:image" content="https://moon369.org/assets/og/home.jpg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<style>x-dc{display:none}html,body{background:#0B0B0D}html{scrollbar-width:thin;scrollbar-color:#2E3035 #0B0B0D}
+*{scrollbar-width:thin;scrollbar-color:#2E3035 transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#24262A;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#3A3B3F;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
+@keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
+header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+
+.ev-card{border:1px solid #24262A;background:#0B0B0D;padding:28px;display:flex;flex-direction:column;gap:16px}
+.ev-k{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
+.ev-btn{border:1px solid #E9E4D8;padding:16px 26px;min-height:44px;box-sizing:border-box;font-family:'Syncopate',sans-serif;font-size:11px;font-weight:700;letter-spacing:.24em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:none;color:#E9E4D8}
+.ev-btn.p{background:#E9E4D8;color:#0B0B0D}.ev-btn[disabled]{opacity:.4;cursor:default}
+.ev-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.ev-pick{font-family:'JetBrains Mono',monospace;font-size:13px;color:#B9B6AE;word-break:break-all}
+.ev-report{background:#F4F1EA;color:#141413;padding:56px 56px 48px;display:flex;flex-direction:column;gap:28px;font-family:Inter,sans-serif}
+.ev-report h2{margin:0;font-family:'Syncopate',sans-serif;font-weight:700;font-size:22px;letter-spacing:.12em}
+.ev-report h3{margin:0 0 10px;font-family:'Syncopate',sans-serif;font-weight:700;font-size:11px;letter-spacing:.22em;color:#55565B}
+.ev-report table{width:100%;border-collapse:collapse;font-size:13.5px}
+.ev-report td{padding:9px 0;border-top:1px solid #D9D4C8;vertical-align:top}
+.ev-report td:first-child{width:34%;color:#55565B;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em;padding-right:16px}
+.ev-report td:last-child{font-family:'JetBrains Mono',monospace;font-size:12.5px;word-break:break-all}
+.ev-verdict{display:flex;align-items:center;gap:16px;border:2px solid #141413;padding:18px 22px}
+.ev-verdict b{font-family:'Syncopate',sans-serif;font-size:20px;letter-spacing:.14em}
+.ev-verdict.bad{border-color:#9A3B30;color:#9A3B30}
+.ev-ok{color:#1F6B3A;font-weight:600}.ev-no{color:#9A3B30;font-weight:600}
+.ev-small{font-size:12px;line-height:1.6;color:#55565B}
+.ev-report code{font-family:'JetBrains Mono',monospace;font-size:12px}
+@media (max-width:720px){.ev-report{padding:28px 20px}.ev-report td:first-child{width:40%}}
+@media print{
+  @page{margin:14mm}
+  html,body{background:#fff!important}
+  header,footer,.ev-noprint,.moon-stars,#top::before,body::before{display:none!important}
+  body{padding:0!important}
+  .ev-report{padding:0;background:#fff}
+  section{border:0!important}
+  [data-ev-wrap]{padding:0!important;max-width:none!important}
+}
+</style>
+<script src="js/preact.umd.js" defer></script>
+<script src="js/header.js" defer></script>
+<script src="js/dc-lite.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+<script src="js/evidence.js" defer></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
+.pk-a,.pk-b,.pk-f{animation-duration:3.2s;animation-iteration-count:infinite;animation-fill-mode:both}
+.pk-a{animation-name:pkA}.pk-b{animation-name:pkB}.pk-f{animation-name:pkF}
+@keyframes pkA{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(-30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkB{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkF{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.6,1)}36%,54%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.6,1)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pk-a,.pk-b,.pk-f{animation:none}}
+@media (max-width: 720px){
+header > div{padding:16px 20px!important;gap:12px 16px!important}
+nav[aria-label="Main"]{gap:10px 18px!important;font-size:10px!important;letter-spacing:.18em!important}
+nav[aria-label="Main"] a{min-height:44px;display:inline-flex!important;align-items:center}
+nav[aria-label="Main"] a[style*="padding: 14px 22px"]{padding:0 14px!important}
+[style*="padding: 140px 32px"],[style*="padding: 160px 32px"],[style*="padding: 120px 32px"]{padding:72px 20px!important}
+[style*="padding: 120px 32px 140px"]{padding:56px 20px 80px!important}
+[style*="padding: 100px 32px 90px"]{padding:56px 20px 48px!important}
+[style*="padding: 64px 32px 120px"],[style*="padding: 80px 32px 120px"]{padding:40px 20px 80px!important}
+[style*="padding: 40px 32px"]{padding:32px 20px!important}
+[style*="padding: 40px 48px"]{padding:28px 22px!important}
+[style*="padding: 40px; display: flex"]{padding:24px!important;gap:24px!important}
+[style*="gap: 104px"]{gap:72px!important}
+[style*="gap: 80px"]{gap:48px!important}
+[style*="gap: 64px"]{gap:40px!important}
+[style*="gap: 56px"]{gap:36px!important}
+pre{font-size:12.5px!important}
+.mw-hint{display:block!important}
+}
+@media (max-width: 720px){
+footer > div{flex-direction:column!important;align-items:center!important;text-align:center;gap:28px!important}
+footer > div > div:first-child{align-items:center!important}
+footer > div > div:last-child{justify-content:center!important;gap:22px!important}
+footer > div > div:first-child svg{width:64px!important}
+}
+</style>
+</helmet>
+<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="/" aria-label="Moon home" style="display: block">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+</svg>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: 'Syncopate', sans-serif; font-size: 11px; letter-spacing: 0.28em">
+<a href="/calendar">CALENDAR</a>
+<a href="/uses">USES</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/#faq">FAQ</a>
+<a href="/#sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
+</nav>
+</div>
+</header>
+
+<section class="ev-noprint" style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 72px; display: flex; flex-direction: column; gap: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">FOR LAWYERS, AUDITORS AND COURTS</div>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">EVIDENCE PACK</h1>
+<p style="margin: 0; max-width: 720px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Turn a signed Moonmark into evidence you can hand to someone else. Moon checks every part of the receipt, proves its place in the Tideline, lists its XRP Ledger and Bitcoin anchors, and signs a statement of what it found. Print it, or download everything as one bundle anyone can check without&nbsp;Moon.</p>
+</div>
+</section>
+
+<section>
+<div data-ev-wrap style="max-width: 1280px; margin: 0 auto; padding: 64px 32px 120px">
+<div data-ev-root></div>
+</div>
+</section>
+
+</div>
+
+<footer style="border-top: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8A8B8F">
+<div style="display: flex; flex-direction: column; gap: 18px"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #24262A; stroke-width: 9"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap"><a href="/" style="color: #8A8B8F">HOME</a><a href="/calendar" style="color: #8A8B8F">CALENDAR</a><a href="/api" style="color: #8A8B8F">API</a><a href="/m" style="color: #8A8B8F">MOONMARK</a><a href="/uses" style="color: #8A8B8F">USES</a><a href="/trust" style="color: #8A8B8F">TRUST</a><a href="/tideline" style="color: #8A8B8F">TIDELINE</a><a href="/evidence" style="color: #8A8B8F">EVIDENCE</a><a href="/press" style="color: #8A8B8F">PRESS</a></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2400}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

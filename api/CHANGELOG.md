@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.0 (Moon 05, Lune 06, Year 1928)
+
+- **Evidence statements**: `POST /v1/evidence` checks a receipt now (signatures, beacon, optional file fingerprint, its place in the Tideline, XRP Ledger and Bitcoin anchors) and returns what it found as a statement signed with Ed25519 and ML-DSA-65. Signed bytes: `moon-evidence/1`, a newline, then the statement as JSON with keys sorted. moon369.org/evidence turns it into a printable report and a bundle anyone can check without Moon.
+- **Checkpoints**: while a lune is open, its receipts are locked on the XRP Ledger about once a minute. `POST /v1/tideline/proof` answers `checkpointed` with an inclusion proof before the tide seals.
+
 ## 1.7.0 (Moon 05, Lune 05, Year 1928)
 
 - **Tides in Bitcoin**: every tide is also stamped through OpenTimestamps (free, no keys) and confirmed in a Bitcoin block within hours. The daily run upgrades pending proofs. Each tide shows `bitcoin` (status and block height), and `GET /v1/tideline/{lune}.ots` with `GET /v1/tideline/{lune}.txt` let anyone check it with the standard tools: `ots verify -f tide-<lune>.txt tide-<lune>.txt.ots`.

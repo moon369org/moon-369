@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import {
   SPEC_VERSION, EPOCH_UNIX_NS, LUNATION_NS, NUM, DEN, MOON_SECOND_SI, YEAR_DAYS, MOONS,
   toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, phaseName, unixNsToIso, yearInfo,
@@ -200,16 +201,91 @@ async function readJson(req: Request): Promise<Record<string, unknown>> {
   throw new HttpError(400, 'bad_json', 'Body must be a JSON object');
 }
 
+
+// ---------- Receipt checks and evidence ----------
+function knownKeys(env: Env): Record<string, string> {
+  const keys: Record<string, string> = { ...(env.RETIRED_KEYS ?? {}) };
+  if (env.SIGNER) { const i = env.SIGNER.info(); keys[i.key_id] = i.public_key; if (env.SIGNER.pq) { const q = env.SIGNER.pq.info(); keys[q.key_id] = q.public_key; } }
+  return keys;
+}
+
+/** Everything /v1/verify reports about a receipt. */
+function checkReceipt(r: Receipt, sha256: unknown, env: Env) {
+  let out = verifyReceipt(r, knownKeys(env), env.BEACON_CHAIN);
+  if (out.valid) {
+    // The signed moonmark must be the same moment as the signed unix_ns.
+    let same = false;
+    try { same = formatMoonmark(toMoon(BigInt(r.unix_ns))) === r.moonmark; } catch { same = false; }
+    if (!same) out = { valid: false, reason: 'moonmark_mismatch' };
+  }
+  if (out.valid && sha256 !== undefined) {
+    const want = typeof sha256 === 'string' ? sha256.toLowerCase() : '';
+    if (want !== r.sha256) out = { valid: false, reason: 'content_mismatch' };
+  }
+  const { not_before_unix_ns, beacon_round, post_quantum, ...rest } = out;
+  return { ...rest, ...(out.valid ? { moonmark: r.moonmark, utc: unixNsToIso(BigInt(r.unix_ns)), key_id: r.key_id, ...(post_quantum !== undefined ? { signatures: post_quantum ? ['Ed25519', PQ_ALG] : ['Ed25519'], post_quantum } : { signatures: ['Ed25519'] }), ...(not_before_unix_ns ? { not_before: { utc: unixNsToIso(BigInt(not_before_unix_ns)), unix_ns: not_before_unix_ns, beacon: BEACON_NETWORK, round: beacon_round } } : {}) } : {}) };
+}
+
+/** JSON with keys sorted at every level, so the signed bytes are the same everywhere. */
+export function canonicalJson(v: unknown): string {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(canonicalJson).join(',') + ']';
+  return '{' + Object.keys(v as object).filter((k) => (v as Record<string, unknown>)[k] !== undefined).sort().map((k) => JSON.stringify(k) + ':' + canonicalJson((v as Record<string, unknown>)[k])).join(',') + '}';
+}
+export const EVIDENCE = 'moon-evidence/1';
+/** The bytes Moon signs for an evidence statement: the version line, then the statement as canonical JSON. */
+export const evidenceBytes = (statement: unknown) => new Uint8Array(Buffer.from(EVIDENCE + '\n' + canonicalJson(statement), 'utf8'));
+
+/**
+ * An evidence statement: Moon checks a receipt now (signatures, beacon, file fingerprint, its place in
+ * the Tideline and the anchors) and signs what it found with its keys. Together with the receipt and
+ * the proofs it is a self-contained record anyone can check without Moon.
+ */
+async function evidence(r: Receipt, sha256: unknown, env: Env) {
+  const check = checkReceipt(r, sha256, env) as Record<string, unknown>;
+  const now = nowUnixNs();
+  let tideline: Record<string, unknown> = { status: 'not_configured' };
+  let proof: unknown = null;
+  if (env.TIDES && check.valid) {
+    try {
+      const p = await proofFor(env.TIDES, r) as Record<string, any>;
+      proof = p;
+      if (p.status === 'sealed') {
+        const t = p.tide;
+        tideline = { status: 'sealed', lune: t.lune, index: p.index, size: p.size, root: t.root, tide_hash: t.hash, prev: t.prev,
+          xrpl: t.anchor ? { tx: t.anchor.tx, ledger_index: t.anchor.ledger_index ?? null } : null,
+          bitcoin: t.bitcoin ? { status: t.bitcoin.status, block_height: t.bitcoin.block_height ?? null } : null,
+          downloads: { tide_txt: `/v1/tideline/${t.lune}.txt`, tide_ots: t.bitcoin ? `/v1/tideline/${t.lune}.ots` : null } };
+      } else if (p.status === 'checkpointed') {
+        const c = p.checkpoint;
+        tideline = { status: 'checkpointed', lune: p.lune, index: p.index, size: p.size, root: c.root, checkpoint_hash: c.hash, checkpoint_utc: unixNsToIso(BigInt(c.at_unix_ns)),
+          xrpl: c.anchor ? { tx: c.anchor.tx, ledger_index: c.anchor.ledger_index ?? null } : null, seals_after_utc: p.seals_after_utc };
+      } else tideline = { status: p.status, lune: p.lune, ...(p.index !== undefined ? { index: p.index } : {}), ...(p.seals_after_utc ? { seals_after_utc: p.seals_after_utc } : {}) };
+    } catch { tideline = { status: 'unavailable' }; }
+  }
+  const statement = {
+    evidence: EVIDENCE,
+    issued: { utc: unixNsToIso(now), unix_ns: now.toString(), moonmark: formatMoonmark(toMoon(now)) },
+    issuer: { name: 'Moon', url: 'https://moon369.org', keys: '/v1/keys' },
+    receipt: { version: r.receipt, sha256: r.sha256, moonmark: r.moonmark, unix_ns: r.unix_ns, key_id: r.key_id, receipt_sha256: createHash('sha256').update(canonicalJson(r)).digest('hex') },
+    checks: { valid: !!check.valid, ...(check.reason ? { reason: check.reason } : {}), signatures: check.signatures ?? [], post_quantum: check.post_quantum ?? null,
+      content_match: sha256 === undefined ? null : !!check.valid, not_before: check.not_before ?? null },
+    tideline,
+  };
+  const signature = env.SIGNER!.signBytes(evidenceBytes(statement));
+  return { statement, signature, signed_bytes: `${EVIDENCE} + newline + canonical JSON of statement (keys sorted)`, receipt: r, proof };
+}
+
 export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, '') || '/';
   const q = url.searchParams;
-  const postOnly = path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/tideline/proof`;
+  const postOnly = path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof`;
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/year/{year}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence'] });
   if (path === '/health') return json({ ok: true });
 
   const gate = await authAndLimit(req, env);
@@ -348,21 +424,14 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
       case path === `/${API_VERSION}/verify`: {
         const body = await readJson(req);
         const r = (body.receipt ?? body) as Receipt;
-        const keys: Record<string, string> = { ...(env.RETIRED_KEYS ?? {}) };
-        if (env.SIGNER) { const i = env.SIGNER.info(); keys[i.key_id] = i.public_key; if (env.SIGNER.pq) { const q = env.SIGNER.pq.info(); keys[q.key_id] = q.public_key; } }
-        let out = verifyReceipt(r, keys, env.BEACON_CHAIN);
-        if (out.valid) {
-          // The signed moonmark must be the same moment as the signed unix_ns.
-          let same = false;
-          try { same = formatMoonmark(toMoon(BigInt(r.unix_ns))) === r.moonmark; } catch { same = false; }
-          if (!same) out = { valid: false, reason: 'moonmark_mismatch' };
-        }
-        if (out.valid && body.sha256 !== undefined) {
-          const want = typeof body.sha256 === 'string' ? body.sha256.toLowerCase() : '';
-          if (want !== r.sha256) out = { valid: false, reason: 'content_mismatch' };
-        }
-        const { not_before_unix_ns, beacon_round, post_quantum, ...rest } = out;
-        return json({ ...rest, ...(out.valid ? { moonmark: r.moonmark, utc: unixNsToIso(BigInt(r.unix_ns)), key_id: r.key_id, ...(post_quantum !== undefined ? { signatures: post_quantum ? ['Ed25519', PQ_ALG] : ['Ed25519'], post_quantum } : { signatures: ['Ed25519'] }), ...(not_before_unix_ns ? { not_before: { utc: unixNsToIso(BigInt(not_before_unix_ns)), unix_ns: not_before_unix_ns, beacon: BEACON_NETWORK, round: beacon_round } } : {}) } : {}) }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+        return json(checkReceipt(r, body.sha256, env), 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/evidence`: {
+        if (!env.SIGNER) throw new HttpError(503, 'signing_unavailable', 'Signing is not configured on this deployment');
+        const body = await readJson(req);
+        const r = (body.receipt ?? body) as Receipt;
+        return json(await evidence(r, body.sha256, env), 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
       case path === `/${API_VERSION}/tideline/seal`: {

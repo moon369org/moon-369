@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moon API
-  version: 1.7.0
+  version: 1.8.0
   summary: The open standard for time. The worldwide timestamp, locked to the moon.
   license: { name: MIT, identifier: MIT }
   description: |
@@ -184,6 +184,12 @@ paths:
                   owner: { type: string, example: Acme Clocks }
                   per_min: { type: [integer, 'null'], example: 1000 }
                   keyed: { type: boolean }
+  /v1/evidence:
+    post:
+      summary: A signed evidence statement for a receipt
+      description: 'Moon checks the receipt now (signatures, beacon, optional file fingerprint, Tideline inclusion, anchors) and signs what it found with Ed25519 and ML-DSA-65. Signed bytes are "moon-evidence/1", a newline, then the statement as JSON with keys sorted.'
+      requestBody: { content: { application/json: { schema: { type: object, properties: { receipt: { $ref: '#/components/schemas/Receipt' }, sha256: { type: string } } } } } }
+      responses: { '200': { description: 'statement, signature, receipt and proof' } }
   /v1/tideline:
     get:
       summary: The Tideline, Moon's public log. Recent tides (sealed lunes) and the open lune.
