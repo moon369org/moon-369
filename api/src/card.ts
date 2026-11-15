@@ -73,7 +73,7 @@ export function cardSvg(d: CardData, size = 600): string {
   const title = esc((d.title ?? 'TODAY ON MOON').toUpperCase());
   const foot = esc(`${d.name.toUpperCase()} · ${(d.illumination * 100).toFixed(1)}% LIT · LUNE ${d.lune} OF ${d.lunesInMoon}`);
   const label = esc(`Year ${d.year}, Moon ${pad2(d.moon)}, Lune ${pad2(d.lune)}. ${d.name}, ${(d.illumination * 100).toFixed(1)}% lit.`);
-  const cols = [['YEAR', String(d.year)], ['MOON', pad2(d.moon)], ['LUNE', pad2(d.lune)]];
+  const cols = [['CYCLE', String(d.year)], ['MOON', pad2(d.moon)], ['LUNE', pad2(d.lune)]];
   const colW = 504 / 3;
   const cells = cols.map(([k, v], i) => {
     const cx = 48 + colW * i + colW / 2;
@@ -109,7 +109,7 @@ export interface ShareData extends CardData { time: string; ns: string }
 export function shareSvg(d: ShareData): string {
   const pct = (d.illumination * 100).toFixed(1);
   const nsG = '.' + d.ns.slice(0, 3) + ' ' + d.ns.slice(3, 6) + ' ' + d.ns.slice(6, 9);
-  const cells = [['YEAR', String(d.year)], ['MOON', pad2(d.moon)], ['LUNE', pad2(d.lune)]];
+  const cells = [['CYCLE', String(d.year)], ['MOON', pad2(d.moon)], ['LUNE', pad2(d.lune)]];
   const cw = 176;
   const grid = cells.map(([k, v], i) => {
     const x = 560 + cw * i;

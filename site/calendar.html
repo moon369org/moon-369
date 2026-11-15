@@ -154,7 +154,7 @@ footer > div > div:first-child svg{width:64px!important}
 <canvas class="mc-ph-big hm-moonglow" aria-hidden="true" style="width: 228px; height: 228px; margin: -54px; display: block; flex: none; pointer-events: none"></canvas>
 <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 12px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">TODAY ON MOON</div>
-<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: 0.14em" class="mc-date"><span class="mc-seg">YEAR {{now.y}}</span><span class="mc-dot"> · </span><span class="mc-seg">MOON {{now.m}}</span><span class="mc-dot"> · </span><span class="mc-seg">LUNE {{now.d}}</span></h1>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: 0.14em" class="mc-date"><span class="mc-seg">CYCLE {{now.y}}</span><span class="mc-dot"> · </span><span class="mc-seg">MOON {{now.m}}</span><span class="mc-dot"> · </span><span class="mc-seg">LUNE {{now.d}}</span></h1>
 <div style="display: flex; align-items: center; gap: 0.3em; font-family: 'JetBrains Mono', monospace; font-size: clamp(40px, 6vw, 72px); line-height: 1; font-variant-numeric: tabular-nums"><canvas class="mc-ph-sm hm-moonglow" aria-hidden="true" style="width: calc(0.82em * 1.9); height: calc(0.82em * 1.9); margin: calc(0.82em * -0.45); display: none; flex: none; pointer-events: none"></canvas><div>{{now.clock}}</div></div>
 <div class="mi-host" style="font-size: 14px; color: #8A8B8F">{{now.meta}}<span class="mi"><button type="button" class="mi-b" aria-label="What the lit percentage means" aria-expanded="false" aria-describedby="mi-t2">i</button><span role="tooltip" id="mi-t2" class="mi-t">Share of the moon&#39;s face lit by the sun at this moment, as seen from Earth. Moon calculates it from the moon&#39;s real position (Meeus, Astronomical Algorithms) and checks it against PyEphem, a standard astronomy library: they agree within 0.05 percentage points. Shown live to 0.001 so you can watch it&nbsp;change.</span></span></div>
 <div class="{{now.seasonCls}}" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; border: 1px solid #24262A; padding: 6px 14px; font-size: 13px">
@@ -172,7 +172,7 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 <div class="mc-yn" style="display: flex; flex-wrap: wrap; gap: 8px">
 <button class="mc-btn" type="button" aria-label="Previous year" onClick="{{prevYear}}"><span class="mc-hide-m">PREVIOUS</span><span class="mc-show-m">‹ PREV</span></button>
-<button class="mc-btn" type="button" onClick="{{thisYear}}">THIS YEAR</button>
+<button class="mc-btn" type="button" onClick="{{thisYear}}">THIS CYCLE</button>
 <button class="mc-btn" type="button" aria-label="Next year" onClick="{{nextYear}}"><span class="mc-hide-m">NEXT</span><span class="mc-show-m">NEXT ›</span></button>
 </div>
 </div>
@@ -181,7 +181,7 @@ footer > div > div:first-child svg{width:64px!important}
 <span class="s1" style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 14px; height: 4px; background: var(--season)"></span>Summer</span>
 <span class="s2" style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 14px; height: 4px; background: var(--season)"></span>Autumn</span>
 <span class="s3" style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 14px; height: 4px; background: var(--season)"></span>Winter</span>
-<span>◆ Equinox or solstice falls on this lune · Northern Hemisphere seasons · Seasons drift about 18 lunes earlier each Moon&nbsp;year</span>
+<span>◆ Equinox or solstice falls on this lune · Northern Hemisphere seasons · Seasons drift about 18 lunes earlier each&nbsp;cycle</span>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px">
 <sc-for list="{{moons}}" as="mo" hint-placeholder-count="13">
@@ -247,7 +247,7 @@ footer > div > div:first-child svg{width:64px!important}
 <tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon hour</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">60 Moon minutes</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">1 h 02 m 25.3 s</td></tr>
 <tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Lune</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">24 Moon hours</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">24 h 58 m 08.2 s</td></tr>
 <tr><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">Moon</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A">28.3846154 lunes</td><td style="padding: 10px 12px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace">29.530589 days (one lunation)</td></tr>
-<tr><td style="padding: 10px 12px">Moon year</td><td style="padding: 10px 12px">13 moons, 369 lunes</td><td style="padding: 10px 12px; font-family: 'JetBrains Mono', monospace">383.8977 days</td></tr>
+<tr><td style="padding: 10px 12px">Cycle (Moon&#39;s year)</td><td style="padding: 10px 12px">13 moons, 369 lunes</td><td style="padding: 10px 12px; font-family: 'JetBrains Mono', monospace">383.8977 days</td></tr>
 </tbody>
 </table>
 </div>

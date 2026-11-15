@@ -172,3 +172,17 @@ describe('key helpers', () => {
     expect(() => envKeyStore('[]')).toThrow();
   });
 });
+
+describe('cycle naming', () => {
+  it('returns cycle alongside year, and serves /v1/cycle/{n}', async () => {
+    const { handle } = await import('../src/index.js');
+    const now = await (await handle(new Request('http://x/v1/convert?utc=2026-11-15T00:00:00Z'))).json() as Record<string, unknown>;
+    expect(now.cycle).toBe(now.year);
+    expect(now.day_of_cycle).toBe(now.day_of_year);
+    const c = await (await handle(new Request('http://x/v1/cycle/1928'))).json() as Record<string, unknown>;
+    expect(c.cycle).toBe(1928);
+    const t = await (await handle(new Request('http://x/v1/to-unix?cycle=1928&moon=5&day=5'))).json() as Record<string, unknown>;
+    const u = await (await handle(new Request('http://x/v1/to-unix?year=1928&moon=5&day=5'))).json() as Record<string, unknown>;
+    expect(t.unix_ns).toBe(u.unix_ns);
+  });
+});

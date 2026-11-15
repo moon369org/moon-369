@@ -15,7 +15,7 @@ import { moonmark, moon, fromMoonmark, moonmarkUrl, moonPhase } from 'moon369';
 
 moonmark();                       // '1928.05.05 06:28:51.840778139' (now)
 moonmark(new Date('2026-11-14'));  // any Date, Unix ms, ISO string or Unix ns (bigint)
-moon();                           // { year: 1928, moon: 5, day: 5, hour: 6, ... }
+moon();                           // { cycle: 1928, moon: 5, day: 5, hour: 6, ... }
 fromMoonmark('1928.05.05 06:28:51.840778139'); // Unix nanoseconds (bigint)
 moonmarkUrl(moonmark());          // 'https://moon369.org/m/1928.05.05-06.28.51.840778139'
 moonPhase();                      // { phase: 0.21, illumination: 0.257, name: 'Waxing crescent' }
@@ -44,6 +44,6 @@ Receipts are hybrid: signed with Ed25519 and with ML-DSA-65, NIST's post-quantum
 
 ## The standard
 
-One Moon year is 13 moons and 369 lunes. A Moon second is 1.0403730 SI seconds, so 13 lunar cycles fit the year exactly. The date is global: it turns over at the same instant everywhere. Full spec: [moon369.org](https://moon369.org).
+One cycle, Moon's year, is 13 moons and 369 lunes. (The field is `cycle`; `year` is kept as the same value.) A Moon second is 1.0403730 SI seconds, so 13 lunar months fit one cycle exactly. The date is global: it turns over at the same instant everywhere. Full spec: [moon369.org](https://moon369.org).
 
 Runs in browsers, Node 18+, Deno, Bun and edge runtimes. MIT licensed.

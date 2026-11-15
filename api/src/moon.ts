@@ -6,7 +6,7 @@
  *
  * Spec v1
  *   Mean synodic month (lunation) ... 29.530588853 SI days = 2,551,442,876,899,200 ns
- *   Moon year ........................ 13 lunations = 369 Moon days
+ *   Cycle (Moon's year) .............. 13 lunations = 369 Moon days
  *   Moon day ......................... 24 h × 60 min × 60 s Moon time
  *   Moon second ...................... 13 × lunation ÷ (369 × 86,400) = 1.0403730490216802… SI s
  *   Epoch (Year 0, Moon 1, Day 1, 00:00:00)
@@ -47,10 +47,12 @@ export const moonOfDay = (d: number): number => Math.floor((d * MOONS) / YEAR_DA
 export const moonLength = (moon: number): number => firstDayOfMoon(moon) - firstDayOfMoon(moon - 1);
 
 export interface MoonTime {
-  year: number;      // counted from year 0
+  cycle: number;     // Moon's year, counted from cycle 0 (0 AD)
+  year: number;      // same as cycle; kept for compatibility
   moon: number;      // 1–13
   day: number;       // 1–28 or 1–29
   dayOfYear: number; // 1–369
+  dayOfCycle: number; // same as dayOfYear
   hour: number;
   minute: number;
   second: number;
@@ -73,10 +75,12 @@ export function fromMoonNs(moonNs: bigint): MoonTime {
   const nanosecond = Number(rest % NS_PER_SECOND);
   rest /= NS_PER_SECOND;
   return {
+    cycle: Number(yearBig),
     year: Number(yearBig),
     moon: m + 1,
     day: doy - firstDayOfMoon(m) + 1,
     dayOfYear: doy + 1,
+    dayOfCycle: doy + 1,
     hour: Number(rest / 3600n),
     minute: Number((rest / 60n) % 60n),
     second: Number(rest % 60n),
@@ -88,7 +92,9 @@ export function fromMoonNs(moonNs: bigint): MoonTime {
 export const toMoon = (unixNs: bigint): MoonTime => fromMoonNs(unixNsToMoonNs(unixNs));
 
 export interface MoonInput {
-  year: number;
+  /** Moon's year. `year` is accepted as the same thing. */
+  cycle?: number;
+  year?: number;
   moon: number;
   day: number;
   hour?: number;
@@ -100,8 +106,9 @@ export interface MoonInput {
 export class MoonRangeError extends Error {}
 
 export function moonNsOf(t: MoonInput): bigint {
-  const { year, moon, day, hour = 0, minute = 0, second = 0, nanosecond = 0 } = t;
-  const ints: [string, number][] = [['year', year], ['moon', moon], ['day', day], ['hour', hour], ['minute', minute], ['second', second], ['nanosecond', nanosecond]];
+  const { moon, day, hour = 0, minute = 0, second = 0, nanosecond = 0 } = t;
+  const year = (t.cycle ?? t.year) as number;
+  const ints: [string, number][] = [['cycle', year], ['moon', moon], ['day', day], ['hour', hour], ['minute', minute], ['second', second], ['nanosecond', nanosecond]];
   for (const [k, v] of ints) if (!Number.isInteger(v)) throw new MoonRangeError(`${k} must be an integer`);
   if (moon < 1 || moon > MOONS) throw new MoonRangeError('moon must be 1 to 13');
   const len = moonLength(moon);
@@ -209,16 +216,16 @@ export const unixNsToIso = (ns: bigint): string => {
   return iso.slice(0, -1) + String(sub).padStart(6, '0') + 'Z';
 };
 
-/** Structure of one Moon year: each moon's length and UTC start. */
+/** Structure of one cycle (Moon's year): each moon's length and UTC start. */
 export function yearInfo(year: number) {
-  if (!Number.isInteger(year)) throw new MoonRangeError('year must be an integer');
+  if (!Number.isInteger(year)) throw new MoonRangeError('cycle must be an integer');
   const moons = [];
   for (let m = 1; m <= MOONS; m++) {
     const startNs = toUnixNs({ year, moon: m, day: 1 });
     moons.push({ moon: m, days: moonLength(m), starts_unix_ns: startNs.toString(), starts_utc: unixNsToIso(startNs) });
   }
   const endNs = toUnixNs({ year: year + 1, moon: 1, day: 1 });
-  return { year, days: YEAR_DAYS, moons, ends_unix_ns: endNs.toString(), ends_utc: unixNsToIso(endNs) };
+  return { cycle: year, year, days: YEAR_DAYS, moons, ends_unix_ns: endNs.toString(), ends_utc: unixNsToIso(endNs) };
 }
 
 /** URL-safe Moonmark, for links and QR codes: "YEAR.MM.DD-HH.MM.SS.NNNNNNNNN". */
