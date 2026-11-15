@@ -140,6 +140,7 @@
     $('[data-nt-canvas]').setAttribute('aria-label', r.phase + ', ' + Math.round(lit * 100) + '% lit');
     $('[data-nt-title]').textContent = TITLES[n.occasion];
     $('[data-nt-date]').textContent = dateText(n).toUpperCase();
+    drawSky(n, ms, f);
     var pl = $('[data-nt-place]'); if (pl) { pl.textContent = n.place ? 'IN ' + (n.place.name + ', ' + n.place.near).toUpperCase() : ''; vis(pl, !!n.place); }
     $('[data-nt-sub]').textContent = (n.h != null ? p2(n.h) + ':' + p2(n.mi) + '  ·  ' : '') + r.phase.toUpperCase() + '  ·  ' + Math.round(lit * 100) + '% LIT  ·  ' + r.age.toFixed(1) + ' DAYS OLD';
     $('[data-nt-cycle]').textContent = md.cycle; $('[data-nt-mo]').textContent = p2(md.moon); $('[data-nt-lune]').textContent = p2(md.lune);
@@ -165,6 +166,8 @@
         ecl.querySelector('canvas').setAttribute('data-type', e.type);
         // On an eclipse day the moon you'd have seen was the eclipse itself.
         current.r.eclipse = e.type;
+        var stx = $('[data-nt-sky-text]');   // on an eclipse day the moon was not lost in the glare: it crossed the sun
+        if (stx && stx.getAttribute('data-glare')) stx.textContent = stx.textContent.replace(stx.getAttribute('data-glare'), stx.getAttribute('data-crossed') + ' ' + an(e.type) + e.type + ' solar eclipse.');
         $('[data-nt-x]').href = 'https://x.com/intent/post?text=' + encodeURIComponent(postText(n, current.r)) + '&url=' + encodeURIComponent(pageUrl(n));
         if (ecCv) { ecCv.setAttribute('data-type', e.type); ecCv.setAttribute('aria-label', an(e.type).replace('a', 'A') + e.type + ' solar eclipse'); vis(moonCv, false); vis(ecCv, true); }
         ecl.querySelector('b').textContent = (an(e.type) + e.type + ' solar eclipse that day').toUpperCase();
@@ -238,6 +241,54 @@
     (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { toast('LINK COPIED'); }, function () { window.prompt('Copy this link', url); });
   }
 
+  // ---------- the moon's path across that local day ----------
+  function localClock(tz) {
+    var f = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    return function (ms) { return f.format(new Date(ms)); };
+  }
+  function midnight(tz, y, mo, d) {   // UTC ms of local 00:00 on that date
+    var z = zIn(tz, y, mo, d, 0, 0), g = new Date(0); g.setUTCFullYear(y, mo - 1, d); g.setUTCHours(0, 0, 0, 0);
+    return g.getTime() - z * 60000;
+  }
+  function drawSky(n, ms, f) {
+    var box = $('[data-nt-sky]'), ask = $('[data-nt-sky-ask]');
+    if (!box || !window.MoonSky) return;
+    var p = n.place && n.place.lat != null ? n.place : null;
+    vis(ask, !p); vis(box, !!p);
+    if (!p) return;
+    var nx = new Date(0); nx.setUTCFullYear(n.y, n.mo - 1, n.d + 1);
+    var t0 = midnight(p.tz, n.y, n.mo, n.d), t1 = midnight(p.tz, nx.getUTCFullYear(), nx.getUTCMonth() + 1, nx.getUTCDate());
+    var sky = MoonSky.day(t0, t1, p.lat, p.lng), clock = localClock(p.tz), fut = t0 > Date.now();
+    var past = function (pastWord, futWord) { return fut ? futWord : pastWord; };
+    $('[data-nt-sky-k]').textContent = 'THE MOON’S PATH · ' + p.name.toUpperCase() + ' · LOCAL TIME · LOOKING ' + (p.lat >= 0 ? 'SOUTH' : 'NORTH');
+    var notes = [];
+    if (sky.always === 'up') notes.push('The moon ' + past('stayed', 'stays') + ' up all day and all night.');
+    if (sky.always === 'down') notes.push('The moon ' + past('never rose', 'will not rise') + ' that day.');
+    if (f <= 0.04 || f >= 0.96) notes.push('<glare>');
+    var glare = 'Near new moon it rides with the sun, so it ' + past('was', 'will be') + ' lost in the glare.';
+    var tx = $('[data-nt-sky-text]');
+    tx.setAttribute('data-glare', glare);
+    tx.setAttribute('data-crossed', 'That day it ' + past('crossed', 'will cross') + ' in front of the sun:');
+    var setNotes = function (extra) { tx.textContent = notes.concat(extra ? [extra] : []).join(' ').replace('<glare>', current && current.r && current.r.eclipse ? tx.getAttribute('data-crossed') + ' ' + an(current.r.eclipse) + current.r.eclipse + ' solar eclipse.' : glare); vis(tx, !!tx.textContent); };
+    // The headline follows the slider: where was the moon at that moment?
+    var chosen = n.h != null ? ms : null;
+    if (box.__sky) box.__sky.stop();
+    box.__sky = MoonSky.mount($('[data-nt-sky-chart]'), {
+      sky: sky, t0: t0, t1: t1, lat: p.lat, lng: p.lng, at: chosen, f: f, clock: clock,
+      onTime: function (t, m) {
+        var w = t > Date.now() ? 'will be' : 'was';
+        $('[data-nt-sky-h]').textContent = m.alt > -0.27
+          ? 'At ' + clock(t) + ' the moon ' + w + ' ' + Math.max(0, Math.round(m.alt)) + '° up in the ' + MoonSky.compass(m.az) + '.'
+          : 'At ' + clock(t) + ' the moon ' + w + ' below the horizon.';
+        var sunUp = MoonSky.sunAlt(t, p.lat, p.lng) > -0.83, phase = window.MoonPhase ? MoonPhase.fraction(t) : f;
+        setNotes(m.alt > -0.27 && phase > 0.04 && phase < 0.96 ? (sunUp ? 'It ' + w + ' daytime, so look for a pale moon in a blue sky.' : 'In a dark sky it ' + w + ' easy to see.') : '');
+      },
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-nt-addplace]'); if (!b) return;
+    var w = $('input[name=where]'); $('[data-nt-form]').scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(function () { w.focus({ preventScroll: true }); }, 350);
+  });
   function whereText(p) { return p.slug ? p.name + ', ' + p.near : p.name; }
   function tzHint() {
     var h = $('[data-nt-tz]'); if (!h) return;
@@ -249,6 +300,7 @@
   function pick(p) {
     place = p; var inp = $('input[name=where]'); inp.value = whereText(p);
     closeList(); tzHint();
+    if (current && $('input[name=d]').value) { var n1 = fromForm(); if (n1) show(n1, false); }   // a moon is showing: redraw it for the new place
   }
   var opts = [], active = -1;
   function closeList() { var l = $('[data-nt-list]'); if (l) { vis(l, false); l.innerHTML = ''; } $('input[name=where]').setAttribute('aria-expanded', 'false'); active = -1; }

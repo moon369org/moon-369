@@ -70,6 +70,37 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .nt-list li:hover,.nt-list li[aria-selected="true"]{background:#1C1D20}
 .nt-tz{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.06em;color:#8A8B8F;min-height:1.4em}
 .nt-place{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.2em;color:#E9E4D8;margin-top:-8px}
+.nt-sky{margin-top:56px;border:1px solid #24262A;overflow:hidden}
+.nt-sky-head{padding:28px 32px 18px;display:flex;flex-direction:column;gap:10px}
+.nt-sky-h{margin:0;font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(15px,1.6vw,20px);letter-spacing:.08em;line-height:1.4;text-transform:uppercase}
+.nt-sky-note{padding:0 32px 24px;margin:0}
+.sk-sky{position:relative;width:100%;aspect-ratio:1000/440}
+.sk-sky canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sk-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #24262A}
+.sk-stats>div{padding:18px 24px;display:flex;flex-direction:column;gap:6px}.sk-stats>div+div{border-left:1px solid #24262A}
+.sk-k{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
+.sk-stats b{font-family:'Syncopate',sans-serif;font-size:clamp(18px,2vw,26px);letter-spacing:.04em}
+.sk-s{font-size:13px;color:#8A8B8F}
+.sk-scrub{padding:20px 32px 24px;border-top:1px solid #24262A;display:flex;flex-direction:column;gap:10px}
+.sk-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sk-now{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.14em}
+.sk-play{all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 16px;display:inline-flex;align-items:center;border:1px solid #2E3035;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9.5px;letter-spacing:.2em;white-space:nowrap}
+.sk-play:hover,.sk-play[aria-pressed="true"]{border-color:#E9E4D8}.sk-play:focus-visible{outline:2px solid #E9E4D8;outline-offset:3px}
+.sk-track{position:relative;height:44px}
+.sk-bar{position:absolute;left:0;right:0;top:20px;height:4px;background:#24262A}
+.sk-up{position:absolute;top:18px;height:8px;background:#E9E4D8;opacity:.85}
+.sk-track input{position:absolute;inset:0;width:100%;height:44px;margin:0;background:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+.sk-track input:focus{outline:none}
+.sk-track input::-webkit-slider-runnable-track{height:44px;background:none}
+.sk-track input::-moz-range-track{height:44px;background:none}
+.sk-track input::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;margin-top:6px;border-radius:50%;background:#0B0B0D;border:2px solid #E9E4D8;box-shadow:0 0 18px rgba(233,228,216,.5)}
+.sk-track input::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#0B0B0D;border:2px solid #E9E4D8;box-shadow:0 0 18px rgba(233,228,216,.5)}
+.sk-track input:focus-visible::-webkit-slider-thumb{outline:2px solid #E9E4D8;outline-offset:3px}
+.sk-ticks{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;color:#55565B;letter-spacing:.08em}
+.nt-sky-ask{margin-top:48px;display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;border:1px dashed #2E3035;padding:22px 24px}
+.nt-sky-ask p{margin:0;font-size:15px;color:#B9B6AE;flex:1 1 280px}
+.nt-shared .nt-sky,.nt-shared .nt-sky-ask{order:0}
+@media (max-width:720px){.nt-sky{margin-top:40px}.nt-sky-head{padding:22px 18px 14px}.nt-sky-note{padding:0 18px 20px}.sk-sky{aspect-ratio:520/420}.sk-stats>div{padding:14px 12px}.sk-scrub{padding:16px 18px 20px}.sk-play{padding:0 12px;font-size:9px}}
 [data-off]{display:none!important}
 .nt-moon{display:flex;justify-content:center;align-items:center;position:relative}
 .nt-moon canvas{width:min(100%,640px);aspect-ratio:1;display:block}
@@ -109,6 +140,7 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 <script src="js/moon-phase.js" defer></script>
 <script src="js/moonglow.js" defer></script>
 <script src="js/eclipseglow.js" defer></script>
+<script src="js/sky.js" defer></script>
 <script src="js/night.js" defer></script>
 <!-- page styles -->
 <style>
@@ -164,7 +196,7 @@ footer > div > div:first-child svg{width:64px!important}
 <path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
 </svg>
 </a>
-<nav aria-label="Main" id="mm-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;">
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;" id="mm-nav">
 <a href="/night" aria-current="page">YOUR MOON</a>
 <a href="/uses">USES</a>
 <a href="/tideline">TIDELINE</a>
@@ -230,6 +262,12 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 </div>
 
+<div class="nt-sky" data-nt-sky="" data-off="">
+<div class="nt-sky-head"><div class="nt-k" data-nt-sky-k="">THE MOON'S PATH</div><h3 class="nt-sky-h" data-nt-sky-h=""></h3></div>
+<div data-nt-sky-chart=""></div>
+<p class="nt-note nt-sky-note" data-nt-sky-text=""></p>
+</div>
+<div class="nt-sky-ask" data-nt-sky-ask="" data-off=""><p>Add where you were to see when the moon was up that day, and where in the sky.</p><button type="button" class="nt-btn o" data-nt-addplace="">ADD A PLACE</button></div>
 <div class="nt-card" data-nt-cardwrap="" data-off="">
 <img data-nt-card="" alt="" width="1080" height="1350">
 <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -340,6 +378,12 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 </div>
 
+<div class="nt-sky" data-nt-sky data-off>
+<div class="nt-sky-head"><div class="nt-k" data-nt-sky-k>THE MOON'S PATH</div><h3 class="nt-sky-h" data-nt-sky-h></h3></div>
+<div data-nt-sky-chart></div>
+<p class="nt-note nt-sky-note" data-nt-sky-text></p>
+</div>
+<div class="nt-sky-ask" data-nt-sky-ask data-off><p>Add where you were to see when the moon was up that day, and where in the sky.</p><button type="button" class="nt-btn o" data-nt-addplace>ADD A PLACE</button></div>
 <div class="nt-card" data-nt-cardwrap data-off>
 <img data-nt-card alt="" width="1080" height="1350">
 <div style="display: flex; flex-direction: column; gap: 16px">
