@@ -50,10 +50,14 @@ export interface TideStore {
   /** The tide's OpenTimestamps proof (.ots bytes). */
   getOts(lune: number): Promise<Buffer | null>;
   putOts(lune: number, file: Buffer): Promise<void>;
+  /** Take a short lock (true if this caller got it). */
+  lock(key: string, seconds: number): Promise<boolean>;
+  addCheckpoint(cp: Checkpoint): Promise<void>;
+  checkpoints(lune: number): Promise<Checkpoint[]>;
 }
 
 export function memoryStore(): TideStore {
-  const L = new Map<number, string[]>(), T = new Map<number, Tide>(), O = new Map<number, Buffer>(); let h: number | null = null, f: number | null = null;
+  const L = new Map<number, string[]>(), T = new Map<number, Tide>(), O = new Map<number, Buffer>(), K = new Map<string, number>(), C = new Map<number, Checkpoint[]>(); let h: number | null = null, f: number | null = null;
   return {
     async append(l, x) { const a = L.get(l) ?? []; a.push(x); L.set(l, a); return a.length - 1; },
     async leaves(l) { return [...(L.get(l) ?? [])]; },
@@ -65,6 +69,9 @@ export function memoryStore(): TideStore {
     async updateTide(t) { T.set(t.lune_index, t); },
     async getOts(l) { return O.get(l) ?? null; },
     async putOts(l, f) { O.set(l, f); },
+    async lock(k, sec) { const now = Date.now(); if ((K.get(k) ?? 0) > now) return false; K.set(k, now + sec * 1000); return true; },
+    async addCheckpoint(cp) { const a = C.get(cp.lune_index) ?? []; a.push(cp); C.set(cp.lune_index, a); },
+    async checkpoints(l) { return [...(C.get(l) ?? [])]; },
   };
 }
 
@@ -90,6 +97,9 @@ export function upstashStore(url: string, token: string): TideStore {
     async updateTide(t) { await call([['SET', `tl:tide:${t.lune_index}`, JSON.stringify(t)]]); },
     async getOts(l) { const [v] = await call([['GET', `tl:ots:${l}`]]); return v ? Buffer.from(v as string, 'base64') : null; },
     async putOts(l, f) { await call([['SET', `tl:ots:${l}`, f.toString('base64')]]); },
+    async lock(k, sec) { const [ok] = await call([['SET', `tl:lock:${k}`, '1', 'NX', 'EX', sec]]); return ok === 'OK'; },
+    async addCheckpoint(cp) { await call([['RPUSH', `tl:cp:${cp.lune_index}`, JSON.stringify(cp)]]); },
+    async checkpoints(l) { const [a] = await call([['LRANGE', `tl:cp:${l}`, 0, -1]]); return ((a as string[]) ?? []).map((x) => JSON.parse(x) as Checkpoint); },
   };
 }
 
@@ -111,6 +121,47 @@ export interface Tide {
   hash: string;            // SHA-256 of tideBytes: the tide's identity
 }
 
+/**
+ * A checkpoint: while a lune is open, Moon locks its receipts so far on the XRP Ledger about once a
+ * minute, so no receipt waits a whole lune for a public lock. It is the same Merkle root a tide uses,
+ * over the first `size` receipts of the lune, signed and anchored.
+ */
+export interface Checkpoint {
+  tideline: typeof TIDELINE; kind: 'checkpoint';
+  lune: string; lune_index: number; size: number; root: string; at_unix_ns: string;
+  key_id: string; signature: string; pq?: { alg: 'ML-DSA-65'; key_id: string; signature: string };
+  hash: string; anchor?: Anchor | null;
+}
+export const checkpointBytes = (c: Pick<Checkpoint, 'lune' | 'lune_index' | 'size' | 'root' | 'at_unix_ns'>): Uint8Array =>
+  new Uint8Array(Buffer.from([TIDELINE + '/checkpoint', `lune:${c.lune}`, `index:${c.lune_index}`, `size:${c.size}`, `root:${c.root}`, `at:${c.at_unix_ns}`].join('\n'), 'utf8'));
+
+/** Checkpoint the open lune if a minute has passed since the last one and anything new was signed. */
+export async function checkpoint(store: TideStore, signer: Signer, nowNs: bigint, anchor: Anchorer, everySec = 60): Promise<Checkpoint | null> {
+  const lune = luneOf(nowNs);
+  if (!(await store.lock(`cp:${lune}`, everySec))) return null;
+  const leaves = await store.leaves(lune);
+  const prev = (await store.checkpoints(lune)).at(-1);
+  if (!leaves.length || (prev && prev.size >= leaves.length)) return null;
+  const body = { lune: luneLabel(lune), lune_index: lune, size: leaves.length, root: merkleRoot(leaves), at_unix_ns: nowNs.toString() };
+  const bytes = checkpointBytes(body), sig = signer.signBytes(bytes);
+  const cp: Checkpoint = { tideline: TIDELINE, kind: 'checkpoint', ...body, key_id: sig.key_id, signature: sig.signature, ...(sig.pq ? { pq: sig.pq as Checkpoint['pq'] } : {}), hash: sha(bytes), anchor: null };
+  try { cp.anchor = await anchor({ lune: `${cp.lune} checkpoint ${cp.size}`, hash: cp.hash }); } catch { cp.anchor = null; }
+  if (!cp.anchor) return null;   // only anchored checkpoints are kept: they are the point
+  await store.addCheckpoint(cp);
+  return cp;
+}
+
+/**
+ * Run after a signing: checkpoint now if no one did recently, otherwise wait out the short lock and
+ * try once more, so the last receipt before a quiet spell still gets locked within about a minute.
+ */
+export async function checkpointSoon(store: TideStore, signer: Signer, now: () => bigint, anchor: Anchorer, everySec = 20, sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))): Promise<Checkpoint | null> {
+  const first = await checkpoint(store, signer, now(), anchor, everySec);
+  if (first) return first;
+  await sleep((everySec + 1) * 1000);
+  return checkpoint(store, signer, now(), anchor, everySec);
+}
+
 /** A receipt's leaf: its signed bytes, so the leaf is the same however the receipt is carried. */
 export const receiptLeaf = (r: Receipt): string => {
   const { signature: _s, ...body } = r;
@@ -130,7 +181,8 @@ export async function record(store: TideStore, r: Receipt): Promise<{ lune: stri
   return { lune: luneLabel(lune), index, leaf };
 }
 
-export type Anchorer = (tide: Tide) => Promise<Anchor | null>;
+/** Writes a fingerprint to a ledger. `lune` names what is anchored (a tide, or a lune's checkpoint). */
+export type Anchorer = (t: { lune: string; hash: string }) => Promise<Anchor | null>;
 /** Bitcoin anchoring through OpenTimestamps: stamp a digest, later upgrade the proof. */
 export interface BitcoinStamper { stamp(digestHex: string): Promise<Buffer | null>; upgrade(file: Buffer): Promise<{ file: Buffer; changed: boolean }>; summarize(file: Buffer): { bitcoin: number[]; pending: string[] } }
 
@@ -174,7 +226,11 @@ export async function proofFor(store: TideStore, r: Receipt) {
   const index = leaves.indexOf(leaf);
   if (index < 0) return { status: 'not_found' as const, lune: luneLabel(lune), leaf };
   const tide = await store.getTide(lune);
-  if (!tide) return { status: 'pending' as const, lune: luneLabel(lune), leaf, index, seals_after_utc: unixNsToIso(luneEndNs(lune)) };
+  if (!tide) {
+    const cp = (await store.checkpoints(lune)).find((c) => c.size > index);
+    if (cp) return { status: 'checkpointed' as const, lune: luneLabel(lune), leaf, index, size: cp.size, path: inclusionProof(index, leaves.slice(0, cp.size)), root: cp.root, checkpoint: cp, seals_after_utc: unixNsToIso(luneEndNs(lune)) };
+    return { status: 'pending' as const, lune: luneLabel(lune), leaf, index, seals_after_utc: unixNsToIso(luneEndNs(lune)) };
+  }
   return { status: 'sealed' as const, lune: tide.lune, leaf, index, size: tide.size, path: inclusionProof(index, leaves.slice(0, tide.size)), root: tide.root, tide };
 }
 

@@ -65,10 +65,12 @@ html.mm-js [data-dc-root] section:has(.mi.open),html.mm-js [data-dc-root] sectio
 
 @media (max-width: 900px){.mk-panel{grid-template-columns:1fr!important;padding:32px 24px!important}.mk-ns-row{padding-left:0!important;flex-wrap:wrap}.mk-meters{border-left:0!important;padding-left:0!important;border-top:1px solid #24262A;padding-top:28px}}
 
+@media (max-width:720px){.hm-tide > div{padding:80px 20px 260px!important}}
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
 <script src="js/moonglow.js" defer></script>
+<script src="js/ocean.js" defer></script>
 <script src="js/livemark.js" defer></script>
 <script src="js/header.js" defer></script>
 <script src="js/dc-lite.js" defer></script>
@@ -666,6 +668,16 @@ footer > div > div:first-child svg{width:64px!important}
 </sc-if>
 </div>
 </div>
+</div>
+</section>
+
+<section id="tideline" class="hm-tide" style="position: relative; overflow: hidden; border-bottom: 1px solid #1C1D20; background: #08080A">
+<canvas class="tl-sea" data-stars="1" data-sea-px="200" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0"></canvas>
+<div style="position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 120px 32px 300px; display: flex; flex-direction: column; gap: 28px; pointer-events: none">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">THE TIDELINE</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(26px, 3.4vw, 44px); letter-spacing: 0.08em; line-height: 1.2">EVERY RECEIPT,<br>LOCKED IN PUBLIC</h2>
+<p style="margin: 0; max-width: 640px; font-size: 17px; line-height: 1.7; color: #B9B6AE">Every signed Moonmark goes into Moon&#39;s public log. Within about a minute it is locked on the XRP Ledger. When the lune ends, the whole lune becomes one tide, chained to the last and anchored on the XRP Ledger and Bitcoin. After that, no one can add, remove or backdate a receipt, Moon&nbsp;included.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 14px; pointer-events: auto"><a href="/tideline" style="padding: 18px 30px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.26em; display: inline-flex; align-items: center; background: #E9E4D8; color: #0B0B0D">SEE THE TIDELINE</a><a href="/tideline?preview" style="padding: 18px 30px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.26em; display: inline-flex; align-items: center; border: 1px solid #E9E4D8">TRY THE PREVIEW</a></div>
 </div>
 </section>
 

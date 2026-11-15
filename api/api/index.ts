@@ -8,6 +8,7 @@ import { beaconSource } from '../src/beacon.js';
 import { upstashStore } from '../src/tideline.js';
 import { xrplAnchorer } from '../src/anchor.js';
 import { stamp, upgrade, summarize } from '../src/ots.js';
+import { waitUntil } from '@vercel/functions';
 
 // Upstash Redis, from the Vercel Marketplace (KV_*) or set by hand (UPSTASH_*). Shared by rate limits and the Tideline.
 const RL_URL = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
@@ -65,6 +66,7 @@ const route = (req: Request) => {
     TIDES,
     ANCHOR,
     BITCOIN,
+    DEFER: (p: Promise<unknown>) => waitUntil(p),
     CRON_SECRET: process.env.CRON_SECRET,
   });
 };

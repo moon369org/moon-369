@@ -5,13 +5,13 @@
  *
  * XRPL_SEED: the wallet's family seed (keep secret). XRPL_SERVER: optional WebSocket URL.
  */
-import type { Anchor, Tide } from './tideline.js';
+import type { Anchor } from './tideline.js';
 import { TIDELINE } from './tideline.js';
 
 const hex = (s: string) => Buffer.from(s, 'utf8').toString('hex').toUpperCase();
 
 export function xrplAnchorer(seed: string, server = 'wss://xrplcluster.com') {
-  return async (tide: Tide): Promise<Anchor | null> => {
+  return async (tide: { lune: string; hash: string }): Promise<Anchor | null> => {
     const xrpl = await import('xrpl');
     const client = new xrpl.Client(server, { connectionTimeout: 8000 });
     await client.connect();

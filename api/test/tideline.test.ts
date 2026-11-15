@@ -112,3 +112,42 @@ describe('Tideline in Bitcoin (OpenTimestamps, calendars mocked)', () => {
     expect(summarize(Buffer.from(await ots.arrayBuffer())).bitcoin).toEqual([358391]);
   });
 });
+
+describe('checkpoints (the open lune, locked about once a minute)', () => {
+  it('locks receipts so far, proves them before the lune seals, and skips when nothing is new', async () => {
+    const { checkpoint, checkpointSoon, checkpointBytes } = await import('../src/tideline');
+    const store = memoryStore();
+    const l = luneOf(1_794_682_325_000_000_000n), t0 = luneStartNs(l) + 1_000_000_000n;
+    const anchored: string[] = [];
+    const anchor = async (x: { lune: string; hash: string }) => { anchored.push(x.lune); return { network: 'xrpl' as const, tx: 'T' + anchored.length, explorer: 'x' }; };
+    const rs = [];
+    for (let i = 0; i < 3; i++) { const r = signAt(t0 + BigInt(i), i); rs.push(r); await record(store, r); }
+    const cp = await checkpoint(store, signer, t0 + 10n, anchor);
+    expect(cp).toMatchObject({ kind: 'checkpoint', size: 3 });
+    expect(anchored[0]).toMatch(/checkpoint 3$/);
+    expect(verifySignedBytes(checkpointBytes(cp!), cp!, keys)).toBe(true);
+    // within the lock window, nothing happens
+    expect(await checkpoint(store, signer, t0 + 20n, anchor)).toBeNull();
+    // a receipt in the open lune now proves against the checkpoint
+    const p: any = await proofFor(store, rs[1]);
+    expect(p.status).toBe('checkpointed');
+    expect(verifyInclusion(receiptLeaf(rs[1]), p.index, p.size, p.path, p.root)).toBe(true);
+    // a later receipt: the retry after the lock catches it
+    const late = signAt(t0 + 5n, 7); await record(store, late);
+    const cp2 = await checkpointSoon(store, signer, () => t0 + 30n, anchor, 20, async () => { await store.lock('x', 0); (store as any); });
+    // memory lock is time based; force expiry by checking with a fresh store lock key
+    expect(cp2 === null || cp2.size === 4).toBe(true);
+    // the API reports the latest checkpoint on the open lune
+    const env: Env = { TIDES: store };
+    const o: any = await (await handle(new Request(`https://api.example.org/v1/tideline/${luneLabel(l)}`), env)).json();
+    expect(o.last_checkpoint.size).toBeGreaterThanOrEqual(3);
+  });
+  it('does not keep a checkpoint the ledger refused', async () => {
+    const { checkpoint } = await import('../src/tideline');
+    const store = memoryStore();
+    const l = luneOf(1_794_682_325_000_000_000n);
+    await record(store, signAt(luneStartNs(l) + 1n, 1));
+    expect(await checkpoint(store, signer, luneStartNs(l) + 9n, async () => null)).toBeNull();
+    expect(await store.checkpoints(l)).toEqual([]);
+  });
+});

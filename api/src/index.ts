@@ -8,7 +8,7 @@ import { svgToPng } from './png.js';
 import { hashKey } from './keys.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
 import { QUICKNET, BEACON_NETWORK, type Beacon, type Chain } from './beacon.js';
-import { TIDELINE, record, sealDue, upgradeBitcoin, proofFor, parseLune, luneLabel, luneOf, luneEndNs, tideBytes, type TideStore, type Anchorer, type BitcoinStamper } from './tideline.js';
+import { TIDELINE, record, sealDue, upgradeBitcoin, checkpointSoon, proofFor, parseLune, luneLabel, luneOf, luneEndNs, tideBytes, type TideStore, type Anchorer, type BitcoinStamper } from './tideline.js';
 
 /** max overrides the limiter's default requests per minute (used for per-key limits). */
 export interface RateLimiter { limit(o: { key: string; max?: number }): Promise<{ success: boolean }> }
@@ -35,6 +35,8 @@ export interface Env {
   TIDES?: TideStore;
   /** Anchors each sealed tide (XRP Ledger). Optional. */
   ANCHOR?: Anchorer;
+  /** Runs work after the response is sent (Vercel waitUntil). Used for checkpoints. */
+  DEFER?: (p: Promise<unknown>) => void;
   /** Anchors each tide in Bitcoin through OpenTimestamps. Optional. */
   BITCOIN?: BitcoinStamper;
   /** Required on /v1/tideline/seal (Vercel Cron sends it as a Bearer token). */
@@ -327,6 +329,11 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const receipt = env.SIGNER.sign(sha, mark, ns, beacon);
         let tideline: Record<string, unknown> | null = null;
         if (env.TIDES) { try { tideline = { ...(await record(env.TIDES, receipt)), status: 'pending', seals_after_utc: unixNsToIso(luneEndNs(luneOf(ns))) }; } catch { tideline = null; } }
+        if (tideline && env.TIDES && env.ANCHOR && env.DEFER) {
+          const T = env.TIDES, A = env.ANCHOR, S = env.SIGNER;
+          env.DEFER(checkpointSoon(T, S, nowUnixNs, A).catch(() => null));   // locks recent receipts on the XRP Ledger about once a minute
+          tideline.checkpoint = 'within about a minute';
+        }
         return json({
           receipt,
           tideline,
@@ -398,7 +405,8 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         }
         if (tide) return json(tide, 200, { 'Cache-Control': 'public, max-age=300', ...planHdr });
         const size = (await env.TIDES.leaves(lune)).length;
-        return json({ tideline: TIDELINE, lune: luneLabel(lune), status: luneEndNs(lune) > nowUnixNs() ? 'open' : 'pending', size, seals_after_utc: unixNsToIso(luneEndNs(lune)) }, 200, { 'Cache-Control': 'public, max-age=60', ...planHdr });
+        const last = (await env.TIDES.checkpoints(lune)).at(-1) ?? null;
+        return json({ tideline: TIDELINE, lune: luneLabel(lune), last_checkpoint: last, status: luneEndNs(lune) > nowUnixNs() ? 'open' : 'pending', size, seals_after_utc: unixNsToIso(luneEndNs(lune)) }, 200, { 'Cache-Control': 'public, max-age=60', ...planHdr });
       }
 
       case path.startsWith(`/${API_VERSION}/year/`): {

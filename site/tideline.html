@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <title>Tideline · Moon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger and Bitcoin.">
+<meta name="description" content="The Tideline: Moon's public log. Every receipt is locked on the XRP Ledger within a minute, and every lune is sealed into a tide anchored on the XRP Ledger and Bitcoin.">
 <link rel="canonical" href="https://moon369.org/tideline">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Moon">
 <meta property="og:url" content="https://moon369.org/tideline">
 <meta property="og:title" content="The Tideline · Moon">
-<meta property="og:description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger and Bitcoin.">
+<meta property="og:description" content="The Tideline: Moon's public log. Every receipt is locked on the XRP Ledger within a minute, and every lune is sealed into a tide anchored on the XRP Ledger and Bitcoin.">
 <meta property="og:image" content="https://moon369.org/assets/og/tideline.jpg?v=1">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Moon Tideline, over a photograph of the moon">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Tideline · Moon">
-<meta name="twitter:description" content="The Tideline: Moon's public log. Every lune, all signed Moonmarks are sealed into a tide, chained to the last and anchored on the XRP Ledger and Bitcoin.">
+<meta name="twitter:description" content="The Tideline: Moon's public log. Every receipt is locked on the XRP Ledger within a minute, and every lune is sealed into a tide anchored on the XRP Ledger and Bitcoin.">
 <meta name="twitter:image" content="https://moon369.org/assets/og/tideline.jpg?v=1">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <meta name="theme-color" content="#0B0B0D">
@@ -120,7 +120,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 100px 32px 240px; display: flex; flex-direction: column; gap: 24px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F; letter-spacing: 0.3em">MOON&#39;S PUBLIC LOG</div>
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">TIDELINE</h1>
-<p style="margin: 0; max-width: 720px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Every lune, Moon seals its signed Moonmarks into a tide: one fingerprint of every receipt, chained to the tide before it, signed with Moon&#39;s keys and anchored on the XRP Ledger and Bitcoin. After that, no one can add, remove or backdate a receipt, Moon&nbsp;included.</p>
+<p style="margin: 0; max-width: 720px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Every lune, Moon seals its signed Moonmarks into a tide: one fingerprint of every receipt, chained to the tide before it, signed with Moon&#39;s keys and anchored on the XRP Ledger and Bitcoin. While a lune is open, every receipt is locked on the XRP Ledger within about a minute. Once locked, no one can add, remove or backdate a receipt, Moon&nbsp;included.</p>
 </div>
 </section>
 
@@ -133,8 +133,9 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><span style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em">THE OPEN LUNE</span><span style="display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #8A8B8F"><img src="/assets/moon-loader.svg" alt="" aria-hidden="true" style="height: 14px; width: auto">LIVE</span></div>
 <div style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(28px, 3.4vw, 40px); letter-spacing: 0.06em">{{openLune}}</div>
 <div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">RECEIPTS SO FAR</span><span>{{openCount}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">LAST LOCKED ON XRP</span><span style="font-variant-numeric: tabular-nums">{{lockedText}}</span></div>
 <div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">SEALS IN</span><span style="font-variant-numeric: tabular-nums">{{sealsIn}}</span></div>
-<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #8A8B8F">Every file signed on Moon right now lands in this lune. When it ends, the whole lune becomes one tide.</p>
+<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #8A8B8F">Every file signed on Moon right now lands in this lune and is locked on the XRP Ledger within about a minute. When the lune ends, it becomes one tide.</p>
 <a href="/#sign" style="border: 1px solid #E9E4D8; padding: 16px 26px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: relative; overflow: hidden; align-self: flex-start">SIGN A FILE</a>
 </div>
 
@@ -194,7 +195,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">01 · RECORD</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every receipt Moon signs is added to its lune&#39;s list the moment it&#39;s&nbsp;signed.</p></div>
 <div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">02 · SEAL</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">When the lune ends, its receipts become one Merkle root, the same structure that secures website certificates, signed with Ed25519 and&nbsp;ML-DSA-65.</p></div>
 <div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">03 · CHAIN</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Each tide includes the previous tide&#39;s fingerprint, so the newest tide vouches for the whole&nbsp;history.</p></div>
-<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04 · ANCHOR</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">The tide&#39;s fingerprint is written to the XRP Ledger in seconds, and into Bitcoin through OpenTimestamps within hours. After that, the tide can never be quietly&nbsp;changed.</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04 · ANCHOR</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every receipt is locked on the XRP Ledger within about a minute, in a checkpoint. When the lune seals, its tide is locked on the XRP Ledger within seconds, and Bitcoin adds a second, independent lock within hours, so the record outlasts any single&nbsp;chain.</p></div>
 </div>
 </section>
 
@@ -213,7 +214,7 @@ footer > div > div:first-child svg{width:64px!important}
 class Component extends DCLogic {
   componentDidMount() {
     this.isPreview = /[?&]preview\b/.test(location.search);
-    if (this.isPreview) { this.buildPreview(); this.iv = setInterval(() => this.setState({ now: Date.now() }), 1000); this.iv3 = setInterval(() => this.setState({ openSize: (this.state.openSize || 0) + (Math.random() < 0.45 ? 1 : 0) }), 2000); return; }
+    if (this.isPreview) { this.buildPreview(); this.iv = setInterval(() => this.setState({ now: Date.now() }), 1000); this.iv3 = setInterval(() => { const n = (this.state.openSize || 0) + (Math.random() < 0.45 ? 1 : 0); const due = !this.state.lastCp || Date.now() - Number(BigInt(this.state.lastCp.at_unix_ns) / 1000000n) > 60000; this.setState({ openSize: n, lastCp: due ? { at_unix_ns: String(Date.now()) + '000000', size: n } : this.state.lastCp }); }, 2000); return; }
     this.load();
     this.iv = setInterval(() => this.setState({ now: Date.now() }), 1000);
     this.iv2 = setInterval(() => this.load(), 30000);
@@ -222,7 +223,7 @@ class Component extends DCLogic {
   load() {
     fetch('https://api.moon369.org/v1/tideline').then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((b) => {
       this.setState({ tl: b, err: null });
-      return fetch('https://api.moon369.org/v1/tideline/' + b.open_lune).then((r) => r.json()).then((o) => this.setState({ openSize: o.size }));
+      return fetch('https://api.moon369.org/v1/tideline/' + b.open_lune).then((r) => r.json()).then((o) => this.setState({ openSize: o.size, lastCp: o.last_checkpoint || null }));
     }).catch((e) => this.setState({ err: e === 503 ? 'soon' : 'offline' }));
   }
 
@@ -262,7 +263,7 @@ class Component extends DCLogic {
     this.pv = { book, leafOf, pathOf, hex };
     const href = URL.createObjectURL(new Blob([JSON.stringify(sample, null, 2) + '\n'], { type: 'application/json' }));
     const open = moonAt(now), end = EPOCH + (today + 1) * DAY;
-    this.setState({ tl: { tideline: 'tideline/1', open_lune: open.lune, seals_after_utc: new Date(end).toISOString(), tides }, openSize: 12 + Math.floor(Math.random() * 30), sampleHref: href, err: null });
+    this.setState({ lastCp: { at_unix_ns: String(now - 14000) + '000000', size: 12 }, tl: { tideline: 'tideline/1', open_lune: open.lune, seals_after_utc: new Date(end).toISOString(), tides }, openSize: 12 + Math.floor(Math.random() * 30), sampleHref: href, err: null });
   }
   async previewProof(rc) {
     const lune = String(rc.moonmark || '').slice(0, 10), e = this.pv && this.pv.book.get(lune);
@@ -296,6 +297,10 @@ class Component extends DCLogic {
       say('Asking the Tideline for its proof…');
       return (this.isPreview ? this.previewProof(rc) : fetch('https://api.moon369.org/v1/tideline/proof', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receipt: rc }) }).then((r) => r.json()))
         .then(async (p) => {
+          if (p.status === 'checkpointed') {
+            const okc = await this.inclusion(p.leaf, p.index, p.size, p.path, p.root);
+            return say(okc ? '✓ Locked on the XRP Ledger in a checkpoint of lune ' + p.lune + ' (receipt ' + (p.index + 1) + ' of ' + p.size + '), proven in your browser. Its tide seals after ' + p.seals_after_utc.replace('T', ' ').slice(0, 16) + ' UTC.' : '✕ The proof does not match the checkpoint. Do not rely on this receipt.', okc);
+          }
           if (p.status === 'pending') return say('Recorded in lune ' + p.lune + ' as receipt #' + (p.index + 1) + '. It seals into a tide after ' + p.seals_after_utc.replace('T', ' ').slice(0, 16) + ' UTC.', null);
           if (p.status === 'not_found') return say('This receipt is not in the Tideline. It was either signed before the Tideline started, or it was changed.', false);
           if (p.status !== 'sealed') return say((p.error && p.error.message) || 'Could not check that receipt.', false);
@@ -328,10 +333,12 @@ class Component extends DCLogic {
       const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, sec = Math.floor(ms / 1000) % 60;
       sealsIn = h + 'h ' + String(m).padStart(2, '0') + 'm ' + String(sec).padStart(2, '0') + 's';
     }
+    let lockedText = s.err ? '–' : 'not yet';
+    if (s.lastCp) { const ago = Math.max(0, Math.round((now - Number(BigInt(s.lastCp.at_unix_ns) / 1000000n)) / 1000)); lockedText = (ago < 60 ? ago + 's' : Math.round(ago / 60) + 'm') + ' ago · ' + Number(s.lastCp.size).toLocaleString('en-US') + ' receipts'; }
     if (!this._pick) this._pick = (e) => this.pick(e);
     const c = s.check || {};
     return {
-      openLune, sealsIn, openCount: s.err ? '–' : s.openSize == null ? '…' : Number(s.openSize).toLocaleString('en-US'),
+      openLune, sealsIn, lockedText, openCount: s.err ? '–' : s.openSize == null ? '…' : Number(s.openSize).toLocaleString('en-US'),
       tides, hasTides: tides.length > 0, noTides: tides.length === 0,
       status: this.isPreview ? 'SAMPLE TIDES' : s.err === 'soon' ? 'THE TIDELINE IS STARTING' : s.err ? 'COULD NOT REACH MOON' : tl ? tides.length + (tides.length === 1 ? ' TIDE' : ' TIDES') + ' SHOWN' : 'LOADING',
       ex: { lune: '1928.05.04', sizeText: '214 receipts', root: '', rootShort: '7f3a91c0d2…e4b81c', prevShort: '19c4e0aa57…02f7d9', algs: 'Ed25519 + ML-DSA-65', anchorText: 'ledger 104,882,113', btcText: 'block 927,418', otsUrl: '' },

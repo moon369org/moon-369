@@ -21,6 +21,7 @@
     "@noble/hashes": "^2.4.0",
     "@noble/post-quantum": "^0.7.1",
     "@resvg/resvg-js": "^2.6.2",
+    "@vercel/functions": "^3.11.3",
     "xrpl": "^5.3.0"
   }
 }
