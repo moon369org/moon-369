@@ -10,9 +10,10 @@ import { MOON_ROOT_PEM } from './tsa-certs.js';
 import { allEclipses, indexAfter, publicEclipse, eclipseByDate, eclipseCardSvg, ymdOf, tdTime, ECLIPSE_TYPES, type EclipseType } from './eclipses.js';
 import { eclipseIcon } from './eclipse-icon.js';
 import { parseNight, nightFacts, nightSvg, NightParamError } from './night.js';
+import { hashKey, newKey, type KeyWriter } from './keys.js';
+import { mcp } from './mcp.js';
 import { makeRegistration, publicRegistration, isPhash, hamming, bands, SIMILAR_BITS, type RegistryStore } from './registry.js';
 import { svgToPng } from './png.js';
-import { hashKey } from './keys.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
 import { QUICKNET, BEACON_NETWORK, type Beacon, type Chain } from './beacon.js';
 import { TIDELINE, record, sealDue, upgradeBitcoin, checkpointSoon, proofFor, parseLune, luneLabel, luneOf, luneEndNs, tideBytes, type TideStore, type Anchorer, type BitcoinStamper } from './tideline.js';
@@ -59,6 +60,14 @@ export interface Env {
   REGISTRY?: RegistryStore;
   /** RFC 3161 Time-Stamp Authority signer (MOON_TSA_KEY + certificate). Optional. */
   TSA?: TsaSigner;
+  /** Where self-serve keys are written (POST /v1/api-keys). Without it, that endpoint answers 503. */
+  KEYS_WRITE?: KeyWriter;
+  /** New self-serve keys per IP (a day). */
+  KEY_CREATE_LIMIT?: RateLimiter;
+  /** Signing on free self-serve keys, per key per day. */
+  FREE_SIGN_DAY?: RateLimiter;
+  /** The numbers behind the free plan, for messages and the key response. */
+  FREE_LIMITS?: { per_min: number; sign_per_day: number };
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
   RETIRED_KEYS?: Record<string, string>;
 }
@@ -188,7 +197,7 @@ const SPEC = {
   license: 'MIT',
 };
 
-type Gate = { plan: string; owner?: string; per_min?: number };
+type Gate = { plan: string; owner?: string; per_min?: number; verified?: boolean };
 
 async function authAndLimit(req: Request, env: Env, signing = false): Promise<Gate | Response> {
   const auth = req.headers.get('Authorization');
@@ -197,7 +206,7 @@ async function authAndLimit(req: Request, env: Env, signing = false): Promise<Ga
     if (!env.API_KEYS) return json({ error: { code: 'keys_disabled', message: 'This deployment does not accept API keys' } }, 400);
     const hash = hashKey(key);
     const raw = await env.API_KEYS.get(hash);
-    let rec: { plan?: string; owner?: string; per_min?: number; active?: boolean } | null = null;
+    let rec: { plan?: string; owner?: string; per_min?: number; active?: boolean; verified?: boolean } | null = null;
     try { rec = raw ? JSON.parse(raw) : null; } catch { rec = null; }
     if (!rec) return json({ error: { code: 'invalid_key', message: 'Unknown API key' } }, 401);
     if (rec.active === false) return json({ error: { code: 'key_disabled', contact: 'moon369org@proton.me', message: 'This API key is switched off. Email moon369org@proton.me.' } }, 403);
@@ -205,7 +214,12 @@ async function authAndLimit(req: Request, env: Env, signing = false): Promise<Ga
     if (env.RATE_LIMITER_KEYED && !(await env.RATE_LIMITER_KEYED.limit({ key: hash.slice(0, 32), max: per_min })).success) {
       return json({ error: { code: 'rate_limited', contact: 'moon369org@proton.me', message: `Key rate limit reached${per_min ? ` (${per_min} requests a minute)` : ''}. For a higher limit email moon369org@proton.me.` } }, 429, { 'Retry-After': '60' });
     }
-    return { plan: rec.plan ?? 'keyed', owner: rec.owner, per_min };
+    if (signing && rec.plan === 'free' && env.FREE_SIGN_DAY && !(await env.FREE_SIGN_DAY.limit({ key: hash.slice(0, 32) })).success) {
+      const n = env.FREE_LIMITS?.sign_per_day ?? 500;
+      return json({ error: { code: 'sign_daily_limit', contact: 'moon369org@proton.me', message: `Free key signing limit reached (${n} a day). For more, email moon369org@proton.me.` } }, 429, { 'Retry-After': String(86400 - Math.floor(Date.now() / 1000) % 86400) });
+    }
+    // Hand-issued keys are verified by Moon; self-serve keys carry whatever name was typed, so they are not.
+    return { plan: rec.plan ?? 'keyed', owner: rec.owner, per_min, verified: rec.verified !== false };
   }
   const ip = req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'anonymous';
   if (env.RATE_LIMITER && !(await env.RATE_LIMITER.limit({ key: ip })).success) {
@@ -228,11 +242,15 @@ function cleanText(x: unknown, max: number): string | null {
   const t = x.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, max);
   return t || null;
 }
-/** Who is registering: the API key owner (verified), plus what they say about the file. */
+/** Who is registering: the API key owner (verified only for keys Moon issued), plus what they say about the file. */
+function registrantOf(gate: Gate) {
+  const named = gate.plan !== 'open' && !!gate.owner;
+  return { registrant: named ? gate.owner! : 'anonymous', registrant_verified: named && gate.verified === true };
+}
 function whoFrom(body: Record<string, unknown>, gate: Gate): Who {
   const ph = typeof body.phash === 'string' ? body.phash.toLowerCase() : null;
   return {
-    registrant: gate.plan !== 'open' && gate.owner ? gate.owner : 'anonymous',
+    ...registrantOf(gate),
     on_behalf_of: cleanText(body.on_behalf_of, 80),
     label: cleanText(body.label, 120),
     phash: isPhash(ph) ? ph : null,
@@ -322,12 +340,12 @@ async function evidence(r: Receipt, sha256: unknown, env: Env) {
 }
 
 /** Signs a SHA-256 fingerprint now: receipt, Tideline record, and links. Shared by /v1/sign and the TSA. */
-interface Who { registrant: string; on_behalf_of?: string | null; label?: string | null; phash?: string | null }
+interface Who { registrant: string; registrant_verified?: boolean; on_behalf_of?: string | null; label?: string | null; phash?: string | null }
 async function latestBeacon(env: Env): Promise<Beacon | null> {
   if (!env.BEACON) return null;
   try { return await env.BEACON(nowUnixNs()); } catch { return null; }
 }
-async function signNow(env: Env, sha: string, at?: bigint, who: Who = { registrant: 'anonymous' }, beaconIn?: Beacon | null) {
+async function signNow(env: Env, sha: string, at?: bigint, who: Who = { registrant: 'anonymous', registrant_verified: false }, beaconIn?: Beacon | null) {
   const S = env.SIGNER!;
   const beacon = beaconIn !== undefined ? beaconIn : await latestBeacon(env);
   const ns = at ?? nowUnixNs();
@@ -346,7 +364,7 @@ async function signNow(env: Env, sha: string, at?: bigint, who: Who = { registra
     try {
       const reg = makeRegistration(receipt, signed_url, who, (b) => { const x = S.signBytes(b); return { key_id: x.key_id, signature: x.signature }; });
       await env.REGISTRY.add(reg);
-      registration = { registrant: reg.registrant, registrant_verified: reg.registrant !== 'anonymous', on_behalf_of: reg.on_behalf_of, label: reg.label, phash: reg.phash, lookup: '/v1/lookup/' + sha };
+      registration = { registrant: reg.registrant, registrant_verified: reg.registrant_verified, on_behalf_of: reg.on_behalf_of, label: reg.label, phash: reg.phash, lookup: '/v1/lookup/' + sha };
     } catch { registration = null; }
   }
   return {
@@ -362,7 +380,7 @@ async function signNow(env: Env, sha: string, at?: bigint, who: Who = { registra
 }
 
 /** RFC 3161 time-stamping: DER in, DER out. */
-async function tsaResponse(req: Request, env: Env, planHdr: Record<string, string>, who: Who = { registrant: 'anonymous' }): Promise<Response> {
+async function tsaResponse(req: Request, env: Env, planHdr: Record<string, string>, who: Who = { registrant: 'anonymous', registrant_verified: false }): Promise<Response> {
   const hdr = { 'Content-Type': 'application/timestamp-reply', 'Cache-Control': 'no-store', ...CORS, ...planHdr };
   const reply = (der: Uint8Array, extra: Record<string, string> = {}) => new Response(Buffer.from(der), { status: 200, headers: { ...hdr, ...extra } });
   const ct = (req.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
@@ -387,16 +405,17 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, '') || '/';
   const q = url.searchParams;
+  if (path === '/mcp') return mcp(req, env, handle);
   if (path === `/${API_VERSION}/tsa` && req.method === 'POST') {
     const gate = await authAndLimit(req, env, true);
     if (gate instanceof Response) return gate;
-    return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, { registrant: gate.plan !== 'open' && gate.owner ? gate.owner : 'anonymous' });
+    return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, registrantOf(gate));
   }
-  const postOnly = path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof`;
+  const postOnly = path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof`;
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
@@ -575,7 +594,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
       }
 
       case path === `/${API_VERSION}/me`:
-        return json({ plan: gate.plan, ...(gate.owner ? { owner: gate.owner } : {}), per_min: gate.per_min ?? null, keyed: gate.plan !== 'open' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+        return json({ plan: gate.plan, ...(gate.owner ? { owner: gate.owner, owner_verified: gate.verified === true } : {}), per_min: gate.per_min ?? null, keyed: gate.plan !== 'open' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
 
       case path === `/${API_VERSION}/keys`: {
         const keys = [
@@ -584,6 +603,25 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           ...Object.entries(env.RETIRED_KEYS ?? {}).map(([key_id, public_key]) => ({ key_id, alg: Buffer.from(public_key, 'base64url').length === 32 ? 'Ed25519' : PQ_ALG, public_key, status: 'retired' })),
         ];
         return json({ receipt: env.SIGNER?.pq ? RECEIPT_V3 : env.BEACON ? RECEIPT_V2 : RECEIPT_V1, receipts_accepted: RECEIPT_VERSIONS, keys, signing: env.SIGNER ? (env.SIGNER.pq ? 'hybrid' : 'enabled') : 'not_configured' }, 200, { 'Cache-Control': 'public, max-age=300', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/api-keys`: {
+        // A free API key, straight away. Shown once; only its SHA-256 is stored.
+        if (!env.KEYS_WRITE) throw new HttpError(503, 'keys_unavailable', 'Self-serve keys are not switched on yet. Email moon369org@proton.me for a key.');
+        const body = await readJson(req);
+        const name = cleanText(body.name, 80), email = cleanText(body.email, 200), use = cleanText(body.use, 300);
+        if (!name || name.length < 2) throw new HttpError(400, 'bad_param', 'name: who the key is for (your name, app or company), 2 to 80 characters');
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new HttpError(400, 'bad_param', 'email: a working address, so we can reach you about your key');
+        const ip = req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'anonymous';
+        if (env.KEY_CREATE_LIMIT && !(await env.KEY_CREATE_LIMIT.limit({ key: ip })).success)
+          throw new HttpError(429, 'rate_limited', 'Too many new keys from here today. Try again tomorrow, or email moon369org@proton.me.');
+        const L = env.FREE_LIMITS ?? { per_min: 60, sign_per_day: 500 };
+        const key = newKey();
+        const ok = await env.KEYS_WRITE.put(hashKey(key), { owner: name, plan: 'free', per_min: L.per_min, verified: false, email, use: use ?? undefined, created: new Date().toISOString() });
+        if (!ok) throw new HttpError(500, 'key_failed', 'Could not create a key. Try again.');
+        return json({ key, owner: name, owner_verified: false, plan: 'free', per_min: L.per_min, signing_per_day: L.sign_per_day,
+          note: 'Keep this key secret: it is shown once and cannot be recovered. Send it as Authorization: Bearer <key>. Registrations made with it show your name as unverified; for a verified name, email moon369org@proton.me.' },
+          201, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
       case path === `/${API_VERSION}/sign`: {

@@ -106,6 +106,30 @@ footer > div > div:last-child{justify-content:center!important;gap:22px!importan
 footer > div > div:first-child svg{width:64px!important}
 }
 </style>
+<style>
+.ak-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:end;border:1px solid #24262A;padding:28px;background:#0B0B0D}
+.ak-f{display:flex;flex-direction:column;gap:8px;min-width:0}.ak-wide{grid-column:1/-1}
+.ak-k{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
+.ak-in{box-sizing:border-box;width:100%;min-height:52px;padding:0 14px;background:#111214;border:1px solid #2E3035;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:16px;border-radius:0;-webkit-appearance:none;appearance:none}
+.ak-in:focus{outline:none;border-color:#E9E4D8}
+.ak-go,.ak-copy,.at-btn{all:unset;cursor:pointer;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;font-family:'Syncopate',sans-serif;font-weight:700;letter-spacing:.2em;white-space:nowrap}
+.ak-go{min-height:52px;padding:0 26px;background:#E9E4D8;color:#0B0B0D;font-size:11px;grid-column:1/-1;justify-self:start}
+.ak-go[aria-busy="true"]{opacity:.6}
+.ak-go:focus-visible,.ak-copy:focus-visible,.at-btn:focus-visible{outline:2px solid #E9E4D8;outline-offset:3px}
+.ak-msg{grid-column:1/-1;color:#D9A35F;font-size:14px;min-height:1px}
+.ak-out{border:1px solid #E9E4D8;padding:24px 28px;display:flex;flex-direction:column;gap:14px;background:#0B0B0D}
+.ak-key{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.ak-key code{font-family:'JetBrains Mono',monospace;font-size:15px;color:#E9E4D8;word-break:break-all;flex:1 1 280px}
+.ak-copy{min-height:44px;padding:0 18px;border:1px solid #2E3035;color:#E9E4D8;font-size:10px}.ak-copy:hover{border-color:#E9E4D8}
+.ak-pre{margin:0;padding:18px;background:#08080A;border:1px solid #24262A;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;color:#E9E4D8;overflow-x:auto;white-space:pre}
+.ak-tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));border-top:1px solid #1C1D20;border-left:1px solid #1C1D20}
+.ak-tools>div{border-right:1px solid #1C1D20;border-bottom:1px solid #1C1D20;padding:16px 20px;display:flex;flex-direction:column;gap:4px}.ak-tools b{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:13px;color:#E9E4D8}.ak-tools span{font-size:13.5px;color:#8A8B8F}
+.at-btn{min-height:30px;padding:0 12px;border:1px solid #E9E4D8;color:#E9E4D8;font-size:9px;margin:-6px 0}.at-btn:hover{background:#E9E4D8;color:#0B0B0D}.at-btn[aria-busy="true"]{opacity:.6}
+.at-live{color:#7FBF8E}.at-err{color:#D9A35F}
+.at-img{display:block;max-width:100%;height:auto;margin:16px 20px 20px;border:1px solid #24262A;background:#111214}
+[data-off]{display:none!important}
+@media (max-width:720px){.ak-form{grid-template-columns:minmax(0,1fr);padding:20px}.ak-go{justify-self:stretch}.ak-out{padding:20px}}
+</style>
+<script src="js/apitry.js" defer></script>
 </head>
 <body>
 <!--snapshot--><div data-dc-snapshot="" aria-hidden="true">
@@ -144,7 +168,7 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 <div style="flex: 0 1 380px; border: 1px solid rgb(36, 38, 42); padding: 24px; display: flex; flex-direction: column; gap: 10px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">LIVE · MOONMARK · GET /v1/now</div>
-<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none;"></canvas><div><span style="visibility: hidden;">04:24:20</span></div></div>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none;"></canvas><div>04:46:37</div></div>
 <div class="ap-hide-m" style="font-family: Syncopate, sans-serif; font-size: 12px; letter-spacing: 0.24em;">CYCLE 1928 · MOON 05 · LUNE 06</div>
 <div class="ap-date" style="display: none;"><div class="ap-date-c"><div class="ap-date-l">CYCLE</div><div class="ap-date-v">1928</div></div><div class="ap-date-c"><div class="ap-date-l">MOON</div><div class="ap-date-v">05</div></div><div class="ap-date-c"><div class="ap-date-l">LUNE</div><div class="ap-date-v">06</div></div></div>
 </div>
@@ -156,6 +180,8 @@ footer > div > div:first-child svg{width:64px!important}
 <nav aria-label="Docs" style="flex: 1 1 200px; max-width: 240px; display: flex; flex-direction: column; border-left: 1px solid rgb(36, 38, 42); padding-left: 20px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.24em; color: rgb(138, 139, 143); padding-bottom: 10px;">ON THIS PAGE</div>
 <a href="#start" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Quick start</a>
+<a href="#key" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Free key</a>
+<a href="#mcp" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">AI assistants (MCP)</a>
 <a href="#constants" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Constants</a>
 <a href="#endpoints" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Endpoints</a>
 <a href="#errors" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Errors &amp; limits</a>
@@ -175,7 +201,7 @@ footer > div > div:first-child svg{width:64px!important}
 <p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">No signup, no key. Call <code>/v1/now</code> and you have Moon time. Every response is JSON, and every caller gets the same answer at the same&nbsp;instant.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: rgb(36, 38, 42); border: 1px solid rgb(36, 38, 42);">
-<div style="background: rgb(11, 11, 13); padding: 24px; display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">STEP 1</div><div style="font-size: 16px; font-weight: 500;">Call the API</div><p style="margin: 0px; font-size: 14px; line-height: 1.6; color: rgb(162, 163, 167);">Base URL <code>https://api.moon369.org</code>. Open rate limit 120 requests a minute, and signing 10 a minute and 100 a day. Need more? Email&nbsp;<a href="mailto:moon369org@proton.me" style="color: rgb(242, 242, 240);">moon369org@proton.me</a>.</p></div>
+<div style="background: rgb(11, 11, 13); padding: 24px; display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">STEP 1</div><div style="font-size: 16px; font-weight: 500;">Call the API</div><p style="margin: 0px; font-size: 14px; line-height: 1.6; color: rgb(162, 163, 167);">Base URL <code>https://api.moon369.org</code>. Open rate limit 120 requests a minute, and signing 10 a minute and 100 a day. Need more? <a href="#key" style="color: rgb(242, 242, 240);">Get a free key</a>, straight&nbsp;away.</p></div>
 <div style="background: rgb(11, 11, 13); padding: 24px; display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">STEP 2</div><div style="font-size: 16px; font-weight: 500;">Or install the library</div><p style="margin: 0px; font-size: 14px; line-height: 1.6; color: rgb(162, 163, 167);"><code>npm install moon369</code>. Same answer as the API, fully offline, no rate&nbsp;limits.</p></div>
 <div style="background: rgb(11, 11, 13); padding: 24px; display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">STEP 3</div><div style="font-size: 16px; font-weight: 500;">Show the badge</div><p style="margin: 0px; font-size: 14px; line-height: 1.6; color: rgb(162, 163, 167);">Display "Powered by Moon" with a link back wherever Moon time&nbsp;appears.</p></div>
 </div>
@@ -189,6 +215,58 @@ moonPhase().name;  // 'Waxing crescent'
 
 // Check a signed Moonmark, offline once you have the keys
 await verify(receipt, { content: file });  // { valid: true, ... }</pre>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px;">
+<div id="key" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 16px; padding-top: 24px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">FREE, STRAIGHT AWAY</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">GET A FREE KEY</h2>
+<p style="margin: 0px; max-width: 760px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">Reading is open with no key. A free key raises your limit to 60 requests a minute and 500 signatures a day, unlocks batch signing, and puts your name on what you register. Your name shows as <i>unverified</i> until we check it: email <a href="mailto:moon369org@proton.me" style="color: rgb(242, 242, 240);">moon369org@proton.me</a> for a verified name or higher&nbsp;limits.</p>
+</div>
+<form class="ak-form" data-ak-form="" novalidate="">
+<label class="ak-f"><span class="ak-k">NAME, APP OR COMPANY</span><input class="ak-in" name="name" type="text" maxlength="80" autocomplete="organization"></label>
+<label class="ak-f"><span class="ak-k">EMAIL</span><input class="ak-in" name="email" type="email" maxlength="200" autocomplete="email"></label>
+<label class="ak-f ak-wide"><span class="ak-k">WHAT ARE YOU BUILDING? <span style="color: rgb(85, 86, 91);">· OPTIONAL</span></span><input class="ak-in" name="use" type="text" maxlength="300"></label>
+<button class="ak-go" type="submit">GET MY KEY</button>
+<div class="ak-msg" data-ak-msg="" role="alert"></div>
+</form>
+<div class="ak-out" data-ak-out="" data-off="">
+<div class="ak-k">YOUR KEY · SHOWN ONCE, SO COPY IT NOW</div>
+<div class="ak-key"><code data-ak-key=""></code><button type="button" class="ak-copy" data-ak-copy="">COPY</button></div>
+<pre class="ak-pre" data-ak-example=""></pre>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px;">
+<div id="mcp" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 16px; padding-top: 24px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">MODEL CONTEXT PROTOCOL</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">USE MOON FROM AI ASSISTANTS</h2>
+<p style="margin: 0px; max-width: 760px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">Moon is an MCP server, so Claude, ChatGPT, Cursor and other assistants can use it directly: "When is the next total eclipse?", "What did the moon look like on 14 June 1990?", "Timestamp this file." Add the server URL to your assistant; no install. To use your key, add it as an <code>Authorization: Bearer</code>&nbsp;header.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>SERVER URL</span><span>STREAMABLE HTTP</span></div>
+<pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">https://api.moon369.org/mcp</pre>
+</div>
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>CONFIG (CURSOR, CLAUDE CODE, MOST CLIENTS)</span><span></span></div>
+<pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">{
+  "mcpServers": {
+    "moon": { "url": "https://api.moon369.org/mcp" }
+  }
+}</pre>
+</div>
+</div>
+<div class="ak-tools">
+<div><b>moon_time</b><span>Moon time for any moment</span></div>
+<div><b>moon_on_date</b><span>The moon on any date: phase, light, eclipse</span></div>
+<div><b>next_solar_eclipse</b><span>The next eclipse, of any type</span></div>
+<div><b>solar_eclipse_on</b><span>One eclipse, with its saros</span></div>
+<div><b>list_solar_eclipses</b><span>Every eclipse, 2000 BCE to 3000 CE</span></div>
+<div><b>timestamp_fingerprint</b><span>A signed Moonmark for a file's SHA-256</span></div>
+<div><b>lookup_fingerprint</b><span>Who registered a file, and when</span></div>
+<div><b>verify_receipt</b><span>Check a Moonmark's signatures</span></div>
 </div>
 </section>
 
@@ -216,7 +294,7 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl https://api.moon369.org/v1/now</pre>
 </div>
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
@@ -227,11 +305,11 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
   "day": 6,
   "day_of_cycle": 120,
   "moon_length_days": 28,
-  "time": "04:24:20",
-  "moonmark": "1928.05.06 04:24:20.932047000",
-  "phase": { "fraction": 0.197921, "name": "First quarter" },
-  "unix_ms": 1794768904450,
-  "utc": "2026-11-15T18:55:04.450000000Z",
+  "time": "04:46:37",
+  "moonmark": "1928.05.06 04:46:37.997632000",
+  "phase": { "fraction": 0.198407, "name": "First quarter" },
+  "unix_ms": 1794770295497,
+  "utc": "2026-11-15T19:18:15.497000000Z",
   "time_zone": null,
   "dst": false
 }</span></pre>
@@ -249,7 +327,7 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 <tbody><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">unix_ns</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">string</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);">Optional. Nanoseconds since 1970-01-01 UTC, as a string.</td></tr></tbody></table></div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl "https://api.moon369.org/v1/moonmark\
   ?unix_ns=1794516299901000000"</pre>
 </div>
@@ -278,7 +356,7 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 <tbody><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">unix</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">integer</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);">Milliseconds since 1970-01-01 UTC.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">unix_ns</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">string</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);">Nanoseconds since 1970-01-01 UTC, for full precision.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">utc</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">string</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);">ISO 8601 with <code>Z</code> or an offset, up to 9 fraction digits.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">format</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">string</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);"><code>object</code> (default) or <code>string</code> for plain text such as <code>1928.05.03 08:57:39.035909351</code>.</td></tr></tbody></table></div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl "https://api.moon369.org/v1/convert\
   ?unix_ns=1794516299901000000"</pre>
 </div>
@@ -317,7 +395,7 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 <tbody><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">moonmark</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">string</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);"><code>CYCLE.MM.DD HH:MM:SS.fraction</code>. Alternative to the fields below.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">cycle</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">integer</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);">Cycle (Moon's year), counted from cycle 0. <code>year</code> also works.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">moon</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">integer</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);">1 to 13.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">day</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">integer</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);">1 to 28 or 29, depending on the moon.</td></tr><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">time</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">string</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);"><code>HH:MM:SS</code> with up to 9 fraction digits. Defaults to 00:00:00.</td></tr></tbody></table></div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl "https://api.moon369.org/v1/to-unix\
   ?moonmark=1928.06.01%2012:30:00.5"</pre>
 </div>
@@ -351,7 +429,7 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 <tbody><tr><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; white-space: nowrap;">cycle</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); white-space: nowrap;">integer</td><td style="padding: 14px 20px; border-top: 1px solid rgb(28, 29, 32); font-size: 14px; color: rgb(162, 163, 167);">The cycle number, in the path.</td></tr></tbody></table></div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl https://api.moon369.org/v1/cycle/1928</pre>
 </div>
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
@@ -408,7 +486,7 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 <p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">Moon's public signing keys. Retired keys stay listed so old receipts keep verifying. Keep a copy and you never need Moon to check a&nbsp;receipt.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl https://api.moon369.org/v1/keys</pre>
 </div>
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
@@ -528,7 +606,7 @@ curl -X POST https://api.moon369.org/v1/sign \
 <p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">Is this exact file on Moon? Returns every registration, earliest first: the Moonmark, who registered it and a link to the signed proof. <code>registrant</code> is the API key owner, which Moon verifies (<code>anonymous</code> without a key). <code>on_behalf_of</code> and <code>label</code> are as the registrant stated them. Each registration carries a <code>statement</code> signed with Moon's Ed25519&nbsp;key.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl https://api.moon369.org/v1/lookup/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</pre>
 </div>
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
@@ -561,7 +639,7 @@ curl -X POST https://api.moon369.org/v1/sign \
 <p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">Find edited copies of a photo. Send its 64-bit difference hash (<code>phash</code>, 16 hex): shrink the image to 9×8 grayscale, set each bit when a pixel is brighter than the one to its right, rows top to bottom. Matches are images within 10 of 64 bits, closest first. A match means the picture looks the same, not that it is the same file. Pass <code>phash</code> to <code>/v1/sign</code> to make your own images findable; <a href="/check" style="color: rgb(233, 228, 216);">/embed/moon.js</a> computes it for&nbsp;you.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl -X POST https://api.moon369.org/v1/lookup/similar \
   -H "Content-Type: application/json" \
   -d '{"phash": "f0e4c8d8b0a4c2e1"}' </pre>
@@ -589,7 +667,7 @@ curl -X POST https://api.moon369.org/v1/sign \
 <p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">Every solar eclipse from 2000 BCE to 3000 CE (years <code>-1999</code> to <code>3000</code>), 11,896 in all. Filter with <code>from</code> and <code>to</code> (years, default the next 20) and <code>type</code> (<code>total</code>, <code>annular</code>, <code>hybrid</code>, <code>partial</code>, comma-separated). Up to 1,000 per page; follow <code>next_cursor</code>. Dates and times are Terrestrial Time at greatest eclipse, as in NASA's Five Millennium Canon; before 15 October 1582 dates are Julian. <code>/v1/eclipses.csv</code> downloads them&nbsp;all.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl "https://api.moon369.org/v1/eclipses?from=2026&amp;to=2030&amp;type=total"</pre>
 </div>
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
@@ -626,7 +704,7 @@ curl -X POST https://api.moon369.org/v1/sign \
 <p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">The next solar eclipse after now, or after <code>after</code> (Unix ms). Add <code>type=total</code> for the next total one. Includes <code>in_days</code>.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl "https://api.moon369.org/v1/eclipses/next?type=total"</pre>
 </div>
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
@@ -644,7 +722,7 @@ curl -X POST https://api.moon369.org/v1/sign \
 <p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">One eclipse by its date (<code>2024-04-08</code>, or <code>-0584-05-28</code> before year 1), with the eclipses before and after it and its saros series. 404 when there was no solar eclipse that&nbsp;day.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl https://api.moon369.org/v1/eclipses/2024-04-08</pre>
 </div>
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
@@ -727,7 +805,7 @@ openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl https://api.moon369.org/v1/spec</pre>
 </div>
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
@@ -793,7 +871,7 @@ openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: rgb(36, 38, 42); border: 1px solid rgb(36, 38, 42);">
 <div style="background: rgb(11, 11, 13); padding: 24px; display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">OPEN</div><div style="font-size: 16px; font-weight: 500;">No key</div><p style="margin: 0px; font-size: 14px; line-height: 1.6; color: rgb(162, 163, 167);">Limited per IP address: 120 requests a minute. Signing (<code>/v1/sign</code>, <code>/v1/tsa</code>, <code>/v1/evidence</code>) is 10 a minute and 100 a day, enough to try it and build on it. Over that you get a <code>429</code> with <code>Retry-After</code>.</p></div>
-<div style="background: rgb(11, 11, 13); padding: 24px; display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">HIGHER LIMITS</div><div style="font-size: 16px; font-weight: 500;">Building something big?</div><p style="margin: 0px; font-size: 14px; line-height: 1.6; color: rgb(162, 163, 167);">Email <a href="mailto:moon369org@proton.me" style="color: rgb(242, 242, 240);">moon369org@proton.me</a> with what you're building and the volume you need. You'll get an API key: send it as <code>Authorization: Bearer&nbsp;&lt;key&gt;</code>, and <code>/v1/me</code> shows your&nbsp;limit.</p></div>
+<div style="background: rgb(11, 11, 13); padding: 24px; display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">HIGHER LIMITS</div><div style="font-size: 16px; font-weight: 500;">Building something big?</div><p style="margin: 0px; font-size: 14px; line-height: 1.6; color: rgb(162, 163, 167);"><a href="#key" style="color: rgb(242, 242, 240);">Get a free key</a> now, or email <a href="mailto:moon369org@proton.me" style="color: rgb(242, 242, 240);">moon369org@proton.me</a> with what you're building and the volume you need for a verified, higher-limit key: send it as <code>Authorization: Bearer&nbsp;&lt;key&gt;</code>, and <code>/v1/me</code> shows your&nbsp;limit.</p></div>
 <div style="background: rgb(11, 11, 13); padding: 24px; display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">CACHING</div><div style="font-size: 16px; font-weight: 500;">Past is permanent</div><p style="margin: 0px; font-size: 14px; line-height: 1.6; color: rgb(162, 163, 167);"><code>/now</code> is never cached. Conversions, cycles and the spec are cached forever. CORS is open to every&nbsp;origin.</p></div>
 </div>
 </section>
@@ -1019,6 +1097,8 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <nav aria-label="Docs" style="flex: 1 1 200px; max-width: 240px; display: flex; flex-direction: column; border-left: 1px solid #24262A; padding-left: 20px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.24em; color: #8A8B8F; padding-bottom: 10px">ON THIS PAGE</div>
 <a href="#start" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Quick start</a>
+<a href="#key" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Free key</a>
+<a href="#mcp" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">AI assistants (MCP)</a>
 <a href="#constants" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Constants</a>
 <a href="#endpoints" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Endpoints</a>
 <a href="#errors" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Errors &amp; limits</a>
@@ -1038,7 +1118,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">No signup, no key. Call <code>/v1/now</code> and you have Moon time. Every response is JSON, and every caller gets the same answer at the same&nbsp;instant.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: #24262A; border: 1px solid #24262A">
-<div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">STEP 1</div><div style="font-size: 16px; font-weight: 500">Call the API</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">Base URL <code>https://api.moon369.org</code>. Open rate limit 120 requests a minute, and signing 10 a minute and 100 a day. Need more? Email&nbsp;<a href="mailto:moon369org@proton.me" style="color: #F2F2F0">moon369org@proton.me</a>.</p></div>
+<div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">STEP 1</div><div style="font-size: 16px; font-weight: 500">Call the API</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">Base URL <code>https://api.moon369.org</code>. Open rate limit 120 requests a minute, and signing 10 a minute and 100 a day. Need more? <a href="#key" style="color: #F2F2F0">Get a free key</a>, straight&nbsp;away.</p></div>
 <div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">STEP 2</div><div style="font-size: 16px; font-weight: 500">Or install the library</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7"><code>npm install moon369</code>. Same answer as the API, fully offline, no rate&nbsp;limits.</p></div>
 <div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">STEP 3</div><div style="font-size: 16px; font-weight: 500">Show the badge</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">Display "Powered by Moon" with a link back wherever Moon time&nbsp;appears.</p></div>
 </div>
@@ -1052,6 +1132,58 @@ moonPhase().name;  // 'Waxing crescent'
 
 // Check a signed Moonmark, offline once you have the keys
 await verify(receipt, { content: file });  // { valid: true, ... }</pre>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="key" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">FREE, STRAIGHT AWAY</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">GET A FREE KEY</h2>
+<p style="margin: 0; max-width: 760px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Reading is open with no key. A free key raises your limit to 60 requests a minute and 500 signatures a day, unlocks batch signing, and puts your name on what you register. Your name shows as <i>unverified</i> until we check it: email <a href="mailto:moon369org@proton.me" style="color: #F2F2F0">moon369org@proton.me</a> for a verified name or higher&nbsp;limits.</p>
+</div>
+<form class="ak-form" data-ak-form novalidate>
+<label class="ak-f"><span class="ak-k">NAME, APP OR COMPANY</span><input class="ak-in" name="name" type="text" maxlength="80" autocomplete="organization" required></label>
+<label class="ak-f"><span class="ak-k">EMAIL</span><input class="ak-in" name="email" type="email" maxlength="200" autocomplete="email" required></label>
+<label class="ak-f ak-wide"><span class="ak-k">WHAT ARE YOU BUILDING? <span style="color: #55565B">· OPTIONAL</span></span><input class="ak-in" name="use" type="text" maxlength="300"></label>
+<button class="ak-go" type="submit">GET MY KEY</button>
+<div class="ak-msg" data-ak-msg role="alert"></div>
+</form>
+<div class="ak-out" data-ak-out data-off>
+<div class="ak-k">YOUR KEY · SHOWN ONCE, SO COPY IT NOW</div>
+<div class="ak-key"><code data-ak-key></code><button type="button" class="ak-copy" data-ak-copy>COPY</button></div>
+<pre class="ak-pre" data-ak-example></pre>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="mcp" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">MODEL CONTEXT PROTOCOL</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">USE MOON FROM AI ASSISTANTS</h2>
+<p style="margin: 0; max-width: 760px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Moon is an MCP server, so Claude, ChatGPT, Cursor and other assistants can use it directly: "When is the next total eclipse?", "What did the moon look like on 14 June 1990?", "Timestamp this file." Add the server URL to your assistant; no install. To use your key, add it as an <code>Authorization: Bearer</code>&nbsp;header.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>SERVER URL</span><span>STREAMABLE HTTP</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">https://api.moon369.org/mcp</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>CONFIG (CURSOR, CLAUDE CODE, MOST CLIENTS)</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  "mcpServers": {
+    "moon": { "url": "https://api.moon369.org/mcp" }
+  }
+}</pre>
+</div>
+</div>
+<div class="ak-tools">
+<div><b>moon_time</b><span>Moon time for any moment</span></div>
+<div><b>moon_on_date</b><span>The moon on any date: phase, light, eclipse</span></div>
+<div><b>next_solar_eclipse</b><span>The next eclipse, of any type</span></div>
+<div><b>solar_eclipse_on</b><span>One eclipse, with its saros</span></div>
+<div><b>list_solar_eclipses</b><span>Every eclipse, 2000 BCE to 3000 CE</span></div>
+<div><b>timestamp_fingerprint</b><span>A signed Moonmark for a file's SHA-256</span></div>
+<div><b>lookup_fingerprint</b><span>Who registered a file, and when</span></div>
+<div><b>verify_receipt</b><span>Check a Moonmark's signatures</span></div>
 </div>
 </section>
 
@@ -1643,7 +1775,7 @@ openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: #24262A; border: 1px solid #24262A">
 <div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">OPEN</div><div style="font-size: 16px; font-weight: 500">No key</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">Limited per IP address: 120 requests a minute. Signing (<code>/v1/sign</code>, <code>/v1/tsa</code>, <code>/v1/evidence</code>) is 10 a minute and 100 a day, enough to try it and build on it. Over that you get a <code>429</code> with <code>Retry-After</code>.</p></div>
-<div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">HIGHER LIMITS</div><div style="font-size: 16px; font-weight: 500">Building something big?</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">Email <a href="mailto:moon369org@proton.me" style="color: #F2F2F0">moon369org@proton.me</a> with what you're building and the volume you need. You'll get an API key: send it as <code>Authorization: Bearer&nbsp;&lt;key&gt;</code>, and <code>/v1/me</code> shows your&nbsp;limit.</p></div>
+<div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">HIGHER LIMITS</div><div style="font-size: 16px; font-weight: 500">Building something big?</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7"><a href="#key" style="color: #F2F2F0">Get a free key</a> now, or email <a href="mailto:moon369org@proton.me" style="color: #F2F2F0">moon369org@proton.me</a> with what you're building and the volume you need for a verified, higher-limit key: send it as <code>Authorization: Bearer&nbsp;&lt;key&gt;</code>, and <code>/v1/me</code> shows your&nbsp;limit.</p></div>
 <div style="background: #0B0B0D; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">CACHING</div><div style="font-size: 16px; font-weight: 500">Past is permanent</div><p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7"><code>/now</code> is never cached. Conversions, cycles and the spec are cached forever. CORS is open to every&nbsp;origin.</p></div>
 </div>
 </section>

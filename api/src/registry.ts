@@ -2,9 +2,10 @@
 // ("is this file on Moon?") and by look-alike images ("is this a copy of something on Moon?").
 //
 // Each registration is a statement Moon signs:
-//   moon-registration/1\n sha256:<hex>\n <moonmark>\n <unix_ns>\n registrant:<verified API key owner or "anonymous">\n
+//   moon-registration/1\n sha256:<hex>\n <moonmark>\n <unix_ns>\n registrant:<API key owner or "anonymous">\n registrant_verified:<yes|no>\n
 //   on_behalf_of:<as the registrant states it>\n label:<free text>\n phash:<16 hex or "">\n receipt:<receipt signature>
-// The registrant comes from the API key, so Moon vouches for it. on_behalf_of and label are the
+// The registrant comes from the API key. Moon vouches for it (registrant_verified: yes) only for keys it
+// issued by hand; free self-serve keys carry whatever name was typed. on_behalf_of and label are the
 // registrant's own words: Moon records them and signs that they were said, not that they are true.
 import type { Receipt } from './receipt.js';
 
@@ -15,7 +16,8 @@ export interface Registration {
   sha256: string;
   moonmark: string;
   unix_ns: string;
-  registrant: string;          // verified: the API key owner, or "anonymous" on the open tier
+  registrant: string;          // the API key owner, or "anonymous" on the open tier
+  registrant_verified: boolean; // true only for keys Moon issued
   on_behalf_of: string | null; // stated by the registrant
   label: string | null;        // stated by the registrant
   phash: string | null;        // 64-bit image difference hash, hex; for look-alike lookups
@@ -26,19 +28,19 @@ export interface Registration {
 
 export function registrationBytes(r: Omit<Registration, 'signature' | 'signed_url'>): Uint8Array {
   return new TextEncoder().encode([
-    r.registration, 'sha256:' + r.sha256, r.moonmark, r.unix_ns, 'registrant:' + r.registrant,
+    r.registration, 'sha256:' + r.sha256, r.moonmark, r.unix_ns, 'registrant:' + r.registrant, 'registrant_verified:' + (r.registrant_verified ? 'yes' : 'no'),
     'on_behalf_of:' + (r.on_behalf_of ?? ''), 'label:' + (r.label ?? ''), 'phash:' + (r.phash ?? ''), 'receipt:' + r.receipt_signature,
   ].join('\n'));
 }
 
 export function makeRegistration(
-  receipt: Receipt, signedUrl: string, who: { registrant: string; on_behalf_of?: string | null; label?: string | null; phash?: string | null },
+  receipt: Receipt, signedUrl: string, who: { registrant: string; registrant_verified?: boolean; on_behalf_of?: string | null; label?: string | null; phash?: string | null },
   signBytes: (b: Uint8Array) => { key_id: string; signature: string },
 ): Registration {
   const base = {
     registration: REGISTRATION as typeof REGISTRATION,
     sha256: receipt.sha256, moonmark: receipt.moonmark, unix_ns: String(receipt.unix_ns),
-    registrant: who.registrant, on_behalf_of: who.on_behalf_of ?? null, label: who.label ?? null, phash: who.phash ?? null,
+    registrant: who.registrant, registrant_verified: who.registrant_verified === true, on_behalf_of: who.on_behalf_of ?? null, label: who.label ?? null, phash: who.phash ?? null,
     receipt_signature: receipt.signature,
   };
   const s = signBytes(registrationBytes(base));
@@ -100,7 +102,7 @@ export function upstashRegistry(url: string, token: string): RegistryStore {
 export function publicRegistration(r: Registration) {
   return {
     moonmark: r.moonmark, utc: new Date(Number(BigInt(r.unix_ns) / 1_000_000n)).toISOString(),
-    registrant: r.registrant, registrant_verified: r.registrant !== 'anonymous',
+    registrant: r.registrant, registrant_verified: r.registrant_verified === true,
     on_behalf_of: r.on_behalf_of, label: r.label, signed_url: r.signed_url,
     statement: r,
   };

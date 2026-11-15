@@ -3,7 +3,7 @@
 import { handle } from '../src/index.js';
 import { memoryLimiter, upstashLimiter } from '../src/ratelimit.js';
 import { Signer, PqSigner, loadPrivateKey } from '../src/receipt.js';
-import { envKeyStore } from '../src/keys.js';
+import { envKeyStore, upstashKeyStore, chainKeyStores } from '../src/keys.js';
 import { beaconSource } from '../src/beacon.js';
 import { upstashStore } from '../src/tideline.js';
 import { upstashRegistry } from '../src/registry.js';
@@ -26,8 +26,16 @@ const RATE_LIMITER = RL_URL && RL_TOKEN
 // Customer API keys: MOON_API_KEYS is JSON of SHA-256(key) -> { owner, plan, per_min, active }.
 // Each key gets its own per-minute limit (per_min, default KEY_RATE_LIMIT_PER_MIN).
 const KEY_PER_MIN = Number(process.env.KEY_RATE_LIMIT_PER_MIN ?? 1000);
-let API_KEYS: ReturnType<typeof envKeyStore> | undefined;
-try { if (process.env.MOON_API_KEYS) API_KEYS = envKeyStore(process.env.MOON_API_KEYS); } catch { API_KEYS = undefined; }
+let HAND_KEYS: ReturnType<typeof envKeyStore> | undefined;
+try { if (process.env.MOON_API_KEYS) HAND_KEYS = envKeyStore(process.env.MOON_API_KEYS); } catch { HAND_KEYS = undefined; }
+// Self-serve free keys (POST /v1/api-keys) live in Upstash. Hand-issued keys are checked first.
+const SELF_KEYS = RL_URL && RL_TOKEN ? upstashKeyStore(RL_URL, RL_TOKEN) : undefined;
+const API_KEYS = chainKeyStores(HAND_KEYS, SELF_KEYS);
+const FREE_PER_MIN = Number(process.env.FREE_KEY_PER_MIN ?? 60);
+const FREE_SIGN_PER_DAY = Number(process.env.FREE_KEY_SIGN_PER_DAY ?? 500);
+const FREE_SIGN_DAY = RL_URL && RL_TOKEN ? upstashLimiter(RL_URL, RL_TOKEN, FREE_SIGN_PER_DAY, 'moon:rlf', 86_400_000) : memoryLimiter(FREE_SIGN_PER_DAY, 86_400_000);
+// New keys per address per day, so nobody mints keys by the thousand.
+const KEY_CREATE_LIMIT = RL_URL && RL_TOKEN ? upstashLimiter(RL_URL, RL_TOKEN, Number(process.env.KEY_CREATE_PER_DAY ?? 3), 'moon:rlc', 86_400_000) : memoryLimiter(3, 86_400_000);
 const RATE_LIMITER_KEYED = RL_URL && RL_TOKEN
   ? upstashLimiter(RL_URL, RL_TOKEN, KEY_PER_MIN, 'moon:rlk')
   : memoryLimiter(KEY_PER_MIN);
@@ -79,6 +87,10 @@ const route = (req: Request) => {
     SIGN_LIMIT_DAY,
     SIGN_LIMITS: { per_min: SIGN_PER_MIN, per_day: SIGN_PER_DAY },
     API_KEYS,
+    KEYS_WRITE: SELF_KEYS,
+    KEY_CREATE_LIMIT,
+    FREE_SIGN_DAY,
+    FREE_LIMITS: { per_min: FREE_PER_MIN, sign_per_day: FREE_SIGN_PER_DAY },
     SIGNER,
     RETIRED_KEYS,
     BEACON,
