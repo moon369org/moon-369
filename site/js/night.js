@@ -90,6 +90,18 @@
     res.hidden = false;
     try { history.replaceState(null, '', path(n)); } catch (e) {}
     document.title = TITLES[n.occasion].charAt(0) + TITLES[n.occasion].slice(1).toLowerCase() + ' · ' + dateText(n) + ' · Moon';
+    var ecl = $('[data-nt-eclipse]');
+    if (ecl) {
+      ecl.hidden = true;
+      var ed = ymd(n), seq = (current.seq = (current.seq || 0) + 1);
+      fetch(API + '/v1/eclipses/' + ed).then(function (r) { return r.ok ? r.json() : null; }).then(function (e) {
+        if (!e || current.n !== n) return;
+        ecl.href = '/eclipse/' + e.date;
+        ecl.querySelector('img').src = 'assets/eclipse/' + e.type + '.svg';
+        ecl.querySelector('b').textContent = 'A ' + e.type.toUpperCase() + ' SOLAR ECLIPSE THAT DAY';
+        ecl.hidden = false;
+      }).catch(function () {});
+    }
     if (scroll) setTimeout(function () { res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }, 60);
   }
 

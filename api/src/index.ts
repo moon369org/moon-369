@@ -7,6 +7,8 @@ import {
 import { cardSvg, shareSvg } from './card.js';
 import { TsaSigner, TsaReject, parseRequest as parseTsq, issue as issueTst, reject as tsaReject, FAIL as TSA_FAIL, TSA_POLICY, TSA_EXT_MOONMARK } from './tsa.js';
 import { MOON_ROOT_PEM } from './tsa-certs.js';
+import { allEclipses, indexAfter, publicEclipse, eclipseByDate, eclipseCardSvg, ymdOf, tdTime, ECLIPSE_TYPES, type EclipseType } from './eclipses.js';
+import { eclipseIcon } from './eclipse-icon.js';
 import { parseNight, nightFacts, nightSvg, NightParamError } from './night.js';
 import { makeRegistration, publicRegistration, isPhash, hamming, bands, SIMILAR_BITS, type RegistryStore } from './registry.js';
 import { svgToPng } from './png.js';
@@ -394,7 +396,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png'] });
   if (path === '/health') return json({ ok: true });
 
   const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
@@ -490,6 +492,72 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         if (path.endsWith('.svg')) return new Response(req.method === 'HEAD' ? null : svg, { status: 200, headers: { 'Content-Type': 'image/svg+xml; charset=utf-8', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Allow-Origin': '*', ...cache, ...planHdr } });
         const png = svgToPng(svg, fmt === 'story' ? 1080 : 1200);
         return new Response(req.method === 'HEAD' ? null : new Uint8Array(png), { status: 200, headers: { 'Content-Type': 'image/png', 'Access-Control-Allow-Origin': '*', ...cache, ...planHdr } });
+      }
+
+      case path === `/${API_VERSION}/eclipse.svg`: {
+        const t = (q.get('type') ?? 'total') as EclipseType;
+        if (!ECLIPSE_TYPES.includes(t)) throw new HttpError(400, 'bad_param', 'type must be total, annular, hybrid or partial');
+        const size = q.get('size') === null ? 64 : Number(q.get('size'));
+        if (!Number.isInteger(size) || size < 12 || size > 1024) throw new HttpError(400, 'bad_param', 'size must be a whole number of pixels from 12 to 1024');
+        return new Response(req.method === 'HEAD' ? null : eclipseIcon(t, size, q.get('bg') !== '0'), { status: 200, headers: { 'Content-Type': 'image/svg+xml; charset=utf-8', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Allow-Origin': '*', ...FOREVER, ...planHdr } });
+      }
+
+      case path === `/${API_VERSION}/eclipse.png`: {
+        const e = eclipseByDate(q.get('date') ?? '');
+        if (!e) throw new HttpError(404, 'not_found', 'No solar eclipse on that date. Dates are YYYY-MM-DD by Terrestrial Time, as NASA lists them.');
+        return new Response(req.method === 'HEAD' ? null : new Uint8Array(svgToPng(eclipseCardSvg(e), 1200)), { status: 200, headers: { 'Content-Type': 'image/png', 'Access-Control-Allow-Origin': '*', ...FOREVER, ...planHdr } });
+      }
+
+      case path === `/${API_VERSION}/eclipses` || path === `/${API_VERSION}/eclipses.csv`: {
+        // Every solar eclipse, -1999 to 3000. ?from=YEAR&to=YEAR&type=total,hybrid&limit=500&cursor=N
+        const all = allEclipses();
+        const types = (q.get('type') ?? '').split(',').map((x) => x.trim()).filter(Boolean) as EclipseType[];
+        for (const t of types) if (!ECLIPSE_TYPES.includes(t)) throw new HttpError(400, 'bad_param', 'type must be total, annular, hybrid or partial (comma-separated)');
+        const yr = (k: string, d: number) => { const v = q.get(k); if (v === null) return d; const n = Number(v); if (!Number.isInteger(n)) throw new HttpError(400, 'bad_param', `${k} must be a year like 2024 or -500`); return n; };
+        const csv = path.endsWith('.csv');
+        const thisYear = new Date().getUTCFullYear();
+        const from = yr('from', csv ? -1999 : thisYear), to = yr('to', csv ? 3000 : from + 19);
+        const pick = all.filter((e) => e.y >= from && e.y <= to && (!types.length || types.includes(e.type)));
+        if (csv) {
+          const head = 'date,calendar,greatest_eclipse_td,utc,type,central,gamma,magnitude,saros,delta_t_s,moonmark';
+          const rows = pick.map((e) => { const p = publicEclipse(e); return [p.date, p.calendar, p.greatest_eclipse_td, p.utc, p.type, p.central, p.gamma, p.magnitude ?? '', p.saros, p.delta_t_s, p.moonmark].join(','); });
+          return new Response(req.method === 'HEAD' ? null : head + '\n' + rows.join('\n') + '\n', { status: 200, headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': 'inline; filename="moon-solar-eclipses.csv"', ...CORS, 'Cache-Control': 'public, max-age=86400', ...planHdr } });
+        }
+        const limit = q.get('limit') === null ? 500 : Number(q.get('limit'));
+        if (!Number.isInteger(limit) || limit < 1 || limit > 1000) throw new HttpError(400, 'bad_param', 'limit must be 1 to 1000');
+        const cursor = q.get('cursor') === null ? 0 : Number(q.get('cursor'));
+        if (!Number.isInteger(cursor) || cursor < 0) throw new HttpError(400, 'bad_param', 'cursor must be a whole number');
+        const page = pick.slice(cursor, cursor + limit).map(publicEclipse);
+        const more = cursor + limit < pick.length;
+        return json({ from, to, types: types.length ? types : ECLIPSE_TYPES, count: pick.length, returned: page.length, next_cursor: more ? cursor + limit : null,
+          source: 'Computed by Moon (Meeus ch. 54, Espenak-Meeus Delta T). Dates and times are Terrestrial Time, as in NASA\'s Five Millennium Canon.', eclipses: page },
+          200, { 'Cache-Control': 'public, max-age=86400', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/eclipses/next`: {
+        const types = (q.get('type') ?? '').split(',').filter(Boolean) as EclipseType[];
+        for (const t of types) if (!ECLIPSE_TYPES.includes(t)) throw new HttpError(400, 'bad_param', 'type must be total, annular, hybrid or partial');
+        const after = q.get('after') === null ? Date.now() : Number(q.get('after'));
+        if (!Number.isFinite(after)) throw new HttpError(400, 'bad_param', 'after must be Unix milliseconds');
+        const all = allEclipses();
+        let i = indexAfter(after);
+        while (i < all.length && types.length && !types.includes(all[i].type)) i++;
+        if (i >= all.length) throw new HttpError(404, 'not_found', 'No eclipse after that moment before the year 3000');
+        const e = all[i];
+        return json({ ...publicEclipse(e), in_days: Math.round(((e.ms - after) / 86400000) * 10) / 10 }, 200, { 'Cache-Control': 'public, max-age=3600', ...planHdr });
+      }
+
+      case path.startsWith(`/${API_VERSION}/eclipses/`): {
+        const date = decodeURIComponent(path.slice(`/${API_VERSION}/eclipses/`.length));
+        const e = eclipseByDate(date);
+        if (!e) throw new HttpError(404, 'not_found', 'No solar eclipse on that date. Use YYYY-MM-DD (or -YYYY-MM-DD before year 1) by Terrestrial Time.');
+        const all = allEclipses(), i = all.indexOf(e);
+        const sameSaros = all.filter((x) => x.saros === e.saros);
+        const j = sameSaros.indexOf(e);
+        const brief = (x: typeof e | undefined) => (x ? { date: ymdOf(x), type: x.type, page: `https://moon369.org/eclipse/${ymdOf(x)}` } : null);
+        return json({ ...publicEclipse(e), previous: brief(all[i - 1]), next: brief(all[i + 1]),
+          saros_series: { saros: e.saros, member: j + 1, of: sameSaros.length, previous: brief(sameSaros[j - 1]), next: brief(sameSaros[j + 1]) } },
+          200, { ...FOREVER, ...planHdr });
       }
 
       case path.startsWith(`/${API_VERSION}/m/`): {

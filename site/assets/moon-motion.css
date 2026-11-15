@@ -330,3 +330,9 @@ html.sl-lock { overflow: hidden; }
 .sl:focus { outline: none; }
 .sl-load { position: absolute; left: 50%; top: 50%; width: 58%; height: auto; transform: translate(-50%, -50%); opacity: 1; transition: opacity .4s ease; pointer-events: none; }
 .sl.flare .sl-load, .sl.err .sl-load { opacity: 0; }
+
+/* Footer: the link list wraps beside the logo instead of pushing it onto its own line. */
+@media (min-width:721px){
+  footer > div{flex-wrap:nowrap!important}
+  footer > div > div:last-child{flex:0 1 auto;max-width:min(820px,68%);justify-content:flex-start;row-gap:14px!important}
+}

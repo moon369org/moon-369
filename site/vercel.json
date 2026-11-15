@@ -8,6 +8,10 @@
       "destination": "/api/night?d=:d"
     },
     {
+      "source": "/eclipse/:date",
+      "destination": "/api/eclipse?date=:date"
+    },
+    {
       "source": "/m/:mark",
       "destination": "/api/m?mark=:mark"
     }

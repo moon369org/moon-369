@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://moon369.org/sitemap.xml
+Sitemap: https://moon369.org/sitemap-eclipses.xml
