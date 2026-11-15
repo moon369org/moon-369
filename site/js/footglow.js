@@ -145,7 +145,7 @@
   var t0 = performance.now(), last = 0;
   var nextBeam = 0;
   function frame(now) {
-    if (!reduce && now > nextBeam && beams.length < 22) { spawn(now); nextBeam = now + 160 + Math.random() * 560; }
+    if (!reduce && now > nextBeam && beams.length < 11) { spawn(now); nextBeam = now + 320 + Math.random() * 1120; }
     if (now - last > 33) {
       var all = document.querySelectorAll('canvas.ft-glow');
       for (var c = 0; c < all.length; c++) {
