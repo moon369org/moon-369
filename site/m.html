@@ -100,6 +100,20 @@ footer > div > div:first-child svg{width:64px!important}
 }
 </style>
 <style>
+.mk-own{margin-top:24px;border:1px solid #E9E4D8;padding:40px;display:flex;flex-wrap:wrap;gap:32px 48px;align-items:center;justify-content:space-between}
+.mk-own-l{flex:1 1 460px;display:flex;flex-direction:column;gap:14px}
+.mk-own-k{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;color:#8A8B8F}
+.mk-own-h{margin:0;font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(20px,2.4vw,30px);letter-spacing:.08em;line-height:1.25}
+.mk-own-p{margin:0;font-size:16px;line-height:1.6;color:#B9B6AE}
+.mk-own-steps{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column}
+.mk-own-steps li{display:flex;gap:16px;padding:12px 0;border-top:1px solid #1C1D20;font-size:15px;line-height:1.55;color:#A2A3A7}
+.mk-own-steps b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:12px;color:#8A8B8F;padding-top:3px}
+.mk-own-r{flex:0 1 auto;display:flex;flex-direction:column;align-items:center;gap:14px}
+.mk-own-btn{position:relative;overflow:hidden;min-height:56px;padding:0 34px;display:inline-flex;align-items:center;justify-content:center;background:#E9E4D8;color:#0B0B0D;font-family:'Syncopate',sans-serif;font-weight:700;font-size:12px;letter-spacing:.26em;cursor:pointer}
+.mk-own-btn:hover{background:#FFFFFF}
+.mk-own-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.mk-own-a{font-family:'JetBrains Mono',monospace;font-size:13px;color:#8A8B8F;min-height:44px;display:inline-flex;align-items:center}
+@media (max-width:720px){.mk-own{padding:28px 22px}.mk-own-r{width:100%}.mk-own-btn{width:100%}}
 .mk-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:48px;align-items:start}
 .mk-main{display:flex;flex-direction:column;gap:26px}
 .mk-l{font-family:'Syncopate',sans-serif;font-size:10px;letter-spacing:.26em;color:#8A8B8F}
@@ -178,6 +192,22 @@ footer > div > div:first-child svg{width:64px!important}
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">MOONMARK</h1>
 </div>
 <div data-mk-root></div>
+<div class="mk-own">
+<div class="mk-own-l">
+<div class="mk-own-k">MAKE YOUR OWN</div>
+<h2 class="mk-own-h">PROVE WHEN YOUR FILE EXISTED</h2>
+<p class="mk-own-p">A signed Moonmark like this one takes seconds. Free, no account.</p>
+<ol class="mk-own-steps">
+<li><b>01</b><span>Choose any file. It never leaves your device; only its fingerprint is sent.</span></li>
+<li><b>02</b><span>Moon signs that fingerprint at this exact moment, down to the nanosecond.</span></li>
+<li><b>03</b><span>Share the link. Anyone can check it, forever.</span></li>
+</ol>
+</div>
+<div class="mk-own-r">
+<label class="mk-own-btn">SIGN A FILE<input type="file" data-seal-pick aria-label="Choose a file to sign"></label>
+<a class="mk-own-a" href="/trust">Why you can trust it &rarr;</a>
+</div>
+</div>
 </section>
 </div>
 
@@ -197,6 +227,8 @@ class Component extends DCLogic {
   }
 }
 </script>
+<script src="js/moonglow.js" defer></script>
+<script src="js/seal.js" defer></script>
 <script src="js/footglow.js" defer></script>
 </body>
 </html>

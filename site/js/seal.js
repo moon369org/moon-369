@@ -27,7 +27,7 @@
       '<div class="sl-in">' +
         '<div class="sl-top"><span class="sl-k">SIGNED MOONMARK</span><button type="button" class="sl-x" aria-label="Close">&times;</button></div>' +
         '<div class="sl-stage">' +
-          '<div class="sl-moonwrap"><canvas class="hm-moonglow sl-moon" aria-hidden="true"></canvas><div class="sl-ring"></div><div class="sl-ring sl-ring2"></div></div>' +
+          '<div class="sl-moonwrap"><canvas class="hm-moonglow sl-moon" aria-hidden="true"></canvas><img class="sl-load" src="/assets/moon-loader-black.svg" alt="" aria-hidden="true"><div class="sl-ring"></div><div class="sl-ring sl-ring2"></div></div>' +
           '<div class="sl-status" role="status" aria-live="polite"></div>' +
           '<div class="sl-hex" aria-hidden="true"></div>' +
           '<div class="sl-mark" aria-live="polite"></div>' +
@@ -266,6 +266,35 @@
     c.fillStyle = '#8A8B8F'; font(400, 24, '"JetBrains Mono", monospace'); c.fillText('Scan to verify  ·  moon369.org', W / 2, 1300);
     return new Promise(function (res) { cv.toBlob(function (b) { res(b); }, 'image/png'); });
   }
+
+  // Standalone signing, for pages without their own flow (the Moonmark page).
+  function emit(d) { window.dispatchEvent(new CustomEvent('moon:seal', { detail: d })); }
+  function sign(file) {
+    if (!file) return;
+    if (file.size > 1024 * 1024 * 1024) { emit({ phase: 'start', name: file.name }); emit({ phase: 'error', message: 'That file is over 1 GB. Fingerprint it yourself and send the SHA-256 to the API.' }); return; }
+    emit({ phase: 'start', name: file.name });
+    file.arrayBuffer().then(function (buf) { return crypto.subtle.digest('SHA-256', buf); }).then(function (d) {
+      var sha = Array.from(new Uint8Array(d), function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+      emit({ phase: 'hashed', sha: sha });
+      return fetch('https://api.moon369.org/v1/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sha256: sha }) })
+        .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, status: r.status, b: b }; }); })
+        .then(function (x) {
+          if (!x.ok) throw new Error(x.status === 429 ? 'Too many requests right now. Try again in a minute.' : ((x.b && x.b.error && x.b.error.message) || 'Signing failed. Try again.'));
+          var rc = x.b.receipt;
+          var href = URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }));
+          emit({ phase: 'signed', receipt: rc, tideline: x.b.tideline || null, url: x.b.signed_url, href: href, file: file.name.replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json' });
+        });
+    }).catch(function (err) {
+      emit({ phase: 'error', message: (err && err.message && !/fetch|network/i.test(err.message)) ? err.message : 'Could not reach Moon. Check your connection and try again.' });
+    });
+  }
+  window.MoonSeal = { sign: sign };
+  // Any file input marked data-seal-pick signs through the Seal. Delegated, so re-renders don't matter.
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (!t || !t.matches || !t.matches('input[data-seal-pick]')) return;
+    var f = t.files && t.files[0]; t.value = ''; sign(f);
+  });
 
   window.addEventListener('moon:seal', function (e) {
     var d = e.detail || {};

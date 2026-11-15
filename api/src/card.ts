@@ -21,6 +21,54 @@ export function phasePath(f: number, r: number): string {
   return `M0,-${r} A${r},${r} 0 0 ${outer} 0,${r} A${rx.toFixed(3)},${r} 0 0 ${inner} 0,-${r}Z`;
 }
 
+/**
+ * The moon as the site draws it: a soft terminator (light blurs into shadow, the lit edge
+ * stays crisp) and the Edge Corona (white rays off the lit limb that fade to nothing, zero
+ * at the poles). Centered on 0,0, radius r. `id` keeps defs unique within one SVG.
+ */
+export function moonSvg(f: number, r: number, id: string): string {
+  const waxing = f < 0.5, full = Math.abs(f - 0.5) < 0.02, lit = phasePath(f, r);
+  const soft = (r * 0.08).toFixed(2), lw = r * 0.4;
+  // Light painted past the lit limb, so blurring only softens the terminator.
+  const R2 = (r + lw / 2 - 1).toFixed(2);
+  const limb = (right: boolean) => `<path d="M0,-${R2} A${R2},${R2} 0 0 ${right ? 1 : 0} 0,${R2}" fill="none" stroke="${PAPER}" stroke-width="${lw.toFixed(2)}"/>`;
+  const sides = full ? [true, false] : [waxing];
+  // Rays: tapered, widest at the surface, faded by a radial mask; deterministic so the card is stable.
+  let rays = '';
+  const n = 120;
+  for (const right of sides) {
+    for (let j = 0; j < n; j++) {
+      const v = j / (n - 1), ang = -Math.PI / 2 + v * Math.PI;
+      const env = Math.pow(Math.max(0, Math.cos(ang)), 1.6);
+      if (env < 0.03) continue;
+      const h1 = Math.abs(Math.sin(j * 12.9898 + (right ? 0 : 7)) * 43758.5453) % 1;
+      const h2 = Math.abs(Math.sin(j * 78.233 + (right ? 0 : 3)) * 12543.31) % 1;
+      const len = r * (0.18 + 0.42 * h1) * env, a = (0.25 + 0.75 * h2) * env;
+      const dx = Math.cos(ang) * (right ? 1 : -1), dy = Math.sin(ang), w = r * 0.012 * (0.6 + 1.6 * h2);
+      const x0 = dx * r * 0.97, y0 = dy * r * 0.97, x1 = dx * (r + len), y1 = dy * (r + len);
+      rays += `<path d="M${(x0 - dy * w).toFixed(1)},${(y0 + dx * w).toFixed(1)}L${x1.toFixed(1)},${y1.toFixed(1)}L${(x0 + dy * w).toFixed(1)},${(y0 - dx * w).toFixed(1)}Z" fill="${PAPER}" fill-opacity="${a.toFixed(2)}"/>`;
+    }
+  }
+  const reach = (r * 1.65).toFixed(1);
+  return `<defs>` +
+    `<clipPath id="${id}c"><circle r="${r}"/></clipPath>` +
+    `<filter id="${id}s" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${soft}"/></filter>` +
+    `<filter id="${id}r" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${(r * 0.012).toFixed(2)}"/></filter>` +
+    `<filter id="${id}g1" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="${(r * 0.06).toFixed(2)}"/></filter>` +
+    `<filter id="${id}g2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="${(r * 0.16).toFixed(2)}"/></filter>` +
+    `<radialGradient id="${id}f" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="${reach}"><stop offset="${(r * 0.97 / (r * 1.65)).toFixed(3)}" stop-color="#fff"/><stop offset="${(r * 1.12 / (r * 1.65)).toFixed(3)}" stop-color="#fff" stop-opacity="0.45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>` +
+    `<mask id="${id}m" maskUnits="userSpaceOnUse" x="-${reach}" y="-${reach}" width="${(r * 3.3).toFixed(1)}" height="${(r * 3.3).toFixed(1)}"><circle r="${reach}" fill="url(#${id}f)"/></mask>` +
+    `</defs>` +
+    // glow from the lit shape itself
+    `<path d="${lit}" fill="${PAPER}" fill-opacity="0.32" filter="url(#${id}g2)"/>` +
+    `<path d="${lit}" fill="${PAPER}" fill-opacity="0.35" filter="url(#${id}g1)"/>` +
+    // rays
+    `<g mask="url(#${id}m)"><g filter="url(#${id}r)">${rays}</g></g>` +
+    // the moon, with a soft terminator
+    `<circle r="${(r - 0.75).toFixed(2)}" fill="${SHADOW}"/>` +
+    `<g clip-path="url(#${id}c)"><g filter="url(#${id}s)"><path d="${lit}" fill="${PAPER}"/>${sides.map(limb).join('')}</g></g>`;
+}
+
 export function cardSvg(d: CardData, size = 600): string {
   const title = esc((d.title ?? 'TODAY ON MOON').toUpperCase());
   const foot = esc(`${d.name.toUpperCase()} · ${(d.illumination * 100).toFixed(1)}% LIT · LUNE ${d.lune} OF ${d.lunesInMoon}`);
@@ -48,7 +96,7 @@ export function cardSvg(d: CardData, size = 600): string {
     `<rect x="0.5" y="0.5" width="599" height="599" rx="23.5" fill="none" stroke="${LINE}"/>` +
     `<text x="300" y="84" class="t">${title}</text>` +
     `<circle cx="300" cy="226" r="118" fill="url(#g)"/>` +
-    `<g transform="translate(300,226)"><circle r="56" fill="${SHADOW}"/><path d="${phasePath(d.fraction, 56)}" fill="${PAPER}"/></g>` +
+    `<g transform="translate(300,226)">${moonSvg(d.fraction, 56, 'mc')}</g>` +
     `<path d="M48 380H552M48 512H552M${48 + colW} 380V512M${48 + 2 * colW} 380V512" stroke="${LINE}" stroke-width="1.5" fill="none"/>` +
     cells +
     `<text x="300" y="560" class="f">${foot}</text>` +
@@ -74,7 +122,7 @@ export function shareSvg(d: ShareData): string {
     `<rect width="1200" height="630" fill="${INK}"/>` +
     `<svg x="66" y="62" width="148" height="42" viewBox="-10 -10 424 120"><path d="M4,100 V4 L48,64 L92,4 V100" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/><path d="M312,100 V4 L400,96 V0" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/><defs><mask id="mwA" maskUnits="userSpaceOnUse" x="-10" y="-10" width="424" height="120"><rect x="-10" y="-10" width="424" height="120" fill="#fff"/><circle cx="232.0" cy="50" r="46" fill="none" stroke="#000" stroke-width="18"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#fff" stroke-width="18"/></mask><mask id="mwB" maskUnits="userSpaceOnUse" x="-10" y="-10" width="424" height="120"><rect x="-10" y="-10" width="424" height="120" fill="#fff"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#000" stroke-width="18"/></mask></defs><circle cx="172.0" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8" mask="url(#mwA)"/><circle cx="232.0" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8" mask="url(#mwB)"/></svg>` +
     `<circle cx="290" cy="345" r="250" fill="url(#g)"/>` +
-    `<g transform="translate(290,345)"><circle r="150" fill="${SHADOW}"/><path d="${phasePath(d.fraction, 150)}" fill="${PAPER}"/></g>` +
+    `<g transform="translate(290,345)">${moonSvg(d.fraction, 150, 'ms')}</g>` +
     `<text x="560" y="150" font-family="JetBrains Mono" font-size="18" letter-spacing="7" fill="${ASH}">${esc((d.title ?? 'MOONMARK').toUpperCase())}</text>` +
     `<text x="556" y="232" font-family="JetBrains Mono" font-size="64" fill="${PAPER}">${d.year}.${pad2(d.moon)}.${pad2(d.lune)}</text>` +
     `<text x="556" y="310" font-family="JetBrains Mono" font-size="64" fill="${PAPER}">${esc(d.time)}</text>` +

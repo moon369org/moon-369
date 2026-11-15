@@ -334,3 +334,5 @@ html.sl-lock { overflow: hidden; }
 @media (max-height: 760px) { .sl-moonwrap { width: 120px; } .sl-in { gap: 12px; } }
 @media (prefers-reduced-motion: reduce) { .sl, .sl-moon, .sl-c, .sl-share { transition: none; } .sl.flare .sl-ring { animation: none; } .sl.stamped .sl-stamp { animation: none; opacity: 1; transform: none; } }
 .sl:focus { outline: none; }
+.sl-load { position: absolute; left: 50%; top: 50%; width: 58%; height: auto; transform: translate(-50%, -50%); opacity: 1; transition: opacity .4s ease; pointer-events: none; }
+.sl.flare .sl-load, .sl.err .sl-load { opacity: 0; }
