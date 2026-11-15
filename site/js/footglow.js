@@ -10,9 +10,19 @@
   function wave(t, s) { return Math.sin(t * 0.31 + s) * 0.55 + Math.sin(t * 0.173 + s * 2.1) * 0.3 + Math.sin(t * 0.071 + s * 3.7) * 0.15; }
   var off = document.createElement('canvas');
 
+  // Long beams: many at a time, each at a random place on the limb. Each one eases in,
+  // holds and eases out on its own clock, so they never flash or pulse together.
+  var beams = [];
+  function spawn(now) {
+    var v = 0.5 + (Math.random() - 0.5) * 0.7;                  // keep away from the ends (Rule 3)
+    beams.push({ v: v, born: now, life: 2200 + Math.random() * 2600,
+      len: 0.45 + Math.random() * 0.5, width: 0.5 + Math.random() * 1.1, peak: 0.2 + Math.pow(Math.random(), 1.5) * 0.8 });
+  }
+
+
   function cap(o, cx, cy, R) { o.beginPath(); o.arc(cx, cy, R, 0, Math.PI * 2); }
 
-  function draw(cv, t) {
+  function draw(cv, t, now) {
     var dpr = Math.min(1.5, window.devicePixelRatio || 1);
     var W = Math.round(cv.clientWidth * dpr), H = Math.round(cv.clientHeight * dpr);
     if (!W || !H) return;
@@ -65,6 +75,26 @@
       o.beginPath(); o.moveTo(x0, y0); o.lineTo(x1, y1); o.stroke();
     }
 
+    // Long beams.
+    for (var b = beams.length - 1; b >= 0; b--) {
+      var B = beams[b], k = (now - B.born) / B.life;
+      if (k >= 1) { beams.splice(b, 1); continue; }
+      var fade = Math.sin(Math.PI * k); fade = fade * fade;      // eases in and out, no hard start or stop
+      var bang = -span + B.v * span * 2, benv = Math.max(0, Math.cos((B.v - 0.5) * Math.PI));
+      var bx = Math.sin(bang), by = -Math.cos(bang);
+      var bl = h * B.len * (0.85 + 0.15 * k), ba = B.peak * fade * benv;
+      var bx0 = cx + bx * R * 0.995, by0 = cy + by * R * 0.995, bx1 = cx + bx * (R + bl), by1 = cy + by * (R + bl);
+      var bg = o.createLinearGradient(bx0, by0, bx1, by1);
+      bg.addColorStop(0, 'rgba(' + INK + ',' + ba + ')');           // brightest on the moon's surface
+      bg.addColorStop(0.06, 'rgba(' + INK + ',' + ba * 0.7 + ')');  // then falls off fast, like real light
+      bg.addColorStop(0.2, 'rgba(' + INK + ',' + ba * 0.35 + ')');
+      bg.addColorStop(0.45, 'rgba(' + INK + ',' + ba * 0.12 + ')');
+      bg.addColorStop(0.75, 'rgba(' + INK + ',' + ba * 0.03 + ')');
+      bg.addColorStop(1, 'rgba(' + INK + ',0)');                // Rule 2
+      o.strokeStyle = bg; o.lineWidth = Math.max(1, (w / 600) * B.width);
+      o.beginPath(); o.moveTo(bx0, by0); o.lineTo(bx1, by1); o.stroke();
+    }
+
     var ctx = cv.getContext('2d');
     ctx.clearRect(0, 0, W, H);
     ctx.globalAlpha = ALPHA * Math.max(0.6, Math.min(1, cv.clientWidth / 1200)); // gentler on phones
@@ -84,13 +114,15 @@
 
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var t0 = performance.now(), last = 0;
+  var nextBeam = 0;
   function frame(now) {
+    if (!reduce && now > nextBeam && beams.length < 14) { spawn(now); nextBeam = now + 120 + Math.random() * 380; }
     if (now - last > 33) {
       var all = document.querySelectorAll('canvas.ft-glow');
       for (var c = 0; c < all.length; c++) {
         var r = all[c].getBoundingClientRect();
         if (r.bottom > 0 && r.top < (window.innerHeight || 800) && (!reduce || !all[c].width)) {
-          draw(all[c], reduce ? 12 : (now - t0) / 1000 * 3 + 40); last = now;
+          draw(all[c], reduce ? 12 : (now - t0) / 1000 * 3 + 40, now); last = now;
         }
       }
     }
