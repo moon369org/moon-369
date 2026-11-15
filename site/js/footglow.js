@@ -35,6 +35,31 @@
     var dx = x1 - x0, dy = y1 - y0, L = Math.sqrt(dx * dx + dy * dy) || 1, nx = -dy / L * w0 / 2, ny = dx / L * w0 / 2;
     o.beginPath(); o.moveTo(x0 + nx, y0 + ny); o.lineTo(x1, y1); o.lineTo(x0 - nx, y0 - ny); o.closePath(); o.fill();
   }
+  // Blur that also works where canvas filters don't (Safari, including every iPhone browser):
+  // there we paint at low resolution and scale up smoothly, which softens edges the same way.
+  var BLUR_OK = (function () { try { var c = document.createElement('canvas').getContext('2d'); c.filter = 'blur(2px)'; return c.filter === 'blur(2px)'; } catch (e) { return false; } })();
+  var blurPool = {};
+  function blurDraw(ctx, W, H, px, alpha, op, paint) {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.globalCompositeOperation = op || 'source-over';
+    if (BLUR_OK) { ctx.filter = 'blur(' + px + 'px)'; paint(ctx); ctx.restore(); return; }
+    // Shrink at most 10x (more loses thin shapes); spread the rest by drawing a few offset copies.
+    var s = Math.max(1, Math.min(px * 1.6, 10)), rest = Math.max(0, px - s / 1.6), w = Math.max(2, Math.ceil(W / s)), h = Math.max(2, Math.ceil(H / s));
+    var key = w + 'x' + h, b = blurPool[key] || (blurPool[key] = document.createElement('canvas'));
+    if (b.width !== w || b.height !== h) { b.width = w; b.height = h; }
+    var c = b.getContext('2d');
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h); c.setTransform(w / W, 0, 0, h / H, 0, 0);
+    c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
+    paint(c);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    if (rest < 1) ctx.drawImage(b, 0, 0, W, H);
+    else {
+      var k = 8, a0 = ctx.globalAlpha;
+      ctx.globalAlpha = a0 / (k + 1); ctx.drawImage(b, 0, 0, W, H);
+      for (var i = 0; i < k; i++) { var an = i / k * Math.PI * 2; ctx.drawImage(b, Math.cos(an) * rest * 0.8, Math.sin(an) * rest * 0.8, W, H); }
+    }
+    ctx.restore();
+  }
+
   function cap(o, cx, cy, R) { o.beginPath(); o.arc(cx, cy, R, 0, Math.PI * 2); }
 
   function draw(cv, t, now) {
@@ -126,10 +151,7 @@
 
     var ctx = cv.getContext('2d');
     ctx.clearRect(0, 0, W, H);
-    ctx.globalAlpha = ALPHA * Math.max(0.6, Math.min(1, cv.clientWidth / 1200)); // gentler on phones
-    ctx.filter = 'blur(' + Math.max(2, Math.round(W / 800)) + 'px)';
-    ctx.drawImage(off, 0, 0, W, H);
-    ctx.filter = 'none';
+    blurDraw(ctx, W, H, Math.max(2, Math.round(W / 800)), ALPHA * Math.max(0.6, Math.min(1, cv.clientWidth / 1200)), 'source-over', function (c) { c.drawImage(off, 0, 0, W, H); });   // gentler on phones
     // Space dust, lit by the moon: brighter near it, barely there further away.
     var dt = lastDust ? Math.min(0.1, (now - lastDust) / 1000) : 0; lastDust = now;
     var mx = cx * 2, my = cy * 2, MR = R * 2, reach = H * 0.7;
@@ -162,17 +184,11 @@
     // The moon itself, with its edge melting into the glow: a stack of tight blurs right on
     // the surface, then the disc with the faintest softening, so the white falls off smoothly.
     var u = Math.max(1, cv.clientWidth / 1440) * dpr;
-    ctx.globalCompositeOperation = 'lighter';
-    var edge = [[30, 0.3], [16, 0.45], [8, 0.55], [4, 0.6]];
-    for (var e = 0; e < edge.length; e++) {
-      ctx.filter = 'blur(' + Math.max(1, Math.round(edge[e][0] * u)) + 'px)';
-      ctx.globalAlpha = edge[e][1];
-      cap(ctx, cx * 2, cy * 2, R * 2); ctx.fillStyle = 'rgb(' + INK + ')'; ctx.fill();
-    }
     ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
-    ctx.filter = 'blur(' + Math.max(1, Math.round(1.5 * u)) + 'px)';
-    cap(ctx, cx * 2, cy * 2, R * 2); ctx.fillStyle = 'rgb(' + INK + ')'; ctx.fill();
-    ctx.filter = 'none';
+    var paintCap = function (c) { cap(c, cx * 2, cy * 2, R * 2); c.fillStyle = 'rgb(' + INK + ')'; c.fill(); };
+    var edge = [[30, 0.3], [16, 0.45], [8, 0.55], [4, 0.6]];
+    for (var e = 0; e < edge.length; e++) blurDraw(ctx, W, H, Math.max(1, Math.round(edge[e][0] * u)), edge[e][1], 'lighter', paintCap);
+    blurDraw(ctx, W, H, Math.max(1, Math.round(1.5 * u)), 1, 'source-over', paintCap);
   }
 
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

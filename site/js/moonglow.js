@@ -18,6 +18,31 @@
   var SCALE = 1.9; // canvas size relative to the moon, so the glow has room to fade out
   function wave(t, s) { return Math.sin(t * 0.31 + s) * 0.55 + Math.sin(t * 0.173 + s * 2.1) * 0.3 + Math.sin(t * 0.071 + s * 3.7) * 0.15; }
 
+  // Blur that also works where canvas filters don't (Safari, including every iPhone browser):
+  // there we paint at low resolution and scale up smoothly, which softens edges the same way.
+  var BLUR_OK = (function () { try { var c = document.createElement('canvas').getContext('2d'); c.filter = 'blur(2px)'; return c.filter === 'blur(2px)'; } catch (e) { return false; } })();
+  var blurPool = {};
+  function blurDraw(ctx, W, H, px, alpha, op, paint) {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.globalCompositeOperation = op || 'source-over';
+    if (BLUR_OK) { ctx.filter = 'blur(' + px + 'px)'; paint(ctx); ctx.restore(); return; }
+    // Shrink at most 10x (more loses thin shapes); spread the rest by drawing a few offset copies.
+    var s = Math.max(1, Math.min(px * 1.6, 10)), rest = Math.max(0, px - s / 1.6), w = Math.max(2, Math.ceil(W / s)), h = Math.max(2, Math.ceil(H / s));
+    var key = w + 'x' + h, b = blurPool[key] || (blurPool[key] = document.createElement('canvas'));
+    if (b.width !== w || b.height !== h) { b.width = w; b.height = h; }
+    var c = b.getContext('2d');
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h); c.setTransform(w / W, 0, 0, h / H, 0, 0);
+    c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
+    paint(c);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    if (rest < 1) ctx.drawImage(b, 0, 0, W, H);
+    else {
+      var k = 8, a0 = ctx.globalAlpha;
+      ctx.globalAlpha = a0 / (k + 1); ctx.drawImage(b, 0, 0, W, H);
+      for (var i = 0; i < k; i++) { var an = i / k * Math.PI * 2; ctx.drawImage(b, Math.cos(an) * rest * 0.8, Math.sin(an) * rest * 0.8, W, H); }
+    }
+    ctx.restore();
+  }
+
   function litPath(ctx, cx, cy, R, f) {
     var k = Math.cos(2 * Math.PI * f), wax = f < 0.5;
     ctx.beginPath();
@@ -40,14 +65,9 @@
     ctx.clearRect(0, 0, W, W);
 
     // Rule 1 + 2: glow made from the lit crescent, blurred at three radii.
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
     var layers = [[160, 0.4], [70, 0.2], [34, 0.12]];
-    for (var i = 0; i < layers.length; i++) {
-      ctx.filter = 'blur(' + Math.max(1, Math.round(W / layers[i][0])) + 'px)';
-      ctx.globalAlpha = layers[i][1] * strength;
-      litPath(ctx, cx, cy, R, f); ctx.fillStyle = 'rgb(' + INK + ')'; ctx.fill();
-    }
-    ctx.restore();
+    var paintLit = function (c) { litPath(c, cx, cy, R, f); c.fillStyle = 'rgb(' + INK + ')'; c.fill(); };
+    for (var i = 0; i < layers.length; i++) blurDraw(ctx, W, W, Math.max(1, Math.round(W / layers[i][0])), layers[i][1] * strength, 'lighter', paintLit);
 
     // The moon.
     ctx.fillStyle = '#24262A'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
@@ -56,19 +76,18 @@
     var soft = Math.max(1, R * 0.08);
     ctx.save();
     ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
-    ctx.filter = 'blur(' + soft.toFixed(1) + 'px)';
-    ctx.fillStyle = ctx.strokeStyle = 'rgb(' + INK + ')';
-    litPath(ctx, cx, cy, R, f); ctx.fill();
-    var lw = soft * 5;
-    ctx.lineWidth = lw;
-    var both = Math.abs(f - 0.5) < 0.02;
-    ctx.beginPath(); ctx.arc(cx, cy, R + lw / 2 - 1, -Math.PI / 2, Math.PI / 2, !wax); ctx.stroke();
-    if (both) { ctx.beginPath(); ctx.arc(cx, cy, R + lw / 2 - 1, Math.PI / 2, -Math.PI / 2, !wax); ctx.stroke(); }
+    var lw = soft * 5, both = Math.abs(f - 0.5) < 0.02;
+    blurDraw(ctx, W, W, Math.max(1, Math.round(soft)), 1, 'source-over', function (c) {
+      c.fillStyle = c.strokeStyle = 'rgb(' + INK + ')';
+      litPath(c, cx, cy, R, f); c.fill();
+      c.lineWidth = lw;
+      c.beginPath(); c.arc(cx, cy, R + lw / 2 - 1, -Math.PI / 2, Math.PI / 2, !wax); c.stroke();
+      if (both) { c.beginPath(); c.arc(cx, cy, R + lw / 2 - 1, Math.PI / 2, -Math.PI / 2, !wax); c.stroke(); }
+    });
     ctx.restore();
 
     // Rays on the lit limb only.
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    ctx.filter = 'blur(' + Math.max(1, Math.round(W / 340)) + 'px)';
+    blurDraw(ctx, W, W, Math.max(1, Math.round(W / 340)), 1, 'lighter', function (ctx) {
     ctx.lineCap = 'round'; ctx.lineWidth = 2.2 * u;
     var n = 150;
     var sides = Math.abs(f - 0.5) < 0.02 ? [side, -side] : [side];   // near full, the whole limb is lit
@@ -95,7 +114,7 @@
       ctx.strokeStyle = g; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
     }
     }
-    ctx.restore();
+    });
   }
 
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
