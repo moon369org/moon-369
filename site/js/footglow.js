@@ -35,7 +35,13 @@
     // The moon: only the very top of a big circle shows above the footer line.
     var ch = Math.max(10, h * 0.07), chord = w * 0.62;
     var R = (chord * chord / 4 + ch * ch) / (2 * ch), cx = w / 2;
-    ch = ch / 2; chord = 2 * Math.sqrt(2 * R * ch - ch * ch);   // same moon, half as much above the line
+    ch = ch / 2;
+    // 3x the moon: three times the radius and three times the cap, then sunk 20px, so it
+    // spans more of the screen and reads flatter while staying a true circle.
+    R = R * 3; ch = Math.max(2, ch * 3 - 20 * dpr / 2);
+    chord = 2 * Math.sqrt(2 * R * ch - ch * ch);
+    // Keep that width, but sit the moon just above the line: only a sliver shows.
+    ch = Math.max(2, 8 * dpr / 2); R = (chord * chord / 4 + ch * ch) / (2 * ch);
     var cy = h + R - ch;
     var span = Math.asin(Math.min(1, (chord / 2) / R));
 
@@ -51,7 +57,7 @@
 
     // Rays on the limb, radial, white only. Rule 3: zero where the limb meets the line.
     o.lineCap = 'round';
-    var n = 170;
+    var n = Math.round(Math.max(170, chord / 2));   // dense enough that rays never read as a comb
     for (var j = 0; j < n; j++) {
       var v = j / (n - 1);
       var ang = -span + v * span * 2;
@@ -71,7 +77,7 @@
       g.addColorStop(0.35, 'rgba(' + INK + ',' + a * 0.55 + ')');
       g.addColorStop(0.7, 'rgba(' + INK + ',' + a * 0.15 + ')');
       g.addColorStop(1, 'rgba(' + INK + ',0)');               // Rule 2: always fade to nothing
-      o.strokeStyle = g; o.lineWidth = Math.max(1, w / 600);
+      o.strokeStyle = g; o.lineWidth = Math.max(1.4, w / 450);
       o.beginPath(); o.moveTo(x0, y0); o.lineTo(x1, y1); o.stroke();
     }
 
