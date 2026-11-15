@@ -6,6 +6,11 @@
    few minutes, which is all a picture of the sky needs. */
 (function () {
   var PI = Math.PI, rad = PI / 180, E = rad * 23.4397;
+  // Safari accepts ctx.filter but may ignore it, so test it by drawing (same check as the moons).
+  var BLUR_OK = (function () {
+    try { var c = document.createElement('canvas'); c.width = c.height = 20; var x = c.getContext('2d', { willReadFrequently: true });
+      x.filter = 'blur(3px)'; x.fillStyle = '#fff'; x.fillRect(8, 8, 4, 4); return x.getImageData(3, 10, 1, 1).data[3] > 0; } catch (e) { return false; }
+  })();
   var sin = Math.sin, cos = Math.cos, tan = Math.tan, asin = Math.asin, atan2 = Math.atan2;
   function days(ms) { return ms / 86400000 - 0.5 + 2440588 - 2451545; }
   function ra(l, b) { return atan2(sin(l) * cos(E) - tan(b) * sin(E), cos(l)); }
@@ -61,6 +66,32 @@
     return { pts: pts, rise: rise, set: set, top: top, always: !rise && !set ? (pts[0].alt > RISE ? 'up' : 'down') : null };
   }
 
+  /** One whole pass of the moon, rise to set, around a moment: the pass it is in, else the next one.
+      With no moment, the pass that overlaps the local day [t0, t1] the most. Crosses midnight when it must. */
+  function pass(t0, t1, at, lat, lng) {
+    var wide = day(t0 - 16 * 3600000, t1 + 16 * 3600000, lat, lng), p = wide.pts, segs = [], open = null;
+    for (var i = 0; i < p.length; i++) {
+      var up = p[i].alt > RISE;
+      if (up && open === null) open = i;
+      if ((!up || i === p.length - 1) && open !== null) { segs.push({ a: open, b: up ? i : i - 1 }); open = null; }
+    }
+    segs = segs.filter(function (sg) { return sg.a > 0 && sg.b < p.length - 1; });   // rose and set inside the samples
+    var pick = null;
+    if (at != null) {
+      pick = segs.filter(function (sg) { return p[sg.a].t <= at && at <= p[sg.b].t; })[0] ||
+        segs.filter(function (sg) { return p[sg.a].t > at; })[0] || segs[segs.length - 1] || null;
+    } else {
+      var best = 0;
+      segs.forEach(function (sg) { var o = Math.min(t1, p[sg.b].t) - Math.max(t0, p[sg.a].t); if (o > best) { best = o; pick = sg; } });
+    }
+    if (!pick) { var d0 = day(t0, t1, lat, lng); d0.w0 = t0; d0.w1 = t1; return d0; }   // never rises, or never sets (far north and south)
+    var r0 = p[pick.a].t, r1 = p[pick.b].t, pad = 45 * 60000;
+    var w0 = Math.min(at != null ? at : r0, r0) - pad, w1 = Math.max(at != null ? at : r1, r1) + pad;
+    var d = day(w0, w1, lat, lng);
+    d.w0 = w0; d.w1 = w1;
+    return d;
+  }
+
   var DIRS = ['north', 'north-northeast', 'northeast', 'east-northeast', 'east', 'east-southeast', 'southeast', 'south-southeast',
     'south', 'south-southwest', 'southwest', 'west-southwest', 'west', 'west-northwest', 'northwest', 'north-northwest'];
   var SHORT = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
@@ -70,15 +101,16 @@
      north in the southern), east and west to either side, and watch the moon cross along its real
      path. mount(el, cfg) draws it with a slider and a play button; cfg.onTime(t, m) reports the moment. */
   function mount(el, cfg) {
-    var sky = cfg.sky, t0 = cfg.t0, t1 = cfg.t1, lat = cfg.lat, lng = cfg.lng, clock = cfg.clock, south = lat >= 0;
+    var lat = cfg.lat, lng = cfg.lng, clock = cfg.clock, south = lat >= 0;
+    var sky = pass(cfg.t0, cfg.t1, cfg.at, lat, lng), t0 = sky.w0, t1 = sky.w1, tag = cfg.dayTag || function () { return ''; };
     var at = cfg.at != null ? cfg.at : (sky.top ? sky.top.t : (t0 + t1) / 2), playing = null;
     el.innerHTML =
       '<div class="sk-sky"><canvas aria-hidden="true"></canvas></div>' +
       '<div class="sk-stats">' + ['RISE', 'HIGHEST', 'SET'].map(function (k, i) { return '<div><span class="sk-k">' + k + '</span><b data-sk="v' + i + '"></b><span class="sk-s" data-sk="s' + i + '"></span></div>'; }).join('') + '</div>' +
-      '<div class="sk-scrub"><div class="sk-row"><span class="sk-now" data-sk="now"></span><button type="button" class="sk-play" data-sk="play" aria-pressed="false">▶ PLAY THE DAY</button></div>' +
+      '<div class="sk-scrub"><div class="sk-row"><span class="sk-now" data-sk="now"></span><button type="button" class="sk-play" data-sk="play" aria-pressed="false"></button></div>' +
       '<div class="sk-track"><div class="sk-bar"></div><div data-sk="ups"></div>' +
       '<input type="range" min="0" max="1440" step="1" aria-label="Time of day"></div>' +
-      '<div class="sk-ticks"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div></div>';
+      '<div class="sk-ticks" data-sk="ticks"></div></div>';
     var q = function (k) { return el.querySelector('[data-sk="' + k + '"]'); };
     var cv = el.querySelector('canvas'), range = el.querySelector('input[type=range]');
     var span = t1 - t0, toV = function (t) { return Math.round((t - t0) / span * 1440); }, toT = function (v) { return t0 + v / 1440 * span; };
@@ -90,17 +122,28 @@
       if ((!up || i === sky.pts.length - 1) && open !== null) { ups += '<div class="sk-up" style="left:' + ((open - t0) / span * 100).toFixed(2) + '%;width:' + ((p.t - open) / span * 100).toFixed(2) + '%"></div>'; open = null; }
     });
     q('ups').innerHTML = ups;
+    // whole-hour ticks across the window
+    var narrowUI = el.clientWidth < 600, every = (t1 - t0) > 14 * 3600000 ? (narrowUI ? 6 : 3) : (narrowUI ? 3 : 2), ticks = '';
+    for (var h = Math.ceil(t0 / 3600000) * 3600000; h <= t1; h += 3600000) {
+      var lab = clock(h); if (+lab.slice(0, 2) % every || lab.slice(3) !== '00') continue;
+      var pc = (h - t0) / span * 100; if (pc < 3 || pc > 97) continue;
+      ticks += '<span style="left:' + pc.toFixed(2) + '%">' + lab + '</span>';
+    }
+    q('ticks').innerHTML = ticks;
+    var PLAY = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0L10 6L0 12Z" fill="currentColor"/></svg> PLAY',
+      PAUSE = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0h3.5v12H0zM6.5 0H10v12H6.5z" fill="currentColor"/></svg> PAUSE';
+    q('play').innerHTML = PLAY;
     var setStat = function (i, ev, sub) { q('v' + i).textContent = ev ? clock(ev.t) : '—'; q('s' + i).textContent = ev ? sub : (i === 1 ? 'not up' : 'not that day'); };
-    setStat(0, sky.rise, sky.rise && 'in the ' + compass(sky.rise.az));
-    setStat(1, sky.top && sky.top.alt > 0 ? sky.top : null, sky.top && Math.round(sky.top.alt) + '° up, ' + compass(sky.top.az));
-    setStat(2, sky.set, sky.set && 'in the ' + compass(sky.set.az));
+    setStat(0, sky.rise, sky.rise && 'in the ' + compass(sky.rise.az) + tag(sky.rise.t));
+    setStat(1, sky.top && sky.top.alt > 0 ? sky.top : null, sky.top && Math.round(sky.top.alt) + '° up, ' + compass(sky.top.az) + tag(sky.top.t));
+    setStat(2, sky.set, sky.set && 'in the ' + compass(sky.set.az) + tag(sky.set.t));
     var cx = cv.getContext('2d');
     function X(az, W, pad) { var a = south ? az : (az + 180) % 360; a = Math.max(15, Math.min(345, a)); return pad + (a - 15) / 330 * (W - pad * 2); }
     function draw() {
       var dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(cv.clientWidth * dpr), H = Math.round(cv.clientHeight * dpr);
       if (!W || !H) return;
       if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
-      var narrow = cv.clientWidth < 600, hz = H * 0.78, pad = W * 0.04, top = H * 0.07;
+      var narrow = cv.clientWidth < 600, hz = H - 88 * dpr, pad = W * 0.04, top = H * 0.07;   // a fixed strip of ground for labels and the moon below the horizon
       var Y = function (alt) { return hz - (alt / 90) * (hz - top); };
       var m = moonAt(at, lat, lng), sun = sunAlt(at, lat, lng), dk = Math.max(0, Math.min(1, (sun + 12) / 12));
       var g = cx.createLinearGradient(0, 0, 0, hz);
@@ -126,7 +169,10 @@
           last = x;
         });
       }
-      cx.save(); cx.filter = 'blur(' + 8 * dpr + 'px)'; cx.strokeStyle = 'rgba(233,228,216,.35)'; cx.lineWidth = 10 * dpr; path(); cx.stroke(); cx.restore();
+      cx.save();
+      if (BLUR_OK) { cx.filter = 'blur(' + 8 * dpr + 'px)'; cx.strokeStyle = 'rgba(233,228,216,.35)'; cx.lineWidth = 10 * dpr; }
+      else { cx.shadowColor = 'rgba(233,228,216,.55)'; cx.shadowBlur = 16 * dpr; cx.strokeStyle = 'rgba(233,228,216,.14)'; cx.lineWidth = 3 * dpr; }
+      path(); cx.stroke(); cx.restore();
       cx.strokeStyle = 'rgba(233,228,216,.85)'; cx.lineWidth = 2 * dpr; cx.lineCap = 'round'; cx.setLineDash([0.1, 7 * dpr]); path(); cx.stroke(); cx.setLineDash([]);
       var gg = cx.createLinearGradient(0, hz, 0, H); gg.addColorStop(0, '#121316'); gg.addColorStop(1, '#0B0B0D');
       cx.fillStyle = gg; cx.fillRect(0, hz, W, H - hz);
@@ -161,26 +207,27 @@
         var k = Math.cos(f * 2 * PI), wax = f < 0.5;
         var lit = new Path2D('M0,' + -r + 'A' + r + ',' + r + ' 0 0 ' + (wax ? 1 : 0) + ' 0,' + r + 'A' + Math.abs(k * r) + ',' + r + ' 0 0 ' + ((k > 0) === wax ? 0 : 1) + ' 0,' + -r + 'Z');
         cx.save(); cx.translate(mx, my); if (!south) cx.scale(-1, 1);
-        cx.filter = 'blur(' + (0.8 * dpr) + 'px)'; cx.fillStyle = '#E9E4D8'; cx.fill(lit); cx.restore();
+        if (BLUR_OK) cx.filter = 'blur(' + (0.8 * dpr) + 'px)';
+        cx.fillStyle = '#E9E4D8'; cx.fill(lit); cx.restore();
       } else {
         var gx = X(m.az, W, pad);
         cx.strokeStyle = 'rgba(233,228,216,.35)'; cx.setLineDash([3 * dpr, 4 * dpr]); cx.lineWidth = 1.2 * dpr;
-        cx.beginPath(); cx.arc(gx, hz + 66 * dpr, 12 * dpr, 0, 7); cx.stroke(); cx.setLineDash([]);
+        cx.beginPath(); cx.arc(gx, hz + 70 * dpr, 10 * dpr, 0, 7); cx.stroke(); cx.setLineDash([]);
       }
       range.value = toV(at);
-      q('now').textContent = clock(at) + (m.alt > RISE ? '  ·  MOON UP' : '  ·  BELOW THE HORIZON');
+      q('now').textContent = clock(at) + tag(at).toUpperCase() + (m.alt > RISE ? '  ·  MOON UP' : '  ·  BELOW THE HORIZON');
       if (cfg.onTime) cfg.onTime(at, m);
     }
-    function stop() { if (playing) { cancelAnimationFrame(playing.raf); playing = null; } q('play').setAttribute('aria-pressed', 'false'); q('play').textContent = '▶ PLAY THE DAY'; }
+    function stop() { if (playing) { cancelAnimationFrame(playing.raf); playing = null; } q('play').setAttribute('aria-pressed', 'false'); q('play').innerHTML = PLAY; }
     range.addEventListener('input', function () { stop(); at = toT(+range.value); draw(); });
     q('play').addEventListener('click', function () {
       if (playing) { stop(); return; }
       if (at >= t1 - 60000) at = t0;
-      q('play').setAttribute('aria-pressed', 'true'); q('play').textContent = '❚❚ PAUSE';
+      q('play').setAttribute('aria-pressed', 'true'); q('play').innerHTML = PAUSE;
       var last = performance.now();
       playing = { raf: 0 };
       (function tick(now) {
-        at = Math.min(t1, at + (now - last) / 9000 * span); last = now;   // the whole day in about nine seconds
+        at = Math.min(t1, at + (now - last) / 9000 * span); last = now;   // the whole pass in about nine seconds
         draw();
         if (at >= t1) { stop(); return; }
         if (playing) playing.raf = requestAnimationFrame(tick);
@@ -191,5 +238,5 @@
     return { stop: stop };
   }
 
-  window.MoonSky = { day: day, moonAt: moonAt, sunAlt: sunAlt, compass: compass, mount: mount };
+  window.MoonSky = { day: day, pass: pass, moonAt: moonAt, sunAlt: sunAlt, compass: compass, mount: mount };
 })();

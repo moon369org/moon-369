@@ -275,11 +275,12 @@
     if (box.__sky) box.__sky.stop();
     box.__sky = MoonSky.mount($('[data-nt-sky-chart]'), {
       sky: sky, t0: t0, t1: t1, lat: p.lat, lng: p.lng, at: chosen, f: f, clock: clock,
+      dayTag: function (t) { return t < t0 ? ' · day before' : t >= t1 ? ' · next day' : ''; },
       onTime: function (t, m) {
-        var w = t > Date.now() ? 'will be' : 'was';
+        var w = t > Date.now() ? 'will be' : 'was', when = clock(t) + (t < t0 ? ' the day before' : t >= t1 ? ' the next day' : '');
         $('[data-nt-sky-h]').textContent = m.alt > -0.27
-          ? 'At ' + clock(t) + ' the moon ' + w + ' ' + Math.max(0, Math.round(m.alt)) + '° up in the ' + MoonSky.compass(m.az) + '.'
-          : 'At ' + clock(t) + ' the moon ' + w + ' below the horizon.';
+          ? 'At ' + when + ' the moon ' + w + ' ' + Math.max(0, Math.round(m.alt)) + '° up in the ' + MoonSky.compass(m.az) + '.'
+          : 'At ' + when + ' the moon ' + w + ' below the horizon.';
         var sunUp = MoonSky.sunAlt(t, p.lat, p.lng) > -0.83, phase = window.MoonPhase ? MoonPhase.fraction(t) : f;
         setNotes(m.alt > -0.27 && phase > 0.04 && phase < 0.96 ? (sunUp ? 'It ' + w + ' daytime, so look for a pale moon in a blue sky.' : 'In a dark sky it ' + w + ' easy to see.') : '');
       },
