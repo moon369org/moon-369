@@ -14,9 +14,9 @@
   // holds and eases out on its own clock, so they never flash or pulse together.
   var beams = [];
   function spawn(now) {
-    var v = 0.5 + (Math.random() - 0.5) * 0.7;                  // keep away from the ends (Rule 3)
+    var v = 0.03 + Math.random() * 0.94;                         // anywhere on the visible surface
     beams.push({ v: v, born: now, life: 2200 + Math.random() * 2600,
-      len: 0.45 + Math.random() * 0.5, width: 0.5 + Math.random() * 1.1, peak: 0.2 + Math.pow(Math.random(), 1.5) * 0.8 });
+      len: 0.12 + Math.pow(Math.random(), 0.8) * 0.85, soft: Math.random(), width: 0.5 + Math.random() * 1.1, peak: 0.2 + Math.pow(Math.random(), 1.5) * 0.8 });
   }
 
 
@@ -80,7 +80,7 @@
       var B = beams[b], k = (now - B.born) / B.life;
       if (k >= 1) { beams.splice(b, 1); continue; }
       var fade = Math.sin(Math.PI * k); fade = fade * fade;      // eases in and out, no hard start or stop
-      var bang = -span + B.v * span * 2, benv = Math.max(0, Math.cos((B.v - 0.5) * Math.PI));
+      var bang = -span + B.v * span * 2, benv = Math.pow(Math.max(0, Math.cos((B.v - 0.5) * Math.PI)), 0.35); // fades only right at the ends (Rule 3)
       var bx = Math.sin(bang), by = -Math.cos(bang);
       var bl = h * B.len * (0.85 + 0.15 * k), ba = B.peak * fade * benv;
       var bx0 = cx + bx * R * 0.995, by0 = cy + by * R * 0.995, bx1 = cx + bx * (R + bl), by1 = cy + by * (R + bl);
@@ -91,8 +91,18 @@
       bg.addColorStop(0.45, 'rgba(' + INK + ',' + ba * 0.12 + ')');
       bg.addColorStop(0.75, 'rgba(' + INK + ',' + ba * 0.03 + ')');
       bg.addColorStop(1, 'rgba(' + INK + ',0)');                // Rule 2
-      o.strokeStyle = bg; o.lineWidth = Math.max(1, (w / 600) * B.width);
+      // Some beams are crisp, some soft: a soft beam trades its core for a wide halo.
+      var bw = Math.max(1, (w / 600) * B.width);
+      o.strokeStyle = bg;
+      o.globalAlpha = 1 - B.soft * 0.75; o.lineWidth = bw;
       o.beginPath(); o.moveTo(bx0, by0); o.lineTo(bx1, by1); o.stroke();
+      if (B.soft > 0.15) {
+        o.globalAlpha = 0.35 * B.soft; o.lineWidth = bw * (2 + 4 * B.soft);
+        o.beginPath(); o.moveTo(bx0, by0); o.lineTo(bx1, by1); o.stroke();
+        o.globalAlpha = 0.18 * B.soft; o.lineWidth = bw * (5 + 9 * B.soft);
+        o.beginPath(); o.moveTo(bx0, by0); o.lineTo(bx1, by1); o.stroke();
+      }
+      o.globalAlpha = 1;
     }
 
     var ctx = cv.getContext('2d');
@@ -116,7 +126,7 @@
   var t0 = performance.now(), last = 0;
   var nextBeam = 0;
   function frame(now) {
-    if (!reduce && now > nextBeam && beams.length < 14) { spawn(now); nextBeam = now + 120 + Math.random() * 380; }
+    if (!reduce && now > nextBeam && beams.length < 20) { spawn(now); nextBeam = now + 80 + Math.random() * 280; }
     if (now - last > 33) {
       var all = document.querySelectorAll('canvas.ft-glow');
       for (var c = 0; c < all.length; c++) {
