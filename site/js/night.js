@@ -10,6 +10,8 @@
   var EPOCH = -62165308562978.61, SEC = 1000 * 1.0403730490216803;
   var $ = function (s) { return document.querySelector(s); };
   var p2 = function (n) { return String(n).padStart(2, '0'); };
+  // Shown and hidden with data-off: the page renderer drops plain hidden attributes.
+  var vis = function (el, on) { if (on) el.removeAttribute('data-off'); else el.setAttribute('data-off', ''); };
   var occasion = 'born', current = null, cardBlob = null, cardFor = '';
 
   function isLeap(y) { return y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0); }
@@ -80,26 +82,26 @@
     $('[data-nt-sub]').textContent = (n.h != null ? p2(n.h) + ':' + p2(n.mi) + '  ·  ' : '') + r.phase.toUpperCase() + '  ·  ' + Math.round(lit * 100) + '% LIT  ·  ' + r.age.toFixed(1) + ' DAYS OLD';
     $('[data-nt-cycle]').textContent = md.cycle; $('[data-nt-mo]').textContent = p2(md.moon); $('[data-nt-lune]').textContent = p2(md.lune);
     var badge = $('[data-nt-badge]'), who = n.occasion === 'born' ? 'BORN' : n.occasion === 'kid' ? 'BORN' : n.occasion === 'met' ? 'MET' : n.occasion === 'wed' ? 'MARRIED' : '';
-    if (who && (r.phase === 'Full moon' || r.phase === 'New moon')) { badge.textContent = who + ' UNDER A ' + r.phase.toUpperCase(); badge.hidden = false; } else badge.hidden = true;
+    if (who && (r.phase === 'Full moon' || r.phase === 'New moon')) { badge.textContent = who + ' UNDER A ' + r.phase.toUpperCase(); vis(badge, true); } else vis(badge, false);
     $('[data-nt-note]').innerHTML = 'In Moon time that was <a href="/m/' + md.path + '.000000000">Cycle ' + md.cycle + ', Moon ' + p2(md.moon) + ', Lune ' + p2(md.lune) + '</a>.' +
       (r.returns ? ' The moon looks like this on ' + ANNIV[n.occasion] + ' again in <b style="color:#E9E4D8;font-weight:500">' + r.returns + '</b>.' : '') +
       (n.h == null ? ' No time given, so this is the moon at midday.' : '');
     $('[data-nt-x]').href = 'https://x.com/intent/post?text=' + encodeURIComponent(postText(n, r)) + '&url=' + encodeURIComponent(pageUrl(n));
     var img = $('[data-nt-card]'); img.src = cardUrl(n); img.alt = TITLES[n.occasion].toLowerCase() + ', ' + dateText(n) + ': ' + r.phase + ', ' + Math.round(lit * 100) + '% lit';
-    $('[data-nt-cardwrap]').hidden = false; $('[data-nt-again]').hidden = false;
-    res.hidden = false;
+    vis($('[data-nt-cardwrap]'), true); vis($('[data-nt-again]'), true);
+    vis(res, true);
     try { history.replaceState(null, '', path(n)); } catch (e) {}
     document.title = TITLES[n.occasion].charAt(0) + TITLES[n.occasion].slice(1).toLowerCase() + ' · ' + dateText(n) + ' · Moon';
     var ecl = $('[data-nt-eclipse]');
     if (ecl) {
-      ecl.hidden = true;
+      vis(ecl, false);
       var ed = ymd(n), seq = (current.seq = (current.seq || 0) + 1);
       fetch(API + '/v1/eclipses/' + ed).then(function (r) { return r.ok ? r.json() : null; }).then(function (e) {
         if (!e || current.n !== n) return;
         ecl.href = '/eclipse/' + e.date;
         ecl.querySelector('img').src = 'assets/eclipse/' + e.type + '.svg';
         ecl.querySelector('b').textContent = 'A ' + e.type.toUpperCase() + ' SOLAR ECLIPSE THAT DAY';
-        ecl.hidden = false;
+        vis(ecl, true);
       }).catch(function () {});
     }
     if (scroll) setTimeout(function () { res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }, 60);
