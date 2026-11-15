@@ -473,6 +473,38 @@ curl -X POST https://api.moon369.org/v1/sign \
 </div>
 <div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; border: 1px solid #E9E4D8; color: #E9E4D8">POST</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/evidence</span>
+<span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">SIGNED</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">An evidence statement for a receipt, ready for a legal or compliance file. Moon re-checks the receipt now (both signatures, the drand beacon, the file match if you add <code>sha256</code>, and where it sits in the <a href="/tideline" style="color: #F2F2F0">Tideline</a> with its XRP Ledger and Bitcoin anchors) and signs what it found with Ed25519 and ML-DSA-65. The response also returns the receipt and its Merkle proof. Signed bytes: <code>moon-evidence/1</code>, a newline, then the statement as JSON with keys sorted. <a href="/evidence" style="color: #F2F2F0">moon369.org/evidence</a> turns it into a readable report and a&nbsp;bundle.</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl -X POST https://api.moon369.org/v1/evidence \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;receipt&quot;: {...}, &quot;sha256&quot;: &quot;&lt;optional hex&gt;&quot;}'</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>RESPONSE</span><span>200 OK</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{
+  &quot;statement&quot;: {
+    &quot;evidence&quot;: &quot;moon-evidence/1&quot;,
+    &quot;checks&quot;: { &quot;valid&quot;: true, &quot;post_quantum&quot;: true,
+      &quot;signatures&quot;: [&quot;Ed25519&quot;, &quot;ML-DSA-65&quot;],
+      &quot;content_match&quot;: true, &quot;not_before&quot;: {...} },
+    &quot;tideline&quot;: { &quot;status&quot;: &quot;sealed&quot;, &quot;lune&quot;: &quot;1928.05.05&quot;,
+      &quot;xrpl&quot;: {...}, &quot;bitcoin&quot;: {...} },
+    &quot;issued&quot;: {...}, &quot;receipt&quot;: {...}
+  },
+  &quot;signature&quot;: { &quot;key_id&quot;: &quot;8efd3211b23533ed&quot;, &quot;pq&quot;: {...} },
+  &quot;proof&quot;: {...}
+}</pre>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/spec</span>
 </div>
