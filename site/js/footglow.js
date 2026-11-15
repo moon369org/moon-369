@@ -15,7 +15,7 @@
   var beams = [];
   function spawn(now) {
     var v = 0.03 + Math.random() * 0.94;                         // anywhere on the visible surface
-    beams.push({ v: v, born: now, life: 8800 + Math.random() * 10400, drift: (Math.random() - 0.5) * 0.06,
+    beams.push({ v: v, born: now, life: 4400 + Math.random() * 5200,
       len: 0.12 + Math.pow(Math.random(), 0.8) * 0.85, soft: Math.random(), width: 0.5 + Math.random() * 1.1, peak: 0.2 + Math.pow(Math.random(), 1.5) * 0.8 });
   }
 
@@ -67,9 +67,6 @@
       var seed = Math.sin(j * 12.9898) * 43758.5453; seed -= Math.floor(seed);
       var seed2 = Math.sin(j * 78.233) * 12543.31; seed2 -= Math.floor(seed2);
       var tw = 0.5 + 0.5 * Math.sin(t * (0.6 + seed * 1.4) + seed2 * 6.28);
-      // Flow: soft swells of light glide around the curve, so the corona moves as one.
-      var flow = 0.5 + 0.5 * Math.sin(v * 9 - t * 0.9 + wave(t * 0.25, v * 3) * 1.2);
-      tw = tw * 0.45 + flow * 0.55;
       var len = h * (0.1 + 0.28 * seed2) * (0.75 + 0.25 * tw) * env;
       var a = Math.min(1, (0.25 + 0.75 * tw) * env * 0.9);
       var dx = Math.sin(ang), dy = -Math.cos(ang);
@@ -89,8 +86,7 @@
       var B = beams[b], k = (now - B.born) / B.life;
       if (k >= 1) { beams.splice(b, 1); continue; }
       var fade = Math.sin(Math.PI * k); fade = fade * fade;      // eases in and out, no hard start or stop
-      var bv = B.v + B.drift * k;                                // beams glide slowly along the curve
-      var bang = -span + bv * span * 2, benv = Math.pow(Math.max(0, Math.cos((bv - 0.5) * Math.PI)), 0.35); // fades only right at the ends (Rule 3)
+      var bang = -span + B.v * span * 2, benv = Math.pow(Math.max(0, Math.cos((B.v - 0.5) * Math.PI)), 0.35); // fades only right at the ends (Rule 3)
       var bx = Math.sin(bang), by = -Math.cos(bang);
       var bl = h * B.len * (0.85 + 0.15 * k), ba = B.peak * fade * benv;
       var bx0 = cx + bx * R * 0.995, by0 = cy + by * R * 0.995, bx1 = cx + bx * (R + bl), by1 = cy + by * (R + bl);
@@ -149,13 +145,13 @@
   var t0 = performance.now(), last = 0;
   var nextBeam = 0;
   function frame(now) {
-    if (!reduce && now > nextBeam && beams.length < 11) { spawn(now); nextBeam = now + 640 + Math.random() * 2240; }
+    if (!reduce && now > nextBeam && beams.length < 11) { spawn(now); nextBeam = now + 320 + Math.random() * 1120; }
     if (now - last > 33) {
       var all = document.querySelectorAll('canvas.ft-glow');
       for (var c = 0; c < all.length; c++) {
         var r = all[c].getBoundingClientRect();
         if (r.bottom > 0 && r.top < (window.innerHeight || 800) && (!reduce || !all[c].width)) {
-          draw(all[c], reduce ? 12 : (now - t0) / 1000 * 0.75 + 40, now); last = now;
+          draw(all[c], reduce ? 12 : (now - t0) / 1000 * 1.5 + 40, now); last = now;
         }
       }
     }
