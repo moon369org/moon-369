@@ -273,11 +273,20 @@
     // The headline follows the slider: where was the moon at that moment?
     var chosen = n.h != null ? ms : null;
     if (box.__sky) box.__sky.stop();
+    // Hold the headline at the height of the longest one it can show, so the page never jumps while the slider moves.
+    var hEl = $('[data-nt-sky-h]');
+    var holdHeight = function () {
+      var keep = hEl.textContent, most = 0;
+      hEl.style.minHeight = '';
+      ['At 00:00 the moon will be below the horizon.', 'At 00:00 the moon will be 88\u00b0 up in the west-southwest.'].forEach(function (x) { hEl.textContent = x; most = Math.max(most, hEl.offsetHeight); });
+      hEl.textContent = keep; hEl.style.minHeight = most + 'px';
+    };
+    if (!box.__holdBound) { box.__holdBound = true; var lastW = 0; window.addEventListener('resize', function () { if (window.innerWidth !== lastW) { lastW = window.innerWidth; holdHeight(); } }); }
     box.__sky = MoonSky.mount($('[data-nt-sky-chart]'), {
       sky: sky, t0: t0, t1: t1, lat: p.lat, lng: p.lng, at: chosen, f: f, clock: clock,
       dayTag: function (t) { return t < t0 ? ' · day before' : t >= t1 ? ' · next day' : ''; },
       onTime: function (t, m) {
-        var w = t > Date.now() ? 'will be' : 'was', when = clock(t) + (t < t0 ? ' the day before' : t >= t1 ? ' the next day' : '');
+        var w = t > Date.now() ? 'will be' : 'was', when = clock(t);   // "next day" lives in the time line under the sky, so this stays short
         $('[data-nt-sky-h]').textContent = m.alt > -0.27
           ? 'At ' + when + ' the moon ' + w + ' ' + Math.max(0, Math.round(m.alt)) + '° up in the ' + MoonSky.compass(m.az) + '.'
           : 'At ' + when + ' the moon ' + w + ' below the horizon.';
@@ -285,6 +294,8 @@
         setNotes(m.alt > -0.27 && phase > 0.04 && phase < 0.96 ? (sunUp ? 'It ' + w + ' daytime, so look for a pale moon in a blue sky.' : 'In a dark sky it ' + w + ' easy to see.') : '');
       },
     });
+    holdHeight();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(holdHeight);
   }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-nt-addplace]'); if (!b) return;
