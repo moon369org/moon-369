@@ -36,7 +36,7 @@
     o.beginPath(); o.moveTo(x0 + nx, y0 + ny); o.lineTo(x1, y1); o.lineTo(x0 - nx, y0 - ny); o.closePath(); o.fill();
   }
   // Blur that also works where canvas filters don't (Safari, including every iPhone browser):
-  // there we paint at low resolution and scale up smoothly, which softens edges the same way.
+  // there we blur with the canvas shadow instead, which Safari does draw.
   // Test that blur really draws: some Safari versions accept ctx.filter but ignore it.
   var BLUR_OK = (function () {
     try {
@@ -50,21 +50,18 @@
   function blurDraw(ctx, W, H, px, alpha, op, paint) {
     ctx.save(); ctx.globalAlpha = alpha; ctx.globalCompositeOperation = op || 'source-over';
     if (BLUR_OK) { ctx.filter = 'blur(' + px + 'px)'; paint(ctx); ctx.restore(); return; }
-    // Shrink at most 10x (more loses thin shapes); spread the rest by drawing a few offset copies.
-    var s = Math.max(1, Math.min(px * 1.6, 10)), rest = Math.max(0, px - s / 1.6), w = Math.max(2, Math.ceil(W / s)), h = Math.max(2, Math.ceil(H / s));
-    var key = w + 'x' + h, b = blurPool[key] || (blurPool[key] = document.createElement('canvas'));
-    if (b.width !== w || b.height !== h) { b.width = w; b.height = h; }
+    // Safari: paint sharp off to the side, then let the canvas shadow (which Safari blurs
+    // properly) fall back onto the real spot. Full resolution, true Gaussian, one pass.
+    var key = W + 'x' + H, b = blurPool[key] || (blurPool[key] = document.createElement('canvas'));
+    if (b.width !== W || b.height !== H) { b.width = W; b.height = H; }
     var c = b.getContext('2d');
-    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h); c.setTransform(w / W, 0, 0, h / H, 0, 0);
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, W, H);
     c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
     paint(c);
-    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-    if (rest < 1) ctx.drawImage(b, 0, 0, W, H);
-    else {
-      var k = 8, a0 = ctx.globalAlpha;
-      ctx.globalAlpha = a0 / (k + 1); ctx.drawImage(b, 0, 0, W, H);
-      for (var i = 0; i < k; i++) { var an = i / k * Math.PI * 2; ctx.drawImage(b, Math.cos(an) * rest * 0.8, Math.sin(an) * rest * 0.8, W, H); }
-    }
+    var shift = W + H + 100;
+    ctx.shadowColor = 'rgb(' + INK + ')'; ctx.shadowBlur = px * 2; ctx.shadowOffsetX = shift; ctx.shadowOffsetY = 0;
+    ctx.drawImage(b, -shift, 0);
+    if (op === 'lighter') ctx.drawImage(b, -shift, 0);   // shadows come out about half as bright as filter blur
     ctx.restore();
   }
 

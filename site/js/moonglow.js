@@ -19,7 +19,7 @@
   function wave(t, s) { return Math.sin(t * 0.31 + s) * 0.55 + Math.sin(t * 0.173 + s * 2.1) * 0.3 + Math.sin(t * 0.071 + s * 3.7) * 0.15; }
 
   // Blur that also works where canvas filters don't (Safari, including every iPhone browser):
-  // there we paint at low resolution and scale up smoothly, which softens edges the same way.
+  // there we blur with the canvas shadow instead, which Safari does draw.
   // Test that blur really draws: some Safari versions accept ctx.filter but ignore it.
   var BLUR_OK = (function () {
     try {
@@ -33,21 +33,18 @@
   function blurDraw(ctx, W, H, px, alpha, op, paint) {
     ctx.save(); ctx.globalAlpha = alpha; ctx.globalCompositeOperation = op || 'source-over';
     if (BLUR_OK) { ctx.filter = 'blur(' + px + 'px)'; paint(ctx); ctx.restore(); return; }
-    // Shrink at most 10x (more loses thin shapes); spread the rest by drawing a few offset copies.
-    var s = Math.max(1, Math.min(px * 1.6, 10)), rest = Math.max(0, px - s / 1.6), w = Math.max(2, Math.ceil(W / s)), h = Math.max(2, Math.ceil(H / s));
-    var key = w + 'x' + h, b = blurPool[key] || (blurPool[key] = document.createElement('canvas'));
-    if (b.width !== w || b.height !== h) { b.width = w; b.height = h; }
+    // Safari: paint sharp off to the side, then let the canvas shadow (which Safari blurs
+    // properly) fall back onto the real spot. Full resolution, true Gaussian, one pass.
+    var key = W + 'x' + H, b = blurPool[key] || (blurPool[key] = document.createElement('canvas'));
+    if (b.width !== W || b.height !== H) { b.width = W; b.height = H; }
     var c = b.getContext('2d');
-    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h); c.setTransform(w / W, 0, 0, h / H, 0, 0);
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, W, H);
     c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
     paint(c);
-    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-    if (rest < 1) ctx.drawImage(b, 0, 0, W, H);
-    else {
-      var k = 8, a0 = ctx.globalAlpha;
-      ctx.globalAlpha = a0 / (k + 1); ctx.drawImage(b, 0, 0, W, H);
-      for (var i = 0; i < k; i++) { var an = i / k * Math.PI * 2; ctx.drawImage(b, Math.cos(an) * rest * 0.8, Math.sin(an) * rest * 0.8, W, H); }
-    }
+    var shift = W + H + 100;
+    ctx.shadowColor = 'rgb(' + INK + ')'; ctx.shadowBlur = px * 2; ctx.shadowOffsetX = shift; ctx.shadowOffsetY = 0;
+    ctx.drawImage(b, -shift, 0);
+    if (op === 'lighter') ctx.drawImage(b, -shift, 0);   // shadows come out about half as bright as filter blur
     ctx.restore();
   }
 
@@ -72,27 +69,37 @@
     var strength = Math.min(1, 0.6 + lit * 1.2); // a thin crescent glows a little more gently
     ctx.clearRect(0, 0, W, W);
 
-    // Rule 1 + 2: glow made from the lit crescent, blurred at three radii.
-    var layers = [[160, 0.4], [70, 0.2], [34, 0.12]];
-    var paintLit = function (c) { litPath(c, cx, cy, R, f); c.fillStyle = 'rgb(' + INK + ')'; c.fill(); };
-    for (var i = 0; i < layers.length; i++) blurDraw(ctx, W, W, Math.max(1, Math.round(W / layers[i][0])), layers[i][1] * strength, 'lighter', paintLit);
+    // The glow and the moon only change with the phase, so draw them once and reuse them.
+    var sk = W + '|' + f.toFixed(4) + '|' + strength.toFixed(3);
+    var st = cv.__moonStatic || (cv.__moonStatic = document.createElement('canvas'));
+    if (cv.__moonKey !== sk) {
+      cv.__moonKey = sk; st.width = W; st.height = W;
+      (function (ctx) {
 
-    // The moon.
-    ctx.fillStyle = '#24262A'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
-    // Soft terminator, like a real moon: light blurs into the shadow. Only that line is
-    // blurred; the lit outer edge stays crisp (we paint past it, then clip to the disc).
-    var soft = Math.max(1, R * 0.08);
-    ctx.save();
-    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
-    var lw = soft * 5, both = Math.abs(f - 0.5) < 0.02;
-    blurDraw(ctx, W, W, Math.max(1, Math.round(soft)), 1, 'source-over', function (c) {
-      c.fillStyle = c.strokeStyle = 'rgb(' + INK + ')';
-      litPath(c, cx, cy, R, f); c.fill();
-      c.lineWidth = lw;
-      c.beginPath(); c.arc(cx, cy, R + lw / 2 - 1, -Math.PI / 2, Math.PI / 2, !wax); c.stroke();
-      if (both) { c.beginPath(); c.arc(cx, cy, R + lw / 2 - 1, Math.PI / 2, -Math.PI / 2, !wax); c.stroke(); }
-    });
-    ctx.restore();
+        // Rule 1 + 2: glow made from the lit crescent, blurred at three radii.
+        var layers = [[160, 0.4], [70, 0.2], [34, 0.12]];
+        var paintLit = function (c) { litPath(c, cx, cy, R, f); c.fillStyle = 'rgb(' + INK + ')'; c.fill(); };
+        for (var i = 0; i < layers.length; i++) blurDraw(ctx, W, W, Math.max(1, Math.round(W / layers[i][0])), layers[i][1] * strength, 'lighter', paintLit);
+    
+        // The moon.
+        ctx.fillStyle = '#24262A'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+        // Soft terminator, like a real moon: light blurs into the shadow. Only that line is
+        // blurred; the lit outer edge stays crisp (we paint past it, then clip to the disc).
+        var soft = Math.max(1, R * 0.08);
+        ctx.save();
+        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
+        var lw = soft * 5, both = Math.abs(f - 0.5) < 0.02;
+        blurDraw(ctx, W, W, Math.max(1, Math.round(soft)), 1, 'source-over', function (c) {
+          c.fillStyle = c.strokeStyle = 'rgb(' + INK + ')';
+          litPath(c, cx, cy, R, f); c.fill();
+          c.lineWidth = lw;
+          c.beginPath(); c.arc(cx, cy, R + lw / 2 - 1, -Math.PI / 2, Math.PI / 2, !wax); c.stroke();
+          if (both) { c.beginPath(); c.arc(cx, cy, R + lw / 2 - 1, Math.PI / 2, -Math.PI / 2, !wax); c.stroke(); }
+        });
+        ctx.restore();
+      })(st.getContext('2d'));
+    }
+    ctx.drawImage(st, 0, 0);
 
     // Rays on the lit limb only.
     blurDraw(ctx, W, W, Math.max(1, Math.round(W / 340)), 1, 'lighter', function (ctx) {
