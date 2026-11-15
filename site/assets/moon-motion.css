@@ -46,11 +46,10 @@
   @keyframes mm-progress { to { transform: scaleX(1); } }
 }
 
-/* ---------- Page entry: headlines warp in ---------- */
-[data-dc-root] h1 { transform-origin: 0 50%; animation: mm-warp 1.4s cubic-bezier(.16, 1, .3, 1) both; }
-#top h1 { transform-origin: 50% 50%; }
+/* ---------- Page entry: headlines rise in ---------- */
+[data-dc-root] h1 { animation: mm-warp 1.2s cubic-bezier(.16, 1, .3, 1) both; }
 @keyframes mm-warp {
-  from { opacity: 0; transform: scale(1.35, 0.9); }
+  from { opacity: 0; transform: translateY(18px); }
   60% { opacity: 1; }
 }
 
