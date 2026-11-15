@@ -37,52 +37,47 @@
     var o = off.getContext('2d');
     o.clearRect(0, 0, w, h);
 
-    // The moon: only the very top of a big circle shows above the footer line.
-    var ch = Math.max(10, h * 0.07), chord = w * 0.62;
+    // The moon: the top of a circle shows above the footer line, with enough curve
+    // that its sides fall away into the dark and it reads as a round moon.
+    var chord = w * 0.7, ch = Math.max(4, Math.min(70 * dpr / 2, chord / 14));   // same shape on every screen
     var R = (chord * chord / 4 + ch * ch) / (2 * ch), cx = w / 2;
-    ch = ch / 2;
-    // 3x the moon: three times the radius and three times the cap, then sunk 20px, so it
-    // spans more of the screen and reads flatter while staying a true circle.
-    R = R * 3; ch = Math.max(2, ch * 3 - 20 * dpr / 2);
-    chord = 2 * Math.sqrt(2 * R * ch - ch * ch);
-    // Keep that width, but sit the moon just above the line: only a sliver shows.
-    ch = Math.max(2, 30 * dpr / 2); chord = w * 0.74; R = (chord * chord / 4 + ch * ch) / (2 * ch); // curve shows, sides go dark
+    ch = ch * 0.3; chord = 2 * Math.sqrt(2 * R * ch - ch * ch);   // same moon, sunk 70%
     var cy = h + R - ch;
-    var span = Math.asin(Math.min(1, (chord / 2) / R));
+    var span = Math.asin(Math.min(1, (chord / 2) / R)) * 1.08;   // a touch past the line, so rays fade below it
 
-    // Rule 1 + 2: glow made from the lit cap, blurred at three radii (as js/moonglow.js).
+    // Halo: rings centred on the moon itself, so the light is perfectly round (Rule 1 + 2).
     o.globalCompositeOperation = 'lighter';
-    var layers = [[18, 0.45], [40, 0.4], [90, 0.4], [200, 0.5]]; // tight layers keep the edge bright
-    for (var i = 0; i < layers.length; i++) {
-      o.filter = 'blur(' + Math.max(1, Math.round(w / layers[i][0] / 2)) + 'px)';
-      o.globalAlpha = layers[i][1];
-      cap(o, cx, cy, R); o.fillStyle = 'rgb(' + INK + ')'; o.fill();
-    }
-    o.filter = 'none'; o.globalAlpha = 1;
+    var halo = o.createRadialGradient(cx, cy, R * 0.995, cx, cy, R + h * 0.42);
+    halo.addColorStop(0, 'rgba(' + INK + ',0.75)');
+    halo.addColorStop(0.04, 'rgba(' + INK + ',0.45)');
+    halo.addColorStop(0.15, 'rgba(' + INK + ',0.2)');
+    halo.addColorStop(0.4, 'rgba(' + INK + ',0.07)');
+    halo.addColorStop(1, 'rgba(' + INK + ',0)');
+    o.fillStyle = halo; o.fillRect(0, 0, w, h);
 
-    // Rays on the limb, radial, white only. Rule 3: zero where the limb meets the line.
-    o.lineCap = 'round';
-    var n = Math.round(Math.max(170, chord / 2));   // dense enough that rays never read as a comb
+    // Rays, radial from the centre. Each one brightens and dims on its own clock, so
+    // nothing travels sideways along the edge (that read as flowing water).
+    var n = Math.round(Math.max(160, chord / 1.6));
     for (var j = 0; j < n; j++) {
       var v = j / (n - 1);
       var ang = -span + v * span * 2;
       var base = Math.max(0, Math.cos((v - 0.5) * Math.PI));
-      var env = Math.pow(base, 0.8), lenv = Math.pow(base, 0.5);
+      var env = Math.pow(base, 0.6);
       if (env < 0.02) continue;
-      var roll = 0.5 + 0.5 * Math.sin(v * 11 - t * 0.55 + wave(t * 0.3, v * 4) * 1.6);
-      var lift = wave(t * 0.4, v * 5) * h * 0.04 * env;
-      var len = (h * 0.16 + h * 0.2 * (0.5 + 0.5 * Math.sin(v * 17 + t * 0.12))) * lenv + lift;
-      var a = Math.min(1, (0.35 + 0.65 * roll) * env * 1.1);
+      var seed = Math.sin(j * 12.9898) * 43758.5453; seed -= Math.floor(seed);
+      var seed2 = Math.sin(j * 78.233) * 12543.31; seed2 -= Math.floor(seed2);
+      var tw = 0.5 + 0.5 * Math.sin(t * (0.6 + seed * 1.4) + seed2 * 6.28);
+      var len = h * (0.1 + 0.28 * seed2) * (0.75 + 0.25 * tw) * env;
+      var a = Math.min(1, (0.25 + 0.75 * tw) * env * 0.9);
       var dx = Math.sin(ang), dy = -Math.cos(ang);
-      var x0 = cx + dx * R * 0.995, y0 = cy + dy * R * 0.995;   // Rule 1: start inside the white
+      var x0 = cx + dx * R * 0.997, y0 = cy + dy * R * 0.997;   // Rule 1: start inside the white
       var x1 = cx + dx * (R + len), y1 = cy + dy * (R + len);
       var g = o.createLinearGradient(x0, y0, x1, y1);
-      g.addColorStop(0, 'rgba(' + INK + ',' + a * 0.8 + ')');
-      g.addColorStop(0.08, 'rgba(' + INK + ',' + a + ')');
-      g.addColorStop(0.35, 'rgba(' + INK + ',' + a * 0.55 + ')');
-      g.addColorStop(0.7, 'rgba(' + INK + ',' + a * 0.15 + ')');
+      g.addColorStop(0, 'rgba(' + INK + ',' + a + ')');
+      g.addColorStop(0.15, 'rgba(' + INK + ',' + a * 0.55 + ')');
+      g.addColorStop(0.45, 'rgba(' + INK + ',' + a * 0.15 + ')');
       g.addColorStop(1, 'rgba(' + INK + ',0)');               // Rule 2: always fade to nothing
-      o.fillStyle = g; taper(o, x0, y0, x1, y1, Math.max(2, w / 260));
+      o.fillStyle = g; taper(o, x0, y0, x1, y1, Math.max(1.5, w / 360));
     }
 
     // Long beams.
