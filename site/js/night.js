@@ -44,15 +44,74 @@
     }
     return null;
   }
-  function zOf(y, mo, d, h, mi) {   // the visitor's UTC offset on that date, in minutes
+  function zOf(y, mo, d, h, mi) {   // the UTC offset on that date, in minutes: the chosen place, else this device's time zone
+    var tz = place ? place.tz : MY_TZ;
+    if (tz) { try { return zIn(tz, y, mo, d, h, mi); } catch (e) {} }
     var dt = new Date(2000, mo - 1, d, h == null ? 12 : h, mi || 0); dt.setFullYear(y);
     return -dt.getTimezoneOffset();
   }
+  // ---------- where: a city (or a time zone) sets the UTC offset for that exact date ----------
+  var place = null;            // { slug, name, near, tz, label } once picked
+  var CITIES = null, citiesP = null;
+  var WITH_PROVINCE = { US: 1, CA: 1, AU: 1, MX: 1, BR: 1, IN: 1 };
+  function ascii(x) { return x.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase(); }
+  function fold(x) { return x.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function loadCities() {
+    if (citiesP) return citiesP;
+    citiesP = fetch('/assets/cities.json').then(function (r) { return r.json(); }).then(function (j) {
+      var seen = {}, list = [];
+      // Slugs follow the same rule and order as the generator (scripts in the API's places.ts header).
+      j.r.forEach(function (r) {
+        var prov = j.p[r[1]], cc = j.c[r[2]].split('|'), base = ascii(r[0] + ' ' + prov + ' ' + cc[1]);
+        var k = (seen[base] || 0) + 1; seen[base] = k;
+        var near = WITH_PROVINCE[cc[1]] && prov && prov !== r[0] ? prov : cc[0];
+        list.push({ slug: k > 1 ? base + '-' + k : base, name: r[0], prov: prov, country: cc[0], near: near, tz: j.z[r[3]], lat: r[4], lng: r[5], key: fold(r[0] + ' ' + prov + ' ' + cc[0]) , nkey: fold(r[0]) });
+      });
+      try {
+        Intl.supportedValuesOf('timeZone').forEach(function (z) {
+          var nice = z.replace(/_/g, ' ');
+          list.push({ slug: null, name: nice, near: 'Time zone', tz: z, key: fold(nice + ' ' + z), nkey: fold(nice.split('/').pop()) });
+        });
+      } catch (e) {}
+      return (CITIES = list);
+    });
+    return citiesP;
+  }
+  function search(q) {
+    q = fold(q.trim()); if (!q || !CITIES) return [];
+    var a = [], b = [], c = [], words = q.split(/[\s,]+/).filter(Boolean);
+    for (var i = 0; i < CITIES.length && a.length < 8; i++) {
+      var x = CITIES[i];
+      if (x.nkey.indexOf(q) === 0) a.push(x);
+      else if (b.length < 8 && x.nkey.indexOf(q) > 0) b.push(x);
+      else if (c.length < 8 && words.length > 1 && words.every(function (w) { return x.key.indexOf(w) >= 0; })) c.push(x);
+    }
+    return a.concat(b, c).slice(0, 8);
+  }
+  /** Minutes east of UTC in time zone tz at instant ms (from the time zone database, so history is right). */
+  function tzOffset(tz, ms) {
+    var p = {}; new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', era: 'short' })
+      .formatToParts(new Date(ms)).forEach(function (x) { p[x.type] = x.value; });
+    var y = +p.year; if (p.era === 'BC' || p.era === 'B') y = 1 - y;
+    var d = new Date(0); d.setUTCFullYear(y, +p.month - 1, +p.day); d.setUTCHours(+p.hour % 24, +p.minute, +p.second, 0);
+    return Math.round((d.getTime() - Math.floor(ms / 1000) * 1000) / 60000);
+  }
+  /** The UTC offset for a wall-clock time in tz on that date, daylight saving included. */
+  function zIn(tz, y, mo, d, h, mi) {
+    var g = new Date(0); g.setUTCFullYear(y, mo - 1, d); g.setUTCHours(h == null ? 12 : h, h == null ? 0 : mi, 0, 0);
+    var o1 = tzOffset(tz, g.getTime()), o2 = tzOffset(tz, g.getTime() - o1 * 60000);
+    return o2;
+  }
+  function zoneName(tz, ms) {
+    var nm = function (style) { return new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: style }).formatToParts(new Date(ms)).filter(function (x) { return x.type === 'timeZoneName'; })[0].value; };
+    try { var v = nm('long'); if (/^GMT/.test(v)) { try { v = nm('longGeneric'); } catch (e) {} } return /^GMT/.test(v) ? tz.replace(/_/g, ' ') : v; } catch (e) { return tz; }
+  }
+  var MY_TZ = (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return null; } })();
   function fmtZ(z) { var a = Math.abs(z); return (z < 0 ? '-' : '+') + p2(Math.floor(a / 60)) + p2(a % 60); }
   function parseZ(s) { var m = /^([+-])(\d{2}):?(\d{2})$/.exec((s || '').replace(' ', '+')); return m ? (m[1] === '-' ? -1 : 1) * (+m[2] * 60 + +m[3]) : null; }
 
   function ymd(n) { return n.y + '-' + p2(n.mo) + '-' + p2(n.d); }
-  function rest(n) { return (n.h != null ? 't=' + p2(n.h) + p2(n.mi) + '&' : '') + 'z=' + encodeURIComponent(fmtZ(n.z)) + '&for=' + n.occasion; }
+  function rest(n) { return (n.h != null ? 't=' + p2(n.h) + p2(n.mi) + '&' : '') + 'z=' + encodeURIComponent(fmtZ(n.z)) + '&for=' + n.occasion + (n.place ? '&in=' + n.place.slug : ''); }
   function query(n) { return 'd=' + ymd(n) + '&' + rest(n); }
   function path(n) { return '/night/' + ymd(n) + '?' + rest(n); }
   function pageUrl(n) { return 'https://moon369.org' + path(n); }
@@ -64,7 +123,7 @@
     var head = {
       born: 'The moon when I was born: ', met: 'The moon the day we met: ', wed: 'The moon on our wedding day: ',
       kid: 'The moon when my child was born: ', day: 'The moon on ' + dateText(n) + ': ',
-    }[n.occasion] + ph + ', ' + pct + '.';
+    }[n.occasion].replace(/: $/, n.place ? ' in ' + n.place.name + ': ' : ': ') + ph + ', ' + pct + '.';
     var future = msOf(n) > Date.now();
     var back = r.eclipse ? '\nAnd there ' + (future ? 'will be ' : 'was ') + an(r.eclipse) + r.eclipse + ' solar eclipse that day.' : r.returns ? '\nIt comes back to ' + ANNIV[n.occasion] + ' in ' + r.returns + '.' : '';
     return head + back + '\n\nWhat did yours look like?';
@@ -81,6 +140,7 @@
     $('[data-nt-canvas]').setAttribute('aria-label', r.phase + ', ' + Math.round(lit * 100) + '% lit');
     $('[data-nt-title]').textContent = TITLES[n.occasion];
     $('[data-nt-date]').textContent = dateText(n).toUpperCase();
+    var pl = $('[data-nt-place]'); if (pl) { pl.textContent = n.place ? 'IN ' + (n.place.name + ', ' + n.place.near).toUpperCase() : ''; vis(pl, !!n.place); }
     $('[data-nt-sub]').textContent = (n.h != null ? p2(n.h) + ':' + p2(n.mi) + '  ·  ' : '') + r.phase.toUpperCase() + '  ·  ' + Math.round(lit * 100) + '% LIT  ·  ' + r.age.toFixed(1) + ' DAYS OLD';
     $('[data-nt-cycle]').textContent = md.cycle; $('[data-nt-mo]').textContent = p2(md.moon); $('[data-nt-lune]').textContent = p2(md.lune);
     var badge = $('[data-nt-badge]'), who = n.occasion === 'born' ? 'BORN' : n.occasion === 'kid' ? 'BORN' : n.occasion === 'met' ? 'MET' : n.occasion === 'wed' ? 'MARRIED' : '';
@@ -125,12 +185,21 @@
     var y = +m[1]; if (y < 1000 || y > 2999) { err.textContent = 'Pick a date between the years 1000 and 2999.'; return null; }
     err.textContent = '';
     var tm = /^(\d{2}):(\d{2})/.exec(tv), h = tm ? +tm[1] : null, mi = tm ? +tm[2] : 0;
-    return { y: y, mo: +m[2], d: +m[3], h: h, mi: mi, z: zOf(y, +m[2], +m[3], h, mi), occasion: occasion };
+    var wv = $('input[name=where]').value.trim();
+    if (wv && (!place || wv !== whereText(place))) {
+      var hit = search(wv)[0];
+      if (!hit) { err.textContent = 'Pick a place from the list, or leave it empty to use your time zone.'; $('input[name=where]').focus(); return null; }
+      pick(hit);
+    }
+    if (!wv) place = null;
+    return { y: y, mo: +m[2], d: +m[3], h: h, mi: mi, z: zOf(y, +m[2], +m[3], h, mi), occasion: occasion, place: place && place.slug ? place : null };
   }
   function fill(n) {
     $('input[name=d]').value = n.y + '-' + p2(n.mo) + '-' + p2(n.d);
     $('input[name=t]').value = n.h != null ? p2(n.h) + ':' + p2(n.mi) : '';
     setOccasion(n.occasion);
+    if (n.place) { place = n.place; $('input[name=where]').value = whereText(n.place); }
+    tzHint();
   }
   function fromUrl() {
     var q = new URLSearchParams(location.search), pm = /^\/night\/(\d{4}-\d{2}-\d{2})\/?$/.exec(location.pathname);
@@ -138,7 +207,8 @@
     if (!m || +m[1] < 1000 || +m[1] > 2999 || +m[2] < 1 || +m[2] > 12 || +m[3] < 1 || +m[3] > 31) return null;
     var tm = /^(\d{2}):?(\d{2})$/.exec(q.get('t') || ''), z = parseZ(q.get('z'));
     var h = tm && +tm[1] < 24 && +tm[2] < 60 ? +tm[1] : null;
-    return { y: +m[1], mo: +m[2], d: +m[3], h: h, mi: h != null ? +tm[2] : 0, z: z == null ? 0 : z, occasion: TITLES[q.get('for')] ? q.get('for') : 'day' };
+    var slug = /^[a-z0-9-]{1,120}$/.test(q.get('in') || '') ? q.get('in') : null;
+    return { y: +m[1], mo: +m[2], d: +m[3], h: h, mi: h != null ? +tm[2] : 0, z: z == null ? 0 : z, occasion: TITLES[q.get('for')] ? q.get('for') : 'day', slug: slug };
   }
 
   function getCard() {
@@ -168,6 +238,67 @@
     (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { toast('LINK COPIED'); }, function () { window.prompt('Copy this link', url); });
   }
 
+  function whereText(p) { return p.slug ? p.name + ', ' + p.near : p.name; }
+  function tzHint() {
+    var h = $('[data-nt-tz]'); if (!h) return;
+    var tz = place ? place.tz : MY_TZ; if (!tz) { h.textContent = ''; return; }
+    var dv = /^(\d{4})-(\d{2})-(\d{2})$/.exec($('input[name=d]').value), ms = Date.now();
+    if (dv) { var t = /^(\d{2}):(\d{2})/.exec($('input[name=t]').value), z = zIn(tz, +dv[1], +dv[2], +dv[3], t ? +t[1] : null, t ? +t[2] : 0); ms = Date.UTC(2000, 0, 1); ms = (function () { var g = new Date(0); g.setUTCFullYear(+dv[1], +dv[2] - 1, +dv[3]); g.setUTCHours(t ? +t[1] : 12, t ? +t[2] : 0); return g.getTime() - z * 60000; })(); }
+    h.textContent = (place ? '' : 'Your time zone: ') + zoneName(tz, ms) + ' (UTC' + fmtZ(tzOffset(tz, ms)).replace(/(\d\d)$/, ':$1') + (dv ? ' that day' : '') + ')';
+  }
+  function pick(p) {
+    place = p; var inp = $('input[name=where]'); inp.value = whereText(p);
+    closeList(); tzHint();
+  }
+  var opts = [], active = -1;
+  function closeList() { var l = $('[data-nt-list]'); if (l) { vis(l, false); l.innerHTML = ''; } $('input[name=where]').setAttribute('aria-expanded', 'false'); active = -1; }
+  function openList(items) {
+    var l = $('[data-nt-list]'), inp = $('input[name=where]'); opts = items; active = -1;
+    if (!items.length) { closeList(); return; }
+    l.innerHTML = items.map(function (p, i) {
+      return '<li role="option" id="nt-opt-' + i + '" data-i="' + i + '"><b>' + p.name.replace(/</g, '&lt;') + '</b><span>' + (p.slug ? [p.prov !== p.name ? p.prov : '', p.country].filter(Boolean).join(', ') : 'Time zone') + '</span></li>';
+    }).join('');
+    vis(l, true); inp.setAttribute('aria-expanded', 'true');
+  }
+  function setActive(i) {
+    var l = $('[data-nt-list]'); active = (i + opts.length) % opts.length;
+    Array.prototype.forEach.call(l.children, function (li, k) { li.setAttribute('aria-selected', String(k === active)); });
+    $('input[name=where]').setAttribute('aria-activedescendant', 'nt-opt-' + active);
+  }
+  (function noSpell() { var w = $('input[name=where]'); if (w) w.spellcheck = false; else setTimeout(noSpell, 50); })();   // the renderer turns spellcheck="false" into true
+  document.addEventListener('focusin', function (e) { if (e.target.matches && e.target.matches('input[name=where]')) loadCities(); });
+  document.addEventListener('input', function (e) {
+    if (!e.target.matches) return;
+    if (e.target.matches('input[name=d],input[name=t]')) { tzHint(); return; }
+    if (!e.target.matches('input[name=where]')) return;
+    var v = e.target.value;
+    if (!v.trim()) { place = null; closeList(); tzHint(); return; }
+    loadCities().then(function () { if (e.target.value === v) openList(search(v)); });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!e.target.matches || !e.target.matches('input[name=where]') || !opts.length || $('[data-nt-list]').hasAttribute('data-off')) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+    else if (e.key === 'Enter' && active >= 0) { e.preventDefault(); pick(opts[active]); }
+    else if (e.key === 'Escape') closeList();
+  });
+  document.addEventListener('mousedown', function (e) {
+    var li = e.target.closest && e.target.closest('[data-nt-list] li');
+    if (li) { e.preventDefault(); pick(opts[+li.getAttribute('data-i')]); return; }
+    if (!(e.target.closest && e.target.closest('.nt-combo'))) closeList();
+  });
+  document.addEventListener('click', function (e) {
+    var loc = e.target.closest && e.target.closest('[data-nt-locate]');
+    if (!loc) return;
+    if (!navigator.geolocation) { toast('LOCATION IS NOT AVAILABLE HERE'); return; }
+    loc.setAttribute('aria-busy', 'true');
+    Promise.all([loadCities(), new Promise(function (ok, no) { navigator.geolocation.getCurrentPosition(ok, no, { timeout: 10000, maximumAge: 600000 }); })]).then(function (a) {
+      var la = a[1].coords.latitude, lo = a[1].coords.longitude, k = Math.cos(la * Math.PI / 180), best = null, bd = 1e9;
+      CITIES.forEach(function (c) { if (!c.slug) return; var dx = (c.lng - lo) * k, dy = c.lat - la, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = c; } });
+      if (best) pick(best);
+    }).catch(function () { toast('COULD NOT GET YOUR LOCATION'); }).then(function () { loc.removeAttribute('aria-busy'); });
+  });
+
   document.addEventListener('click', function (e) {
     var t = e.target.closest && e.target.closest('.nt-chip,[data-try],[data-nt-share],[data-nt-save],[data-nt-copy],[data-nt-reset]');
     if (!t) return;
@@ -194,6 +325,13 @@
   (function boot(tries) {
     if (!$('[data-nt-form]') || !window.MoonPhase || document.querySelector('[data-dc-snapshot] [data-nt-form]') === $('[data-nt-form]')) { if (tries < 200) setTimeout(function () { boot(tries + 1); }, 25); return; }
     var n = fromUrl();
-    if (n) { $('[data-nt-root]').classList.add('nt-shared'); fill(n); show(n, false); }
+    if (n) {
+      $('[data-nt-root]').classList.add('nt-shared'); fill(n); show(n, false);
+      if (n.slug) loadCities().then(function () {
+        var hit = CITIES.filter(function (c) { return c.slug === n.slug; })[0];
+        if (hit && current && current.n === n) { n.place = hit; fill(n); show(n, false); }
+      }).catch(function () {});
+    }
+    tzHint();
   })(0);
 })();

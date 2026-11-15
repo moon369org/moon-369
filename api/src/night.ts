@@ -5,6 +5,7 @@
 // their own words on an image served from Moon.
 import { moonSvg } from './card.js';
 import { LOGO } from './logo.js';
+import { PLACES } from './places.js';
 import { eclipseByDate, type EclipseType } from './eclipses.js';
 import { eclipseIcon } from './eclipse-icon.js';
 import { toMoon, truePhase, illumination, moonLength, formatMoonmark } from './moon.js';
@@ -23,7 +24,7 @@ export const OCCASIONS: Record<string, string> = {
   kid: 'THE MOON WHEN MY CHILD WAS BORN',
 };
 
-export interface NightInput { y: number; mo: number; d: number; h: number | null; mi: number; z: number; occasion: string }
+export interface NightInput { y: number; mo: number; d: number; h: number | null; mi: number; z: number; occasion: string; place?: string | null }
 
 export function parseNight(q: URLSearchParams): NightInput {
   const dm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(q.get('d') ?? '');
@@ -47,7 +48,10 @@ export function parseNight(q: URLSearchParams): NightInput {
     z = (zm[1] === '-' ? -1 : 1) * (+zm[2] * 60 + +zm[3]);
   }
   const occasion = OCCASIONS[q.get('for') ?? ''] ? q.get('for')! : 'day';
-  return { y, mo, d, h, mi, z, occasion };
+  // ?in= names a city from Moon's own list; anything else is ignored, so no one can put their own words on a card.
+  const slug = q.get('in') ?? '';
+  const place = Object.prototype.hasOwnProperty.call(PLACES, slug) ? PLACES[slug] : null;
+  return { y, mo, d, h, mi, z, occasion, place };
 }
 
 /** The moment, in Unix ms. A date with no time means local noon. */
@@ -132,6 +136,7 @@ export function nightSvg(n: NightInput, f: ReturnType<typeof nightFacts>, fmt: '
     ? eclipseIcon(f.eclipse, Math.round(r / 0.26), false, id).replace('<svg ', `<svg x="${(cx - r / 0.52).toFixed(1)}" y="${(cy - r / 0.52).toFixed(1)}" `)
     : `<g transform="translate(${cx},${cy})">${moonSvg(f.phase_fraction, r, id)}</g>`;
   const seed = n.y * 10000 + n.mo * 100 + n.d;
+  const place = n.place ? 'IN ' + n.place.replace(/&/g, '&amp;').replace(/</g, '&lt;') : '';
   if (fmt === 'og') {
     const dfs = fit(date, 590, 56);
     return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">` +
@@ -139,9 +144,10 @@ export function nightSvg(n: NightInput, f: ReturnType<typeof nightFacts>, fmt: '
       `<rect width="1200" height="630" fill="${INK}"/>${stars(1200, 630, 90, seed)}` +
       (f.eclipse ? '' : `<circle cx="300" cy="315" r="270" fill="url(#g)"/>`) +
       art(300, 315, 165, 'no') +
-      `<text x="580" y="128" font-family="JetBrains Mono" font-size="19" letter-spacing="5" fill="${ASH}">${title}</text>` +
-      `<text x="576" y="202" font-family="Syncopate" font-weight="700" font-size="${dfs}" letter-spacing="2" fill="${PAPER}">${date}</text>` +
-      `<text x="580" y="262" font-family="JetBrains Mono" font-size="20" letter-spacing="3" fill="${SOFT}">${sub}</text>` +
+      `<text x="580" y="${n.place ? 112 : 128}" font-family="JetBrains Mono" font-size="19" letter-spacing="5" fill="${ASH}">${title}</text>` +
+      `<text x="576" y="${n.place ? 184 : 202}" font-family="Syncopate" font-weight="700" font-size="${dfs}" letter-spacing="2" fill="${PAPER}">${date}</text>` +
+      (n.place ? `<text x="580" y="224" font-family="JetBrains Mono" font-size="${n.place.length > 30 ? 16 : 19}" letter-spacing="4" fill="${PAPER}">${place}</text>` : '') +
+      `<text x="580" y="${n.place ? 266 : 262}" font-family="JetBrains Mono" font-size="20" letter-spacing="3" fill="${SOFT}">${sub}</text>` +
       grid(580, 300, 176, 15, 34, f) +
       (ret ? `<text x="580" y="472" font-family="JetBrains Mono" font-size="16" letter-spacing="3" fill="${ASH}">${ret}</text>` : '') +
       LOGO(580, 532, 130) +
@@ -156,9 +162,10 @@ export function nightSvg(n: NightInput, f: ReturnType<typeof nightFacts>, fmt: '
     `<text x="540" y="230" font-family="JetBrains Mono" font-size="24" letter-spacing="6" fill="${ASH}" text-anchor="middle">${title}</text>` +
     (f.eclipse ? '' : `<circle cx="540" cy="560" r="330" fill="url(#g)"/>`) +
     art(540, 560, 210, 'ns') +
-    `<text x="540" y="912" font-family="Syncopate" font-weight="700" font-size="${dfs}" letter-spacing="2" fill="${PAPER}" text-anchor="middle">${date}</text>` +
-    `<text x="540" y="972" font-family="JetBrains Mono" font-size="25" letter-spacing="3" fill="${SOFT}" text-anchor="middle">${sub}</text>` +
-    grid(120, 1020, 280, 18, 44, f, true) +
+    `<text x="540" y="${n.place ? 896 : 912}" font-family="Syncopate" font-weight="700" font-size="${dfs}" letter-spacing="2" fill="${PAPER}" text-anchor="middle">${date}</text>` +
+    (n.place ? `<text x="540" y="944" font-family="JetBrains Mono" font-size="${n.place.length > 34 ? 21 : 25}" letter-spacing="5" fill="${PAPER}" text-anchor="middle">${place}</text>` : '') +
+    `<text x="540" y="${n.place ? 990 : 972}" font-family="JetBrains Mono" font-size="25" letter-spacing="3" fill="${SOFT}" text-anchor="middle">${sub}</text>` +
+    grid(120, n.place ? 1030 : 1020, 280, 18, 44, f, true) +
     (ret ? `<text x="540" y="1196" font-family="JetBrains Mono" font-size="20" letter-spacing="3" fill="${ASH}" text-anchor="middle">${ret}</text>` : '') +
     `<text x="540" y="1282" font-family="JetBrains Mono" font-size="22" letter-spacing="4" fill="${ASH}" text-anchor="middle">FIND YOURS AT MOON369.ORG/NIGHT</text>` +
     `</svg>`;

@@ -48,7 +48,8 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .nt-chip{all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 18px;display:inline-flex;align-items:center;border:1px solid #2E3035;color:#B9B6AE;font-family:'Syncopate',sans-serif;font-size:10px;font-weight:700;letter-spacing:.2em;transition:border-color .2s,color .2s,background .2s}
 .nt-chip:hover{border-color:#8A8B8F;color:#E9E4D8}.nt-chip[aria-pressed="true"]{background:#E9E4D8;border-color:#E9E4D8;color:#0B0B0D}
 .nt-chip:focus-visible,.nt-btn:focus-visible{outline:2px solid #E9E4D8;outline-offset:3px}
-.nt-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:16px;align-items:end}
+.nt-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr) minmax(0,1.5fr) auto;gap:16px;align-items:start}
+@media (min-width:1101px){.nt-row>.nt-btn{margin-top:26px}}
 .nt-field{display:flex;flex-direction:column;gap:10px;min-width:0}
 .nt-in{box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:56px;padding:0 16px;background:#111214;border:1px solid #2E3035;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:17px;color-scheme:dark;border-radius:0;-webkit-appearance:none;appearance:none}
 .nt-in:focus{outline:none;border-color:#E9E4D8}
@@ -58,8 +59,18 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .nt-try button{all:unset;cursor:pointer;color:#B9B6AE;border-bottom:1px solid #3A3B3F;padding:4px 0}.nt-try button:hover{color:#E9E4D8;border-color:#E9E4D8}
 .nt-err{color:#D9A35F;font-size:14px;min-height:1px}
 .nt-res{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center;padding-top:72px}
+.nt-combo{position:relative}
+.nt-combo .nt-in{padding-right:52px}
+.nt-combo>.nt-locate{all:unset;cursor:pointer;position:absolute!important;right:4px;top:4px;bottom:4px;width:44px;display:flex;align-items:center;justify-content:center;color:#8A8B8F}
+.nt-combo>.nt-locate:hover,.nt-combo>.nt-locate:focus-visible{color:#E9E4D8}.nt-combo>.nt-locate:focus-visible{outline:2px solid #E9E4D8;outline-offset:-2px}.nt-locate[aria-busy="true"] svg{animation:ntspin 1s linear infinite}
+@keyframes ntspin{to{transform:rotate(360deg)}}
+.nt-list{position:absolute;z-index:30;left:0;right:0;top:calc(100% + 4px);margin:0;padding:6px 0;list-style:none;background:#111214;border:1px solid #2E3035;box-shadow:0 18px 40px rgba(0,0,0,.5);max-height:320px;overflow:auto}
+.nt-list li{padding:10px 16px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.nt-list li b{font-weight:500;font-size:15px;color:#E9E4D8}.nt-list li span{font-size:12.5px;color:#8A8B8F}
+.nt-list li:hover,.nt-list li[aria-selected="true"]{background:#1C1D20}
+.nt-tz{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.06em;color:#8A8B8F;min-height:1.4em}
+.nt-place{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.2em;color:#E9E4D8;margin-top:-8px}
 [data-off]{display:none!important}
-@media (max-width:480px){.nt-row{grid-template-columns:minmax(0,1fr)!important}}
 .nt-moon{display:flex;justify-content:center;align-items:center;position:relative}
 .nt-moon canvas{width:min(100%,640px);aspect-ratio:1;display:block}
 .nt-info{display:flex;flex-direction:column;gap:22px}
@@ -83,6 +94,8 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .nt-ecl{display:flex;align-items:center;gap:14px;align-self:flex-start;border:1px solid #2E3035;padding:10px 18px 10px 10px}.nt-ecl[hidden]{display:none}.nt-ecl:hover{border-color:#E9E4D8}.nt-ecl img,.nt-ecl canvas{width:44px;height:44px;display:block;flex:none}.nt-ecl b{font-family:'Syncopate',sans-serif;font-size:10px;letter-spacing:.2em}
 .nt-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;background:#E9E4D8;color:#0B0B0D;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10px;letter-spacing:.2em;padding:14px 20px;transition:opacity .25s,transform .25s;z-index:100;pointer-events:none}
 .nt-toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:1100px){.nt-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.nt-row .nt-where{grid-column:1/-1}.nt-row .nt-btn{grid-column:1/-1}}
+@media (max-width:480px){.nt-row{grid-template-columns:minmax(0,1fr)!important}}
 @media (max-width:900px){.nt-res{grid-template-columns:1fr;gap:24px;padding-top:48px}.nt-moon{margin:-14% 0 -12%}.nt-sub{font-size:13px;letter-spacing:.1em;line-height:1.7}.nt-moon canvas{width:min(100%,420px)}.nt-card{grid-template-columns:1fr;gap:24px}.nt-card img{max-width:360px}}
 @media (max-width:720px){.nt-form{padding:22px;gap:22px}.nt-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.nt-row .nt-btn{grid-column:1/-1}.nt-chip{padding:0 14px;font-size:9.5px}.nt-grid>div{padding:14px 12px}.nt-share .nt-btn{flex:1 1 calc(50% - 5px)}
 [style*="padding: 100px 32px 56px"]{padding:56px 20px 32px!important}[style*="padding: 0 32px 120px"]{padding:0 20px 80px!important}}
@@ -186,6 +199,11 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="nt-row">
 <label class="nt-field"><span class="nt-k">DATE</span><input class="nt-in" type="date" name="d" min="1000-01-01" max="2999-12-31"></label>
 <label class="nt-field"><span class="nt-k">TIME <span style="color: rgb(85, 86, 91);">· OPTIONAL</span></span><input class="nt-in" type="time" name="t"></label>
+<div class="nt-field nt-where"><label class="nt-k" for="nt-where">WHERE <span style="color: rgb(85, 86, 91);">· OPTIONAL</span></label>
+<div class="nt-combo"><input class="nt-in" id="nt-where" name="where" type="text" autocomplete="off" spellcheck="false" placeholder="City" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nt-places" aria-describedby="nt-tz">
+<button type="button" class="nt-locate" data-nt-locate="" aria-label="Use my location" title="Use my location"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"></circle><path d="M12 1.5v3.5M12 19v3.5M1.5 12H5M19 12h3.5"></path></svg></button>
+<ul class="nt-list" id="nt-places" role="listbox" aria-label="Places" data-nt-list="" data-off=""></ul></div>
+<div class="nt-tz" id="nt-tz" data-nt-tz="" aria-live="polite">Your time zone: Coordinated Universal Time (UTC+00:00)</div></div>
 <button class="nt-btn" type="submit">SHOW ME THE MOON</button>
 </div>
 <div class="nt-err" data-nt-err="" role="alert"></div>
@@ -197,6 +215,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="nt-info">
 <div class="nt-title" data-nt-title=""></div>
 <h2 class="nt-date" data-nt-date=""></h2>
+<div class="nt-place" data-nt-place="" data-off=""></div>
 <div class="nt-sub" data-nt-sub=""></div>
 <div class="nt-badge" data-nt-badge="" data-off=""></div>
 <a class="nt-ecl" data-nt-eclipse="" data-off=""><canvas class="ec-glow" data-type="total" aria-hidden="true"></canvas><b></b></a>
@@ -290,6 +309,11 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="nt-row">
 <label class="nt-field"><span class="nt-k">DATE</span><input class="nt-in" type="date" name="d" min="1000-01-01" max="2999-12-31" required></label>
 <label class="nt-field"><span class="nt-k">TIME <span style="color: #55565B">· OPTIONAL</span></span><input class="nt-in" type="time" name="t"></label>
+<div class="nt-field nt-where"><label class="nt-k" for="nt-where">WHERE <span style="color: #55565B">· OPTIONAL</span></label>
+<div class="nt-combo"><input class="nt-in" id="nt-where" name="where" type="text" autocomplete="off" spellcheck="false" placeholder="City" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nt-places" aria-describedby="nt-tz">
+<button type="button" class="nt-locate" data-nt-locate aria-label="Use my location" title="Use my location"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/><path d="M12 1.5v3.5M12 19v3.5M1.5 12H5M19 12h3.5"/></svg></button>
+<ul class="nt-list" id="nt-places" role="listbox" aria-label="Places" data-nt-list data-off></ul></div>
+<div class="nt-tz" id="nt-tz" data-nt-tz aria-live="polite"></div></div>
 <button class="nt-btn" type="submit">SHOW ME THE MOON</button>
 </div>
 <div class="nt-err" data-nt-err role="alert"></div>
@@ -301,6 +325,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="nt-info">
 <div class="nt-title" data-nt-title></div>
 <h2 class="nt-date" data-nt-date></h2>
+<div class="nt-place" data-nt-place data-off></div>
 <div class="nt-sub" data-nt-sub></div>
 <div class="nt-badge" data-nt-badge data-off></div>
 <a class="nt-ecl" data-nt-eclipse data-off><canvas class="ec-glow" data-type="total" aria-hidden="true"></canvas><b></b></a>

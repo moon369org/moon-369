@@ -486,7 +486,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         try { n = parseNight(q); } catch (e) { if (e instanceof NightParamError) throw new HttpError(400, 'bad_param', e.message); throw e; }
         const facts = nightFacts(n, Date.now());
         const cache = { 'Cache-Control': 'public, max-age=86400, s-maxage=2592000' };   // the return year moves on, so not forever
-        if (path.endsWith('/night')) return json({ ...facts, occasion: n.occasion }, 200, { ...cache, ...planHdr });
+        if (path.endsWith('/night')) return json({ ...facts, occasion: n.occasion, place: n.place ?? null }, 200, { ...cache, ...planHdr });
         const fmt = q.get('fmt') === 'story' ? 'story' : 'og';
         const svg = nightSvg(n, facts, fmt);
         if (path.endsWith('.svg')) return new Response(req.method === 'HEAD' ? null : svg, { status: 200, headers: { 'Content-Type': 'image/svg+xml; charset=utf-8', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Allow-Origin': '*', ...cache, ...planHdr } });

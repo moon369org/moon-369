@@ -26,4 +26,11 @@ describe('your moon', () => {
     expect(r.status).toBe(200);
     expect(r.headers.get('content-type')).toBe('image/png');
   });
+  it('names the place only when it is a city from Moon\'s list', async () => {
+    const a = await (await get('/v1/night?d=1990-06-14&in=denver-colorado-us')).json() as { place: string | null };
+    expect(a.place).toBe('DENVER, COLORADO');
+    const b = await (await get('/v1/night?d=1990-06-14&in=%3Cb%3Ehello')).json() as { place: string | null };
+    expect(b.place).toBe(null);
+    expect((await get('/v1/night.png?d=1990-06-14&in=london-westminster-gb')).status).toBe(200);
+  });
 });
