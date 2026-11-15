@@ -134,7 +134,10 @@
 
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var t0 = performance.now(), last = 0;
+  var PHONE = (window.innerWidth || 1200) < 720, lastFrame = 0;
   function frame(now) {
+    if (PHONE && now - lastFrame < 33) { requestAnimationFrame(frame); return; }   // 30 fps on phones
+    lastFrame = now;
     var all = document.querySelectorAll('canvas.hm-moonglow'), drew = false;
     for (var c = 0; c < all.length; c++) {
       var r = all[c].getBoundingClientRect();

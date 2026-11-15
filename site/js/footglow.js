@@ -16,7 +16,8 @@
 
   // Space dust: tiny specks drifting in the moonlight. Positions are 0..1 of the canvas.
   var dust = [];
-  for (var d = 0; d < 640; d++) dust.push({
+  var DUST = (window.innerWidth || 1200) < 720 ? 160 : 640;   // a quarter on phones: same look on a small screen, far less work
+  for (var d = 0; d < DUST; d++) dust.push({
     fast: Math.random() < 0.2,                                    // one in five drifts twice as fast
     x: Math.random(), y: Math.random(), r: 0.35 + Math.pow(Math.random(), 3) * 0.45,
     vx: (Math.random() - 0.5) * 0.004, vy: -0.002 - Math.random() * 0.006,

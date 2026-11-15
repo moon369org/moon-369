@@ -111,6 +111,9 @@
     root.setAttribute('data-dc-root', '');
     tpl.replaceWith(root);
     render(h(Comp, { __template: template }), root);
+    // The saved first render (see scripts/prerender.cjs) leaves in the same frame the live page arrives.
+    const snap = document.querySelector('[data-dc-snapshot]');
+    if (snap) snap.remove();
     // The page is built after load, so the browser's own jump to #anchor finds nothing. Jump once it exists.
     const hash = location.hash && decodeURIComponent(location.hash.slice(1));
     if (hash) {

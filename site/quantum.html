@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/assets/fonts/syncopate-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<script>document.documentElement.classList.add('mm-js')</script>
 <title>Quantum Ready · Moon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="How Moon is built to be quantum ready: every receipt is signed with Ed25519 and ML-DSA-65, anchored in hashes on Bitcoin and the XRP Ledger, and designed to upgrade.">
@@ -40,11 +45,7 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 <script src="js/dc-lite.js" defer></script>
 <link rel="stylesheet" href="assets/moon-motion.css">
 <script src="js/moon-motion.js" defer></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<!-- page styles -->
 <style>
 body{margin:0;background:#0B0B0D}
 a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
@@ -80,7 +81,118 @@ footer > div > div:last-child{justify-content:center!important;gap:22px!importan
 footer > div > div:first-child svg{width:64px!important}
 }
 </style>
-</helmet>
+</head>
+<body>
+<!--snapshot--><div data-dc-snapshot="" aria-hidden="true">
+<div style="background: rgb(11, 11, 13); color: rgb(233, 228, 216); font-family: Inter, sans-serif; min-height: 100vh;">
+
+<header style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+<a href="/" aria-label="Moon home" style="display: block;">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block;">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+</svg>
+</a>
+<nav aria-label="Main" id="mm-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;">
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/#sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
+</nav>
+<button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
+</header>
+
+<section style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 100px 32px 90px; display: flex; flex-direction: column; gap: 24px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">POST-QUANTUM</div>
+<h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1;">QUANTUM READY</h1>
+<p style="margin: 0px; max-width: 680px; font-size: 18px; line-height: 1.65; color: rgb(185, 182, 174);">A timestamp has to hold up for decades. Moon is built so a receipt signed today still can't be faked after quantum computers arrive. Here's the threat, what Moon does about it now, and how it keeps&nbsp;up.</p>
+</div>
+</section>
+
+<section>
+<div style="max-width: 1280px; margin: 0px auto; padding: 0px 32px;">
+<article style="border-top: 1px solid rgb(28, 29, 32); padding: 72px 0px; display: flex; flex-direction: column; gap: 32px;">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">01</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">THE THREAT</h2>
+<p style="margin: 0px; font-size: 17px; line-height: 1.7; color: rgb(185, 182, 174);">Quantum computers won't break everything. They break one specific thing, and for timestamps it's the thing that&nbsp;matters.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: rgb(36, 38, 42); border: 1px solid rgb(36, 38, 42);"><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Signatures are the weak point</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">A large enough quantum computer running Shor's algorithm could forge the elliptic-curve signatures most of the internet uses today, including&nbsp;Ed25519.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Backdating becomes possible</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">For a timestamp, a forged signature means a fake receipt that claims a file existed years ago. That's the attack Moon is built to&nbsp;stop.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Fingerprints hold up</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">SHA-256, the fingerprint inside every receipt and the Tideline, is a hash. Quantum computers only give a square-root speedup against it, leaving it&nbsp;strong.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Records live for decades</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Contracts, patents, archives and evidence need to be provable long after they're signed. Proof has to outlast today's&nbsp;algorithms.</p></div></div>
+</article>
+<article style="border-top: 1px solid rgb(28, 29, 32); padding: 72px 0px; display: flex; flex-direction: column; gap: 32px;">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">02</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">WHAT MOON DOES TODAY</h2>
+<p style="margin: 0px; font-size: 17px; line-height: 1.7; color: rgb(185, 182, 174);">Every receipt is signed twice over the same bytes: once with Ed25519, today's standard, and once with ML-DSA-65, NIST's post-quantum standard. A receipt counts only when both signatures check out, so faking one means breaking&nbsp;both.</p>
+</div>
+<div style="border: 1px solid rgb(233, 228, 216); background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 8px; max-width: 880px;"><div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 12px;"><span style="font-family: Syncopate, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em;">EVERY RECEIPT, TWO SIGNATURES</span><span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.18em; color: rgb(11, 11, 13); background: rgb(233, 228, 216); padding: 6px 10px;">LIVE</span></div><div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; flex-wrap: wrap;"><span style="color: rgb(138, 139, 143);">CLASSICAL</span><span style="text-align: right;">Ed25519 · 8efd3211b23533ed</span></div><div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; flex-wrap: wrap;"><span style="color: rgb(138, 139, 143);">POST-QUANTUM</span><span style="text-align: right;">ML-DSA-65 · ba9ac6c331f7528a</span></div><div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; flex-wrap: wrap;"><span style="color: rgb(138, 139, 143);">STANDARD</span><span style="text-align: right;">NIST FIPS 204</span></div><div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; flex-wrap: wrap;"><span style="color: rgb(138, 139, 143);">RECEIPT</span><span style="text-align: right;">moonmark-receipt/3</span></div><div style="display: flex; justify-content: space-between; gap: 24px; padding: 16px 0px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; flex-wrap: wrap;"><span style="color: rgb(138, 139, 143);">RULE</span><span style="text-align: right;">Both must check out</span></div></div>
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px; max-width: 880px;"><div style="padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">POST /v1/verify</div><pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">{
+  "valid": true,
+  "signatures": ["Ed25519", "ML-DSA-65"],
+  "post_quantum": true,
+  ...
+}</pre></div>
+</article>
+<article style="border-top: 1px solid rgb(28, 29, 32); padding: 72px 0px; display: flex; flex-direction: column; gap: 32px;">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">03</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">PROOF THAT ISN'T A SIGNATURE</h2>
+<p style="margin: 0px; font-size: 17px; line-height: 1.7; color: rgb(185, 182, 174);">Signatures are only one layer. The <a href="/tideline" style="text-decoration: underline; text-underline-offset: 3px;">Tideline</a> locks every receipt into public records that rest on hashes, the part quantum computers can't&nbsp;undo.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: rgb(36, 38, 42); border: 1px solid rgb(36, 38, 42);"><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">A fingerprint tree</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Every receipt goes into a SHA-256 Merkle tree, so its place in the log can be proven with hashes&nbsp;alone.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Anchored on Bitcoin</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Each day's tide is stamped into Bitcoin through OpenTimestamps. Rewriting it would mean redoing the hash work stacked on top of it ever&nbsp;since.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Anchored on the XRP Ledger</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Checkpoints land on the XRPL within about a minute, a second public record outside Moon's&nbsp;control.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Proof that outlives a break</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">If a signature scheme ever falls, an anchored receipt still shows it existed before that day, because the record was already public and&nbsp;fixed.</p></div></div>
+</article>
+<article id="upgrade" style="border-top: 1px solid rgb(28, 29, 32); padding: 72px 0px; display: flex; flex-direction: column; gap: 32px;">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">04</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">BUILT TO UPGRADE</h2>
+<p style="margin: 0px; font-size: 17px; line-height: 1.7; color: rgb(185, 182, 174);">Moon is designed to upgrade its cryptography without breaking anything it has already&nbsp;signed.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: rgb(36, 38, 42); border: 1px solid rgb(36, 38, 42);"><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Every receipt names its method</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Each receipt starts with its version, like <code>moonmark-receipt/3</code>, so anyone knows exactly how to check&nbsp;it.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">New algorithms slot in</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">When stronger standards arrive, Moon adds them as a new receipt version through its open proposals&nbsp;process.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Old receipts keep working</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Every version ever issued stays verifiable. Retired keys stay published, and checkers accept every past&nbsp;version.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Re-sealed over time</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Through the Tideline, old receipts can be re-anchored with fresh, stronger fingerprints and signatures, so a 2026 receipt is still provable in&nbsp;2056.</p></div></div>
+</article>
+<article style="border-top: 1px solid rgb(28, 29, 32); padding: 72px 0px; display: flex; flex-direction: column; gap: 32px;">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">05</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">CHECK IT YOURSELF</h2>
+<p style="margin: 0px; font-size: 17px; line-height: 1.7; color: rgb(185, 182, 174);">Don't take Moon's word for it. Send any receipt to the open verify endpoint and it reports both signatures. The checking code is open source, so you can read exactly what it&nbsp;does.</p>
+</div>
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px; max-width: 880px;"><div style="padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">curl</div><pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl -s -X POST https://api.moon369.org/v1/verify \
+  -H "Content-Type: application/json" \
+  -d '{"receipt": {...}}'
+# { "valid": true, "post_quantum": true, ... }</pre></div>
+</article>
+</div>
+</section>
+
+<section style="border-top: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 100px 32px 90px; display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-end; justify-content: space-between;">
+<div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 16px;">
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">SIGN SOMETHING</h2>
+<p style="margin: 0px; max-width: 620px; font-size: 17px; line-height: 1.65; color: rgb(185, 182, 174);">Choose a file and get a signed Moonmark in seconds. Your file never leaves your&nbsp;device.</p>
+</div>
+<a href="/#sign" style="display: inline-flex; align-items: center; min-height: 48px; padding: 14px 28px; background: rgb(233, 228, 216); color: rgb(11, 11, 13); font-family: Syncopate, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em;">TRY IT</a>
+</div>
+</section>
+
+</div>
+
+<footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<div style="max-width: 1280px; margin: 0px auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.14em; color: rgb(138, 139, 143);">
+<div style="display: flex; flex-direction: column; gap: 18px;"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap;"><a href="/" style="color: rgb(138, 139, 143);">HOME</a><a href="/calendar" style="color: rgb(138, 139, 143);">CALENDAR</a><a href="/api" style="color: rgb(138, 139, 143);">API</a><a href="/m" style="color: rgb(138, 139, 143);">MOONMARK</a><a href="/uses" style="color: rgb(138, 139, 143);">USES</a><a href="/see" style="color: rgb(138, 139, 143);">SEE IT WORK</a><a href="/trust" style="color: rgb(138, 139, 143);">TRUST</a><a href="/quantum" style="color: rgb(138, 139, 143);">QUANTUM</a><a href="/tideline" style="color: rgb(138, 139, 143);">TIDELINE</a><a href="/evidence" style="color: rgb(138, 139, 143);">EVIDENCE</a><a href="/press" style="color: rgb(138, 139, 143);">PRESS</a><a href="/#faq" style="color: rgb(138, 139, 143);">FAQ</a></div>
+</div>
+</footer>
+
+
+</div><!--/snapshot-->
+<x-dc>
 <div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
 
 <header style="border-bottom: 1px solid #1C1D20">

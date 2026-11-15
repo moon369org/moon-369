@@ -130,10 +130,10 @@
     const seen = new WeakSet();
     const play = (el, i, delay) => el.animate(
       [
-        { opacity: 0, transform: 'translateY(28px)' },
+        { opacity: 0, transform: 'translateY(16px)' },
         { opacity: 1, transform: 'none' },
       ],
-      { duration: 1000, delay: delay + Math.min(i, 6) * 90, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' },
+      { duration: 600, delay: delay + Math.min(i, 4) * 50, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' },
     );
     const io = new IntersectionObserver((entries) => {
       for (const e of entries) {
@@ -143,11 +143,12 @@
         play(e.target, t ? t.i : 0, t && t.hero ? 250 : 0);
       }
     }, { rootMargin: '0px 0px 8% 0px', threshold: 0 });
-    // Whatever is already on screen animates now, before the first paint, so it never flashes.
+    // Whatever is already on screen when the page opens stays put: the text is there from
+    // the first paint, so animating it in would only make it flicker. Only what scrolls in moves.
     const vh = window.innerHeight;
     targets.forEach((t) => {
       const r = t.el.getBoundingClientRect();
-      if (r.top < vh && r.bottom > 0) { seen.add(t.el); play(t.el, t.i, t.hero ? 250 : 120); }
+      if (r.top < vh && r.bottom > 0) seen.add(t.el);
       else io.observe(t.el);
     });
   }

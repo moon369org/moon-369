@@ -11,7 +11,7 @@
    but above the page background. The layer spans the full viewport width and
    fades out toward the bottom of the hero. */
 #top { isolation: isolate; }
-[data-dc-root] > div { overflow-x: clip; }
+:is([data-dc-root],[data-dc-snapshot]) > div { overflow-x: clip; }
 .moon-stars {
   position: absolute; top: 0; bottom: 0; left: calc(50% - 50vw); right: calc(50% - 50vw);
   z-index: -1; pointer-events: none; overflow: hidden;
@@ -46,12 +46,7 @@
   @keyframes mm-progress { to { transform: scaleX(1); } }
 }
 
-/* ---------- Page entry: headlines rise in ---------- */
-[data-dc-root] h1 { animation: mm-warp 1.2s cubic-bezier(.16, 1, .3, 1) both; }
-@keyframes mm-warp {
-  from { opacity: 0; transform: translateY(18px); }
-  60% { opacity: 1; }
-}
+/* Headlines are in the first paint (saved snapshot), so they no longer animate in. */
 
 /* Page-to-page warp (browsers with cross-document view transitions). */
 @view-transition { navigation: auto; }
@@ -72,7 +67,7 @@ nav[aria-label="Main"] a:not([style*="border"]):focus-visible {
 }
 
 nav[aria-label="Main"] a[aria-current="page"] { color: #E9E4D8; background-size: 100% 1px; }
-@media (max-width: 720px) { html.mm-js [data-dc-root] nav[aria-label="Main"] a[aria-current="page"] { background-size: 0 0; font-weight: 700; } }
+@media (max-width: 720px) { html.mm-js :is([data-dc-root],[data-dc-snapshot]) nav[aria-label="Main"] a[aria-current="page"] { background-size: 0 0; font-weight: 700; } }
 
 /* Footer, desktop: menu on the left, logo on the right. Phones keep their stacked layout. */
 @media (min-width: 721px) {
@@ -92,33 +87,33 @@ footer a:hover, footer a:focus-visible {
 footer a:has(svg) { background: none; padding-bottom: 0; }
 
 /* ---------- Buttons: light sweep + glow ---------- */
-[data-dc-root] a[style*="padding: 18px 30px"],
-[data-dc-root] a[style*="padding: 14px 22px"],
-[data-dc-root] button:not(.mm-burger),
-[data-dc-root] .mc-btn {
+:is([data-dc-root],[data-dc-snapshot]) a[style*="padding: 18px 30px"],
+:is([data-dc-root],[data-dc-snapshot]) a[style*="padding: 14px 22px"],
+:is([data-dc-root],[data-dc-snapshot]) button:not(.mm-burger),
+:is([data-dc-root],[data-dc-snapshot]) .mc-btn {
   position: relative; overflow: hidden; isolation: isolate;
   transition: box-shadow .4s, border-color .3s, transform .3s cubic-bezier(.16, 1, .3, 1);
 }
-[data-dc-root] a[style*="padding: 18px 30px"]::after,
-[data-dc-root] a[style*="padding: 14px 22px"]::after,
-[data-dc-root] button:not(.mm-burger)::after,
-[data-dc-root] .mc-btn::after {
+:is([data-dc-root],[data-dc-snapshot]) a[style*="padding: 18px 30px"]::after,
+:is([data-dc-root],[data-dc-snapshot]) a[style*="padding: 14px 22px"]::after,
+:is([data-dc-root],[data-dc-snapshot]) button:not(.mm-burger)::after,
+:is([data-dc-root],[data-dc-snapshot]) .mc-btn::after {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
   transform: translateX(-110%);
 }
-[data-dc-root] a[style*="padding: 18px 30px"]:hover,
-[data-dc-root] a[style*="padding: 14px 22px"]:hover,
-[data-dc-root] button:not(.mm-burger):hover,
-[data-dc-root] .mc-btn:hover {
+:is([data-dc-root],[data-dc-snapshot]) a[style*="padding: 18px 30px"]:hover,
+:is([data-dc-root],[data-dc-snapshot]) a[style*="padding: 14px 22px"]:hover,
+:is([data-dc-root],[data-dc-snapshot]) button:not(.mm-burger):hover,
+:is([data-dc-root],[data-dc-snapshot]) .mc-btn:hover {
   box-shadow: 0 0 24px rgba(233, 228, 216, 0.28), inset 0 0 12px rgba(233, 228, 216, 0.08);
   transform: translateY(-1px);
 }
-[data-dc-root] a[style*="padding: 18px 30px"]:hover::after,
-[data-dc-root] a[style*="padding: 14px 22px"]:hover::after,
-[data-dc-root] button:not(.mm-burger):hover::after,
-[data-dc-root] .mc-btn:hover::after { transform: translateX(110%); transition: transform .8s cubic-bezier(.16, 1, .3, 1); }
-[data-dc-root] input:focus { outline: none; border-color: #E9E4D8 !important; box-shadow: 0 0 0 1px #E9E4D8, 0 0 24px rgba(233, 228, 216, 0.2); transition: box-shadow .3s; }
+:is([data-dc-root],[data-dc-snapshot]) a[style*="padding: 18px 30px"]:hover::after,
+:is([data-dc-root],[data-dc-snapshot]) a[style*="padding: 14px 22px"]:hover::after,
+:is([data-dc-root],[data-dc-snapshot]) button:not(.mm-burger):hover::after,
+:is([data-dc-root],[data-dc-snapshot]) .mc-btn:hover::after { transform: translateX(110%); transition: transform .8s cubic-bezier(.16, 1, .3, 1); }
+:is([data-dc-root],[data-dc-snapshot]) input:focus { outline: none; border-color: #E9E4D8 !important; box-shadow: 0 0 0 1px #E9E4D8, 0 0 24px rgba(233, 228, 216, 0.2); transition: box-shadow .3s; }
 
 /* ---------- Hero mark (home) ---------- */
 #top { position: relative; }
@@ -162,9 +157,9 @@ footer a:has(svg) { background: none; padding-bottom: 0; }
 
 /* ---------- Live clocks glow ---------- */
 #clock div[style*="font-size: clamp(56px"],
-[data-dc-root] div[style*="font-size: clamp(48px, 8vw, 112px)"],
-[data-dc-root] .mk-panel div[style*="font-size: clamp(48px, 7vw, 104px)"],
-[data-dc-root] div[style*="font-size: 40px; line-height: 1"] {
+:is([data-dc-root],[data-dc-snapshot]) div[style*="font-size: clamp(48px, 8vw, 112px)"],
+:is([data-dc-root],[data-dc-snapshot]) .mk-panel div[style*="font-size: clamp(48px, 7vw, 104px)"],
+:is([data-dc-root],[data-dc-snapshot]) div[style*="font-size: 40px; line-height: 1"] {
   text-shadow: 0 0 28px rgba(233, 228, 216, 0.35), 0 0 2px rgba(233, 228, 216, 0.6);
 }
 #clock svg[viewBox="-11 -11 22 22"][style*="0.82em"] { filter: drop-shadow(0 0 6px rgba(233, 228, 216, 0.35)); }
@@ -197,8 +192,8 @@ footer a:has(svg) { background: none; padding-bottom: 0; }
 }
 #standard div[style*="padding: 40px 32px 48px"]:hover { background-color: #111215 !important; }
 #standard div[style*="padding: 40px 32px 48px"]:hover::before { transform: scaleX(1); }
-[data-dc-root] pre { transition: box-shadow .4s; }
-[data-dc-root] pre:hover { box-shadow: inset 0 0 0 1px rgba(233, 228, 216, 0.18), 0 0 30px rgba(129, 151, 173, 0.08); }
+:is([data-dc-root],[data-dc-snapshot]) pre { transition: box-shadow .4s; }
+:is([data-dc-root],[data-dc-snapshot]) pre:hover { box-shadow: inset 0 0 0 1px rgba(233, 228, 216, 0.18), 0 0 30px rgba(129, 151, 173, 0.08); }
 details > summary span[aria-hidden] { display: inline-block; transition: transform .4s cubic-bezier(.16, 1, .3, 1); }
 details[open] > summary span[aria-hidden] { transform: rotate(45deg); }
 details > summary { transition: color .2s, text-shadow .3s; }
@@ -224,20 +219,20 @@ section[aria-label="Current Moon date and time"] > svg { filter: drop-shadow(0 0
   #top p { font-size: clamp(14.5px, 3.85vw, 15px) !important; line-height: 1.5 !important; text-wrap: balance; }
   #top > div[style*="gap: 16px"] { gap: 10px !important; }
   #top a[style*="padding: 18px 30px"] { padding: 15px 22px !important; }
-  [data-dc-root] header a[aria-label="Moon home"] svg { width: 66px !important; height: 18.5px !important; }
-  [data-dc-root] header a[aria-label="Moon home"] { gap: 10px !important; font-size: 10px; }
+  :is([data-dc-root],[data-dc-snapshot]) header a[aria-label="Moon home"] svg { width: 66px !important; height: 18.5px !important; }
+  :is([data-dc-root],[data-dc-snapshot]) header a[aria-label="Moon home"] { gap: 10px !important; font-size: 10px; }
   /* Only collapse the links when the script is there to open them again. */
   /* Pinned top bar: slides away while scrolling down, back in when scrolling up. */
-  html.mm-js [data-dc-root] header {
+  html.mm-js :is([data-dc-root],[data-dc-snapshot]) header {
     position: sticky; top: 0; z-index: 20; background: #0B0B0D; transform: translateZ(0);
     transition: transform .35s cubic-bezier(.16, 1, .3, 1); will-change: transform;
   }
-  html.mm-head-hidden [data-dc-root] header { transform: translateY(-100%) translateZ(0); }
+  html.mm-head-hidden :is([data-dc-root],[data-dc-snapshot]) header { transform: translateY(-100%) translateZ(0); }
   /* Every section and the footer get their own layer below the bar, so animated or
      scrolling content inside them (map, satellites, fade-ins) can never paint over
      the bar or its menu. Safari otherwise lets composited layers jump the order. */
-  html.mm-js [data-dc-root] section, html.mm-js [data-dc-root] footer { position: relative; z-index: 0; }
-  html.mm-js [data-dc-root] header > div { flex-wrap: nowrap !important; }
+  html.mm-js :is([data-dc-root],[data-dc-snapshot]) section, html.mm-js :is([data-dc-root],[data-dc-snapshot]) footer { position: relative; z-index: 0; }
+  html.mm-js :is([data-dc-root],[data-dc-snapshot]) header > div { flex-wrap: nowrap !important; }
   html.mm-js .mm-burger {
     display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 7px;
     width: 44px; height: 44px; margin-right: -10px; padding: 0; border: 0; background: none; cursor: pointer;
@@ -254,7 +249,7 @@ section[aria-label="Current Moon date and time"] > svg { filter: drop-shadow(0 0
   html.mm-menu-open .mm-burger span:first-child { transform: translateY(4.25px) rotate(45deg); }
   html.mm-menu-open .mm-burger span:last-child { transform: translateY(-4.25px) rotate(-45deg); }
   .mm-burger:focus-visible { outline: 2px solid #E9E4D8; outline-offset: 2px; }
-  html.mm-js [data-dc-root] nav[aria-label="Main"] {
+  html.mm-js :is([data-dc-root],[data-dc-snapshot]) nav[aria-label="Main"] {
     position: absolute; left: 0; right: 0; top: 100%;
     flex-direction: column; flex-wrap: nowrap !important; align-items: stretch !important; gap: 0 !important;
     padding: 4px 20px 24px; background: #0B0B0D; border-bottom: 1px solid #1C1D20;
@@ -262,12 +257,12 @@ section[aria-label="Current Moon date and time"] > svg { filter: drop-shadow(0 0
     opacity: 0; transform: translateY(-8px); visibility: hidden; pointer-events: none;
     transition: opacity .25s, transform .3s cubic-bezier(.16, 1, .3, 1), visibility 0s .3s;
   }
-  html.mm-menu-open [data-dc-root] nav[aria-label="Main"] {
+  html.mm-menu-open :is([data-dc-root],[data-dc-snapshot]) nav[aria-label="Main"] {
     opacity: 1; transform: none; visibility: visible; pointer-events: auto;
     transition: opacity .25s, transform .3s cubic-bezier(.16, 1, .3, 1);
   }
-  html.mm-js [data-dc-root] nav[aria-label="Main"] a { min-height: 52px; padding-bottom: 0; border-bottom: 1px solid #1C1D20; }
-  html.mm-js [data-dc-root] nav[aria-label="Main"] a[style*="padding: 14px 22px"] { margin-top: 18px; justify-content: center; padding: 0 22px !important; border: 1px solid #E9E4D8; }
+  html.mm-js :is([data-dc-root],[data-dc-snapshot]) nav[aria-label="Main"] a { min-height: 52px; padding-bottom: 0; border-bottom: 1px solid #1C1D20; }
+  html.mm-js :is([data-dc-root],[data-dc-snapshot]) nav[aria-label="Main"] a[style*="padding: 14px 22px"] { margin-top: 18px; justify-content: center; padding: 0 22px !important; border: 1px solid #E9E4D8; }
 }
 
 /* ---------- Reduced motion: keep the look, drop the movement ---------- */

@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/assets/fonts/syncopate-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<script>document.documentElement.classList.add('mm-js')</script>
 <title>Evidence · Moon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Turn a signed Moonmark into court-ready evidence: every check, the Tideline proof, the XRP Ledger and Bitcoin anchors, and a statement signed by Moon.">
@@ -72,11 +77,7 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 <script src="js/moon-motion.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <script src="js/evidence.js" defer></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<!-- page styles -->
 <style>
 body{margin:0;background:#0B0B0D}
 a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
@@ -112,7 +113,60 @@ footer > div > div:last-child{justify-content:center!important;gap:22px!importan
 footer > div > div:first-child svg{width:64px!important}
 }
 </style>
-</helmet>
+</head>
+<body>
+<!--snapshot--><div data-dc-snapshot="" aria-hidden="true">
+<div style="background: rgb(11, 11, 13); color: rgb(233, 228, 216); font-family: Inter, sans-serif; min-height: 100vh;">
+
+<header style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+<a href="/" aria-label="Moon home" style="display: block;">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block;">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+</svg>
+</a>
+<nav aria-label="Main" id="mm-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;">
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/#sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
+</nav>
+<button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
+</header>
+
+<section class="ev-noprint" style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 100px 32px 72px; display: flex; flex-direction: column; gap: 24px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">FOR LAWYERS, AUDITORS AND COURTS</div>
+<h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1;">EVIDENCE PACK</h1>
+<p style="margin: 0px; max-width: 720px; font-size: 18px; line-height: 1.65; color: rgb(185, 182, 174);">Turn a signed Moonmark into evidence you can hand to someone else. Moon checks every part of the receipt, proves its place in the Tideline, lists its XRP Ledger and Bitcoin anchors, and signs a statement of what it found. Print it, or download everything as one bundle anyone can check without&nbsp;Moon.</p>
+</div>
+</section>
+
+<section>
+<div data-ev-wrap="" style="max-width: 1280px; margin: 0px auto; padding: 64px 32px 120px;">
+<div data-ev-root=""><div class="ev-noprint" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:24px"><div class="ev-card"><div class="ev-k">1 · THE RECEIPT</div><p style="margin:0;font-size:15px;line-height:1.6;color:#A2A3A7">The <code>.moonmark.json</code> file you saved when you signed. Required.</p><label class="ev-btn" style="align-self:flex-start">CHOOSE RECEIPT<input type="file" accept=".json,application/json" data-ev-receipt=""></label></div><div class="ev-card"><div class="ev-k">2 · THE ORIGINAL FILE</div><p style="margin:0;font-size:15px;line-height:1.6;color:#A2A3A7">Optional, but it makes the evidence stronger: proves this exact file is the one Moon signed. It never leaves your device.</p><label class="ev-btn" style="align-self:flex-start">CHOOSE FILE<input type="file" data-ev-file=""></label></div></div><div class="ev-noprint" style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:24px"><button type="button" class="ev-btn p" data-ev-go="" disabled="">BUILD EVIDENCE PACK</button></div></div>
+</div>
+</section>
+
+</div>
+
+<footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<div style="max-width: 1280px; margin: 0px auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.14em; color: rgb(138, 139, 143);">
+<div style="display: flex; flex-direction: column; gap: 18px;"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap;"><a href="/" style="color: rgb(138, 139, 143);">HOME</a><a href="/calendar" style="color: rgb(138, 139, 143);">CALENDAR</a><a href="/api" style="color: rgb(138, 139, 143);">API</a><a href="/m" style="color: rgb(138, 139, 143);">MOONMARK</a><a href="/uses" style="color: rgb(138, 139, 143);">USES</a><a href="/see" style="color: rgb(138, 139, 143);">SEE IT WORK</a><a href="/trust" style="color: rgb(138, 139, 143);">TRUST</a><a href="/quantum" style="color: rgb(138, 139, 143);">QUANTUM</a><a href="/tideline" style="color: rgb(138, 139, 143);">TIDELINE</a><a href="/evidence" style="color: rgb(138, 139, 143);">EVIDENCE</a><a href="/press" style="color: rgb(138, 139, 143);">PRESS</a><a href="/#faq" style="color: rgb(138, 139, 143);">FAQ</a></div>
+</div>
+</footer>
+
+
+</div><!--/snapshot-->
+<x-dc>
 <div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
 
 <header style="border-bottom: 1px solid #1C1D20">

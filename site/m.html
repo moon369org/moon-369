@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/assets/fonts/syncopate-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<script>document.documentElement.classList.add('mm-js')</script>
 <link rel="preconnect" href="https://api.moon369.org" crossorigin>
 <title>Moonmark · Moon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -60,11 +65,7 @@ html.mm-js [data-dc-root] section:has(.mi.open),html.mm-js [data-dc-root] sectio
 <link rel="stylesheet" href="assets/moon-motion.css">
 <script src="js/moon-motion.js" defer></script>
 <script src="js/infotip.js" defer></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<!-- page styles -->
 <style>
 body{margin:0;background:#0B0B0D}
 a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
@@ -161,7 +162,69 @@ footer > div > div:first-child svg{width:64px!important}
 [style*="padding: 100px 32px 140px"]{}
 @media (max-width:720px){[style*="padding: 100px 32px 140px"]{padding:44px 20px 80px!important;gap:28px!important}}
 </style>
-</helmet>
+</head>
+<body>
+<!--snapshot--><div data-dc-snapshot="" aria-hidden="true">
+<div style="background: rgb(11, 11, 13); color: rgb(233, 228, 216); font-family: Inter, sans-serif; min-height: 100vh;">
+
+<header style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+<a href="/" aria-label="Moon home" style="display: block;">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block;">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+</svg>
+</a>
+<nav aria-label="Main" id="mm-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;">
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/#sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
+</nav>
+<button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
+</header>
+
+<section style="max-width: 1280px; margin: 0px auto; padding: 100px 32px 140px; display: flex; flex-direction: column; gap: 40px;">
+<div style="display: flex; flex-direction: column; gap: 18px;">
+<div class="mk-ey" style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);"><span>ONE EXACT MOMENT</span><span class="mk-sep"> · </span><span>THE SAME EVERYWHERE</span></div>
+<h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1;">MOONMARK</h1>
+</div>
+<div data-mk-root=""></div>
+<div class="mk-own">
+<div class="mk-own-l">
+<div class="mk-own-k">MAKE YOUR OWN</div>
+<h2 class="mk-own-h">PROVE WHEN YOUR FILE EXISTED</h2>
+<p class="mk-own-p">A signed Moonmark like this one takes seconds. Free, no account.</p>
+<ol class="mk-own-steps">
+<li><b>01</b><span>Choose any file. It never leaves your device; only its fingerprint is sent.</span></li>
+<li><b>02</b><span>Moon signs that fingerprint at this exact moment, down to the nanosecond.</span></li>
+<li><b>03</b><span>Share the link. Anyone can check it, forever.</span></li>
+</ol>
+</div>
+<div class="mk-own-r">
+<label class="mk-own-btn">SIGN A FILE<input type="file" data-seal-pick="" aria-label="Choose a file to sign"></label>
+<a class="mk-own-a" href="/trust">Why you can trust it →</a>
+</div>
+</div>
+</section>
+</div>
+
+<footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<div style="max-width: 1280px; margin: 0px auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.14em; color: rgb(138, 139, 143);">
+<div style="display: flex; flex-direction: column; gap: 18px;"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap;"><a href="/" style="color: rgb(138, 139, 143);">HOME</a><a href="/calendar" style="color: rgb(138, 139, 143);">CALENDAR</a><a href="/api" style="color: rgb(138, 139, 143);">API</a><a href="/m" style="color: rgb(138, 139, 143);">MOONMARK</a><a href="/uses" style="color: rgb(138, 139, 143);">USES</a><a href="/see" style="color: rgb(138, 139, 143);">SEE IT WORK</a><a href="/trust" style="color: rgb(138, 139, 143);">TRUST</a><a href="/quantum" style="color: rgb(138, 139, 143);">QUANTUM</a><a href="/tideline" style="color: rgb(138, 139, 143);">TIDELINE</a><a href="/evidence" style="color: rgb(138, 139, 143);">EVIDENCE</a><a href="/press" style="color: rgb(138, 139, 143);">PRESS</a><a href="/#faq" style="color: rgb(138, 139, 143);">FAQ</a></div>
+</div>
+</footer>
+
+
+</div><!--/snapshot-->
+<x-dc>
 <div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
 
 <header style="border-bottom: 1px solid #1C1D20">
