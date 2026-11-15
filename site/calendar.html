@@ -59,6 +59,8 @@ html.mm-js [data-dc-root] section:has(.mi.open),html.mm-js [data-dc-root] sectio
 <script src="js/infotip.js" defer></script>
 </head>
 <body>
+<svg aria-hidden="true" width="0" height="0" style="position:absolute"><defs><clipPath id="mc-disc"><circle r="10"></circle></clipPath><filter id="mc-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="0.9"></feGaussianBlur></filter></defs></svg>
+
 <x-dc>
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -191,7 +193,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
 <sc-for list="{{mo.days}}" as="d" hint-placeholder-count="28">
 <button type="button" class="{{d.cls}}" aria-label="{{d.label}}" onClick="{{d.pick}}">
-<svg aria-hidden="true" viewBox="-11 -11 22 22" style="width: 14px; height: 14px; display: block"><circle r="10" style="fill: #24262A"></circle><path d="{{d.ph}}" style="fill: #E9E4D8"></path></svg>
+<svg aria-hidden="true" viewBox="-11 -11 22 22" style="width: 14px; height: 14px; display: block"><circle r="10" style="fill: #24262A"></circle><g clip-path="url(#mc-disc)"><path d="{{d.ph}}" filter="url(#mc-soft)" style="fill: #E9E4D8; stroke: #E9E4D8; stroke-width: 0"></path></g></svg>
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500">{{d.n}}<sc-if value="{{d.hit}}" hint-placeholder-val="{{false}}"> <span class="mc-ev">◆</span></sc-if></span>
 <span class="mc-g">{{d.g}}</span>
 </button>

@@ -51,7 +51,20 @@
 
     // The moon.
     ctx.fillStyle = '#24262A'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
-    litPath(ctx, cx, cy, R, f); ctx.fillStyle = 'rgb(' + INK + ')'; ctx.fill();
+    // Soft terminator, like a real moon: light blurs into the shadow. Only that line is
+    // blurred; the lit outer edge stays crisp (we paint past it, then clip to the disc).
+    var soft = Math.max(1, R * 0.08);
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
+    ctx.filter = 'blur(' + soft.toFixed(1) + 'px)';
+    ctx.fillStyle = ctx.strokeStyle = 'rgb(' + INK + ')';
+    litPath(ctx, cx, cy, R, f); ctx.fill();
+    var lw = soft * 5;
+    ctx.lineWidth = lw;
+    var both = Math.abs(f - 0.5) < 0.02;
+    ctx.beginPath(); ctx.arc(cx, cy, R + lw / 2 - 1, -Math.PI / 2, Math.PI / 2, !wax); ctx.stroke();
+    if (both) { ctx.beginPath(); ctx.arc(cx, cy, R + lw / 2 - 1, Math.PI / 2, -Math.PI / 2, !wax); ctx.stroke(); }
+    ctx.restore();
 
     // Rays on the lit limb only.
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
