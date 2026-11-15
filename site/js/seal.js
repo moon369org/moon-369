@@ -269,6 +269,22 @@
 
   // Standalone signing, for pages without their own flow (the Moonmark page).
   function emit(d) { window.dispatchEvent(new CustomEvent('moon:seal', { detail: d })); }
+  // 64-bit difference hash, the same one /embed/moon.js computes, so edited copies can be found later.
+  function dhash(file) {
+    if (!/^image\//.test(file.type) || !window.createImageBitmap) return Promise.resolve(null);
+    return createImageBitmap(file).then(function (src) {
+      var cv = document.createElement('canvas'); cv.width = 9; cv.height = 8;
+      var x = cv.getContext('2d', { willReadFrequently: true }); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+      x.drawImage(src, 0, 0, 9, 8);
+      var d = x.getImageData(0, 0, 9, 8).data, bits = '', out = '';
+      for (var y = 0; y < 8; y++) for (var i = 0; i < 8; i++) {
+        var a = (y * 9 + i) * 4, b = a + 4;
+        bits += (0.299 * d[a] + 0.587 * d[a + 1] + 0.114 * d[a + 2]) > (0.299 * d[b] + 0.587 * d[b + 1] + 0.114 * d[b + 2]) ? '1' : '0';
+      }
+      for (var k = 0; k < 64; k += 4) out += parseInt(bits.slice(k, k + 4), 2).toString(16);
+      return out;
+    }).catch(function () { return null; });
+  }
   function sign(file) {
     if (!file) return;
     if (file.size > 1024 * 1024 * 1024) { emit({ phase: 'start', name: file.name }); emit({ phase: 'error', message: 'That file is over 1 GB. Fingerprint it yourself and send the SHA-256 to the API.' }); return; }
@@ -276,7 +292,7 @@
     file.arrayBuffer().then(function (buf) { return crypto.subtle.digest('SHA-256', buf); }).then(function (d) {
       var sha = Array.from(new Uint8Array(d), function (b) { return b.toString(16).padStart(2, '0'); }).join('');
       emit({ phase: 'hashed', sha: sha });
-      return fetch('https://api.moon369.org/v1/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sha256: sha }) })
+      return dhash(file).then(function (ph) { return fetch('https://api.moon369.org/v1/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ph ? { sha256: sha, phash: ph } : { sha256: sha }) }); })
         .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, status: r.status, b: b }; }); })
         .then(function (x) {
           if (!x.ok) throw new Error(x.status === 429 ? 'Too many requests right now. Try again in a minute.' : ((x.b && x.b.error && x.b.error.message) || 'Signing failed. Try again.'));
@@ -288,7 +304,7 @@
       emit({ phase: 'error', message: (err && err.message && !/fetch|network/i.test(err.message)) ? err.message : 'Could not reach Moon. Check your connection and try again.' });
     });
   }
-  window.MoonSeal = { sign: sign };
+  window.MoonSeal = { dhash: dhash, sign: sign };
   // Any file input marked data-seal-pick signs through the Seal. Delegated, so re-renders don't matter.
   document.addEventListener('change', function (e) {
     var t = e.target;

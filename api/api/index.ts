@@ -6,6 +6,7 @@ import { Signer, PqSigner, loadPrivateKey } from '../src/receipt.js';
 import { envKeyStore } from '../src/keys.js';
 import { beaconSource } from '../src/beacon.js';
 import { upstashStore } from '../src/tideline.js';
+import { upstashRegistry } from '../src/registry.js';
 import { xrplAnchorer } from '../src/anchor.js';
 import { stamp, upgrade, summarize } from '../src/ots.js';
 import { waitUntil } from '@vercel/functions';
@@ -54,6 +55,8 @@ const BEACON = process.env.MOON_BEACON === 'off' ? undefined : beaconSource();
 const TL_URL = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
 const TL_TOKEN = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
 const TIDES = TL_URL && TL_TOKEN ? upstashStore(TL_URL, TL_TOKEN) : undefined;
+// The registry (lookups by fingerprint and look-alike images) shares the same Upstash database.
+const REGISTRY = TL_URL && TL_TOKEN ? upstashRegistry(TL_URL, TL_TOKEN) : undefined;
 // Anchoring on the XRP Ledger (XRPL_SEED: the wallet's secret seed).
 // Bitcoin anchoring through OpenTimestamps: free, no keys. MOON_OTS=off disables it.
 const BITCOIN = process.env.MOON_OTS === 'off' ? undefined : { stamp: (d: string) => stamp(d), upgrade: (f: Buffer) => upgrade(f), summarize };
@@ -80,6 +83,7 @@ const route = (req: Request) => {
     RETIRED_KEYS,
     BEACON,
     TIDES,
+    REGISTRY,
     ANCHOR,
     BITCOIN,
     TSA,

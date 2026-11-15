@@ -7,6 +7,7 @@ import {
 import { cardSvg, shareSvg } from './card.js';
 import { TsaSigner, TsaReject, parseRequest as parseTsq, issue as issueTst, reject as tsaReject, FAIL as TSA_FAIL, TSA_POLICY, TSA_EXT_MOONMARK } from './tsa.js';
 import { MOON_ROOT_PEM } from './tsa-certs.js';
+import { makeRegistration, publicRegistration, isPhash, hamming, bands, SIMILAR_BITS, type RegistryStore } from './registry.js';
 import { svgToPng } from './png.js';
 import { hashKey } from './keys.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
@@ -51,6 +52,8 @@ export interface Env {
   CRON_SECRET?: string;
   /** Beacon network to check against (default drand quicknet). Tests only. */
   BEACON_CHAIN?: Chain;
+  /** Who registered which fingerprint: powers /v1/lookup. Without it, lookups answer 503. */
+  REGISTRY?: RegistryStore;
   /** RFC 3161 Time-Stamp Authority signer (MOON_TSA_KEY + certificate). Optional. */
   TSA?: TsaSigner;
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
@@ -217,9 +220,25 @@ async function authAndLimit(req: Request, env: Env, signing = false): Promise<Ga
   return { plan: 'open' };
 }
 
-async function readJson(req: Request): Promise<Record<string, unknown>> {
+function cleanText(x: unknown, max: number): string | null {
+  if (typeof x !== 'string') return null;
+  const t = x.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, max);
+  return t || null;
+}
+/** Who is registering: the API key owner (verified), plus what they say about the file. */
+function whoFrom(body: Record<string, unknown>, gate: Gate): Who {
+  const ph = typeof body.phash === 'string' ? body.phash.toLowerCase() : null;
+  return {
+    registrant: gate.plan !== 'open' && gate.owner ? gate.owner : 'anonymous',
+    on_behalf_of: cleanText(body.on_behalf_of, 80),
+    label: cleanText(body.label, 120),
+    phash: isPhash(ph) ? ph : null,
+  };
+}
+
+async function readJson(req: Request, max = 16_384): Promise<Record<string, unknown>> {
   const text = await req.text();
-  if (text.length > 16_384) throw new HttpError(413, 'too_large', 'Send only the SHA-256 fingerprint or the receipt, not the content');
+  if (text.length > max) throw new HttpError(413, 'too_large', 'Send only the SHA-256 fingerprint or the receipt, not the content');
   try { const v = JSON.parse(text); if (v && typeof v === 'object' && !Array.isArray(v)) return v; } catch { /* fall through */ }
   throw new HttpError(400, 'bad_json', 'Body must be a JSON object');
 }
@@ -300,10 +319,14 @@ async function evidence(r: Receipt, sha256: unknown, env: Env) {
 }
 
 /** Signs a SHA-256 fingerprint now: receipt, Tideline record, and links. Shared by /v1/sign and the TSA. */
-async function signNow(env: Env, sha: string, at?: bigint) {
+interface Who { registrant: string; on_behalf_of?: string | null; label?: string | null; phash?: string | null }
+async function latestBeacon(env: Env): Promise<Beacon | null> {
+  if (!env.BEACON) return null;
+  try { return await env.BEACON(nowUnixNs()); } catch { return null; }
+}
+async function signNow(env: Env, sha: string, at?: bigint, who: Who = { registrant: 'anonymous' }, beaconIn?: Beacon | null) {
   const S = env.SIGNER!;
-  let beacon: Beacon | null = null;
-  if (env.BEACON) { try { beacon = await env.BEACON(nowUnixNs()); } catch { beacon = null; } }
+  const beacon = beaconIn !== undefined ? beaconIn : await latestBeacon(env);
   const ns = at ?? nowUnixNs();
   const mark = formatMoonmark(toMoon(ns));
   const receipt = S.sign(sha, mark, ns, beacon);
@@ -314,11 +337,21 @@ async function signNow(env: Env, sha: string, at?: bigint) {
     env.DEFER(checkpointSoon(T, S, nowUnixNs, A).catch(() => null));   // locks recent receipts on the XRP Ledger about once a minute
     tideline.checkpoint = 'within about a minute';
   }
+  const signed_url = MARK_BASE + moonmarkPath(mark) + `?s=${receipt.sha256}&u=${receipt.unix_ns}&k=${receipt.key_id}` + (receipt.beacon ? `&r=${receipt.beacon.round}&b=${receipt.beacon.signature}` : '') + (receipt.pq ? `&q=${receipt.pq.key_id}` : '') + `&g=${receipt.signature}`;
+  let registration: Record<string, unknown> | null = null;
+  if (env.REGISTRY) {
+    try {
+      const reg = makeRegistration(receipt, signed_url, who, (b) => { const x = S.signBytes(b); return { key_id: x.key_id, signature: x.signature }; });
+      await env.REGISTRY.add(reg);
+      registration = { registrant: reg.registrant, registrant_verified: reg.registrant !== 'anonymous', on_behalf_of: reg.on_behalf_of, label: reg.label, phash: reg.phash, lookup: '/v1/lookup/' + sha };
+    } catch { registration = null; }
+  }
   return {
     receipt,
     tideline,
+    registration,
     moonmark_url: MARK_BASE + moonmarkPath(mark),
-    signed_url: MARK_BASE + moonmarkPath(mark) + `?s=${receipt.sha256}&u=${receipt.unix_ns}&k=${receipt.key_id}` + (receipt.beacon ? `&r=${receipt.beacon.round}&b=${receipt.beacon.signature}` : '') + (receipt.pq ? `&q=${receipt.pq.key_id}` : '') + `&g=${receipt.signature}`,
+    signed_url,
     utc: unixNsToIso(ns),
     accuracy_ns: Number(env.CLOCK_ACCURACY_NS ?? 1_000_000),
     clock: env.CLOCK_SOURCE ?? 'server-ntp',
@@ -326,7 +359,7 @@ async function signNow(env: Env, sha: string, at?: bigint) {
 }
 
 /** RFC 3161 time-stamping: DER in, DER out. */
-async function tsaResponse(req: Request, env: Env, planHdr: Record<string, string>): Promise<Response> {
+async function tsaResponse(req: Request, env: Env, planHdr: Record<string, string>, who: Who = { registrant: 'anonymous' }): Promise<Response> {
   const hdr = { 'Content-Type': 'application/timestamp-reply', 'Cache-Control': 'no-store', ...CORS, ...planHdr };
   const reply = (der: Uint8Array, extra: Record<string, string> = {}) => new Response(Buffer.from(der), { status: 200, headers: { ...hdr, ...extra } });
   const ct = (req.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
@@ -339,7 +372,7 @@ async function tsaResponse(req: Request, env: Env, planHdr: Record<string, strin
   const ns = nowUnixNs();
   let moonmarkUrl: string | undefined, mark: string | undefined;
   if (parsed.hashName === 'SHA-256' && env.SIGNER) {
-    try { const out = await signNow(env, Buffer.from(parsed.digest).toString('hex'), ns); moonmarkUrl = out.signed_url; mark = out.receipt.moonmark; } catch { moonmarkUrl = undefined; }
+    try { const out = await signNow(env, Buffer.from(parsed.digest).toString('hex'), ns, who); moonmarkUrl = out.signed_url; mark = out.receipt.moonmark; } catch { moonmarkUrl = undefined; }
   }
   const serial = (ns << 16n) | BigInt(Math.floor(Math.random() * 65536));
   const der = issueTst(env.TSA, parsed, { unixNs: ns, serial, accuracyMs: Math.max(1, Math.round(Number(env.CLOCK_ACCURACY_NS ?? 1_000_000) / 1e6)), moonmarkUrl });
@@ -354,16 +387,16 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (path === `/${API_VERSION}/tsa` && req.method === 'POST') {
     const gate = await authAndLimit(req, env, true);
     if (gate instanceof Response) return gate;
-    return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan });
+    return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, { registrant: gate.plan !== 'open' && gate.owner ? gate.owner : 'anonymous' });
   }
-  const postOnly = path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof`;
+  const postOnly = path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof`;
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar'] });
   if (path === '/health') return json({ ok: true });
 
-  const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/evidence`);
+  const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
   const gate = await authAndLimit(req, env, signing);
   if (gate instanceof Response) return gate;
   const planHdr = { 'X-Moon-Plan': gate.plan };
@@ -475,7 +508,53 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const body = await readJson(req);
         const sha = typeof body.sha256 === 'string' ? body.sha256.toLowerCase() : body.sha256;
         if (!isSha256Hex(sha)) throw new HttpError(400, 'bad_param', 'sha256 must be the 64-character hex SHA-256 of your content. Send the fingerprint, never the content.');
-        return json(await signNow(env, sha), 200, { 'Cache-Control': 'no-store', ...planHdr });
+        return json(await signNow(env, sha, undefined, whoFrom(body, gate)), 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/sign/batch`: {
+        if (!env.SIGNER) throw new HttpError(503, 'signing_unavailable', 'Signing is not configured on this deployment');
+        if (gate.plan === 'open') throw new HttpError(403, 'key_required', 'Batch signing needs an API key. Email moon369org@proton.me.');
+        const body = await readJson(req, 262_144);
+        const items = Array.isArray(body.items) ? body.items as Record<string, unknown>[] : null;
+        if (!items || items.length === 0 || items.length > 100) throw new HttpError(400, 'bad_param', 'items must be a list of 1 to 100 objects like {"sha256": "<hex>"}');
+        for (const [i, it] of items.entries()) {
+          const sh = typeof it?.sha256 === 'string' ? it.sha256.toLowerCase() : it?.sha256;
+          if (!isSha256Hex(sh)) throw new HttpError(400, 'bad_param', `items[${i}].sha256 must be a 64-character hex SHA-256`);
+        }
+        const beacon = await latestBeacon(env);   // one beacon for the whole batch
+        const results = [];
+        for (const it of items) results.push(await signNow(env, String(it.sha256).toLowerCase(), undefined, whoFrom(it, gate), beacon));
+        return json({ count: results.length, results }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path.startsWith(`/${API_VERSION}/lookup/`) && path !== `/${API_VERSION}/lookup/similar`: {
+        if (!env.REGISTRY) throw new HttpError(503, 'registry_unavailable', 'Lookups are not configured on this deployment');
+        const sh = path.split('/').pop()!.toLowerCase();
+        if (!isSha256Hex(sh)) throw new HttpError(400, 'bad_param', 'Put the 64-character hex SHA-256 of the file in the path');
+        const regs = await env.REGISTRY.bySha(sh, 50);
+        regs.sort((a, b) => (BigInt(a.unix_ns) < BigInt(b.unix_ns) ? -1 : 1));
+        const pub = regs.map(publicRegistration);
+        return json({ sha256: sh, registered: pub.length > 0, count: pub.length, first: pub[0] ?? null, registrations: pub }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/lookup/similar`: {
+        if (!env.REGISTRY) throw new HttpError(503, 'registry_unavailable', 'Lookups are not configured on this deployment');
+        const body = await readJson(req);
+        const ph = typeof body.phash === 'string' ? body.phash.toLowerCase() : body.phash;
+        if (!isPhash(ph)) throw new HttpError(400, 'bad_param', 'phash must be the 16-character hex 64-bit difference hash of the image');
+        const cands = new Set<string>();
+        for (const b of bands(ph)) for (const c of await env.REGISTRY.candidatesByBand(b)) { cands.add(c); if (cands.size >= 200) break; }
+        const matches = [];
+        for (const c of cands) {
+          const regs = await env.REGISTRY.bySha(c, 50);
+          const withPh = regs.filter((r) => r.phash);
+          if (!withPh.length) continue;
+          withPh.sort((a, b) => (BigInt(a.unix_ns) < BigInt(b.unix_ns) ? -1 : 1));
+          const d = hamming(ph, withPh[0].phash!);
+          if (d <= SIMILAR_BITS) matches.push({ sha256: c, distance: d, first: publicRegistration(withPh[0]) });
+        }
+        matches.sort((a, b) => a.distance - b.distance || (BigInt(a.first.statement.unix_ns) < BigInt(b.first.statement.unix_ns) ? -1 : 1));
+        return json({ phash: ph, threshold_bits: SIMILAR_BITS, count: matches.length, matches: matches.slice(0, 20), note: 'Look-alike images: a match means the picture looks the same, not that it is the same file. The earliest registration is usually the original.' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
       case path === `/${API_VERSION}/tsa`:
