@@ -146,7 +146,7 @@
       var lit = Math.max(0, 1 - dd / reach); lit = lit * lit * lit;      // brightest right by the moon
       var al = (0.05 + 0.95 * lit) * (0.6 + 0.4 * Math.sin(now / 1000 * P.sp + P.ph)) * (0.75 + 0.25 * P.a);
       if (al < 0.01) continue;
-      var pr = P.r * dpr;
+      var pr = P.r * dpr * Math.max(0.5, Math.min(1, cv.clientWidth / 1200));   // finer on phones
       var sg = ctx.createRadialGradient(px, py, 0, px, py, pr * 2.2);
       sg.addColorStop(0, 'rgba(' + INK + ',' + al + ')'); sg.addColorStop(0.4, 'rgba(' + INK + ',' + al * 0.6 + ')');
       sg.addColorStop(1, 'rgba(' + INK + ',0)');
