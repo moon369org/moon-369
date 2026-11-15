@@ -4,6 +4,10 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/night/:d",
+      "destination": "/api/night?d=:d"
+    },
+    {
       "source": "/m/:mark",
       "destination": "/api/m?mark=:mark"
     }

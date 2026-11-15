@@ -63,9 +63,10 @@
     if (cv.width !== W) { cv.width = W; cv.height = W; }
     var ctx = cv.getContext('2d'), u = W / 404;
     var cx = W / 2, cy = W / 2, R = W / SCALE / 2;
-    var f = window.MoonPhase ? window.MoonPhase.fraction(Date.now()) : 0.17;
+    var at = +cv.getAttribute('data-at') || Date.now();   // data-at="<unix ms>" shows the moon at another moment
+    var f = window.MoonPhase ? window.MoonPhase.fraction(at) : 0.17;
     var wax = f < 0.5, side = wax ? 1 : -1;
-    var lit = window.MoonPhase ? window.MoonPhase.illumination(Date.now()) : 0.27;
+    var lit = window.MoonPhase ? window.MoonPhase.illumination(at) : 0.27;
     var strength = Math.min(1, 0.6 + lit * 1.2); // a thin crescent glows a little more gently
     ctx.clearRect(0, 0, W, W);
 

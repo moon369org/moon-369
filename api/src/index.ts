@@ -7,6 +7,7 @@ import {
 import { cardSvg, shareSvg } from './card.js';
 import { TsaSigner, TsaReject, parseRequest as parseTsq, issue as issueTst, reject as tsaReject, FAIL as TSA_FAIL, TSA_POLICY, TSA_EXT_MOONMARK } from './tsa.js';
 import { MOON_ROOT_PEM } from './tsa-certs.js';
+import { parseNight, nightFacts, nightSvg, NightParamError } from './night.js';
 import { makeRegistration, publicRegistration, isPhash, hamming, bands, SIMILAR_BITS, type RegistryStore } from './registry.js';
 import { svgToPng } from './png.js';
 import { hashKey } from './keys.js';
@@ -393,7 +394,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png'] });
   if (path === '/health') return json({ ok: true });
 
   const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
@@ -475,6 +476,20 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           ...(fixed ? FOREVER : { 'Cache-Control': 'public, max-age=60' }),
           ...planHdr,
         } });
+      }
+
+      case path === `/${API_VERSION}/night` || path === `/${API_VERSION}/night.png` || path === `/${API_VERSION}/night.svg`: {
+        // Your Moon: the moon on any date, with a share card. ?d=1990-06-14&t=2130&z=-0700&for=born
+        let n;
+        try { n = parseNight(q); } catch (e) { if (e instanceof NightParamError) throw new HttpError(400, 'bad_param', e.message); throw e; }
+        const facts = nightFacts(n, Date.now());
+        const cache = { 'Cache-Control': 'public, max-age=86400, s-maxage=2592000' };   // the return year moves on, so not forever
+        if (path.endsWith('/night')) return json({ ...facts, occasion: n.occasion }, 200, { ...cache, ...planHdr });
+        const fmt = q.get('fmt') === 'story' ? 'story' : 'og';
+        const svg = nightSvg(n, facts, fmt);
+        if (path.endsWith('.svg')) return new Response(req.method === 'HEAD' ? null : svg, { status: 200, headers: { 'Content-Type': 'image/svg+xml; charset=utf-8', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Allow-Origin': '*', ...cache, ...planHdr } });
+        const png = svgToPng(svg, fmt === 'story' ? 1080 : 1200);
+        return new Response(req.method === 'HEAD' ? null : new Uint8Array(png), { status: 200, headers: { 'Content-Type': 'image/png', 'Access-Control-Allow-Origin': '*', ...cache, ...planHdr } });
       }
 
       case path.startsWith(`/${API_VERSION}/m/`): {
