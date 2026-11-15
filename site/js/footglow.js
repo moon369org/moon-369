@@ -13,6 +13,15 @@
   // Long beams: many at a time, each at a random place on the limb. Each one eases in,
   // holds and eases out on its own clock, so they never flash or pulse together.
   var beams = [];
+
+  // Space dust: tiny specks drifting in the moonlight. Positions are 0..1 of the canvas.
+  var dust = [];
+  for (var d = 0; d < 150; d++) dust.push({
+    x: Math.random(), y: Math.random(), r: 0.5 + Math.pow(Math.random(), 3) * 1.3,
+    vx: (Math.random() - 0.5) * 0.004, vy: -0.002 - Math.random() * 0.006,
+    ph: Math.random() * 6.28, sp: 0.4 + Math.random() * 1.2, a: 0.25 + Math.random() * 0.6 });
+  var lastDust = 0;
+
   function spawn(now) {
     var v = 0.03 + Math.random() * 0.94;                         // anywhere on the visible surface
     beams.push({ v: v, born: now, life: 4400 + Math.random() * 5200,
@@ -119,6 +128,28 @@
     ctx.filter = 'blur(' + Math.max(2, Math.round(W / 800)) + 'px)';
     ctx.drawImage(off, 0, 0, W, H);
     ctx.filter = 'none';
+    // Space dust, lit by the moon: brighter near it, barely there further away.
+    var dt = lastDust ? Math.min(0.1, (now - lastDust) / 1000) : 0; lastDust = now;
+    var mx = cx * 2, my = cy * 2, MR = R * 2, reach = H * 0.9;
+    ctx.globalAlpha = 1;
+    for (var q = 0; q < dust.length; q++) {
+      var P = dust[q];
+      P.x += (P.vx + Math.sin(t * 0.3 + P.ph) * 0.002) * dt; P.y += P.vy * dt;
+      if (P.y < -0.02) { P.y = 1.02; P.x = Math.random(); }
+      if (P.x < -0.02) P.x = 1.02; else if (P.x > 1.02) P.x = -0.02;
+      var px = P.x * W, py = P.y * H;
+      var dd = Math.sqrt((px - mx) * (px - mx) + (py - my) * (py - my)) - MR;
+      if (dd < 0) continue;                                       // never in front of the moon
+      var lit = Math.max(0, 1 - dd / reach); lit = lit * lit;
+      var al = P.a * (0.55 + 0.45 * Math.sin(now / 1000 * P.sp + P.ph)) * (0.3 + 0.7 * lit);
+      if (al < 0.01) continue;
+      var pr = P.r * dpr;
+      var sg = ctx.createRadialGradient(px, py, 0, px, py, pr * 2.2);
+      sg.addColorStop(0, 'rgba(' + INK + ',' + al + ')'); sg.addColorStop(0.4, 'rgba(' + INK + ',' + al * 0.6 + ')');
+      sg.addColorStop(1, 'rgba(' + INK + ',0)');
+      ctx.fillStyle = sg; ctx.fillRect(px - pr * 2.2, py - pr * 2.2, pr * 4.4, pr * 4.4);
+    }
+
     // Rule 2 at the top: fade the whole thing out before it reaches anything above.
     ctx.globalCompositeOperation = 'destination-in';
     var top = ctx.createLinearGradient(0, 0, 0, H);
