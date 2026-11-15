@@ -31,6 +31,12 @@ const RATE_LIMITER_KEYED = RL_URL && RL_TOKEN
   ? upstashLimiter(RL_URL, RL_TOKEN, KEY_PER_MIN, 'moon:rlk')
   : memoryLimiter(KEY_PER_MIN);
 
+// Free signing on the open tier (sign, tsa, evidence): small, so volume comes through API keys.
+const SIGN_PER_MIN = Number(process.env.SIGN_RATE_PER_MIN ?? 10);
+const SIGN_PER_DAY = Number(process.env.SIGN_RATE_PER_DAY ?? 100);
+const SIGN_LIMIT_MIN = RL_URL && RL_TOKEN ? upstashLimiter(RL_URL, RL_TOKEN, SIGN_PER_MIN, 'moon:rls') : memoryLimiter(SIGN_PER_MIN);
+const SIGN_LIMIT_DAY = RL_URL && RL_TOKEN ? upstashLimiter(RL_URL, RL_TOKEN, SIGN_PER_DAY, 'moon:rld', 86_400_000) : memoryLimiter(SIGN_PER_DAY, 86_400_000);
+
 // Signing key for Moonmark receipts (MOON_SIGNING_KEY: Ed25519, PEM or base64 PKCS8).
 let SIGNER: Signer | undefined;
 // Post-quantum key (MOON_PQ_KEY: 32-byte ML-DSA-65 seed, base64). With it, receipts are hybrid v3 (Ed25519 + ML-DSA-65).
@@ -66,6 +72,9 @@ const route = (req: Request) => {
     CLOCK_SOURCE: process.env.CLOCK_SOURCE,
     RATE_LIMITER,
     RATE_LIMITER_KEYED,
+    SIGN_LIMIT_MIN,
+    SIGN_LIMIT_DAY,
+    SIGN_LIMITS: { per_min: SIGN_PER_MIN, per_day: SIGN_PER_DAY },
     API_KEYS,
     SIGNER,
     RETIRED_KEYS,

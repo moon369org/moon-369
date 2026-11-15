@@ -1,16 +1,16 @@
 /**
- * Rate limiters for the open tier and per-key limits (max overrides the default). Fixed one-minute windows, keyed by client IP.
+ * Rate limiters for the open tier and per-key limits (max overrides the default). Fixed windows (one minute by default), keyed by client IP.
  * - upstashLimiter: shared across every server instance (Upstash Redis REST). Use in production.
  * - memoryLimiter: per instance only. A fallback so a limit always exists.
  * Both fail open: if the store can't be reached, the request goes through.
  */
 import type { RateLimiter } from './index.js';
 
-export function memoryLimiter(perMinute: number): RateLimiter {
+export function memoryLimiter(perMinute: number, windowMs = 60_000): RateLimiter {
   const hits = new Map<string, { w: number; n: number }>();
   return {
     async limit({ key, max }) {
-      const w = Math.floor(Date.now() / 60_000);
+      const w = Math.floor(Date.now() / windowMs);
       const h = hits.get(key);
       if (!h || h.w !== w) {
         if (hits.size > 50_000) hits.clear();
@@ -23,15 +23,15 @@ export function memoryLimiter(perMinute: number): RateLimiter {
   };
 }
 
-export function upstashLimiter(url: string, token: string, perMinute: number, prefix = 'moon:rl'): RateLimiter {
+export function upstashLimiter(url: string, token: string, perMinute: number, prefix = 'moon:rl', windowMs = 60_000): RateLimiter {
   return {
     async limit({ key, max }) {
-      const k = `${prefix}:${key}:${Math.floor(Date.now() / 60_000)}`;
+      const k = `${prefix}:${key}:${Math.floor(Date.now() / windowMs)}`;
       try {
         const r = await fetch(`${url.replace(/\/$/, '')}/pipeline`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify([['INCR', k], ['EXPIRE', k, '70']]),
+          body: JSON.stringify([['INCR', k], ['EXPIRE', k, String(Math.ceil(windowMs / 1000) + 10)]]),
         });
         if (!r.ok) return { success: true };
         const out = (await r.json()) as { result: number }[];

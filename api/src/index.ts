@@ -24,6 +24,11 @@ export interface Env {
   RATE_LIMITER?: RateLimiter;
   /** Keyed tier, keyed by API key. */
   RATE_LIMITER_KEYED?: RateLimiter;
+  /** Open tier, signing only (sign, tsa, evidence): per minute and per day, keyed by IP. API keys skip these. */
+  SIGN_LIMIT_MIN?: RateLimiter;
+  SIGN_LIMIT_DAY?: RateLimiter;
+  /** The numbers behind SIGN_LIMIT_MIN and SIGN_LIMIT_DAY, for messages. */
+  SIGN_LIMITS?: { per_min: number; per_day: number };
   /** Store of valid API keys, looked up by SHA-256 of the key. Optional. */
   API_KEYS?: KeyStore;
   /** Accuracy of this deployment's clock, in ns (default 1,000,000 = 1 ms). */
@@ -179,7 +184,7 @@ const SPEC = {
 
 type Gate = { plan: string; owner?: string; per_min?: number };
 
-async function authAndLimit(req: Request, env: Env): Promise<Gate | Response> {
+async function authAndLimit(req: Request, env: Env, signing = false): Promise<Gate | Response> {
   const auth = req.headers.get('Authorization');
   const key = auth?.startsWith('Bearer ') ? auth.slice(7).trim() : null;
   if (key) {
@@ -199,6 +204,15 @@ async function authAndLimit(req: Request, env: Env): Promise<Gate | Response> {
   const ip = req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'anonymous';
   if (env.RATE_LIMITER && !(await env.RATE_LIMITER.limit({ key: ip })).success) {
     return json({ error: { code: 'rate_limited', contact: 'moon369org@proton.me', message: 'Open rate limit reached (120 requests a minute). For higher limits email moon369org@proton.me, or run the MIT reference code locally.' } }, 429, { 'Retry-After': '60' });
+  }
+  if (signing) {
+    // Signing is the paid product: the open tier gets enough to try it; volume needs an API key.
+    const L = env.SIGN_LIMITS ?? { per_min: 10, per_day: 100 };
+    const msg = (what: string) => `Free signing limit reached (${what}). Signing at volume needs an API key: email moon369org@proton.me.`;
+    if (env.SIGN_LIMIT_MIN && !(await env.SIGN_LIMIT_MIN.limit({ key: ip })).success)
+      return json({ error: { code: 'sign_rate_limited', contact: 'moon369org@proton.me', message: msg(`${L.per_min} a minute`) } }, 429, { 'Retry-After': '60' });
+    if (env.SIGN_LIMIT_DAY && !(await env.SIGN_LIMIT_DAY.limit({ key: ip })).success)
+      return json({ error: { code: 'sign_daily_limit', contact: 'moon369org@proton.me', message: msg(`${L.per_day} a day`) } }, 429, { 'Retry-After': String(86400 - Math.floor(Date.now() / 1000) % 86400) });
   }
   return { plan: 'open' };
 }
@@ -338,7 +352,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   const path = url.pathname.replace(/\/+$/, '') || '/';
   const q = url.searchParams;
   if (path === `/${API_VERSION}/tsa` && req.method === 'POST') {
-    const gate = await authAndLimit(req, env);
+    const gate = await authAndLimit(req, env, true);
     if (gate instanceof Response) return gate;
     return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan });
   }
@@ -349,7 +363,8 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa'] });
   if (path === '/health') return json({ ok: true });
 
-  const gate = await authAndLimit(req, env);
+  const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/evidence`);
+  const gate = await authAndLimit(req, env, signing);
   if (gate instanceof Response) return gate;
   const planHdr = { 'X-Moon-Plan': gate.plan };
 

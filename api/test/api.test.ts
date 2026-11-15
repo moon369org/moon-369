@@ -186,3 +186,19 @@ describe('cycle naming', () => {
     expect(t.unix_ns).toBe(u.unix_ns);
   });
 });
+
+describe('free signing limits', () => {
+  it('limits signing on the open tier but not reads, and keys skip it', async () => {
+    const { memoryLimiter } = await import('../src/ratelimit.js');
+    const { handle } = await import('../src/index.js');
+    const env = { SIGN_LIMIT_MIN: memoryLimiter(2), SIGN_LIMIT_DAY: memoryLimiter(100, 86_400_000), SIGN_LIMITS: { per_min: 2, per_day: 100 } };
+    const sign = () => handle(new Request('http://x/v1/sign', { method: 'POST', headers: { 'x-real-ip': '9.9.9.9' }, body: JSON.stringify({ sha256: 'a'.repeat(64) }) }), env);
+    expect((await sign()).status).toBe(503);   // passes the limit (no signer configured here)
+    expect((await sign()).status).toBe(503);
+    const third = await sign();
+    expect(third.status).toBe(429);
+    expect(((await third.json()) as { error: { code: string } }).error.code).toBe('sign_rate_limited');
+    const read = await handle(new Request('http://x/v1/now', { headers: { 'x-real-ip': '9.9.9.9' } }), env);
+    expect(read.status).toBe(200);
+  });
+});
