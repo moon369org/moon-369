@@ -277,3 +277,11 @@ section[aria-label="Current Moon date and time"] > svg { filter: drop-shadow(0 0
   @supports (animation-timeline: scroll()) { body::before { display: none; } }
   @view-transition { navigation: none; }
 }
+
+/* Edge Corona rising out of the footer's top line (js/footglow.js). */
+footer { position: relative; }
+footer > div { position: relative; z-index: 1; }
+canvas.ft-glow {
+  position: absolute; left: 0; right: 0; bottom: 100%; width: 100%; height: clamp(260px, 40vw + 120px, 640px);
+  pointer-events: none; z-index: 0; display: block;
+}
