@@ -37,7 +37,15 @@
   }
   // Blur that also works where canvas filters don't (Safari, including every iPhone browser):
   // there we paint at low resolution and scale up smoothly, which softens edges the same way.
-  var BLUR_OK = (function () { try { var c = document.createElement('canvas').getContext('2d'); c.filter = 'blur(2px)'; return c.filter === 'blur(2px)'; } catch (e) { return false; } })();
+  // Test that blur really draws: some Safari versions accept ctx.filter but ignore it.
+  var BLUR_OK = (function () {
+    try {
+      var cv = document.createElement('canvas'); cv.width = cv.height = 20;
+      var c = cv.getContext('2d', { willReadFrequently: true });
+      c.filter = 'blur(3px)'; c.fillStyle = '#fff'; c.fillRect(8, 8, 4, 4);
+      return c.getImageData(3, 10, 1, 1).data[3] > 0;   // a blurred square leaks light 5px away
+    } catch (e) { return false; }
+  })();
   var blurPool = {};
   function blurDraw(ctx, W, H, px, alpha, op, paint) {
     ctx.save(); ctx.globalAlpha = alpha; ctx.globalCompositeOperation = op || 'source-over';
