@@ -130,7 +130,7 @@
     const seen = new WeakSet();
     const play = (el, i, delay) => el.animate(
       [
-        { opacity: 0, transform: 'translateY(28px) scale(.985)' },
+        { opacity: 0, transform: 'translateY(28px)' },
         { opacity: 1, transform: 'none' },
       ],
       { duration: 1000, delay: delay + Math.min(i, 6) * 90, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' },
