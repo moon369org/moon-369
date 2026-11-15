@@ -39,43 +39,58 @@
     return rc;
   }
   var esc = function (x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  // Start checking the signature as soon as the script runs, before anything else waits.
+  var verifyCache = {};
+  function verifyEarly(rc) {
+    var k = rc.signature;
+    if (!verifyCache[k]) verifyCache[k] = fetch('https://api.moon369.org/v1/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receipt: rc }) }).then(function (r) { return r.json(); });
+    return verifyCache[k];
+  }
+  // drand quicknet: round n was published at genesis + (n - 1) * 3 seconds, so this needs no network.
+  function roundUtc(n) { return new Date((1692803367 + (n - 1) * 3) * 1000).toISOString().replace('T', ' ').slice(0, 19) + ' UTC'; }
+  var TICK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
   function sigBox(root, rc) {
     var box = root.querySelector('[data-mk-sig]'); if (!box) return;
     var short = rc.sha256.slice(0, 12) + '…' + rc.sha256.slice(-8);
-    box.className = 'mk-sig';
-    box.innerHTML = '<div class="mk-sig-h">CHECKING SIGNATURE…</div>';
-    fetch('https://api.moon369.org/v1/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receipt: rc }) })
-      .then(function (r) { return r.json(); })
-      .then(function (b) {
-        if (!b || !b.valid) {
-          box.className = 'mk-sig mk-sig-bad';
-          box.innerHTML = '<div class="mk-sig-h">SIGNATURE DOES NOT CHECK OUT</div><div class="mk-sig-p">This link&#39;s receipt is not valid' + (b && b.reason ? ' (' + esc(b.reason) + ')' : '') + '. Do not rely on it.</div>';
-          return;
-        }
-        var href = URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }));
-        box.className = 'mk-sig mk-sig-ok';
-        box.innerHTML =
-          '<div class="mk-sig-h"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>SIGNED · VERIFIED</div>' +
-          '<div class="mk-sig-p">Moon signed this file fingerprint at this exact moment. The signature checks out' + (b.not_before ? ', and a public drand beacon proves it couldn&#39;t have been signed any&nbsp;earlier' : '') + '.</div>' +
-          '<div class="mk-sig-r"><span>SHA-256</span><b title="' + rc.sha256 + '">' + short + '</b></div>' +
-          '<div class="mk-sig-r"><span>KEY</span><b>' + rc.key_id + ' · Ed25519</b></div>' +
-          (rc.pq ? '<div class="mk-sig-r"><span>POST-QUANTUM</span><b>ML-DSA-65 · in the saved receipt</b></div>' : '') +
-          (b.not_before ? '<div class="mk-sig-r"><span style="display:inline-flex;align-items:center">NOT BEFORE<span class="mi"><button type="button" class="mi-b" aria-label="What NOT BEFORE means" aria-expanded="false" aria-describedby="mi-nb">i</button><span role="tooltip" id="mi-nb" class="mi-t">drand is public randomness from the League of Entropy, independent organizations including Cloudflare. A new value every 3 seconds that no one can predict. This receipt includes one, so it couldn&#39;t have been signed before that value existed.</span></span></span><b title="drand quicknet round ' + b.not_before.round + '">' + esc(b.not_before.utc.replace('T', ' ').slice(0, 19)) + ' UTC</b></div>' : '') +
-          '<label class="mk-sig-btn">CHECK A FILE<input type="file" data-mk-file></label>' +
-          '<a class="mk-sig-btn" href="' + href + '" download="' + rc.moonmark.replace(/[^0-9.]+/g, '_') + '.moonmark.json">SAVE RECEIPT</a>' +
-          '<div class="mk-sig-m" data-mk-match></div>';
-        var inp = box.querySelector('[data-mk-file]'), out = box.querySelector('[data-mk-match]');
-        inp.onchange = function () {
-          var f = inp.files && inp.files[0]; inp.value = ''; if (!f) return;
-          out.textContent = 'Fingerprinting ' + f.name + '…';
-          f.arrayBuffer().then(function (b2) { return crypto.subtle.digest('SHA-256', b2); }).then(function (d) {
-            var h = Array.from(new Uint8Array(d), function (x) { return x.toString(16).padStart(2, '0'); }).join('');
-            out.className = 'mk-sig-m ' + (h === rc.sha256 ? 'yes' : 'no');
-            out.textContent = h === rc.sha256 ? '✓ ' + f.name + ' is the exact file Moon signed.' : '✕ ' + f.name + ' is not the file Moon signed.';
-          }).catch(function () { out.textContent = 'Could not read that file.'; });
-        };
-      })
-      .catch(function () { box.innerHTML = '<div class="mk-sig-h">COULD NOT REACH MOON TO CHECK THE SIGNATURE</div>'; });
+    var href = URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }));
+    var nb = rc.beacon ? rc.beacon.round : null;
+    // Everything the link already carries is shown at once; only the verdict waits for Moon.
+    box.className = 'mk-sig mk-sig-wait';
+    box.innerHTML =
+      '<div class="mk-sig-h" data-mk-h>CHECKING SIGNATURE…</div>' +
+      '<div class="mk-sig-p" data-mk-p>Moon signed this file fingerprint at this exact moment' + (nb ? ', after a public drand beacon that proves it couldn&#39;t have been signed any&nbsp;earlier' : '') + '. Checking the signature now.</div>' +
+      '<div class="mk-sig-r"><span>SHA-256</span><b title="' + rc.sha256 + '">' + short + '</b></div>' +
+      '<div class="mk-sig-r"><span>KEY</span><b>' + rc.key_id + ' · Ed25519</b></div>' +
+      (rc.pq ? '<div class="mk-sig-r"><span>POST-QUANTUM</span><b>ML-DSA-65 · in the saved receipt</b></div>' : '') +
+      (nb ? '<div class="mk-sig-r"><span style="display:inline-flex;align-items:center">NOT BEFORE<span class="mi"><button type="button" class="mi-b" aria-label="What NOT BEFORE means" aria-expanded="false" aria-describedby="mi-nb">i</button><span role="tooltip" id="mi-nb" class="mi-t">drand is public randomness from the League of Entropy, independent organizations including Cloudflare. A new value every 3 seconds that no one can predict. This receipt includes one, so it couldn&#39;t have been signed before that value existed.</span></span></span><b title="drand quicknet round ' + nb + '">' + roundUtc(nb) + '</b></div>' : '') +
+      '<label class="mk-sig-btn">CHECK A FILE<input type="file" data-mk-file></label>' +
+      '<a class="mk-sig-btn" href="' + href + '" download="' + rc.moonmark.replace(/[^0-9.]+/g, '_') + '.moonmark.json">SAVE RECEIPT</a>' +
+      '<div class="mk-sig-m" data-mk-match></div>';
+    var inp = box.querySelector('[data-mk-file]'), out = box.querySelector('[data-mk-match]');
+    inp.onchange = function () {
+      var f = inp.files && inp.files[0]; inp.value = ''; if (!f) return;
+      out.textContent = 'Fingerprinting ' + f.name + '…';
+      f.arrayBuffer().then(function (b2) { return crypto.subtle.digest('SHA-256', b2); }).then(function (d) {
+        var h = Array.from(new Uint8Array(d), function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+        out.className = 'mk-sig-m ' + (h === rc.sha256 ? 'yes' : 'no');
+        out.textContent = h === rc.sha256 ? '✓ ' + f.name + ' is the exact file Moon signed.' : '✕ ' + f.name + ' is not the file Moon signed.';
+      }).catch(function () { out.textContent = 'Could not read that file.'; });
+    };
+    var hEl = box.querySelector('[data-mk-h]'), pEl = box.querySelector('[data-mk-p]');
+    verifyEarly(rc).then(function (b) {
+      if (!b || !b.valid) {
+        box.className = 'mk-sig mk-sig-bad';
+        hEl.textContent = 'SIGNATURE DOES NOT CHECK OUT';
+        pEl.innerHTML = 'This link&#39;s receipt is not valid' + (b && b.reason ? ' (' + esc(b.reason) + ')' : '') + '. Do not rely on it.';
+        return;
+      }
+      box.className = 'mk-sig mk-sig-ok';
+      hEl.innerHTML = TICK + 'SIGNED · VERIFIED';
+      pEl.innerHTML = 'Moon signed this file fingerprint at this exact moment. The signature checks out' + (b.not_before ? ', and a public drand beacon proves it couldn&#39;t have been signed any&nbsp;earlier' : '') + '.';
+    }).catch(function () {
+      hEl.textContent = 'COULD NOT REACH MOON TO CHECK THE SIGNATURE';
+      pEl.textContent = 'The details below come from the link. Try again in a moment.';
+    });
   }
   function render(root, mk, fresh, rc) {
     var ms = toMs(mk);
@@ -139,5 +154,10 @@
     render(root, mk, false, mk ? receiptFrom(mk) : null);
     return true;
   }
+  try {
+    var pm0 = /\/m\/([^/?#]+)/.exec(location.pathname), q0 = pm0 ? pm0[1] : new URLSearchParams(location.search).get('m');
+    var mk0 = q0 ? parse(q0) : null, rc0 = mk0 ? receiptFrom(mk0) : null;
+    if (rc0) verifyEarly(rc0);
+  } catch (e) {}
   var t = 0, iv = setInterval(function () { if ((window.MoonPhase && window.qrcode && start()) || ++t > 80) clearInterval(iv); }, 100);
 })();
