@@ -123,6 +123,56 @@
     });
   }
   var TICK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
+  // The permanent record: where this Moonmark sits in the Tideline, how long it has existed, and its history.
+  var ageTimer = 0;
+  function ageText(ms) {
+    var s = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+    var y = Math.floor(d / 365.2425), dd = Math.floor(d - y * 365.2425);
+    var parts = [];
+    if (y) parts.push(y + (y === 1 ? ' year' : ' years'));
+    if (y || dd) parts.push(dd + (dd === 1 ? ' day' : ' days'));
+    parts.push(h + (h === 1 ? ' hour' : ' hours'), p(m) + ' min', p(x) + ' sec');
+    return parts.join(', ');
+  }
+  function when(ns) {
+    var ms = Number(BigInt(ns) / 1000000n), mk = fromMs(ms);
+    var loc = ''; try { loc = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(ms); } catch (e) { loc = new Date(ms).toUTCString(); }
+    return text(mk) + ' · ' + loc;
+  }
+  function recordBox(root, rc) {
+    var box = root.querySelector('[data-mk-rec]'); if (!box) return;
+    var born = Number(BigInt(rc.unix_ns) / 1000000n);
+    var step = function (done, title, detail) { return '<li class="' + (done ? 'done' : 'next') + '"><span aria-hidden="true"></span><div><b>' + title + '</b>' + (detail ? '<i>' + detail + '</i>' : '') + '</div></li>'; };
+    var draw = function (pr) {
+      var steps = [];
+      if (rc.beacon) steps.push(step(true, 'Could not have existed earlier', 'Public drand beacon, round ' + Number(rc.beacon.round).toLocaleString('en-US') + ' · ' + roundUtc(rc.beacon.round)));
+      steps.push(step(true, 'Signed by Moon', when(rc.unix_ns) + (rc.pq ? ' · Ed25519 + ML-DSA-65' : ' · Ed25519')));
+      var head = '';
+      if (pr && pr.status && pr.status !== 'not_found') {
+        var lune = pr.lune, n = pr.index + 1;
+        head = '<a class="mk-rec-n" href="/tide/' + lune + '#e' + pr.index + '"><span>TIDE ' + lune + '</span><span>ENTRY ' + n.toLocaleString('en-US') + '</span></a>';
+        steps.push(step(true, 'Written into the Tideline', 'Tide ' + lune + ', entry ' + n.toLocaleString('en-US') + ' · Moon&#39;s public log'));
+        if (pr.status === 'sealed' && pr.tide) {
+          steps.push(step(true, 'Sealed into tide ' + lune, when(pr.tide.sealed_unix_ns) + ' · one Merkle root over ' + pr.tide.size.toLocaleString('en-US') + ' entries'));
+          var b = pr.tide.bitcoin;
+          if (b && b.status === 'confirmed') steps.push(step(true, 'Anchored in Bitcoin', 'Block ' + Number(b.block_height).toLocaleString('en-US') + ' · through OpenTimestamps'));
+          else if (b) steps.push(step(false, 'Anchoring in Bitcoin', 'Waiting for the next Bitcoin blocks, usually a few hours'));
+        } else {
+          steps.push(step(false, 'Sealed into tide ' + lune, 'When the lune ends: ' + String(pr.seals_after_utc || '').replace('T', ' ').slice(0, 16) + ' UTC'));
+          steps.push(step(false, 'Anchored in Bitcoin', 'After the tide seals'));
+        }
+      }
+      box.innerHTML = '<div class="mk-rec-k">IN THE PERMANENT RECORD</div>' + head +
+        '<div class="mk-rec-age"><span>HAS EXISTED FOR</span><b data-mk-age>' + ageText(Date.now() - born) + '</b></div>' +
+        '<ol class="mk-hist">' + steps.join('') + '</ol>' +
+        '<p class="mk-rec-p">This record cannot be changed or backdated. Its receipt checks out offline with Moon&#39;s public keys, even if Moon is ever gone.</p>';
+      clearInterval(ageTimer);
+      ageTimer = setInterval(function () { var a = box.querySelector('[data-mk-age]'); if (!a) return clearInterval(ageTimer); a.textContent = ageText(Date.now() - born); }, 1000);
+    };
+    draw(null);
+    fetch('https://api.moon369.org/v1/tideline/proof', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receipt: rc }) })
+      .then(function (r) { return r.ok ? r.json() : null; }).then(function (pr) { if (pr) draw(pr); }).catch(function () {});
+  }
   function sigBox(root, rc) {
     var box = root.querySelector('[data-mk-sig]'); if (!box) return;
     var short = rc.sha256.slice(0, 12) + '…' + rc.sha256.slice(-8);
@@ -197,7 +247,7 @@
       (ev ? '<div class="mk-cd" data-mk-cd><div class="mk-l" data-mk-cd-l>STARTS IN</div><div class="mk-cd-c" data-mk-cd-c></div></div>' +
         '<div class="mk-when"><span>YOUR LOCAL TIME</span><b>' + esc(local) + ' ' + esc(abbr) + '</b></div>' : '') +
       (rc && coa ? '<div data-mk-coa></div>' : '') +
-      (rc ? '<div data-mk-sig></div>' : '') +
+      (rc ? '<div data-mk-sig></div><div class="mk-rec" data-mk-rec></div>' : '') +
       '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" role="img" aria-label="' + nm + '"><defs><clipPath id="mk-disc"><circle r="10"/></clipPath><filter id="mk-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="0.8"/></filter></defs><circle r="10" fill="#24262A"/><g clip-path="url(#mk-disc)"><path d="' + ph + '" fill="#E9E4D8" filter="url(#mk-soft)"/></g></svg>' +
       '<div class="mk-cells"><div><i>CYCLE</i><b>' + mk.y + '</b></div><div><i>MOON</i><b>' + p(mk.m) + '</b></div><div><i>LUNE</i><b>' + p(mk.d) + '</b></div></div></div>' +
       '<div class="mk-mark" aria-label="Moonmark ' + text(mk) + '.' + p(mk.ns, 9) + '"><span>' + mk.y + '.' + p(mk.m) + '.' + p(mk.d) + '</span> <span>' + p(mk.h) + ':' + p(mk.mi) + ':' + p(mk.s) + '<span class="mk-ns">' + nsGroups(mk.ns) + '</span></span></div>' +
@@ -213,7 +263,7 @@
       '<div class="mk-side"><div class="mk-qr">' + qr + '</div><div class="mk-cap">Scan to open this ' + (ev ? 'event' : 'Moonmark') + ' in your own local time.</div>' +
       (rc || ev ? '' : '<div class="mk-note">This Moonmark is unsigned. A signed Moonmark from Moon proves when something happened.</div>') + '</div>' +
       '</div>';
-    if (rc) sigBox(root, rc);
+    if (rc) { sigBox(root, rc); recordBox(root, rc); }
     if (rc && coa) coaBox(root, rc, coa);
     root.querySelector('[data-mk-copy]').onclick = function (e) {
       try { navigator.clipboard.writeText(url); e.target.textContent = 'COPIED'; } catch (err) { e.target.textContent = url; }

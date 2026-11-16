@@ -92,6 +92,9 @@
       return '<li id="e' + e.index + '"><span class="td-n">' + (e.index + 1) + '</span><a class="td-leaf" href="/tideline?q=' + e.leaf + '#search" title="Look this entry up">' + e.leaf + '</a>' +
         (sealed && !t.entries_truncated ? '<button type="button" data-td-proof="' + e.index + '">PROOF</button>' : '') + '<div class="td-proof" data-td-out="' + e.index + '"></div></li>';
     }).join('') + (all.length > 2000 ? '<li class="td-empty">Showing the first 2,000. All of them are in the JSON.</li>' : '');
+    // A link to one entry (/tide/<lune>#e36): bring it into view and mark it.
+    var hm = /^#e(\d+)$/.exec(location.hash);
+    if (hm) { var li = document.getElementById('e' + hm[1]); if (li) { li.classList.add('td-here'); setTimeout(function () { li.scrollIntoView({ block: 'center' }); }, 50); } }
     list.onclick = function (ev) {
       var b = ev.target.closest && ev.target.closest('[data-td-proof]'); if (!b) return;
       var i = +b.getAttribute('data-td-proof'), out = list.querySelector('[data-td-out="' + i + '"]');
