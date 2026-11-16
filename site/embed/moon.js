@@ -85,7 +85,7 @@
   }
   function row(k, v) { return '<div style="display:grid;grid-template-columns:96px 1fr;gap:12px;padding:9px 0;border-top:1px solid ' + C.line + '"><div style="font:500 10px/1.6 ' + MONO + ';letter-spacing:.2em;color:' + C.dim + '">' + k + '</div><div style="font:400 12.5px/1.6 ' + MONO + ';word-break:break-word">' + v + '</div></div>'; }
   function regCard(r, extra) {
-    return (extra || '') + row('MOONMARK', esc(when(r))) + row('REGISTERED BY', who(r)) + (r.label ? row('LABEL', esc(r.label)) : '') +
+    return (extra || '') + row('MOONMARK', esc(when(r))) + row('REGISTERED BY', who(r)) + (/^Sky-checked:/.test(r.label || '') ? row('SKY', '<span style="color:' + C.ok + ';letter-spacing:.2em">SKY-CHECKED</span><br><span style="color:' + C.dim + '">' + esc(r.label.replace(/^Sky-checked:\s*/, '')) + (r.registrant_verified ? '' : ' (measured by Sky Check in the sealer\'s browser)') + '</span>') : r.label ? row('LABEL', esc(r.label)) : '') +
       row('PROOF', '<a href="' + esc(r.signed_url) + '" target="_blank" rel="noopener" style="color:' + C.fg + '">Open the signed Moonmark ↗</a>');
   }
 

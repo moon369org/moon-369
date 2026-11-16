@@ -44,7 +44,7 @@
   function nowPanel() {
     var ms = Date.now(), S = window.MoonSkyCheck, ex = S.expected(ms, loc && loc.lat, loc && loc.lng);
     var dir = ex.dir != null ? ex.dir : (window.MoonPhase.tilt(ms) + (ex.fraction < 0.5 ? 90 : 270));
-    drawMoon($('[data-sc-nowcv]'), ex.fraction, dir, 84);
+    var cv = $('[data-sc-nowcv]'); if (cv) cv.setAttribute('data-tilt', ex.dir != null ? String(ex.dir - (ex.fraction < 0.5 ? 90 : 270)) : '');
     var t = ex.name + ' · ' + (ex.lit * 100).toFixed(0) + '% lit · Moonmark ' + moonmark(ms).text + '<br>';
     if (ex.dir == null) t += 'Add your location to see which way it tilts where you are.';
     else t += 'Lit side points ' + clockWord(ex.dir) + ' (' + deg(ex.dir) + ' from straight up)' + (ex.alt < 0 ? '. It is below your horizon right now.' : '.');
@@ -91,6 +91,7 @@
     };
   }
 
+  var photo = null, sealed = null, sealing = false;
   function readPhoto(file) {
     var v = $('[data-sc-v]'), res = $('[data-sc-res]');
     res.hidden = false; v.className = 'sc-v'; v.innerHTML = '<b>READING YOUR PHOTO…</b>'; $('[data-sc-rows]').innerHTML = '';
@@ -99,7 +100,7 @@
     var bmpP = (window.createImageBitmap ? createImageBitmap(file) : Promise.reject()).catch(function () {
       return new Promise(function (ok, no) { var im = new Image(); im.onload = function () { ok(im); }; im.onerror = no; im.src = URL.createObjectURL(file); });
     });
-    Promise.all([exifP, bmpP]).then(function (a) { analyse(a[0], a[1]); }).catch(function () {
+    Promise.all([exifP, bmpP]).then(function (a) { photo = file; sealed = null; analyse(a[0], a[1]); }).catch(function () {
       v.className = 'sc-v off'; v.innerHTML = '<b>COULD NOT OPEN THAT PHOTO</b><span>Try a JPEG or PNG, or take a new photo.</span>';
     });
   }
@@ -185,7 +186,52 @@
     rows += '<div><span>WHERE</span><b>' + (last.place ? last.place.lat.toFixed(2) + ', ' + last.place.lng.toFixed(2) : 'Not shared') + '</b><em>' + (last.place ? 'From ' + esc(last.place.from) + '. Used only on this page.' : 'Needed to check the tilt.') + '</em>' + (last.place ? '' : '<div data-sc-place></div>') + '</div>';
     $('[data-sc-rows]').innerHTML = rows;
     renderPlaceBlocks();
+    sealUi();
     try { window.moonTrack && window.moonTrack('sky_check', { verdict: c.verdict }); } catch (er) {}
+  }
+
+
+  // Seal this sky: register the exact photo on Moon, labelled with what Sky Check measured. Only for a match.
+  function sealUi() {
+    var b = $('[data-sc-seal]'), out = $('[data-sc-sealed]'); if (!b || !out) return;
+    var ok = last && last.c.verdict === 'match' && photo;
+    b.hidden = !ok || !!sealed; b.disabled = sealing; b.textContent = sealing ? 'SEALING…' : 'SEAL THIS SKY';
+    if (sealed) {
+      out.hidden = false;
+      out.innerHTML = '<div class="sc-badge">SKY-CHECKED</div><p>Sealed at <a href="' + esc(sealed.url) + '" target="_blank" rel="noopener">' + esc(sealed.mk) + '</a>. Anyone can drop this exact photo on <a href="/verify">Verify</a> to see it was registered, and that its Moon matched Moon time.</p>' +
+        '<a class="sc-btn" href="' + sealed.href + '" download="' + esc(sealed.file) + '">DOWNLOAD RECEIPT</a>';
+    } else if (out.dataset.err) { out.hidden = false; out.innerHTML = '<p class="sc-err">' + esc(out.dataset.err) + '</p>'; }
+    else out.hidden = true;
+  }
+  function skyLabel() {
+    var m = last.m, c = last.c;
+    var t = 'Sky-checked: photo Moon ' + Math.round(m.lit * 100) + '% lit' + (c.tilt === 'match' ? ', lit side ' + Math.round(m.dir) + '°' : '') + ', matches Moon time';
+    return t + (last.useExif ? ' at ' + new Date(last.ms).toISOString().slice(0, 16) + 'Z' : ' when sealed');
+  }
+  var sealJs = null;
+  function lookAlike(file) {
+    if (!sealJs) sealJs = window.MoonSeal ? Promise.resolve() : new Promise(function (ok, no) { var sc = document.createElement('script'); sc.src = '/js/seal.js'; sc.async = true; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+    return sealJs.then(function () { return window.MoonSeal.dhash(file); }).catch(function () { return null; });
+  }
+  function sealSky() {
+    if (!photo || !last || last.c.verdict !== 'match' || sealing) return;
+    var out = $('[data-sc-sealed]'); delete out.dataset.err; sealing = true; sealUi();
+    var file = photo, label = skyLabel();
+    file.arrayBuffer().then(function (buf) { return crypto.subtle.digest('SHA-256', buf); }).then(function (d) {
+      var sha = Array.from(new Uint8Array(d), function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+      return lookAlike(file).then(function (ph) {
+        var body = { sha256: sha, label: label }; if (ph) body.phash = ph;
+        return fetch('https://api.moon369.org/v1/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      });
+    }).then(function (r) { return r.json().then(function (b) { return { ok: r.ok, status: r.status, b: b }; }); }).then(function (x) {
+      if (!x.ok) throw new Error(x.status === 429 ? 'Too many requests right now. Try again in a minute.' : ((x.b && x.b.error && x.b.error.message) || 'Sealing failed. Try again.'));
+      var rc = x.b.receipt;
+      sealed = { mk: rc.moonmark.slice(0, 19), url: x.b.signed_url, file: (file.name || 'moon-photo').replace(/[^A-Za-z0-9._-]+/g, '_') + '.moonmark.json',
+        href: URL.createObjectURL(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' })) };
+      try { window.moonTrack && window.moonTrack('sky_sealed', {}); } catch (er) {}
+    }).catch(function (err) {
+      out.dataset.err = (err && err.message && !/fetch|network/i.test(err.message)) ? err.message : 'Could not reach Moon. Check your connection and try again.';
+    }).then(function () { sealing = false; sealUi(); });
   }
 
   // A shareable picture: your photo beside Moon's, the verdict and the Moonmark.
@@ -211,7 +257,7 @@
     c.fillStyle = '#E9E4D8'; c.font = '34px "JetBrains Mono", monospace';
     c.fillText((last.m.lit * 100).toFixed(0) + '% lit' + (last.m.dir != null && cmp.tilt !== 'skip' ? ' · ' + Math.round(last.m.dir) + '°' : ''), 80, 890);
     c.fillText((e.lit * 100).toFixed(0) + '% lit' + (e.dir != null && cmp.tilt !== 'skip' ? ' · ' + Math.round(e.dir) + '°' : ''), 560, 890);
-    c.fillStyle = '#8A8B8F'; c.font = '22px "JetBrains Mono", monospace'; c.fillText(sp('MOONMARK'), 80, 1010);
+    c.fillStyle = sealed ? '#4CC38A' : '#8A8B8F'; c.font = '22px "JetBrains Mono", monospace'; c.fillText(sp(sealed ? 'SKY-CHECKED · SEALED ON MOON ' + sealed.mk : 'MOONMARK'), 80, 1010);
     c.fillStyle = '#E9E4D8'; c.font = '54px "JetBrains Mono", monospace'; c.fillText(mk.text, 80, 1080);
     c.fillStyle = '#8A8B8F'; c.font = '24px "JetBrains Mono", monospace'; c.fillText(when(last.ms), 80, 1130);
     c.fillStyle = '#24262A'; c.fillRect(80, 1200, W - 160, 2);
@@ -237,6 +283,7 @@
       inp.onchange = function () { var f = inp.files && inp.files[0]; if (f) { if (!loc) askLocation(null, true); readPhoto(f); } inp.value = ''; };
     });
     $('[data-sc-save]').onclick = save;
+    var sb = $('[data-sc-seal]'); if (sb) sb.onclick = sealSky;
   }
   var t = 0, iv = setInterval(function () {
     var el = $('[data-sc-file]'), snap = document.querySelector('[data-dc-snapshot]');

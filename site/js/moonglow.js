@@ -89,7 +89,8 @@
     var f = window.MoonPhase ? window.MoonPhase.fraction(at) : 0.17;
     // Turn the whole canvas so the lit side points the way the real Moon's does (north up).
     // The CSS rotate property leaves any transform already on the canvas alone.
-    var tilt = window.MoonPhase && window.MoonPhase.tilt ? window.MoonPhase.tilt(at) : 0;
+    var dt = cv.getAttribute('data-tilt');   // data-tilt="<deg>" overrides it, e.g. the tilt seen from one place
+    var tilt = dt !== null && dt !== '' && isFinite(+dt) ? +dt : window.MoonPhase && window.MoonPhase.tilt ? window.MoonPhase.tilt(at) : 0;
     if (cv.__tilt !== tilt) { cv.__tilt = tilt; cv.style.rotate = tilt + 'deg'; }
     var wax = f < 0.5, side = wax ? 1 : -1;
     var lit = window.MoonPhase ? window.MoonPhase.illumination(at) : 0.27;

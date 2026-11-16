@@ -46,7 +46,7 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .sc-eye{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;color:#8A8B8F}
 .sc-p{margin:0;max-width:720px;font-size:17px;line-height:1.65;color:#B9B6AE}
 .sc-now{display:flex;align-items:center;gap:22px;border:1px solid #24262A;padding:20px 24px;max-width:720px}
-.sc-now canvas{width:84px;height:84px;flex:none}
+.sc-nowm{width:84px;height:84px;flex:none;position:relative}.sc-nowm canvas{position:absolute;left:50%;top:50%;width:160px;height:160px;margin:-80px 0 0 -80px;pointer-events:none}
 .sc-now b{display:block;font-family:'Syncopate',sans-serif;font-weight:700;font-size:13px;letter-spacing:.16em;margin-bottom:6px}
 .sc-now span{display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;color:#8A8B8F}
 .sc-pl{margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:360px}
@@ -59,7 +59,7 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .sc-btns{display:flex;gap:12px;flex-wrap:wrap}
 .sc-btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 28px;border:1px solid #E9E4D8;background:none;color:#E9E4D8;font-family:'Syncopate',sans-serif;font-weight:700;font-size:11px;letter-spacing:.22em;cursor:pointer;box-sizing:border-box}
 .sc-btn.p{background:#E9E4D8;color:#0B0B0D}
-.sc-btn input{display:none}
+.sc-btn input{display:none}.sc-btn:disabled{opacity:.6;cursor:default}.sc-btn[hidden]{display:none}.sc-sealed{margin-top:20px;padding:20px;border:1px solid #24262A;display:flex;flex-direction:column;gap:14px;align-items:flex-start}.sc-sealed[hidden]{display:none}.sc-sealed p{margin:0;font-size:15px;line-height:1.6;color:#B9B6AE}.sc-sealed a:not(.sc-btn){color:#E9E4D8}.sc-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid #4CC38A;color:#4CC38A;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.24em}.sc-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#4CC38A}.sc-err{color:#F0645C!important}
 .sc-tips{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:1px;background:#24262A;border:1px solid #24262A}
 .sc-tips li{background:#0B0B0D;padding:18px 20px;font-size:14px;line-height:1.6;color:#B9B6AE}
 .sc-tips b{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:11px;letter-spacing:.24em;color:#8A8B8F;margin-bottom:6px}
@@ -81,12 +81,13 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .sc-rows em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;color:#8A8B8F}
 .sc-rows a{color:#E9E4D8;text-decoration:underline;text-underline-offset:3px}
 .sc-ok{color:#4CC38A}.sc-warn{color:#F2C14E}.sc-bad{color:#F0645C}
-@media (max-width:720px){.sc-btns .sc-btn{flex:1 1 100%}.sc-pair{grid-template-columns:1fr 1fr}.sc-pair figure{padding:14px}.sc-rows{grid-template-columns:1fr}.sc-now{padding:16px}.sc-now canvas{width:64px;height:64px}}
+@media (max-width:720px){.sc-btns .sc-btn{flex:1 1 100%}.sc-pair{grid-template-columns:1fr 1fr}.sc-pair figure{padding:14px}.sc-rows{grid-template-columns:1fr}.sc-now{padding:16px}.sc-nowm{width:64px;height:64px}.sc-nowm canvas{width:122px;height:122px;margin:-61px 0 0 -61px}}
 </style>
 
 <script src="js/preact.umd.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
 <script src="js/places.js" defer></script>
+<script src="js/moonglow.js" defer></script>
 <script src="js/sky-check-core.js" defer></script>
 <script src="js/sky-check.js" defer></script>
 <script src="js/header.js" defer></script>
@@ -165,7 +166,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="sc-eye">SKY CHECK · YOUR PHOTO NEVER LEAVES YOUR PHONE</div>
 <h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(30px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1; max-width: 1000px;">CHECK MOON TIME AGAINST THE SKY</h1>
 <p class="sc-p">Moon's dates follow the real Moon, so you can check them by looking up. Take a photo of the Moon and Moon measures how much of it is lit and which way the lit side points, then checks both against what Moon time says the sky should show, right where you're standing.</p>
-<div class="sc-now" data-sc-now=""><canvas data-sc-nowcv="" aria-hidden="true"></canvas><div><b data-sc-nowh="">THE MOON RIGHT NOW</b><span data-sc-nowt="">First quarter · 44% lit · Moonmark 1928.05.07 04:02:09<br>Add your location to see which way it tilts where you are.</span><div data-sc-place=""><div class="sc-pl"><div class="sc-pl-row"><button type="button" data-sc-loc="">USE MY LOCATION</button></div><input type="text" data-sc-city="" placeholder="or type your city" autocomplete="off" aria-label="Your city"><div class="sc-pl-list" data-sc-cities="" role="listbox"></div><span class="sc-pl-msg" data-sc-plmsg="" role="status"></span></div></div></div></div>
+<div class="sc-now" data-sc-now=""><div class="sc-nowm"><canvas class="hm-moonglow" data-sc-nowcv="" aria-hidden="true" style="rotate: 17.6deg;" data-tilt=""></canvas></div><div><b data-sc-nowh="">THE MOON RIGHT NOW</b><span data-sc-nowt="">First quarter · 44% lit · Moonmark 1928.05.07 04:12:14<br>Add your location to see which way it tilts where you are.</span><div data-sc-place=""><div class="sc-pl"><div class="sc-pl-row"><button type="button" data-sc-loc="">USE MY LOCATION</button></div><input type="text" data-sc-city="" placeholder="or type your city" autocomplete="off" aria-label="Your city"><div class="sc-pl-list" data-sc-cities="" role="listbox"></div><span class="sc-pl-msg" data-sc-plmsg="" role="status"></span></div></div></div></div>
 <div class="sc-btns"><label class="sc-btn p">TAKE OR CHOOSE A PHOTO<input type="file" accept="image/*" data-sc-file=""></label></div>
 <ul class="sc-tips">
 <li><b>01 · HOLD IT STRAIGHT</b>Keep your phone upright, not tilted, so up in the photo is up in the sky.</li>
@@ -180,7 +181,8 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="sc-v" data-sc-v="" role="status"></div>
 <div class="sc-pair"><figure><div class="sc-art"><canvas data-sc-photo="" aria-label="Your photo of the Moon"></canvas></div><figcaption>YOUR PHOTO</figcaption></figure><figure><div class="sc-art"><canvas data-sc-pred="" aria-label="The Moon Moon time predicts"></canvas></div><figcaption>MOON TIME SAYS</figcaption></figure></div>
 <div class="sc-rows" data-sc-rows=""></div>
-<div class="sc-btns"><button type="button" class="sc-btn p" data-sc-save="">SAVE OR SHARE</button><label class="sc-btn">TRY ANOTHER PHOTO<input type="file" accept="image/*" data-sc-file2=""></label></div>
+<div class="sc-btns"><button type="button" class="sc-btn p" data-sc-seal="">SEAL THIS SKY</button><button type="button" class="sc-btn" data-sc-save="">SAVE OR SHARE</button><label class="sc-btn">TRY ANOTHER PHOTO<input type="file" accept="image/*" data-sc-file2=""></label></div>
+<div class="sc-sealed" data-sc-sealed=""></div>
 </div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(18px, 2vw, 24px); letter-spacing: 0.08em;">WHY THIS WORKS</h2>
 <p class="sc-p">Every Moon month starts at the new moon, so the date tells you the phase. And the Moon's phase is the same for everyone on Earth at the same moment, unlike the Sun, which tells the time only where you stand. Which way the lit side tilts depends on your place in the world, so Moon works that out from your location. The sky can confirm the date to about a day; the nanoseconds and the proof come from Moon's signatures.</p>
@@ -229,7 +231,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="sc-eye">SKY CHECK · YOUR PHOTO NEVER LEAVES YOUR PHONE</div>
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(30px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1; max-width: 1000px">CHECK MOON TIME AGAINST THE SKY</h1>
 <p class="sc-p">Moon's dates follow the real Moon, so you can check them by looking up. Take a photo of the Moon and Moon measures how much of it is lit and which way the lit side points, then checks both against what Moon time says the sky should show, right where you're standing.</p>
-<div class="sc-now" data-sc-now><canvas data-sc-nowcv aria-hidden="true"></canvas><div><b data-sc-nowh>THE MOON RIGHT NOW</b><span data-sc-nowt>Working it out…</span><div data-sc-place></div></div></div>
+<div class="sc-now" data-sc-now><div class="sc-nowm"><canvas class="hm-moonglow" data-sc-nowcv aria-hidden="true"></canvas></div><div><b data-sc-nowh>THE MOON RIGHT NOW</b><span data-sc-nowt>Working it out…</span><div data-sc-place></div></div></div>
 <div class="sc-btns"><label class="sc-btn p">TAKE OR CHOOSE A PHOTO<input type="file" accept="image/*" data-sc-file></label></div>
 <ul class="sc-tips">
 <li><b>01 · HOLD IT STRAIGHT</b>Keep your phone upright, not tilted, so up in the photo is up in the sky.</li>
@@ -244,7 +246,8 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="sc-v" data-sc-v role="status"></div>
 <div class="sc-pair"><figure><div class="sc-art"><canvas data-sc-photo aria-label="Your photo of the Moon"></canvas></div><figcaption>YOUR PHOTO</figcaption></figure><figure><div class="sc-art"><canvas data-sc-pred aria-label="The Moon Moon time predicts"></canvas></div><figcaption>MOON TIME SAYS</figcaption></figure></div>
 <div class="sc-rows" data-sc-rows></div>
-<div class="sc-btns"><button type="button" class="sc-btn p" data-sc-save>SAVE OR SHARE</button><label class="sc-btn">TRY ANOTHER PHOTO<input type="file" accept="image/*" data-sc-file2></label></div>
+<div class="sc-btns"><button type="button" class="sc-btn p" data-sc-seal hidden>SEAL THIS SKY</button><button type="button" class="sc-btn" data-sc-save>SAVE OR SHARE</button><label class="sc-btn">TRY ANOTHER PHOTO<input type="file" accept="image/*" data-sc-file2></label></div>
+<div class="sc-sealed" data-sc-sealed hidden></div>
 </div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(18px, 2vw, 24px); letter-spacing: 0.08em">WHY THIS WORKS</h2>
 <p class="sc-p">Every Moon month starts at the new moon, so the date tells you the phase. And the Moon's phase is the same for everyone on Earth at the same moment, unlike the Sun, which tells the time only where you stand. Which way the lit side tilts depends on your place in the world, so Moon works that out from your location. The sky can confirm the date to about a day; the nanoseconds and the proof come from Moon's signatures.</p>
