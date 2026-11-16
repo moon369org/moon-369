@@ -23,6 +23,9 @@ export function previewTags(html, date, type) {
   set(/(<meta name="twitter:image" content=")[^"]*(")/, img);
   set(/(<meta property="og:image:alt" content=")[^"]*(")/, `${title}, with an icon of the eclipse`);
   set(/(<title>)[^<]*(<\/title>)/, `${title} · Moon`);
+  // Draw the right eclipse from the first frame, not a total that then changes.
+  html = html.replace(/<canvas data-wait="" ([^>]*?)data-type="total"([^>]*data-ec-icon)/g, `<canvas $1data-type="${type}"$2`)
+             .replace(/<canvas data-wait ([^>]*?)data-type="total"([^>]*data-ec-icon)/g, `<canvas $1data-type="${type}"$2`);
   return html;
 }
 

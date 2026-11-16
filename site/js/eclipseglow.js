@@ -196,7 +196,9 @@
     lastFrame = now;
     var all = document.querySelectorAll('canvas.ec-glow');
     for (var i = 0; i < all.length; i++) {
-      var cv = all[i], r = cv.getBoundingClientRect();
+      var cv = all[i], r;
+      if (cv.hasAttribute('data-wait')) continue;   // its real type is still loading
+      r = cv.getBoundingClientRect();
       if (r.bottom < 0 || r.top > (window.innerHeight || 800)) continue;
       if (reduce && cv.__ecKey === (cv.getAttribute('data-type') || 'total') + '|' + Math.round(cv.clientWidth * Math.min(2, window.devicePixelRatio || 1))) continue;
       draw(cv, reduce ? 20 : (now - t0) / 1000 + 30 + i * 13);

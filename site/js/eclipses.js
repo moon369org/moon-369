@@ -44,7 +44,7 @@
   function initList() {
     get('/v1/eclipses/next').then(function (e) {
       $('[data-ec-next]').href = '/eclipse/' + e.date;
-      $('[data-ec-next-icon]').setAttribute('data-type', e.type);
+      $('[data-ec-next-icon]').setAttribute('data-type', e.type); $('[data-ec-next-icon]').removeAttribute('data-wait');
       $('[data-ec-next-icon]').setAttribute('aria-label', NAME[e.type]);
       $('[data-ec-next-date]').textContent = longDate(e.date).toUpperCase();
       $('[data-ec-next-sub]').textContent = e.type.toUpperCase() + ' · ' + new Date(e.unix_ms).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) + ' your time · SAROS ' + e.saros;
@@ -76,7 +76,7 @@
     get('/v1/eclipses/' + m[1]).then(function (e) {
       var title = NAME[e.type] + ' · ' + longDate(e.date);
       document.title = title + ' · Moon';
-      $('[data-ec-icon]').setAttribute('data-type', e.type); $('[data-ec-icon]').setAttribute('aria-label', NAME[e.type]);
+      $('[data-ec-icon]').setAttribute('data-type', e.type); $('[data-ec-icon]').removeAttribute('data-wait'); $('[data-ec-icon]').setAttribute('aria-label', NAME[e.type]);
       $('[data-ec-kind]').textContent = NAME[e.type].toUpperCase();
       $('[data-ec-date]').textContent = longDate(e.date).toUpperCase();
       $('[data-ec-sub]').textContent = 'GREATEST ECLIPSE ' + e.greatest_eclipse_td + ' TT · SAROS ' + e.saros;
