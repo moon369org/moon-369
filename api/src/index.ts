@@ -112,6 +112,15 @@ const FOREVER = { 'Cache-Control': 'public, max-age=31536000, immutable' };
 /** Server time in Unix ns. the platform exposes millisecond time; finer digits come from the conversion. */
 const nowUnixNs = (): bigint => BigInt(Date.now()) * 1_000_000n;
 
+/** When the nightly seal next runs after a moment: daily at 07:23 UTC (api/vercel.json "crons"). Keep the two in step. */
+const SEAL_RUN_UTC_MIN = 7 * 60 + 23;
+export function nextSealRun(afterNs: bigint, nowNs: bigint): string {
+  const from = Number((afterNs > nowNs ? afterNs : nowNs) / 1_000_000n), day = 86_400_000;
+  let t = Math.floor(from / day) * day + SEAL_RUN_UTC_MIN * 60_000;
+  if (t <= from) t += day;
+  return new Date(t).toISOString();
+}
+
 function moonBody(t: MoonTime, unixNs: bigint) {
   const ph = truePhase(unixNs);
   const p = (n: number) => String(n).padStart(2, '0');
@@ -995,8 +1004,11 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
             const behind = next !== null && next < open ? luneEndNs(next) : null;
             const overdue = behind !== null && nowNs - behind > 26n * 3_600_000_000_000n;
             const last = head === null ? null : await env.TIDES.getTide(head);
+            // Lunes that have ended but aren't sealed yet, with their receipt counts (the most recent 10).
+            const waiting: { lune: string; size: number; ended_utc: string }[] = [];
+            if (behind !== null) for (let l = Math.max(next!, open - 10); l < open; l++) waiting.push({ lune: luneLabel(l), size: (await env.TIDES.leaves(l)).length, ended_utc: unixNsToIso(luneEndNs(l)) });
             return { open_lune: luneLabel(open), seals_after_utc: unixNsToIso(luneEndNs(open)), last_sealed: last ? { lune: last.lune, size: last.size, sealed_utc: unixNsToIso(BigInt(last.sealed_unix_ns)), bitcoin: last.bitcoin ? { status: last.bitcoin.status, block_height: last.bitcoin.block_height ?? null } : null } : null,
-              waiting_to_seal: behind === null ? 0 : open - next!, overdue, anchoring: { bitcoin: !!env.BITCOIN, xrpl: !!env.ANCHOR } };
+              waiting_to_seal: behind === null ? 0 : open - next!, waiting, next_seal_run_utc: nextSealRun(behind ?? luneEndNs(open), nowNs), overdue, anchoring: { bitcoin: !!env.BITCOIN, xrpl: !!env.ANCHOR } };
           }),
         ]);
         const problems = [
