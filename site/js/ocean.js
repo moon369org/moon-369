@@ -104,8 +104,9 @@
     }
 
     // More energy for the first few seconds, settling to a calm swell.
-    var boost = reduce ? 1 : 1 + 1.4 * Math.exp(-t / 2.6);
-    if (!reduce && t < 3 && Math.random() < 0.05) this.splash(Math.random(), (0.5 + Math.random()) * (1 - t / 3));
+    // (Not on rolling seas: they start already calm.)
+    var boost = reduce || this.flow ? 1 : 1 + 1.4 * Math.exp(-t / 2.6);
+    if (!reduce && !this.flow && t < 3 && Math.random() < 0.05) this.splash(Math.random(), (0.5 + Math.random()) * (1 - t / 3));
     var waves = this.waves, sets = this.sets, flow = this.flow, dir = this.dir;
     // Rolling waves: one comes in every few seconds, each its own height, width and speed, with a steeper front.
     var rolls = this.rolls || (this.rolls = []);
