@@ -61,3 +61,24 @@ describe('/v1/card.png', () => {
     expect(view.getUint32(20)).toBe(630);
   });
 });
+
+import { moonOnlySvg } from '../src/card';
+import { handle as handleMoon } from '../src/index';
+describe('the moon on its own', () => {
+  it('draws the site moon, square, transparent by default', () => {
+    const s = moonOnlySvg(0.25, 17, 400);
+    expect(s).toMatch(/^<svg[^>]*width="400" height="400"/);
+    expect(s).toContain('rotate(17)');
+    expect(s).not.toContain('<rect');
+    expect(moonOnlySvg(0.25, 0, 400, 'dark')).toContain('<rect');
+  });
+  it('serves /v1/moon.svg and /v1/moon.png', async () => {
+    const r = await handleMoon(new Request('https://x/v1/moon.svg?utc=2026-11-16T12:00:00Z&size=256'));
+    expect(r.status).toBe(200);
+    expect(r.headers.get('Content-Type')).toContain('image/svg+xml');
+    expect(await r.text()).toContain('First quarter');
+    const p = await handleMoon(new Request('https://x/v1/moon.png?size=128&bg=dark&tilt=off'));
+    expect(p.headers.get('Content-Type')).toBe('image/png');
+    expect((await handleMoon(new Request('https://x/v1/moon.svg?size=5'))).status).toBe(400);
+  });
+});

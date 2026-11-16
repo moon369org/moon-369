@@ -145,6 +145,14 @@ export function moonSvg(f: number, r: number, id: string, tilt = 0): string {
   return tilt ? `<g transform="rotate(${tilt})">${art}</g>` : art;
 }
 
+/** Moon's moon on its own, as on the site: the lit face, glow, rim, halo and rays, turned to the real tilt. Square. */
+export function moonOnlySvg(f: number, tilt: number, size: number, bg: 'none' | 'dark' = 'none', label = 'The Moon'): string {
+  const r = size / 3.8;   // the site's canvas is 1.9 moon diameters wide, so the glow has room to fade
+  const h = size / 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="${-h} ${-h} ${size} ${size}" role="img" aria-label="${label.replace(/[<&"]/g, '')}">` +
+    (bg === 'dark' ? `<rect x="${-h}" y="${-h}" width="${size}" height="${size}" fill="${INK}"/>` : '') + moonSvg(f, r, 'mo', tilt) + '</svg>';
+}
+
 export function cardSvg(d: CardData, size = 600): string {
   const title = esc((d.title ?? 'TODAY ON MOON').toUpperCase());
   const foot = esc(`${d.name.toUpperCase()} · ${(d.illumination * 100).toFixed(1)}% LIT · LUNE ${d.lune} OF ${d.lunesInMoon}`);

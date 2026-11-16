@@ -14,6 +14,7 @@
  *     slow waves that never line up.
  */
 (function () {
+  if (window.__moonglow) return; window.__moonglow = true;
   var INK = '233,228,216';
   var SCALE = 1.9; // canvas size relative to the moon, so the glow has room to fade out
   function wave(t, s) { return Math.sin(t * 0.31 + s) * 0.55 + Math.sin(t * 0.173 + s * 2.1) * 0.3 + Math.sin(t * 0.071 + s * 3.7) * 0.15; }
