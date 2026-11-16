@@ -83,6 +83,39 @@ footer > div > div:last-child{justify-content:center!important;gap:22px!importan
 footer > div > div:first-child svg{width:64px!important}
 }
 </style>
+<style>
+.pr-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid #24262A}
+.pr-stats>div{padding:24px 28px;display:flex;flex-direction:column-reverse;gap:10px;min-width:0}.pr-stats>div+div{border-left:1px solid #24262A}
+.pr-stats b{font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(16px,2vw,26px);letter-spacing:.04em;color:#F2F2F0;overflow-wrap:anywhere}
+.pr-stats span{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
+.pr-stats b[data-pr-when]{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:clamp(15px,1.6vw,20px);letter-spacing:.02em}
+.pr-check{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:32px;align-items:start}
+.pr-check-t{display:flex;flex-direction:column;gap:12px}
+.pr-ok{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.pr-ok>div{border:1px solid #24262A;padding:24px;display:flex;flex-direction:column;gap:10px}.pr-ok p{margin:0;font-size:14px;line-height:1.6;color:#A2A3A7}
+.pr-ok a,.pr-steps a,.pr-cta a{color:#F2F2F0}
+.pr-reg-top{display:flex;flex-wrap:wrap;gap:12px}
+.pr-btn{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1px solid #2E3035;color:#E9E4D8;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10px;letter-spacing:.2em;box-sizing:border-box}.pr-btn:hover{border-color:#E9E4D8}
+.pr-reg{border-top:1px solid #24262A}
+.pr-reg-empty{padding:28px 0;color:#8A8B8F;font-size:14px}
+.pr-row{display:grid;grid-template-columns:64px minmax(0,1.3fr) minmax(0,1fr) auto auto;gap:20px;align-items:center;padding:14px 0;border-bottom:1px solid #1C1D20}
+.pr-th{width:64px;height:64px;display:flex;align-items:center;justify-content:center;background:#111214;border:1px solid #1C1D20;overflow:hidden}
+.pr-th img{max-width:56px;max-height:56px;display:block}.pr-th.lt{background:#E9E4D8}.pr-th span{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:#8A8B8F}
+.pr-nm{display:flex;flex-direction:column;gap:4px;min-width:0}.pr-nm b{font-weight:500;font-size:15px;overflow-wrap:anywhere}.pr-nm span{font-size:13px;color:#8A8B8F}
+.pr-sha{all:unset;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;color:#A2A3A7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.pr-sha:hover{color:#E9E4D8}
+.pr-sha:focus-visible,.pr-dl:focus-visible,.pr-btn:focus-visible{outline:2px solid #E9E4D8;outline-offset:3px}
+.pr-dl{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;color:#E9E4D8;min-height:44px;display:inline-flex;align-items:center}
+.pr-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;counter-reset:st}
+.pr-steps li{border:1px solid #24262A;padding:24px;display:flex;flex-direction:column;gap:10px;counter-increment:st;min-width:0}
+.pr-steps li::before{content:'0' counter(st);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:#8A8B8F}
+.pr-steps b{font-size:16px;font-weight:500}.pr-steps p{margin:0;font-size:14px;line-height:1.6;color:#A2A3A7}
+.pr-steps pre{margin:6px 0 0;padding:14px;background:#08080A;border:1px solid #1C1D20;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:#E9E4D8;white-space:pre-wrap;word-break:break-all}
+.pr-cta{border:1px solid #E9E4D8;padding:24px 28px}.pr-cta p{margin:0;font-size:16px;line-height:1.65;color:#E9E4D8}
+@media (max-width:720px){.pr-stats{grid-template-columns:minmax(0,1fr)}.pr-stats>div+div{border-left:0;border-top:1px solid #24262A}.pr-check{grid-template-columns:minmax(0,1fr)}
+.pr-row{grid-template-columns:56px minmax(0,1fr) auto;gap:12px 14px}.pr-th{width:56px;height:56px}.pr-th img{max-width:48px;max-height:48px}.pr-sha{grid-column:2/-1;grid-row:2}.pr-row moon-badge{grid-column:2/-1;grid-row:3}.pr-dl{grid-column:3;grid-row:1}}
+</style>
+<script src="/embed/moon.js" defer></script>
+<script src="js/press.js" defer></script>
 </head>
 <body>
 <!--snapshot--><div data-dc-snapshot="" aria-hidden="true">
@@ -101,7 +134,7 @@ footer > div > div:first-child svg{width:64px!important}
 <path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
 </svg>
 </a>
-<nav aria-label="Main" id="mm-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;">
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;" id="mm-nav">
 <a href="/night">YOUR MOON</a>
 <a href="/uses">USES</a>
 <a href="/tideline">TIDELINE</a>
@@ -115,9 +148,9 @@ footer > div > div:first-child svg{width:64px!important}
 <section style="border-bottom: 1px solid rgb(28, 29, 32);">
 <div style="max-width: 1280px; margin: 0px auto; padding: 100px 32px 90px; display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-end; justify-content: space-between;">
 <div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 24px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">BRAND ASSETS</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">BRAND ASSETS · SIGNED ON MOON</div>
 <h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1;">PRESS KIT</h1>
-<p style="margin: 0px; max-width: 600px; font-size: 18px; line-height: 1.65; color: rgb(185, 182, 174);">Logos, badges, colors, type and the facts about Moon. Everything is free to use for coverage of Moon and for products built on it, following the guidelines&nbsp;below.</p>
+<p style="margin: 0px; max-width: 600px; font-size: 18px; line-height: 1.65; color: rgb(185, 182, 174);">Logos, badges, colors, type and the facts about Moon. Every file here is signed with a Moonmark and registered to Moon, so anyone can check that a copy is genuine and when it was&nbsp;published.</p>
 </div>
 <a href="assets/Moon-Press-Kit.zip" download="Moon-Press-Kit.zip" style="display: inline-flex; align-items: center; gap: 14px; background: rgb(233, 228, 216); color: rgb(11, 11, 13); padding: 20px 30px; min-height: 44px; box-sizing: border-box; font-family: Syncopate, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em;">DOWNLOAD FULL KIT <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-weight: 400; letter-spacing: 0.06em; color: rgb(74, 75, 79);">ZIP · 1.3 MB</span></a>
 </div>
@@ -125,10 +158,27 @@ footer > div > div:first-child svg{width:64px!important}
 
 <div style="max-width: 1280px; margin: 0px auto; padding: 80px 32px 120px; display: flex; flex-direction: column; gap: 104px;">
 
+<section style="display: flex; flex-direction: column; gap: 32px;">
+<div id="signed" style="display: flex; flex-direction: column; gap: 14px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">01</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">SIGNED ON MOON</h2>
+<p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">We put our own brand on Moon. Before publishing, every logo, icon, badge and color file in this kit, plus a written brand statement, was fingerprinted and signed with a Moonmark by Moon's verified key. Each signature carries Moon's two signatures and a public drand randomness beacon, which proves it couldn't have been made any earlier, and Moon's registry records it under Moon's verified name. Nobody can backdate it or claim these files&nbsp;first.</p>
+</div>
+<div class="pr-stats">
+<div><b data-pr-count="">40</b><span>BRAND FILES SIGNED</span></div>
+<div><b data-pr-who="">MOON</b><span>REGISTERED BY</span></div>
+<div><b data-pr-when=""><span style="visibility: hidden;">Could not reach Moon</span></b><span>SIGNED AT MOONMARK</span></div>
+</div>
+<div class="pr-check">
+<div class="pr-check-t"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">CHECK ANY COPY</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(185, 182, 174);">Found a Moon logo somewhere? Drop it here. A genuine file shows as registered by Moon, verified. Cropped, resized or recolored copies of our images are found too. The file never leaves your&nbsp;device.</p></div>
+<moon-check></moon-check>
+</div>
+</section>
+
 <section style="display: flex; flex-wrap: wrap; gap: 48px 64px;">
 <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 20px;">
 <div id="about" style="display: flex; flex-direction: column; gap: 14px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">01</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">02</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">ABOUT MOON</h2>
 <p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">Use this description in articles and&nbsp;listings.</p>
 </div>
@@ -143,7 +193,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px;">
 <div id="logo" style="display: flex; flex-direction: column; gap: 14px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">02</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">03</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">WORDMARK</h2>
 <p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">The primary logo. The two O's are linked: one passes over the other at the top and under it at the bottom. SVG and PNG versions are in the full&nbsp;kit.</p>
 </div>
@@ -168,7 +218,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px;">
 <div id="mark" style="display: flex; flex-direction: column; gap: 14px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">03</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">04</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">MARK</h2>
 <p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">The linked O's on their own, for avatars, favicons and tight&nbsp;spaces.</p>
 </div>
@@ -193,7 +243,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px;">
 <div id="icons" style="display: flex; flex-direction: column; gap: 14px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">04</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">05</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">APP ICONS</h2>
 <p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">1024 px masters. The kit also includes 512, 64 and 32 px versions; the small sizes use a heavier stroke so they stay&nbsp;legible.</p>
 </div>
@@ -218,7 +268,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px;">
 <div id="badges" style="display: flex; flex-direction: column; gap: 14px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">05</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">06</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">POWERED BY MOON</h2>
 <p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">For sites and apps that show Moon time from the API. Link the badge to the Moon homepage. Full rules are on the <a href="api.html#attribution" style="border-bottom: 1px solid rgb(233, 228, 216);">API page</a>.</p>
 </div>
@@ -243,7 +293,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px;">
 <div id="loader" style="display: flex; flex-direction: column; gap: 14px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">06</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">07</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">LOADER</h2>
 <p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">Breathe: one solid circle opens into the two rings and closes again, 3.2 seconds, no pause. The animated SVG and a standalone HTML page are in the full&nbsp;kit.</p>
 </div>
@@ -258,7 +308,7 @@ footer > div > div:first-child svg{width:64px!important}
 <section style="display: flex; flex-direction: column; gap: 32px;">
 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px;">
 <div id="colors" style="display: flex; flex-direction: column; gap: 14px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">07</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">08</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">COLORS</h2>
 <p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">About 90 percent dark, 10 percent cream. Regolith is the only&nbsp;accent.</p>
 </div>
@@ -305,7 +355,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px;">
 <div id="type" style="display: flex; flex-direction: column; gap: 14px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">08</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">09</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">TYPOGRAPHY</h2>
 <p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">Three free Google Fonts. Never substitute others in brand&nbsp;materials.</p>
 </div>
@@ -329,7 +379,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px;">
 <div id="social" style="display: flex; flex-direction: column; gap: 14px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">09</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">10</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">SOCIAL</h2>
 <p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">The X banner and avatar. The kit also includes the full-size "A new standard for time"&nbsp;image.</p>
 </div>
@@ -339,9 +389,16 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px;">
 <div id="usage" style="display: flex; flex-direction: column; gap: 14px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">10</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">11</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">USAGE</h2>
-<p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">Keep the brand consistent wherever it&nbsp;appears.</p>
+<p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">All rights reserved. The Moon name, wordmark, linked-O mark, app icons, loader and social images may not be used without written permission from Moon, with two&nbsp;exceptions.</p>
+</div>
+<div class="pr-ok">
+<div><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.2em; color: rgb(127, 191, 142);">ALLOWED</div><div style="font-size: 16px; font-weight: 500;">News and commentary</div><p>Editors and writers may show the logo when reporting on Moon, using the files on this&nbsp;page.</p></div>
+<div><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.2em; color: rgb(127, 191, 142);">ALLOWED</div><div style="font-size: 16px; font-weight: 500;">Powered by Moon</div><p>Sites and apps that show Moon time from the <a href="/api#brand">Moon API</a> may show the Powered by Moon badge, unaltered, linked to&nbsp;moon369.org.</p></div>
+<div><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.2em; color: rgb(217, 163, 95);">EVERYTHING ELSE</div><div style="font-size: 16px; font-weight: 500;">Ask first</div><p>Any other use needs written permission from Moon: <a href="mailto:moon369org@proton.me">moon369org@proton.me</a>.</p></div>
+</div>
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143); margin-top: 8px;">WHEN THE BRAND IS USED
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;"><div style="border: 1px solid rgb(36, 38, 42); padding: 24px; display: flex; flex-direction: column; gap: 10px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.2em; color: rgb(233, 228, 216);">DO</div>
@@ -368,7 +425,36 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="font-size: 16px; font-weight: 500;">Don't rebuild the wordmark</div>
 <p style="margin: 0px; font-size: 14px; line-height: 1.6; color: rgb(162, 163, 167);">Always use the supplied files. Never retype MOON in a&nbsp;font.</p>
 </div></div>
-<p style="margin: 0px; max-width: 760px; font-size: 14px; line-height: 1.7; color: rgb(138, 139, 143);">The Moon name, the linked-O mark and the Powered by Moon badge are trademarks. Using them in coverage, or to show that a product runs on Moon time, is welcome. Using them to imply partnership, certification or endorsement requires written&nbsp;approval.</p>
+<p style="margin: 0px; max-width: 760px; font-size: 14px; line-height: 1.7; color: rgb(138, 139, 143);">The Moon name and marks are trademarks of Moon (™). The signed Moonmarks on this page prove what Moon published and when; they are not a trademark registration. Using the marks to imply partnership, certification or endorsement is never allowed without written&nbsp;approval.</p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 32px;">
+<div id="registry" style="display: flex; flex-direction: column; gap: 14px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">12</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">THE REGISTRY</h2>
+<p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">Every file in the kit with its SHA-256 fingerprint and its live status on Moon. The manifest lists them all and is signed too, so one signature vouches for the whole&nbsp;set.</p>
+</div>
+<div class="pr-reg-top"><a href="assets/brand/moon-brand-manifest.json" class="pr-btn">MANIFEST · JSON</a><a href="assets/brand/MOON-BRAND-STATEMENT.md" class="pr-btn">BRAND STATEMENT</a><a href="assets/brand/moon-brand-receipts.json" class="pr-btn">ALL 42 RECEIPTS · JSON</a><a href="assets/Moon-Press-Kit.zip" download="Moon-Press-Kit.zip" class="pr-btn">FULL KIT · ZIP</a></div>
+<div class="pr-reg" data-pr-reg=""><div class="pr-row" style="padding:0;border:0;height:0;overflow:hidden" aria-hidden="true"></div><div class="pr-row" id="file-MOON-BRAND-STATEMENT-md"><div class="pr-th"><span>MD</span></div><div class="pr-nm"><b>MOON-BRAND-STATEMENT.md</b><span>Brand statement · 2 KB</span></div><button type="button" class="pr-sha" data-sha="3962977889814f72664f08c7d1d93cc5f771882d66f1325d99195aa00789d6ce" title="Copy the SHA-256" aria-label="Copy the SHA-256 of MOON-BRAND-STATEMENT.md">3962977889814f72664f08c7d1d93cc5f771882d66f1325d99195aa00789d6ce</button><moon-badge sha256="3962977889814f72664f08c7d1d93cc5f771882d66f1325d99195aa00789d6ce" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/MOON-BRAND-STATEMENT.md" download="">GET ↓</a></div><div class="pr-row" id="file-app-icon-moon-app-icon-cream-1024-png"><div class="pr-th"><img src="assets/brand/app-icon/moon-app-icon-cream-1024.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>app-icon/moon-app-icon-cream-1024.png</b><span>App icon · 49 KB · look-alike hash 8080f8b2b2e08080</span></div><button type="button" class="pr-sha" data-sha="6f038ca6058f915854b79494971af389e6aefeff483fcbae9aed03c6b00e256d" title="Copy the SHA-256" aria-label="Copy the SHA-256 of app-icon/moon-app-icon-cream-1024.png">6f038ca6058f915854b79494971af389e6aefeff483fcbae9aed03c6b00e256d</button><moon-badge sha256="6f038ca6058f915854b79494971af389e6aefeff483fcbae9aed03c6b00e256d" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/app-icon/moon-app-icon-cream-1024.png" download="">GET ↓</a></div><div class="pr-row" id="file-app-icon-moon-app-icon-cream-32-png"><div class="pr-th"><img src="assets/brand/app-icon/moon-app-icon-cream-32.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>app-icon/moon-app-icon-cream-32.png</b><span>App icon · 1 KB · look-alike hash 0301f0b2b2f08123</span></div><button type="button" class="pr-sha" data-sha="65c4061edec826898309d1803edf81ae362ec586f9d25af5841e424557a4143d" title="Copy the SHA-256" aria-label="Copy the SHA-256 of app-icon/moon-app-icon-cream-32.png">65c4061edec826898309d1803edf81ae362ec586f9d25af5841e424557a4143d</button><moon-badge sha256="65c4061edec826898309d1803edf81ae362ec586f9d25af5841e424557a4143d" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/app-icon/moon-app-icon-cream-32.png" download="">GET ↓</a></div><div class="pr-row" id="file-app-icon-moon-app-icon-cream-512-png"><div class="pr-th"><img src="assets/brand/app-icon/moon-app-icon-cream-512.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>app-icon/moon-app-icon-cream-512.png</b><span>App icon · 22 KB · look-alike hash 8080f8b2b2e08080</span></div><button type="button" class="pr-sha" data-sha="7ef2a3df80f351f7c8a3e14cc7f0026ca472d7d1f75a10ba4c9d61d200babd73" title="Copy the SHA-256" aria-label="Copy the SHA-256 of app-icon/moon-app-icon-cream-512.png">7ef2a3df80f351f7c8a3e14cc7f0026ca472d7d1f75a10ba4c9d61d200babd73</button><moon-badge sha256="7ef2a3df80f351f7c8a3e14cc7f0026ca472d7d1f75a10ba4c9d61d200babd73" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/app-icon/moon-app-icon-cream-512.png" download="">GET ↓</a></div><div class="pr-row" id="file-app-icon-moon-app-icon-cream-64-png"><div class="pr-th"><img src="assets/brand/app-icon/moon-app-icon-cream-64.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>app-icon/moon-app-icon-cream-64.png</b><span>App icon · 2 KB · look-alike hash 8280f0b2b2f08123</span></div><button type="button" class="pr-sha" data-sha="be41f6a9a413992b0441007ac535e00cfa0840e467144d729861c0d762f3de9a" title="Copy the SHA-256" aria-label="Copy the SHA-256 of app-icon/moon-app-icon-cream-64.png">be41f6a9a413992b0441007ac535e00cfa0840e467144d729861c0d762f3de9a</button><moon-badge sha256="be41f6a9a413992b0441007ac535e00cfa0840e467144d729861c0d762f3de9a" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/app-icon/moon-app-icon-cream-64.png" download="">GET ↓</a></div><div class="pr-row" id="file-app-icon-moon-app-icon-cream-svg"><div class="pr-th"><img src="assets/brand/app-icon/moon-app-icon-cream.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>app-icon/moon-app-icon-cream.svg</b><span>App icon · 963 B</span></div><button type="button" class="pr-sha" data-sha="8111e28c92854d8c5b35f612f99b5770fdd9211d1dfc6c7959ae7d539658daef" title="Copy the SHA-256" aria-label="Copy the SHA-256 of app-icon/moon-app-icon-cream.svg">8111e28c92854d8c5b35f612f99b5770fdd9211d1dfc6c7959ae7d539658daef</button><moon-badge sha256="8111e28c92854d8c5b35f612f99b5770fdd9211d1dfc6c7959ae7d539658daef" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/app-icon/moon-app-icon-cream.svg" download="">GET ↓</a></div><div class="pr-row" id="file-app-icon-moon-app-icon-dark-1024-png"><div class="pr-th"><img src="assets/brand/app-icon/moon-app-icon-dark-1024.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>app-icon/moon-app-icon-dark-1024.png</b><span>App icon · 49 KB · look-alike hash 8200074d4d1f0082</span></div><button type="button" class="pr-sha" data-sha="d948c70689785d0634713c302c4d6b9db82cd9be2a8db4becd24a392ca645e78" title="Copy the SHA-256" aria-label="Copy the SHA-256 of app-icon/moon-app-icon-dark-1024.png">d948c70689785d0634713c302c4d6b9db82cd9be2a8db4becd24a392ca645e78</button><moon-badge sha256="d948c70689785d0634713c302c4d6b9db82cd9be2a8db4becd24a392ca645e78" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/app-icon/moon-app-icon-dark-1024.png" download="">GET ↓</a></div><div class="pr-row" id="file-app-icon-moon-app-icon-dark-32-png"><div class="pr-th"><img src="assets/brand/app-icon/moon-app-icon-dark-32.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>app-icon/moon-app-icon-dark-32.png</b><span>App icon · 1 KB · look-alike hash 02000f4d4d0f0082</span></div><button type="button" class="pr-sha" data-sha="e7857f095612d4054fe489d4086fbd6ae5cd08bddfbe98dce06606af7c6bbddd" title="Copy the SHA-256" aria-label="Copy the SHA-256 of app-icon/moon-app-icon-dark-32.png">e7857f095612d4054fe489d4086fbd6ae5cd08bddfbe98dce06606af7c6bbddd</button><moon-badge sha256="e7857f095612d4054fe489d4086fbd6ae5cd08bddfbe98dce06606af7c6bbddd" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/app-icon/moon-app-icon-dark-32.png" download="">GET ↓</a></div><div class="pr-row" id="file-app-icon-moon-app-icon-dark-512-png"><div class="pr-th"><img src="assets/brand/app-icon/moon-app-icon-dark-512.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>app-icon/moon-app-icon-dark-512.png</b><span>App icon · 23 KB · look-alike hash 8200074d4d1f0082</span></div><button type="button" class="pr-sha" data-sha="4212e9ecedea90a2cfd321e13c7af4be71c50f3e1fa8998e8ea9e61652d852f1" title="Copy the SHA-256" aria-label="Copy the SHA-256 of app-icon/moon-app-icon-dark-512.png">4212e9ecedea90a2cfd321e13c7af4be71c50f3e1fa8998e8ea9e61652d852f1</button><moon-badge sha256="4212e9ecedea90a2cfd321e13c7af4be71c50f3e1fa8998e8ea9e61652d852f1" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/app-icon/moon-app-icon-dark-512.png" download="">GET ↓</a></div><div class="pr-row" id="file-app-icon-moon-app-icon-dark-64-png"><div class="pr-th"><img src="assets/brand/app-icon/moon-app-icon-dark-64.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>app-icon/moon-app-icon-dark-64.png</b><span>App icon · 2 KB · look-alike hash 82000f4d4d0f0082</span></div><button type="button" class="pr-sha" data-sha="71beb6d17f05b035ec696c47e586b3528d9b1a878fe76d139690185d8ac844b4" title="Copy the SHA-256" aria-label="Copy the SHA-256 of app-icon/moon-app-icon-dark-64.png">71beb6d17f05b035ec696c47e586b3528d9b1a878fe76d139690185d8ac844b4</button><moon-badge sha256="71beb6d17f05b035ec696c47e586b3528d9b1a878fe76d139690185d8ac844b4" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/app-icon/moon-app-icon-dark-64.png" download="">GET ↓</a></div><div class="pr-row" id="file-app-icon-moon-app-icon-dark-svg"><div class="pr-th"><img src="assets/brand/app-icon/moon-app-icon-dark.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>app-icon/moon-app-icon-dark.svg</b><span>App icon · 963 B</span></div><button type="button" class="pr-sha" data-sha="5c684ffc1037106e066a30ed28b2b19c8f162f64455caabacd97a5b78f0fde5d" title="Copy the SHA-256" aria-label="Copy the SHA-256 of app-icon/moon-app-icon-dark.svg">5c684ffc1037106e066a30ed28b2b19c8f162f64455caabacd97a5b78f0fde5d</button><moon-badge sha256="5c684ffc1037106e066a30ed28b2b19c8f162f64455caabacd97a5b78f0fde5d" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/app-icon/moon-app-icon-dark.svg" download="">GET ↓</a></div><div class="pr-row" id="file-badges-badge-dark-svg"><div class="pr-th"><img src="assets/brand/badges/badge-dark.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>badges/badge-dark.svg</b><span>Powered by Moon badge · 9 KB</span></div><button type="button" class="pr-sha" data-sha="308e93a856e537e159b2a30f4aa32d6fbd281ec4a0820a76e09934557c5e55cd" title="Copy the SHA-256" aria-label="Copy the SHA-256 of badges/badge-dark.svg">308e93a856e537e159b2a30f4aa32d6fbd281ec4a0820a76e09934557c5e55cd</button><moon-badge sha256="308e93a856e537e159b2a30f4aa32d6fbd281ec4a0820a76e09934557c5e55cd" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/badges/badge-dark.svg" download="">GET ↓</a></div><div class="pr-row" id="file-badges-badge-dark-4x-png"><div class="pr-th"><img src="assets/brand/badges/badge-dark@4x.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>badges/badge-dark@4x.png</b><span>Powered by Moon badge · 16 KB · look-alike hash 806061676f6e6e80</span></div><button type="button" class="pr-sha" data-sha="5da43c9f7e435b265c921de68503bda0396408f10c30396feb91c52ca468bd16" title="Copy the SHA-256" aria-label="Copy the SHA-256 of badges/badge-dark@4x.png">5da43c9f7e435b265c921de68503bda0396408f10c30396feb91c52ca468bd16</button><moon-badge sha256="5da43c9f7e435b265c921de68503bda0396408f10c30396feb91c52ca468bd16" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/badges/badge-dark@4x.png" download="">GET ↓</a></div><div class="pr-row" id="file-badges-badge-light-svg"><div class="pr-th lt"><img src="assets/brand/badges/badge-light.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>badges/badge-light.svg</b><span>Powered by Moon badge · 9 KB</span></div><button type="button" class="pr-sha" data-sha="153da3d43b28510e7b0eca3d7963c4a56639d181038269327671a1f08f0dded3" title="Copy the SHA-256" aria-label="Copy the SHA-256 of badges/badge-light.svg">153da3d43b28510e7b0eca3d7963c4a56639d181038269327671a1f08f0dded3</button><moon-badge sha256="153da3d43b28510e7b0eca3d7963c4a56639d181038269327671a1f08f0dded3" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/badges/badge-light.svg" download="">GET ↓</a></div><div class="pr-row" id="file-badges-badge-light-4x-png"><div class="pr-th lt"><img src="assets/brand/badges/badge-light@4x.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>badges/badge-light@4x.png</b><span>Powered by Moon badge · 16 KB · look-alike hash 0181989890919101</span></div><button type="button" class="pr-sha" data-sha="714f4fa3760f152effd60dd9afcf5ec90fadbd310280a0d677ba679bdd4846e9" title="Copy the SHA-256" aria-label="Copy the SHA-256 of badges/badge-light@4x.png">714f4fa3760f152effd60dd9afcf5ec90fadbd310280a0d677ba679bdd4846e9</button><moon-badge sha256="714f4fa3760f152effd60dd9afcf5ec90fadbd310280a0d677ba679bdd4846e9" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/badges/badge-light@4x.png" download="">GET ↓</a></div><div class="pr-row" id="file-colors-moon-colors-css"><div class="pr-th"><span>CSS</span></div><div class="pr-nm"><b>colors/moon-colors.css</b><span>Colors · 303 B</span></div><button type="button" class="pr-sha" data-sha="f1075a79e85f905dd2a13ee75e8ebf0e87b346134d5fd5e623f30d995d9f2afc" title="Copy the SHA-256" aria-label="Copy the SHA-256 of colors/moon-colors.css">f1075a79e85f905dd2a13ee75e8ebf0e87b346134d5fd5e623f30d995d9f2afc</button><moon-badge sha256="f1075a79e85f905dd2a13ee75e8ebf0e87b346134d5fd5e623f30d995d9f2afc" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/colors/moon-colors.css" download="">GET ↓</a></div><div class="pr-row" id="file-colors-moon-colors-json"><div class="pr-th"><span>JSON</span></div><div class="pr-nm"><b>colors/moon-colors.json</b><span>Colors · 581 B</span></div><button type="button" class="pr-sha" data-sha="86696d5b7d9b9df08d024fe4a2d2a56137a6ac84d5fb9028b297fa9e03b04f72" title="Copy the SHA-256" aria-label="Copy the SHA-256 of colors/moon-colors.json">86696d5b7d9b9df08d024fe4a2d2a56137a6ac84d5fb9028b297fa9e03b04f72</button><moon-badge sha256="86696d5b7d9b9df08d024fe4a2d2a56137a6ac84d5fb9028b297fa9e03b04f72" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/colors/moon-colors.json" download="">GET ↓</a></div><div class="pr-row" id="file-colors-moon-palette-png"><div class="pr-th"><img src="assets/brand/colors/moon-palette.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>colors/moon-palette.png</b><span>Colors · 34 KB · look-alike hash 0000000000008092</span></div><button type="button" class="pr-sha" data-sha="4b41cdb93011754d53656d4d5caaec3b7f98f1d4867de5763938b5fdbb83249e" title="Copy the SHA-256" aria-label="Copy the SHA-256 of colors/moon-palette.png">4b41cdb93011754d53656d4d5caaec3b7f98f1d4867de5763938b5fdbb83249e</button><moon-badge sha256="4b41cdb93011754d53656d4d5caaec3b7f98f1d4867de5763938b5fdbb83249e" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/colors/moon-palette.png" download="">GET ↓</a></div><div class="pr-row" id="file-colors-moon-palette-svg"><div class="pr-th"><img src="assets/brand/colors/moon-palette.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>colors/moon-palette.svg</b><span>Colors · 1 KB</span></div><button type="button" class="pr-sha" data-sha="12cf34a6ce344f7fe8cc810e73e3103a18e22d08009d979ff4e0cb62e85855b5" title="Copy the SHA-256" aria-label="Copy the SHA-256 of colors/moon-palette.svg">12cf34a6ce344f7fe8cc810e73e3103a18e22d08009d979ff4e0cb62e85855b5</button><moon-badge sha256="12cf34a6ce344f7fe8cc810e73e3103a18e22d08009d979ff4e0cb62e85855b5" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/colors/moon-palette.svg" download="">GET ↓</a></div><div class="pr-row" id="file-loader-moon-loader-html"><div class="pr-th"><span>HTML</span></div><div class="pr-nm"><b>loader/moon-loader.html</b><span>Loader · 2 KB</span></div><button type="button" class="pr-sha" data-sha="1f2102979b71290ab20dd90b8f25905738b8d76c0871b91317eac7f41dad779b" title="Copy the SHA-256" aria-label="Copy the SHA-256 of loader/moon-loader.html">1f2102979b71290ab20dd90b8f25905738b8d76c0871b91317eac7f41dad779b</button><moon-badge sha256="1f2102979b71290ab20dd90b8f25905738b8d76c0871b91317eac7f41dad779b" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/loader/moon-loader.html" download="">GET ↓</a></div><div class="pr-row" id="file-loader-moon-loader-svg"><div class="pr-th"><img src="assets/brand/loader/moon-loader.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>loader/moon-loader.svg</b><span>Loader · 1 KB</span></div><button type="button" class="pr-sha" data-sha="24d360289e65b607100cc5e0801cf1ef637174e8e3e0f85efb6bee6a1338ef50" title="Copy the SHA-256" aria-label="Copy the SHA-256 of loader/moon-loader.svg">24d360289e65b607100cc5e0801cf1ef637174e8e3e0f85efb6bee6a1338ef50</button><moon-badge sha256="24d360289e65b607100cc5e0801cf1ef637174e8e3e0f85efb6bee6a1338ef50" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/loader/moon-loader.svg" download="">GET ↓</a></div><div class="pr-row" id="file-logo-moon-wordmark-black-on-cream-png"><div class="pr-th"><img src="assets/brand/logo/moon-wordmark-black-on-cream.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>logo/moon-wordmark-black-on-cream.png</b><span>Wordmark · 83 KB · look-alike hash 6b32169695557169</span></div><button type="button" class="pr-sha" data-sha="1db1ef07c6fe3f53dc2cc67d40265f281f65a9372500760ffadfe23c23522455" title="Copy the SHA-256" aria-label="Copy the SHA-256 of logo/moon-wordmark-black-on-cream.png">1db1ef07c6fe3f53dc2cc67d40265f281f65a9372500760ffadfe23c23522455</button><moon-badge sha256="1db1ef07c6fe3f53dc2cc67d40265f281f65a9372500760ffadfe23c23522455" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/logo/moon-wordmark-black-on-cream.png" download="">GET ↓</a></div><div class="pr-row" id="file-logo-moon-wordmark-black-on-cream-svg"><div class="pr-th"><img src="assets/brand/logo/moon-wordmark-black-on-cream.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>logo/moon-wordmark-black-on-cream.svg</b><span>Wordmark · 1 KB</span></div><button type="button" class="pr-sha" data-sha="9d088cd93c4dd462537874cea0a9bef308ee7a36ba043eccd0811cce1bb262f9" title="Copy the SHA-256" aria-label="Copy the SHA-256 of logo/moon-wordmark-black-on-cream.svg">9d088cd93c4dd462537874cea0a9bef308ee7a36ba043eccd0811cce1bb262f9</button><moon-badge sha256="9d088cd93c4dd462537874cea0a9bef308ee7a36ba043eccd0811cce1bb262f9" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/logo/moon-wordmark-black-on-cream.svg" download="">GET ↓</a></div><div class="pr-row" id="file-logo-moon-wordmark-black-png"><div class="pr-th lt"><img src="assets/brand/logo/moon-wordmark-black.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>logo/moon-wordmark-black.png</b><span>Wordmark · 73 KB · look-alike hash 8c0aeae9aaaa8a8c</span></div><button type="button" class="pr-sha" data-sha="69b044c15f61c2e88320a89a2a18ba1b77f6fa909615307acef11db516d1958c" title="Copy the SHA-256" aria-label="Copy the SHA-256 of logo/moon-wordmark-black.png">69b044c15f61c2e88320a89a2a18ba1b77f6fa909615307acef11db516d1958c</button><moon-badge sha256="69b044c15f61c2e88320a89a2a18ba1b77f6fa909615307acef11db516d1958c" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/logo/moon-wordmark-black.png" download="">GET ↓</a></div><div class="pr-row" id="file-logo-moon-wordmark-black-svg"><div class="pr-th lt"><img src="assets/brand/logo/moon-wordmark-black.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>logo/moon-wordmark-black.svg</b><span>Wordmark · 1 KB</span></div><button type="button" class="pr-sha" data-sha="d2e1c2ebaf2dd3e533f6cd92c3be1b28788ee93c78346153ea8ac2ac60063f1c" title="Copy the SHA-256" aria-label="Copy the SHA-256 of logo/moon-wordmark-black.svg">d2e1c2ebaf2dd3e533f6cd92c3be1b28788ee93c78346153ea8ac2ac60063f1c</button><moon-badge sha256="d2e1c2ebaf2dd3e533f6cd92c3be1b28788ee93c78346153ea8ac2ac60063f1c" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/logo/moon-wordmark-black.svg" download="">GET ↓</a></div><div class="pr-row" id="file-logo-moon-wordmark-cream-on-dark-png"><div class="pr-th"><img src="assets/brand/logo/moon-wordmark-cream-on-dark.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>logo/moon-wordmark-cream-on-dark.png</b><span>Wordmark · 83 KB · look-alike hash 94cde9696aaa8e96</span></div><button type="button" class="pr-sha" data-sha="2ae2bbe3869b34c2390a2452caa8cc2559aa93fee6929acb198e8250ba10e3ba" title="Copy the SHA-256" aria-label="Copy the SHA-256 of logo/moon-wordmark-cream-on-dark.png">2ae2bbe3869b34c2390a2452caa8cc2559aa93fee6929acb198e8250ba10e3ba</button><moon-badge sha256="2ae2bbe3869b34c2390a2452caa8cc2559aa93fee6929acb198e8250ba10e3ba" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/logo/moon-wordmark-cream-on-dark.png" download="">GET ↓</a></div><div class="pr-row" id="file-logo-moon-wordmark-cream-on-dark-svg"><div class="pr-th"><img src="assets/brand/logo/moon-wordmark-cream-on-dark.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>logo/moon-wordmark-cream-on-dark.svg</b><span>Wordmark · 1 KB</span></div><button type="button" class="pr-sha" data-sha="92cf4e0325ce5f9b22c3383de36e99645c0fb2905175c25123fcad8c186e9b25" title="Copy the SHA-256" aria-label="Copy the SHA-256 of logo/moon-wordmark-cream-on-dark.svg">92cf4e0325ce5f9b22c3383de36e99645c0fb2905175c25123fcad8c186e9b25</button><moon-badge sha256="92cf4e0325ce5f9b22c3383de36e99645c0fb2905175c25123fcad8c186e9b25" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/logo/moon-wordmark-cream-on-dark.svg" download="">GET ↓</a></div><div class="pr-row" id="file-logo-moon-wordmark-cream-png"><div class="pr-th"><img src="assets/brand/logo/moon-wordmark-cream.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>logo/moon-wordmark-cream.png</b><span>Wordmark · 77 KB · look-alike hash 926c6ad795a94e49</span></div><button type="button" class="pr-sha" data-sha="dd540e71ae9c3ddf44d7c9189ba297536cf2706ce7efea440c0be466d13f7ff3" title="Copy the SHA-256" aria-label="Copy the SHA-256 of logo/moon-wordmark-cream.png">dd540e71ae9c3ddf44d7c9189ba297536cf2706ce7efea440c0be466d13f7ff3</button><moon-badge sha256="dd540e71ae9c3ddf44d7c9189ba297536cf2706ce7efea440c0be466d13f7ff3" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/logo/moon-wordmark-cream.png" download="">GET ↓</a></div><div class="pr-row" id="file-logo-moon-wordmark-cream-svg"><div class="pr-th"><img src="assets/brand/logo/moon-wordmark-cream.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>logo/moon-wordmark-cream.svg</b><span>Wordmark · 1 KB</span></div><button type="button" class="pr-sha" data-sha="7b186274ea6048d8868b8f869685ddb1d57963c3cba04e6b783d81ed820329d4" title="Copy the SHA-256" aria-label="Copy the SHA-256 of logo/moon-wordmark-cream.svg">7b186274ea6048d8868b8f869685ddb1d57963c3cba04e6b783d81ed820329d4</button><moon-badge sha256="7b186274ea6048d8868b8f869685ddb1d57963c3cba04e6b783d81ed820329d4" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/logo/moon-wordmark-cream.svg" download="">GET ↓</a></div><div class="pr-row" id="file-mark-moon-mark-black-on-cream-png"><div class="pr-th"><img src="assets/brand/mark/moon-mark-black-on-cream.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>mark/moon-mark-black-on-cream.png</b><span>Mark · 42 KB · look-alike hash cce8332b2b33e8cc</span></div><button type="button" class="pr-sha" data-sha="85163931b4cfc57ad7b3d9d3f384d93de0b0cb5b21e4770675b8ed5874097a19" title="Copy the SHA-256" aria-label="Copy the SHA-256 of mark/moon-mark-black-on-cream.png">85163931b4cfc57ad7b3d9d3f384d93de0b0cb5b21e4770675b8ed5874097a19</button><moon-badge sha256="85163931b4cfc57ad7b3d9d3f384d93de0b0cb5b21e4770675b8ed5874097a19" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/mark/moon-mark-black-on-cream.png" download="">GET ↓</a></div><div class="pr-row" id="file-mark-moon-mark-black-on-cream-svg"><div class="pr-th"><img src="assets/brand/mark/moon-mark-black-on-cream.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>mark/moon-mark-black-on-cream.svg</b><span>Mark · 916 B</span></div><button type="button" class="pr-sha" data-sha="1d2af7acd725e2a6ce847bedd284d01f2d92efe9b13931072811492d155367fd" title="Copy the SHA-256" aria-label="Copy the SHA-256 of mark/moon-mark-black-on-cream.svg">1d2af7acd725e2a6ce847bedd284d01f2d92efe9b13931072811492d155367fd</button><moon-badge sha256="1d2af7acd725e2a6ce847bedd284d01f2d92efe9b13931072811492d155367fd" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/mark/moon-mark-black-on-cream.svg" download="">GET ↓</a></div><div class="pr-row" id="file-mark-moon-mark-black-png"><div class="pr-th lt"><img src="assets/brand/mark/moon-mark-black.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>mark/moon-mark-black.png</b><span>Mark · 37 KB · look-alike hash 0033cc8c84d41300</span></div><button type="button" class="pr-sha" data-sha="d1dc4191deaf81aa36c823e37da36aee186d658c38346bd73b86603b8d13d319" title="Copy the SHA-256" aria-label="Copy the SHA-256 of mark/moon-mark-black.png">d1dc4191deaf81aa36c823e37da36aee186d658c38346bd73b86603b8d13d319</button><moon-badge sha256="d1dc4191deaf81aa36c823e37da36aee186d658c38346bd73b86603b8d13d319" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/mark/moon-mark-black.png" download="">GET ↓</a></div><div class="pr-row" id="file-mark-moon-mark-black-svg"><div class="pr-th lt"><img src="assets/brand/mark/moon-mark-black.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>mark/moon-mark-black.svg</b><span>Mark · 852 B</span></div><button type="button" class="pr-sha" data-sha="2cc43b45079984fe906b394e9980cc3c58d116894d69b2acde5e727ef6e4f7ea" title="Copy the SHA-256" aria-label="Copy the SHA-256 of mark/moon-mark-black.svg">2cc43b45079984fe906b394e9980cc3c58d116894d69b2acde5e727ef6e4f7ea</button><moon-badge sha256="2cc43b45079984fe906b394e9980cc3c58d116894d69b2acde5e727ef6e4f7ea" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/mark/moon-mark-black.svg" download="">GET ↓</a></div><div class="pr-row" id="file-mark-moon-mark-cream-on-dark-png"><div class="pr-th"><img src="assets/brand/mark/moon-mark-cream-on-dark.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>mark/moon-mark-cream-on-dark.png</b><span>Mark · 43 KB · look-alike hash 3217ccd4d4cc1733</span></div><button type="button" class="pr-sha" data-sha="c8830480d57f6f9bdc22789f15b07966e38d3d5bc5be112c0737d77b55fa19bb" title="Copy the SHA-256" aria-label="Copy the SHA-256 of mark/moon-mark-cream-on-dark.png">c8830480d57f6f9bdc22789f15b07966e38d3d5bc5be112c0737d77b55fa19bb</button><moon-badge sha256="c8830480d57f6f9bdc22789f15b07966e38d3d5bc5be112c0737d77b55fa19bb" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/mark/moon-mark-cream-on-dark.png" download="">GET ↓</a></div><div class="pr-row" id="file-mark-moon-mark-cream-on-dark-svg"><div class="pr-th"><img src="assets/brand/mark/moon-mark-cream-on-dark.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>mark/moon-mark-cream-on-dark.svg</b><span>Mark · 916 B</span></div><button type="button" class="pr-sha" data-sha="f511dc155496eebe4bc94d70c5faf07fb20c46aa62bb536b7f4216f1c0058e66" title="Copy the SHA-256" aria-label="Copy the SHA-256 of mark/moon-mark-cream-on-dark.svg">f511dc155496eebe4bc94d70c5faf07fb20c46aa62bb536b7f4216f1c0058e66</button><moon-badge sha256="f511dc155496eebe4bc94d70c5faf07fb20c46aa62bb536b7f4216f1c0058e66" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/mark/moon-mark-cream-on-dark.svg" download="">GET ↓</a></div><div class="pr-row" id="file-mark-moon-mark-cream-png"><div class="pr-th"><img src="assets/brand/mark/moon-mark-cream.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>mark/moon-mark-cream.png</b><span>Mark · 39 KB · look-alike hash 16d455ccd4aa3332</span></div><button type="button" class="pr-sha" data-sha="c3bb4b0c3ac5c8cf62166795cd27e8054fae1ccfb3094895821a8a20665f4ed3" title="Copy the SHA-256" aria-label="Copy the SHA-256 of mark/moon-mark-cream.png">c3bb4b0c3ac5c8cf62166795cd27e8054fae1ccfb3094895821a8a20665f4ed3</button><moon-badge sha256="c3bb4b0c3ac5c8cf62166795cd27e8054fae1ccfb3094895821a8a20665f4ed3" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/mark/moon-mark-cream.png" download="">GET ↓</a></div><div class="pr-row" id="file-mark-moon-mark-cream-svg"><div class="pr-th"><img src="assets/brand/mark/moon-mark-cream.svg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>mark/moon-mark-cream.svg</b><span>Mark · 852 B</span></div><button type="button" class="pr-sha" data-sha="c9e27c3522fe7b30febd20be2a17bb18599594c5f728521ad237b398eba125a0" title="Copy the SHA-256" aria-label="Copy the SHA-256 of mark/moon-mark-cream.svg">c9e27c3522fe7b30febd20be2a17bb18599594c5f728521ad237b398eba125a0</button><moon-badge sha256="c9e27c3522fe7b30febd20be2a17bb18599594c5f728521ad237b398eba125a0" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/mark/moon-mark-cream.svg" download="">GET ↓</a></div><div class="pr-row" id="file-social-moon-new-standard-for-time-jpg"><div class="pr-th"><img src="assets/brand/social/moon-new-standard-for-time.jpg" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>social/moon-new-standard-for-time.jpg</b><span>Social image · 291 KB · look-alike hash 0e0f1f7971a6a625</span></div><button type="button" class="pr-sha" data-sha="f9907185b3f834898fb01d9890ac3a22cb80caa30f6cb869798e2d4ae15b3fae" title="Copy the SHA-256" aria-label="Copy the SHA-256 of social/moon-new-standard-for-time.jpg">f9907185b3f834898fb01d9890ac3a22cb80caa30f6cb869798e2d4ae15b3fae</button><moon-badge sha256="f9907185b3f834898fb01d9890ac3a22cb80caa30f6cb869798e2d4ae15b3fae" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/social/moon-new-standard-for-time.jpg" download="">GET ↓</a></div><div class="pr-row" id="file-social-moon-x-avatar-png"><div class="pr-th"><img src="assets/brand/social/moon-x-avatar.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>social/moon-x-avatar.png</b><span>Social image · 14 KB · look-alike hash 00070f4d4d0f0a00</span></div><button type="button" class="pr-sha" data-sha="95ab120855edf329e05f24e81b95e0ea87a7bdb7b923778ac1bda2e75d7f21a2" title="Copy the SHA-256" aria-label="Copy the SHA-256 of social/moon-x-avatar.png">95ab120855edf329e05f24e81b95e0ea87a7bdb7b923778ac1bda2e75d7f21a2</button><moon-badge sha256="95ab120855edf329e05f24e81b95e0ea87a7bdb7b923778ac1bda2e75d7f21a2" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/social/moon-x-avatar.png" download="">GET ↓</a></div><div class="pr-row" id="file-social-moon-x-banner-photo-png"><div class="pr-th"><img src="assets/brand/social/moon-x-banner-photo.png" alt="" loading="lazy" decoding="async"></div><div class="pr-nm"><b>social/moon-x-banner-photo.png</b><span>Social image · 376 KB · look-alike hash 0e1e1f3b3b2b6968</span></div><button type="button" class="pr-sha" data-sha="4979da7d50a722cccfccc4645936003133c751241dc2f192aa6846f32a0ef5e4" title="Copy the SHA-256" aria-label="Copy the SHA-256 of social/moon-x-banner-photo.png">4979da7d50a722cccfccc4645936003133c751241dc2f192aa6846f32a0ef5e4</button><moon-badge sha256="4979da7d50a722cccfccc4645936003133c751241dc2f192aa6846f32a0ef5e4" show-missing=""></moon-badge><a class="pr-dl" href="assets/brand/social/moon-x-banner-photo.png" download="">GET ↓</a></div></div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 32px;">
+<div id="how" style="display: flex; flex-direction: column; gap: 14px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">13</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">DO THE SAME FOR YOUR BRAND</h2>
+<p style="margin: 0px; max-width: 720px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">This is how we did it, and any company can do the same for its logos, product photos, designs or documents. It takes an API key and four&nbsp;steps.</p>
+</div>
+<ol class="pr-steps">
+<li><b>Fingerprint every file</b><p>A SHA-256 fingerprint identifies a file exactly; change one pixel and it changes completely. For images, also make the 64-bit look-alike hash so edited copies can be found. Our script does both and writes a&nbsp;manifest.</p><pre>shasum -a 256 logo/*</pre></li>
+<li><b>Write down what you claim</b><p>A short brand statement: the name, the marks, the colors and how others may use them. Sign the statement and the manifest along with the&nbsp;files.</p></li>
+<li><b>Sign them all at once</b><p>One call signs up to 100 fingerprints. Each gets a Moonmark, Moon's two signatures and a registration under your company&nbsp;name.</p><pre>curl -X POST https://api.moon369.org/v1/sign/batch \
+  -H "Authorization: Bearer $MOON_KEY" \
+  -H "Content-Type: application/json" \
+  -d @sign-request.json</pre></li>
+<li><b>Publish, and let anyone check</b><p>Post the files with their fingerprints. Anyone can drop a copy on <a href="/check">moon369.org/check</a> or call the lookup API to see who registered it and when, and verify the signatures without trusting&nbsp;anyone.</p><pre>curl https://api.moon369.org/v1/lookup/&lt;sha256&gt;</pre></li>
+</ol>
+<div class="pr-cta"><p>Start with a <a href="/api#key">free API key</a>. For a verified company name, email <a href="mailto:moon369org@proton.me">moon369org@proton.me</a>. The script we used is <a href="https://github.com/moon369org/moon-369/blob/main/scripts/brand-registry.py">open source</a>, and so is <a href="assets/brand/sign-request.json">the exact request we&nbsp;sent</a>.</p></div>
+<p style="margin: 0px; max-width: 760px; font-size: 13.5px; line-height: 1.7; color: rgb(138, 139, 143);">A Moonmark proves that a file existed at a moment and who registered it. It is strong evidence of authorship and priority, but it is not a trademark or copyright registration, and it is not legal&nbsp;advice.</p>
 </section>
 
 </div>
@@ -412,9 +498,9 @@ footer > div > div:first-child svg{width:64px!important}
 <section style="border-bottom: 1px solid #1C1D20">
 <div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 90px; display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-end; justify-content: space-between">
 <div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 24px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">BRAND ASSETS</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">BRAND ASSETS · SIGNED ON MOON</div>
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">PRESS KIT</h1>
-<p style="margin: 0; max-width: 600px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Logos, badges, colors, type and the facts about Moon. Everything is free to use for coverage of Moon and for products built on it, following the guidelines&nbsp;below.</p>
+<p style="margin: 0; max-width: 600px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Logos, badges, colors, type and the facts about Moon. Every file here is signed with a Moonmark and registered to Moon, so anyone can check that a copy is genuine and when it was&nbsp;published.</p>
 </div>
 <a href="assets/Moon-Press-Kit.zip" download="Moon-Press-Kit.zip" style="display: inline-flex; align-items: center; gap: 14px; background: #E9E4D8; color: #0B0B0D; padding: 20px 30px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em">DOWNLOAD FULL KIT <span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; letter-spacing: 0.06em; color: #4A4B4F">ZIP · 1.3 MB</span></a>
 </div>
@@ -422,10 +508,27 @@ footer > div > div:first-child svg{width:64px!important}
 
 <div style="max-width: 1280px; margin: 0 auto; padding: 80px 32px 120px; display: flex; flex-direction: column; gap: 104px">
 
+<section style="display: flex; flex-direction: column; gap: 32px">
+<div id="signed" style="display: flex; flex-direction: column; gap: 14px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">01</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">SIGNED ON MOON</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">We put our own brand on Moon. Before publishing, every logo, icon, badge and color file in this kit, plus a written brand statement, was fingerprinted and signed with a Moonmark by Moon&#39;s verified key. Each signature carries Moon&#39;s two signatures and a public drand randomness beacon, which proves it couldn&#39;t have been made any earlier, and Moon&#39;s registry records it under Moon&#39;s verified name. Nobody can backdate it or claim these files&nbsp;first.</p>
+</div>
+<div class="pr-stats">
+<div><b data-pr-count>40</b><span>BRAND FILES SIGNED</span></div>
+<div><b data-pr-who>MOON</b><span>REGISTERED BY</span></div>
+<div><b data-pr-when>…</b><span>SIGNED AT MOONMARK</span></div>
+</div>
+<div class="pr-check">
+<div class="pr-check-t"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">CHECK ANY COPY</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #B9B6AE">Found a Moon logo somewhere? Drop it here. A genuine file shows as registered by Moon, verified. Cropped, resized or recolored copies of our images are found too. The file never leaves your&nbsp;device.</p></div>
+<moon-check></moon-check>
+</div>
+</section>
+
 <section style="display: flex; flex-wrap: wrap; gap: 48px 64px">
 <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 20px">
 <div id="about" style="display: flex; flex-direction: column; gap: 14px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">01</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">02</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">ABOUT MOON</h2>
 <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Use this description in articles and&nbsp;listings.</p>
 </div>
@@ -440,7 +543,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px">
 <div id="logo" style="display: flex; flex-direction: column; gap: 14px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">02</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">03</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">WORDMARK</h2>
 <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">The primary logo. The two O&#39;s are linked: one passes over the other at the top and under it at the bottom. SVG and PNG versions are in the full&nbsp;kit.</p>
 </div>
@@ -465,7 +568,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px">
 <div id="mark" style="display: flex; flex-direction: column; gap: 14px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">03</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">MARK</h2>
 <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">The linked O&#39;s on their own, for avatars, favicons and tight&nbsp;spaces.</p>
 </div>
@@ -490,7 +593,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px">
 <div id="icons" style="display: flex; flex-direction: column; gap: 14px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">05</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">APP ICONS</h2>
 <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">1024 px masters. The kit also includes 512, 64 and 32 px versions; the small sizes use a heavier stroke so they stay&nbsp;legible.</p>
 </div>
@@ -515,7 +618,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px">
 <div id="badges" style="display: flex; flex-direction: column; gap: 14px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">05</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">06</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">POWERED BY MOON</h2>
 <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">For sites and apps that show Moon time from the API. Link the badge to the Moon homepage. Full rules are on the <a href='api.html#attribution' style='border-bottom: 1px solid #E9E4D8'>API page</a>.</p>
 </div>
@@ -540,7 +643,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px">
 <div id="loader" style="display: flex; flex-direction: column; gap: 14px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">06</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">07</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">LOADER</h2>
 <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Breathe: one solid circle opens into the two rings and closes again, 3.2 seconds, no pause. The animated SVG and a standalone HTML page are in the full&nbsp;kit.</p>
 </div>
@@ -555,7 +658,7 @@ footer > div > div:first-child svg{width:64px!important}
 <section style="display: flex; flex-direction: column; gap: 32px">
 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px">
 <div id="colors" style="display: flex; flex-direction: column; gap: 14px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">07</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">08</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">COLORS</h2>
 <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">About 90 percent dark, 10 percent cream. Regolith is the only&nbsp;accent.</p>
 </div>
@@ -602,7 +705,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px">
 <div id="type" style="display: flex; flex-direction: column; gap: 14px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">08</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">09</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">TYPOGRAPHY</h2>
 <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Three free Google Fonts. Never substitute others in brand&nbsp;materials.</p>
 </div>
@@ -626,7 +729,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px">
 <div id="social" style="display: flex; flex-direction: column; gap: 14px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">09</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">10</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">SOCIAL</h2>
 <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">The X banner and avatar. The kit also includes the full-size &quot;A new standard for time&quot;&nbsp;image.</p>
 </div>
@@ -636,9 +739,16 @@ footer > div > div:first-child svg{width:64px!important}
 
 <section style="display: flex; flex-direction: column; gap: 32px">
 <div id="usage" style="display: flex; flex-direction: column; gap: 14px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">10</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">11</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">USAGE</h2>
-<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Keep the brand consistent wherever it&nbsp;appears.</p>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">All rights reserved. The Moon name, wordmark, linked-O mark, app icons, loader and social images may not be used without written permission from Moon, with two&nbsp;exceptions.</p>
+</div>
+<div class="pr-ok">
+<div><div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #7FBF8E">ALLOWED</div><div style="font-size: 16px; font-weight: 500">News and commentary</div><p>Editors and writers may show the logo when reporting on Moon, using the files on this&nbsp;page.</p></div>
+<div><div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #7FBF8E">ALLOWED</div><div style="font-size: 16px; font-weight: 500">Powered by Moon</div><p>Sites and apps that show Moon time from the <a href="/api#brand">Moon API</a> may show the Powered by Moon badge, unaltered, linked to&nbsp;moon369.org.</p></div>
+<div><div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #D9A35F">EVERYTHING ELSE</div><div style="font-size: 16px; font-weight: 500">Ask first</div><p>Any other use needs written permission from Moon: <a href="mailto:moon369org@proton.me">moon369org@proton.me</a>.</p></div>
+</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F; margin-top: 8px">WHEN THE BRAND IS USED
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px"><div style="border: 1px solid #24262A; padding: 24px; display: flex; flex-direction: column; gap: 10px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: #E9E4D8">DO</div>
@@ -665,7 +775,36 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="font-size: 16px; font-weight: 500">Don't rebuild the wordmark</div>
 <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A2A3A7">Always use the supplied files. Never retype MOON in a&nbsp;font.</p>
 </div></div>
-<p style="margin: 0; max-width: 760px; font-size: 14px; line-height: 1.7; color: #8A8B8F">The Moon name, the linked-O mark and the Powered by Moon badge are trademarks. Using them in coverage, or to show that a product runs on Moon time, is welcome. Using them to imply partnership, certification or endorsement requires written&nbsp;approval.</p>
+<p style="margin: 0; max-width: 760px; font-size: 14px; line-height: 1.7; color: #8A8B8F">The Moon name and marks are trademarks of Moon (™). The signed Moonmarks on this page prove what Moon published and when; they are not a trademark registration. Using the marks to imply partnership, certification or endorsement is never allowed without written&nbsp;approval.</p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 32px">
+<div id="registry" style="display: flex; flex-direction: column; gap: 14px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">12</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">THE REGISTRY</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Every file in the kit with its SHA-256 fingerprint and its live status on Moon. The manifest lists them all and is signed too, so one signature vouches for the whole&nbsp;set.</p>
+</div>
+<div class="pr-reg-top"><a href="assets/brand/moon-brand-manifest.json" class="pr-btn">MANIFEST · JSON</a><a href="assets/brand/MOON-BRAND-STATEMENT.md" class="pr-btn">BRAND STATEMENT</a><a href="assets/brand/moon-brand-receipts.json" class="pr-btn">ALL 42 RECEIPTS · JSON</a><a href="assets/Moon-Press-Kit.zip" download="Moon-Press-Kit.zip" class="pr-btn">FULL KIT · ZIP</a></div>
+<div class="pr-reg" data-pr-reg><div class="pr-reg-empty">Loading the registry…</div></div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 32px">
+<div id="how" style="display: flex; flex-direction: column; gap: 14px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">13</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">DO THE SAME FOR YOUR BRAND</h2>
+<p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 1.7; color: #A2A3A7">This is how we did it, and any company can do the same for its logos, product photos, designs or documents. It takes an API key and four&nbsp;steps.</p>
+</div>
+<ol class="pr-steps">
+<li><b>Fingerprint every file</b><p>A SHA-256 fingerprint identifies a file exactly; change one pixel and it changes completely. For images, also make the 64-bit look-alike hash so edited copies can be found. Our script does both and writes a&nbsp;manifest.</p><pre>shasum -a 256 logo/*</pre></li>
+<li><b>Write down what you claim</b><p>A short brand statement: the name, the marks, the colors and how others may use them. Sign the statement and the manifest along with the&nbsp;files.</p></li>
+<li><b>Sign them all at once</b><p>One call signs up to 100 fingerprints. Each gets a Moonmark, Moon&#39;s two signatures and a registration under your company&nbsp;name.</p><pre>curl -X POST https://api.moon369.org/v1/sign/batch \
+  -H "Authorization: Bearer $MOON_KEY" \
+  -H "Content-Type: application/json" \
+  -d @sign-request.json</pre></li>
+<li><b>Publish, and let anyone check</b><p>Post the files with their fingerprints. Anyone can drop a copy on <a href="/check">moon369.org/check</a> or call the lookup API to see who registered it and when, and verify the signatures without trusting&nbsp;anyone.</p><pre>curl https://api.moon369.org/v1/lookup/&lt;sha256&gt;</pre></li>
+</ol>
+<div class="pr-cta"><p>Start with a <a href="/api#key">free API key</a>. For a verified company name, email <a href="mailto:moon369org@proton.me">moon369org@proton.me</a>. The script we used is <a href="https://github.com/moon369org/moon-369/blob/main/scripts/brand-registry.py">open source</a>, and so is <a href="assets/brand/sign-request.json">the exact request we&nbsp;sent</a>.</p></div>
+<p style="margin: 0; max-width: 760px; font-size: 13.5px; line-height: 1.7; color: #8A8B8F">A Moonmark proves that a file existed at a moment and who registered it. It is strong evidence of authorship and priority, but it is not a trademark or copyright registration, and it is not legal&nbsp;advice.</p>
 </section>
 
 </div>

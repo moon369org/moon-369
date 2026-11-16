@@ -68,6 +68,16 @@ describe('self-serve API keys', () => {
   });
 });
 
+describe('verify', () => {
+  it('accepts a bare receipt, as the docs show, and a wrapped one', async () => {
+    const e = env();
+    const signed = await (await post(e, '/v1/sign', { sha256: SHA }, HAND)).json() as { receipt: Record<string, unknown> };
+    const bare = await (await post(e, '/v1/verify', signed.receipt)).json() as { valid: boolean };
+    const wrapped = await (await post(e, '/v1/verify', { receipt: signed.receipt })).json() as { valid: boolean };
+    expect(bare.valid).toBe(true); expect(wrapped.valid).toBe(true);
+  });
+});
+
 describe('MCP server', () => {
   const rpc = (e: Env, msg: unknown) => handle(new Request('http://x/mcp', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' }, body: JSON.stringify(msg) }), e);
   it('initializes, lists tools and answers pings', async () => {

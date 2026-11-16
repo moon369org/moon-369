@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 424 120">
+<rect x="-10" y="-10" width="424" height="120" fill="#E9E4D8"/>
+<path d="M4,100 V4 L48,64 L92,4 V100" fill="none" stroke="#0B0B0D" stroke-width="8" stroke-linejoin="bevel"/>
+<path d="M312,100 V4 L400,96 V0" fill="none" stroke="#0B0B0D" stroke-width="8" stroke-linejoin="bevel"/>
+<defs>
+<mask id="wA" maskUnits="userSpaceOnUse" x="-10" y="-10" width="424" height="120">
+<rect x="-10" y="-10" width="424" height="120" fill="#fff"/>
+<circle cx="232.0" cy="50" r="46" fill="none" stroke="#000" stroke-width="18"/>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#fff" stroke-width="18"/>
+</mask>
+<mask id="wB" maskUnits="userSpaceOnUse" x="-10" y="-10" width="424" height="120">
+<rect x="-10" y="-10" width="424" height="120" fill="#fff"/>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#000" stroke-width="18"/>
+</mask>
+</defs>
+<circle cx="172.0" cy="50" r="46" fill="none" stroke="#0B0B0D" stroke-width="8" mask="url(#wA)"/>
+<circle cx="232.0" cy="50" r="46" fill="none" stroke="#0B0B0D" stroke-width="8" mask="url(#wB)"/>
+</svg>

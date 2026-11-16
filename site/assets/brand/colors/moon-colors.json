@@ -1,0 +1,33 @@
+{
+  "color": {
+    "void": {
+      "value": "#050506",
+      "role": "deep space"
+    },
+    "eclipse": {
+      "value": "#0B0B0D",
+      "role": "primary ground"
+    },
+    "graphite": {
+      "value": "#16171A",
+      "role": "surfaces"
+    },
+    "basalt": {
+      "value": "#24262A",
+      "role": "lines, rules"
+    },
+    "ash": {
+      "value": "#8A8B8F",
+      "role": "secondary text"
+    },
+    "regolith": {
+      "value": "#E9E4D8",
+      "role": "mark, accent"
+    }
+  },
+  "font": {
+    "display": "Syncopate",
+    "text": "Inter",
+    "data": "JetBrains Mono"
+  }
+}

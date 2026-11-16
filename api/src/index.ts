@@ -707,14 +707,15 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
 
       case path === `/${API_VERSION}/verify`: {
         const body = await readJson(req);
-        const r = (body.receipt ?? body) as Receipt;
+        // Accept the receipt itself, or { receipt: {...} }. A bare receipt has its own "receipt" field: the version string.
+        const r = (body.receipt && typeof body.receipt === 'object' ? body.receipt : body) as Receipt;
         return json(checkReceipt(r, body.sha256, env), 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
       case path === `/${API_VERSION}/evidence`: {
         if (!env.SIGNER) throw new HttpError(503, 'signing_unavailable', 'Signing is not configured on this deployment');
         const body = await readJson(req);
-        const r = (body.receipt ?? body) as Receipt;
+        const r = (body.receipt && typeof body.receipt === 'object' ? body.receipt : body) as Receipt;
         return json(await evidence(r, body.sha256, env), 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
@@ -729,7 +730,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
       case path === `/${API_VERSION}/tideline/proof`: {
         if (!env.TIDES) throw new HttpError(503, 'tideline_unavailable', 'The Tideline is not configured on this deployment');
         const body = await readJson(req);
-        const r = (body.receipt ?? body) as Receipt;
+        const r = (body.receipt && typeof body.receipt === 'object' ? body.receipt : body) as Receipt;
         if (!r || typeof r !== 'object' || typeof (r as Receipt).unix_ns !== 'string' || !/^-?\d+$/.test((r as Receipt).unix_ns)) throw new HttpError(400, 'bad_param', 'Send a signed Moonmark receipt');
         return json(await proofFor(env.TIDES, r), 200, { 'Cache-Control': 'no-store', ...planHdr });
       }

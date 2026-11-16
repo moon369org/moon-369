@@ -1,0 +1,272 @@
+{
+  "name": "Moon brand manifest",
+  "owner": "Moon",
+  "site": "https://moon369.org/press",
+  "statement": "MOON-BRAND-STATEMENT.md",
+  "policy": "All rights reserved. No use without written permission from Moon, except news coverage of Moon and the unaltered Powered by Moon badge on sites and apps that use the Moon API.",
+  "verify": "https://api.moon369.org/v1/lookup/<sha256>",
+  "files": [
+    {
+      "file": "MOON-BRAND-STATEMENT.md",
+      "what": "Brand statement",
+      "sha256": "3962977889814f72664f08c7d1d93cc5f771882d66f1325d99195aa00789d6ce",
+      "bytes": 2390
+    },
+    {
+      "file": "app-icon/moon-app-icon-cream-1024.png",
+      "what": "App icon",
+      "sha256": "6f038ca6058f915854b79494971af389e6aefeff483fcbae9aed03c6b00e256d",
+      "bytes": 49668,
+      "phash": "8080f8b2b2e08080"
+    },
+    {
+      "file": "app-icon/moon-app-icon-cream-32.png",
+      "what": "App icon",
+      "sha256": "65c4061edec826898309d1803edf81ae362ec586f9d25af5841e424557a4143d",
+      "bytes": 1154,
+      "phash": "0301f0b2b2f08123"
+    },
+    {
+      "file": "app-icon/moon-app-icon-cream-512.png",
+      "what": "App icon",
+      "sha256": "7ef2a3df80f351f7c8a3e14cc7f0026ca472d7d1f75a10ba4c9d61d200babd73",
+      "bytes": 22783,
+      "phash": "8080f8b2b2e08080"
+    },
+    {
+      "file": "app-icon/moon-app-icon-cream-64.png",
+      "what": "App icon",
+      "sha256": "be41f6a9a413992b0441007ac535e00cfa0840e467144d729861c0d762f3de9a",
+      "bytes": 2440,
+      "phash": "8280f0b2b2f08123"
+    },
+    {
+      "file": "app-icon/moon-app-icon-cream.svg",
+      "what": "App icon",
+      "sha256": "8111e28c92854d8c5b35f612f99b5770fdd9211d1dfc6c7959ae7d539658daef",
+      "bytes": 963
+    },
+    {
+      "file": "app-icon/moon-app-icon-dark-1024.png",
+      "what": "App icon",
+      "sha256": "d948c70689785d0634713c302c4d6b9db82cd9be2a8db4becd24a392ca645e78",
+      "bytes": 50002,
+      "phash": "8200074d4d1f0082"
+    },
+    {
+      "file": "app-icon/moon-app-icon-dark-32.png",
+      "what": "App icon",
+      "sha256": "e7857f095612d4054fe489d4086fbd6ae5cd08bddfbe98dce06606af7c6bbddd",
+      "bytes": 1169,
+      "phash": "02000f4d4d0f0082"
+    },
+    {
+      "file": "app-icon/moon-app-icon-dark-512.png",
+      "what": "App icon",
+      "sha256": "4212e9ecedea90a2cfd321e13c7af4be71c50f3e1fa8998e8ea9e61652d852f1",
+      "bytes": 23129,
+      "phash": "8200074d4d1f0082"
+    },
+    {
+      "file": "app-icon/moon-app-icon-dark-64.png",
+      "what": "App icon",
+      "sha256": "71beb6d17f05b035ec696c47e586b3528d9b1a878fe76d139690185d8ac844b4",
+      "bytes": 2446,
+      "phash": "82000f4d4d0f0082"
+    },
+    {
+      "file": "app-icon/moon-app-icon-dark.svg",
+      "what": "App icon",
+      "sha256": "5c684ffc1037106e066a30ed28b2b19c8f162f64455caabacd97a5b78f0fde5d",
+      "bytes": 963
+    },
+    {
+      "file": "badges/badge-dark.svg",
+      "what": "Powered by Moon badge",
+      "sha256": "308e93a856e537e159b2a30f4aa32d6fbd281ec4a0820a76e09934557c5e55cd",
+      "bytes": 9334
+    },
+    {
+      "file": "badges/badge-dark@4x.png",
+      "what": "Powered by Moon badge",
+      "sha256": "5da43c9f7e435b265c921de68503bda0396408f10c30396feb91c52ca468bd16",
+      "bytes": 16233,
+      "phash": "806061676f6e6e80"
+    },
+    {
+      "file": "badges/badge-light.svg",
+      "what": "Powered by Moon badge",
+      "sha256": "153da3d43b28510e7b0eca3d7963c4a56639d181038269327671a1f08f0dded3",
+      "bytes": 9334
+    },
+    {
+      "file": "badges/badge-light@4x.png",
+      "what": "Powered by Moon badge",
+      "sha256": "714f4fa3760f152effd60dd9afcf5ec90fadbd310280a0d677ba679bdd4846e9",
+      "bytes": 16275,
+      "phash": "0181989890919101"
+    },
+    {
+      "file": "colors/moon-colors.css",
+      "what": "Colors",
+      "sha256": "f1075a79e85f905dd2a13ee75e8ebf0e87b346134d5fd5e623f30d995d9f2afc",
+      "bytes": 303
+    },
+    {
+      "file": "colors/moon-colors.json",
+      "what": "Colors",
+      "sha256": "86696d5b7d9b9df08d024fe4a2d2a56137a6ac84d5fb9028b297fa9e03b04f72",
+      "bytes": 581
+    },
+    {
+      "file": "colors/moon-palette.png",
+      "what": "Colors",
+      "sha256": "4b41cdb93011754d53656d4d5caaec3b7f98f1d4867de5763938b5fdbb83249e",
+      "bytes": 34835,
+      "phash": "0000000000008092"
+    },
+    {
+      "file": "colors/moon-palette.svg",
+      "what": "Colors",
+      "sha256": "12cf34a6ce344f7fe8cc810e73e3103a18e22d08009d979ff4e0cb62e85855b5",
+      "bytes": 1080
+    },
+    {
+      "file": "loader/moon-loader.html",
+      "what": "Loader",
+      "sha256": "1f2102979b71290ab20dd90b8f25905738b8d76c0871b91317eac7f41dad779b",
+      "bytes": 1600
+    },
+    {
+      "file": "loader/moon-loader.svg",
+      "what": "Loader",
+      "sha256": "24d360289e65b607100cc5e0801cf1ef637174e8e3e0f85efb6bee6a1338ef50",
+      "bytes": 1234
+    },
+    {
+      "file": "logo/moon-wordmark-black-on-cream.png",
+      "what": "Wordmark",
+      "sha256": "1db1ef07c6fe3f53dc2cc67d40265f281f65a9372500760ffadfe23c23522455",
+      "bytes": 85427,
+      "phash": "6b32169695557169"
+    },
+    {
+      "file": "logo/moon-wordmark-black-on-cream.svg",
+      "what": "Wordmark",
+      "sha256": "9d088cd93c4dd462537874cea0a9bef308ee7a36ba043eccd0811cce1bb262f9",
+      "bytes": 1140
+    },
+    {
+      "file": "logo/moon-wordmark-black.png",
+      "what": "Wordmark",
+      "sha256": "69b044c15f61c2e88320a89a2a18ba1b77f6fa909615307acef11db516d1958c",
+      "bytes": 74452,
+      "phash": "8c0aeae9aaaa8a8c"
+    },
+    {
+      "file": "logo/moon-wordmark-black.svg",
+      "what": "Wordmark",
+      "sha256": "d2e1c2ebaf2dd3e533f6cd92c3be1b28788ee93c78346153ea8ac2ac60063f1c",
+      "bytes": 1076
+    },
+    {
+      "file": "logo/moon-wordmark-cream-on-dark.png",
+      "what": "Wordmark",
+      "sha256": "2ae2bbe3869b34c2390a2452caa8cc2559aa93fee6929acb198e8250ba10e3ba",
+      "bytes": 85382,
+      "phash": "94cde9696aaa8e96"
+    },
+    {
+      "file": "logo/moon-wordmark-cream-on-dark.svg",
+      "what": "Wordmark",
+      "sha256": "92cf4e0325ce5f9b22c3383de36e99645c0fb2905175c25123fcad8c186e9b25",
+      "bytes": 1140
+    },
+    {
+      "file": "logo/moon-wordmark-cream.png",
+      "what": "Wordmark",
+      "sha256": "dd540e71ae9c3ddf44d7c9189ba297536cf2706ce7efea440c0be466d13f7ff3",
+      "bytes": 78973,
+      "phash": "926c6ad795a94e49"
+    },
+    {
+      "file": "logo/moon-wordmark-cream.svg",
+      "what": "Wordmark",
+      "sha256": "7b186274ea6048d8868b8f869685ddb1d57963c3cba04e6b783d81ed820329d4",
+      "bytes": 1076
+    },
+    {
+      "file": "mark/moon-mark-black-on-cream.png",
+      "what": "Mark",
+      "sha256": "85163931b4cfc57ad7b3d9d3f384d93de0b0cb5b21e4770675b8ed5874097a19",
+      "bytes": 43298,
+      "phash": "cce8332b2b33e8cc"
+    },
+    {
+      "file": "mark/moon-mark-black-on-cream.svg",
+      "what": "Mark",
+      "sha256": "1d2af7acd725e2a6ce847bedd284d01f2d92efe9b13931072811492d155367fd",
+      "bytes": 916
+    },
+    {
+      "file": "mark/moon-mark-black.png",
+      "what": "Mark",
+      "sha256": "d1dc4191deaf81aa36c823e37da36aee186d658c38346bd73b86603b8d13d319",
+      "bytes": 38384,
+      "phash": "0033cc8c84d41300"
+    },
+    {
+      "file": "mark/moon-mark-black.svg",
+      "what": "Mark",
+      "sha256": "2cc43b45079984fe906b394e9980cc3c58d116894d69b2acde5e727ef6e4f7ea",
+      "bytes": 852
+    },
+    {
+      "file": "mark/moon-mark-cream-on-dark.png",
+      "what": "Mark",
+      "sha256": "c8830480d57f6f9bdc22789f15b07966e38d3d5bc5be112c0737d77b55fa19bb",
+      "bytes": 43863,
+      "phash": "3217ccd4d4cc1733"
+    },
+    {
+      "file": "mark/moon-mark-cream-on-dark.svg",
+      "what": "Mark",
+      "sha256": "f511dc155496eebe4bc94d70c5faf07fb20c46aa62bb536b7f4216f1c0058e66",
+      "bytes": 916
+    },
+    {
+      "file": "mark/moon-mark-cream.png",
+      "what": "Mark",
+      "sha256": "c3bb4b0c3ac5c8cf62166795cd27e8054fae1ccfb3094895821a8a20665f4ed3",
+      "bytes": 39463,
+      "phash": "16d455ccd4aa3332"
+    },
+    {
+      "file": "mark/moon-mark-cream.svg",
+      "what": "Mark",
+      "sha256": "c9e27c3522fe7b30febd20be2a17bb18599594c5f728521ad237b398eba125a0",
+      "bytes": 852
+    },
+    {
+      "file": "social/moon-new-standard-for-time.jpg",
+      "what": "Social image",
+      "sha256": "f9907185b3f834898fb01d9890ac3a22cb80caa30f6cb869798e2d4ae15b3fae",
+      "bytes": 297670,
+      "phash": "0e0f1f7971a6a625"
+    },
+    {
+      "file": "social/moon-x-avatar.png",
+      "what": "Social image",
+      "sha256": "95ab120855edf329e05f24e81b95e0ea87a7bdb7b923778ac1bda2e75d7f21a2",
+      "bytes": 14124,
+      "phash": "00070f4d4d0f0a00"
+    },
+    {
+      "file": "social/moon-x-banner-photo.png",
+      "what": "Social image",
+      "sha256": "4979da7d50a722cccfccc4645936003133c751241dc2f192aa6846f32a0ef5e4",
+      "bytes": 385051,
+      "phash": "0e1e1f3b3b2b6968"
+    }
+  ]
+}

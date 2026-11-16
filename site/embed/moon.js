@@ -118,7 +118,7 @@
           if (ex.count > 1) html += '<div class="n" style="margin-top:10px">Registered ' + ex.count + ' times. The earliest is shown.</div>';
         } else if (others.length) {
           html += '<div class="h" style="color:' + C.warn + '">' + moonSvg(16) + 'AN EDITED COPY OF A FILE ON MOON</div>' + fp +
-            '<div class="n">This exact file was never registered, but it looks like ' + (others.length === 1 ? 'a picture' : others.length + ' pictures') + ' that were. The earliest registration is usually the original.</div>';
+            '<div class="n">This exact file was never registered, but it looks like ' + (others.length === 1 ? 'a picture that was' : others.length + ' pictures that were') + '. The earliest registration is usually the original.</div>';
         } else {
           html += '<div class="h">NOT ON MOON</div>' + fp + '<div class="n">Nobody has registered this file' + (ph ? ' or anything that looks like it' : '') + '. <a href="https://moon369.org/#sign">Sign it now</a> to be the first.</div>';
         }

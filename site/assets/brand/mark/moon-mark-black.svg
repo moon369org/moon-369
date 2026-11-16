@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-90 -70 180 140">
+<defs>
+<mask id="mA" maskUnits="userSpaceOnUse" x="-90" y="-70" width="180" height="140">
+<rect x="-90" y="-70" width="180" height="140" fill="#fff"/>
+<circle cx="30.0" cy="0" r="46" fill="none" stroke="#000" stroke-width="18"/>
+<path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" fill="none" stroke="#fff" stroke-width="18"/>
+</mask>
+<mask id="mB" maskUnits="userSpaceOnUse" x="-90" y="-70" width="180" height="140">
+<rect x="-90" y="-70" width="180" height="140" fill="#fff"/>
+<path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" fill="none" stroke="#000" stroke-width="18"/>
+</mask>
+</defs>
+<circle cx="-30.0" cy="0" r="46" fill="none" stroke="#0B0B0D" stroke-width="8" mask="url(#mA)"/>
+<circle cx="30.0" cy="0" r="46" fill="none" stroke="#0B0B0D" stroke-width="8" mask="url(#mB)"/>
+</svg>
