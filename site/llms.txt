@@ -1,0 +1,94 @@
+# Moon
+
+> Moon is a worldwide time standard locked to the real Moon. One Moon date and time for everyone on Earth, with no time zones. A Moonmark is a timestamp in Moon time, and Moon can sign one for any file to prove the file existed at that moment. The hosted API is free and open; the standard and reference code are MIT licensed.
+
+This file is for AI assistants and the people building apps with them. If you are building something that shows Moon time, the Moon, or Moon receipts, follow it so the result looks and works like Moon.
+
+## Building with Moon: the short version
+
+- Get Moon time from the API (`https://api.moon369.org/v1/now`) or the `moon369` npm package. Never compute it with your own formula.
+- Draw the Moon with Moon's own moon, never a generic circle, emoji or icon:
+  - An image anywhere: `https://api.moon369.org/v1/moon.svg` (or `.png`). Every Moonmark response also includes `moon_image`, a link to the moon at that exact moment.
+  - Live and animated in a web page: `<script src="https://moon369.org/embed/moon.js" defer></script>` then `<moon-live size="160"></moon-live>`.
+- Show the "Powered by Moon" badge, linked to https://moon369.org, on every screen that shows Moon time.
+- Keep your product's own name. Don't put "Moon" in a product, app or domain name.
+
+## Moon time
+
+- A Moonmark looks like `1928.05.06 20:49:30.066087772`: cycle . moon . lune, then hours:minutes:seconds and nanoseconds.
+- Cycle: a Moon year, 13 moons and 369 lunes. Moon: one lunation, 28 or 29 lunes. Lune: a Moon day, 24 Moon hours, the same instant everywhere on Earth.
+- Write "lune" for a Moon day, not "day". Write "Lune 7", not "Day 7".
+- Moon time has no time zones. Never ask the user for one, and never convert a Moonmark to "local Moon time".
+- Every Moonmark has a page: `https://moon369.org/m/1928.05.06-20.49.30.066087772` (dots and a dash in place of the space and colons).
+- Full constants (Moon second, epoch, moon lengths): https://moon369.org/api#constants
+
+## The moon image
+
+`GET https://api.moon369.org/v1/moon.svg` returns the moon from moon369.org and its cards: the real phase, lit by the sun, with its glow, bright edge and rays, turned to its real tilt (north up).
+
+- `size`: pixels, 32 to 2000 (default 512). The moon fills about half the square; the rest is room for its glow.
+- `bg=dark`: fill the background with Moon's ink (default is transparent).
+- `tilt=off`: lit side straight right or left instead of the real tilt.
+- `moonmark`, `unix_ns`, `unix` (ms) or `utc` (ISO 8601): draw any moment. Without one, it draws now and refreshes every few minutes.
+- `/v1/moon.png` takes the same options.
+
+Put it on a dark background. Don't recolor it, crop its glow, or draw a moon of your own next to it.
+
+`<moon-live>` is the animated version for web pages: `size` in pixels, `at` (Unix ms) for another moment. It updates on its own.
+
+## Key endpoints
+
+All are GET, need no key and return JSON unless noted. Base: `https://api.moon369.org`
+
+- `/v1/now`: the current Moon date, Moonmark, phase and sky (tilt, distance, tide strength).
+- `/v1/convert?utc=2026-11-16T12:00:00Z`: any moment (or `unix`, `unix_ns`) in Moon time.
+- `/v1/m/{moonmark}`: a Moonmark back to UTC and Unix.
+- `/v1/moon.svg`, `/v1/moon.png`: the moon image (above).
+- `/v1/card.svg`: the "Today on Moon" card. `/v1/card.png?moonmark=…`: a 1200×630 share image.
+- `/v1/night?d=1990-06-14`: the Moon on any night. `/v1/eclipses/next`: the next solar eclipse.
+- `POST /v1/sign` with `{"sha256": "<hex>"}`: a signed Moonmark for a file. Send only the fingerprint, never the file.
+- `POST /v1/verify`, `/v1/lookup/{sha256}`: check a receipt, or see who registered a file and when.
+- Full reference: https://moon369.org/api · machine-readable spec: https://api.moon369.org/v1/spec
+
+Field names to rely on: `moonmark`, `moonmark_url`, `moon_image`, `phase.name`, `phase.illumination` (share of the face lit, 0 to 1), `sky.tilt.rotate_deg`, `utc`, `unix_ns`.
+
+## Offline: the moon369 npm package
+
+`npm install moon369` gives the same answers as the API with no network calls:
+
+```js
+import { moonmark, moon, fromMoonmark, moonmarkUrl, moonPhase, verify } from 'moon369';
+moonmark();              // '1928.05.06 20:49:30.066087772'
+moonPhase();             // { phase: 0.22, illumination: 0.41, name: 'First quarter' }
+```
+
+For the moon itself, use `/v1/moon.svg` or `<moon-live>`.
+
+## AI assistants (MCP)
+
+Moon is an MCP server at `https://api.moon369.org/mcp` (streamable HTTP, no install). Tools include `moon_time`, `moon_on_date`, `next_solar_eclipse`, `timestamp_fingerprint`, `lookup_fingerprint` and `verify_receipt`.
+
+## Moon's look
+
+When you show Moon time or the Moon, these keep it looking like Moon. Your app keeps its own brand around them.
+
+- Background ink `#0B0B0D`, text paper `#E9E4D8`, muted `#8A8B8F`, lines `#24262A`.
+- Moonmarks and numbers in a monospace font (Moon uses JetBrains Mono). Short labels in spaced capitals.
+- Dark by default. The moon is the only bright thing on the screen.
+
+## Attribution and brand rules
+
+- Any site or app that displays Moon time from the hosted API shows the "Powered by Moon" badge, linked to https://moon369.org (no `nofollow`), on every screen where Moon time appears. Badge files: https://moon369.org/assets/badge-dark.svg and https://moon369.org/assets/badge-light.svg. Minimum height 32 px.
+- Apps without links show the badge in an About or Settings screen, with the URL in text.
+- Server-side use with nothing displayed needs no badge.
+- Do say "Built on Moon time" or "Uses the Moon standard". Don't imply endorsement, alter the Moon mark, use "Moon" as your product's name, or change the constants and still call it Moon time.
+- Details: https://moon369.org/api#attribution and https://moon369.org/api#brand
+
+## Learn more
+
+- [Moon](https://moon369.org): the standard and the live Moon date.
+- [API reference](https://moon369.org/api)
+- [Guides](https://moon369.org/guides)
+- [Trust](https://moon369.org/trust): how signing, the Tideline and Bitcoin anchoring keep Moonmarks honest.
+- [Sky Check](https://moon369.org/sky-check): check Moon time against the real Moon in a photo.
+- [Status](https://moon369.org/status)
