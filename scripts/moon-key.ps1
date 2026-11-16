@@ -9,9 +9,10 @@
 #   powershell -ExecutionPolicy Bypass -File .\moon-key.ps1 -Owner "Acme Studio" -Email "ops@acme.co"
 #   Optional: -Plan business (default)  -PerMin 300 (default)  -Note "who asked, invoice number"
 #
-# Switch a key off or back on:
+# Switch a key off or back on, by the name it was issued to (reads the key from its saved file) or by the key itself:
+#   powershell -ExecutionPolicy Bypass -File .\moon-key.ps1 -Off "Acme Studio"
+#   powershell -ExecutionPolicy Bypass -File .\moon-key.ps1 -On  "Acme Studio"
 #   powershell -ExecutionPolicy Bypass -File .\moon-key.ps1 -Off moon_xxxxx
-#   powershell -ExecutionPolicy Bypass -File .\moon-key.ps1 -On  moon_xxxxx
 
 param(
   [switch]$Setup,
@@ -63,17 +64,33 @@ function Call($path, $body) {
     return Invoke-RestMethod -Method Post -Uri ($Api + $path) -Headers $headers -ContentType 'application/json; charset=utf-8' -Body ([System.Text.Encoding]::UTF8.GetBytes($json))
   } catch {
     $detail = $_.ErrorDetails.Message
+    if (-not $detail) {
+      # Windows PowerShell 5.1 keeps Moon's answer in the response stream.
+      try { $sr = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $detail = $sr.ReadToEnd() } catch {}
+    }
     if (-not $detail) { $detail = $_.Exception.Message }
+    if ($detail -match 'unknown_key') { Fail 'Moon has no key like that. Check the key, or use the name it was issued to:  -Off "Acme Studio"' }
     if ($detail -match 'not_found') { Fail 'Moon does not know the admin token yet. Add MOON_ADMIN_TOKEN in Vercel (moon-api) and redeploy once.' }
     if ($detail -match 'forbidden') { Fail 'The token on this computer does not match MOON_ADMIN_TOKEN in Vercel. Paste the value of ~\.moon-admin-token into Vercel again and redeploy.' }
     Fail "Moon said: $detail"
   }
 }
 
+function SlugOf($name) { ($name.ToLower() -replace '[^a-z0-9]+', '-').Trim('-') }
+function KeyFileOf($name) { Join-Path (Join-Path $HOME 'Downloads') ("moon-key-" + (SlugOf $name) + ".txt") }
+
 if ($Off -or $On) {
-  $key = if ($Off) { $Off } else { $On }
+  $key = (@($Off, $On) | Where-Object { $_ } | Select-Object -First 1).Trim()
+  if (-not $key.StartsWith('moon_')) {
+    # A name: find the key in the file this script saved when it was issued.
+    $f = KeyFileOf $key
+    if (-not (Test-Path $f)) { Fail "No saved key file for `"$key`" at $f. Use the key itself:  -Off moon_xxxxx" }
+    $key = ((Get-Content -Path $f) | Where-Object { $_ -match '^moon_' } | Select-Object -First 1)
+    if (-not $key) { Fail "Could not find a moon_ key inside $f" }
+    $key = $key.Trim()
+  }
   $path = if ($Off) { '/v1/admin/keys/off' } else { '/v1/admin/keys/on' }
-  $r = Call $path @{ key = $key.Trim() }
+  $r = Call $path @{ key = $key }
   $state = if ($r.active) { 'ON' } else { 'OFF' }
   Write-Host ''
   Write-Host "Key for $($r.owner) is now $state." -ForegroundColor Green
@@ -87,8 +104,7 @@ if ($Email) { $body.email = $Email }
 if ($Note) { $body.note = $Note }
 $r = Call '/v1/admin/keys' $body
 
-$slug = ($Owner.ToLower() -replace '[^a-z0-9]+', '-').Trim('-')
-$file = Join-Path (Join-Path $HOME 'Downloads') "moon-key-$slug.txt"
+$file = KeyFileOf $Owner
 @(
   "Moon API key for $($r.owner)"
   ''
