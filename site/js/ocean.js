@@ -5,7 +5,8 @@
  *   data-sea-top="0.45"   where the water line sits, as a share of the canvas height
  *   data-sea-px="220"     or: the water fills this many CSS pixels at the bottom, whatever the canvas height
  *   data-stars="1"        also draw a quiet field of stars above (and faintly under) the water
- *   data-sea-flow="right"  swells roll in one way (right: left to right; left: right to left), in sets, slightly different on every visit
+ *   data-sea-flow="right"  swells roll in one way (right: left to right; left: right to left), in sets, slightly different on every visit,
+ *                          plus a steady train of rolling waves that travel the whole way across
  *   data-sea-line="#hex"   trace the water's surface with a line in this color
  *   data-sea-line-w="3"     its width in CSS pixels (default 1)   data-sea-line-a="0.5"  its opacity (default 1)
  * Base swell: Gerstner-style waves (sharp crests, wide troughs). Ripples: a 1D spring per column.
@@ -78,6 +79,10 @@
       for (var b = 0; b < N; b++) h[b] += v[b] * 0.5;
     }
   };
+  Sea.prototype.roller = function (born, W) {
+    var w = 110 + Math.random() * 120, v = 55 + Math.random() * 40, start = this.dir > 0 ? -0.1 * W - w * 3 * this.dpr : 1.1 * W + w * 3 * this.dpr;
+    return { born: born, x0: start, x: start, v: v, w: w, a: 10 + Math.random() * 7 };
+  };
   Sea.prototype.draw = function (now) {
     var cv = this.cv, ctx = this.ctx;
     var rect = cv.getBoundingClientRect();
@@ -101,7 +106,14 @@
     // More energy for the first few seconds, settling to a calm swell.
     var boost = reduce ? 1 : 1 + 1.4 * Math.exp(-t / 2.6);
     if (!reduce && t < 3 && Math.random() < 0.05) this.splash(Math.random(), (0.5 + Math.random()) * (1 - t / 3));
-    var waves = this.waves, sets = this.sets, flow = this.flow;
+    var waves = this.waves, sets = this.sets, flow = this.flow, dir = this.dir;
+    // Rolling waves: one comes in every few seconds, each its own height, width and speed, with a steeper front.
+    var rolls = this.rolls || (this.rolls = []);
+    if (flow && !reduce) {
+      if (this.nextRoll === undefined) { this.nextRoll = t; for (var pre = 0; pre < 3; pre++) rolls.push(this.roller(t - pre * 4.2 - Math.random() * 2, W)); }
+      if (t >= this.nextRoll) { rolls.push(this.roller(t, W)); this.nextRoll = t + 3 + Math.random() * 3.5; }
+      for (var rq = rolls.length - 1; rq >= 0; rq--) { var ro = rolls[rq]; ro.x = ro.x0 + dir * ro.v * dpr * (t - ro.born); if (dir * (ro.x - (dir > 0 ? 1.15 * W : -0.15 * W)) > ro.w * dpr * 3) rolls.splice(rq, 1); }
+    }
     var base = H * this.top;
     var pts = [];
     ctx.beginPath(); ctx.moveTo(-0.1 * W, H);
@@ -109,6 +121,11 @@
       var x0 = (-0.06 + i / (N - 1) * 1.12) * W, dx = 0, dy = 0;   // drawn a little past both edges, so no seam shows
       var env = 1;
       if (flow) for (var e = 0; e < sets.length; e++) env *= 0.72 + 0.28 * Math.sin(2 * Math.PI / (sets[e].L * dpr) * x0 - this.dir * sets[e].v * t + sets[e].p);
+      for (var rr = 0; rr < rolls.length; rr++) {
+        var R0 = rolls[rr], d = dir * (x0 - R0.x) / (R0.w * dpr), sh = d > 0 ? Math.exp(-d * d / 0.3) : Math.exp(-d * d);
+        var RA = R0.a * u * Math.min(1, (t - R0.born) / 1.2) * sh;   // ease in so a new wave never pops
+        dy += RA; dx += dir * 0.35 * RA;
+      }
       for (var w = 0; w < waves.length; w++) {
         var L = waves[w][0] * dpr, A = waves[w][1] * u * boost * (w < 3 ? env : 1), k = 2 * Math.PI / L, ph = k * x0 - waves[w][2] * t * waves[w][3] + waves[w][4];
         dx -= 0.55 * A * Math.sin(ph);
