@@ -5,7 +5,8 @@
  *   data-sea-top="0.45"   where the water line sits, as a share of the canvas height
  *   data-sea-px="220"     or: the water fills this many CSS pixels at the bottom, whatever the canvas height
  *   data-stars="1"        also draw a quiet field of stars above (and faintly under) the water
- *   data-sea-line="#hex"   trace the water's surface with a thin line in this color
+ *   data-sea-line="#hex"   trace the water's surface with a line in this color
+ *   data-sea-line-w="3"     its width in CSS pixels (default 1)   data-sea-line-a="0.5"  its opacity (default 1)
  * Base swell: Gerstner-style waves (sharp crests, wide troughs). Ripples: a 1D spring per column.
  */
 (function () {
@@ -17,6 +18,7 @@
     this.top = parseFloat(cv.getAttribute('data-sea-top') || '0.45');
     this.withStars = cv.getAttribute('data-stars') === '1';
     this.line = cv.getAttribute('data-sea-line');
+    this.lineW = parseFloat(cv.getAttribute('data-sea-line-w') || '1'); this.lineA = parseFloat(cv.getAttribute('data-sea-line-a') || '1');
     this.W = 0; this.H = 0; this.dpr = 1; this.N = 0; this.h = []; this.v = []; this.ptr = null;
     this.t0 = performance.now(); this.stars = [];
     var self = this, host = cv.closest('section') || cv.parentElement;
@@ -113,7 +115,7 @@
     if (this.line && pts.length) {
       ctx.beginPath(); ctx.moveTo(pts[0], pts[1]);
       for (var q = 2; q < pts.length; q += 2) ctx.lineTo(pts[q], pts[q + 1]);
-      ctx.strokeStyle = this.line; ctx.lineWidth = dpr; ctx.lineJoin = 'round'; ctx.stroke();
+      ctx.strokeStyle = this.line; ctx.lineWidth = this.lineW * dpr; ctx.lineJoin = 'round'; ctx.globalAlpha = this.lineA; ctx.stroke(); ctx.globalAlpha = 1;
     }
   };
 
