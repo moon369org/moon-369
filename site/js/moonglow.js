@@ -48,8 +48,9 @@
     ctx.restore();
   }
 
-  function litPath(ctx, cx, cy, R, f) {
-    var k = Math.cos(2 * Math.PI * f), wax = f < 0.5;
+  // kOverride moves the terminator: a smaller k lights more of the disc (used for the clip below).
+  function litPath(ctx, cx, cy, R, f, kOverride) {
+    var k = kOverride != null ? kOverride : Math.cos(2 * Math.PI * f), wax = f < 0.5;
     ctx.beginPath();
     ctx.arc(cx, cy, R, -Math.PI / 2, Math.PI / 2, !wax);
     ctx.ellipse(cx, cy, Math.abs(k) * R, R, 0, Math.PI / 2, -Math.PI / 2, wax ? k > 0 : k < 0);
@@ -88,18 +89,27 @@
     
         // The moon.
         ctx.fillStyle = '#24262A'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
-        // Soft terminator, like a real moon: light blurs into the shadow. Only that line is
-        // blurred; the lit outer edge stays crisp (we paint past it, then clip to the disc).
-        var soft = Math.max(1, R * 0.08);
+        // Soft terminator, like a real sphere: the light fades across a band whose width follows the
+        // terminator's own curve, wide at the middle and narrowing to nothing at the poles, so the
+        // shadow side is one smooth curve with no horns. The band is stacked lit shapes (each moves
+        // the terminator a little), then a light blur hides the steps. The lit outer edge stays
+        // crisp: we paint past it, then clip to the disc.
+        var soft = Math.max(1, R * 0.02), K = Math.cos(2 * Math.PI * f), BAND = 0.16, N = 14;
+        var a = 1 - Math.pow(0.03, 1 / N), clampK = function (k) { return Math.max(-1, Math.min(1, k)); };
         ctx.save();
         ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
-        var lw = soft * 5, both = Math.abs(f - 0.5) < 0.02;
+        var kc = K - BAND - (soft * 2.5) / R;   // never let the blur wrap light past the band
+        if (kc > -1) { litPath(ctx, cx, cy, R, f, kc); ctx.clip(); }
+        var lw = R * 0.4, both = Math.abs(f - 0.5) < 0.02;
         blurDraw(ctx, W, W, Math.max(1, Math.round(soft)), 1, 'source-over', function (c) {
           c.fillStyle = c.strokeStyle = 'rgb(' + INK + ')';
-          litPath(c, cx, cy, R, f); c.fill();
+          litPath(c, cx, cy, R, f, clampK(K + BAND)); c.fill();
           c.lineWidth = lw;
           c.beginPath(); c.arc(cx, cy, R + lw / 2 - 1, -Math.PI / 2, Math.PI / 2, !wax); c.stroke();
           if (both) { c.beginPath(); c.arc(cx, cy, R + lw / 2 - 1, Math.PI / 2, -Math.PI / 2, !wax); c.stroke(); }
+          c.globalAlpha = a;
+          for (var i = 1; i <= N; i++) { litPath(c, cx, cy, R, f, clampK(K + BAND - 2 * BAND * i / N)); c.fill(); }
+          c.globalAlpha = 1;
         });
         ctx.restore();
       })(st.getContext('2d'));

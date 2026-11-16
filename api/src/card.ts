@@ -17,8 +17,8 @@ const pad2 = (n: number) => String(n).padStart(2, '0');
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 
 /** The lit part of the moon as a path, centered on 0,0 with radius r. Same math as the site. */
-export function phasePath(f: number, r: number): string {
-  const k = Math.cos(2 * Math.PI * f), waxing = f < 0.5;
+export function phasePath(f: number, r: number, kOverride?: number): string {
+  const k = kOverride ?? Math.cos(2 * Math.PI * f), waxing = f < 0.5;
   const outer = waxing ? 1 : 0, inner = (waxing === (k > 0)) ? 0 : 1, rx = Math.abs(k) * r;
   return `M0,-${r} A${r},${r} 0 0 ${outer} 0,${r} A${rx.toFixed(3)},${r} 0 0 ${inner} 0,-${r}Z`;
 }
@@ -30,7 +30,14 @@ export function phasePath(f: number, r: number): string {
  */
 export function moonSvg(f: number, r: number, id: string, tilt = 0): string {
   const waxing = f < 0.5, full = Math.abs(f - 0.5) < 0.02, lit = phasePath(f, r);
-  const soft = (r * 0.08).toFixed(2), lw = r * 0.4;
+  // Soft terminator like a real sphere: a band of stacked lit shapes whose width follows the
+  // terminator's curve (wide in the middle, nothing at the poles), so the shadow side is one smooth
+  // curve with no horns. A light blur hides the steps; the clip keeps it from wrapping the poles.
+  const K = Math.cos(2 * Math.PI * f), BAND = 0.16, N = 14, a = 1 - Math.pow(0.03, 1 / N);
+  const ck = (k: number) => Math.max(-1, Math.min(1, k));
+  const soft = (r * 0.02).toFixed(2), lw = r * 0.4, kc = K - BAND - 2.5 * 0.02;
+  let band = `<path d="${phasePath(f, r, ck(K + BAND))}" fill="${PAPER}"/>`;
+  for (let i = 1; i <= N; i++) band += `<path d="${phasePath(f, r, ck(K + BAND - 2 * BAND * i / N))}" fill="${PAPER}" fill-opacity="${a.toFixed(4)}"/>`;
   // Light painted past the lit limb, so blurring only softens the terminator.
   const R2 = (r + lw / 2 - 1).toFixed(2);
   const limb = (right: boolean) => `<path d="M0,-${R2} A${R2},${R2} 0 0 ${right ? 1 : 0} 0,${R2}" fill="none" stroke="${PAPER}" stroke-width="${lw.toFixed(2)}"/>`;
@@ -54,6 +61,9 @@ export function moonSvg(f: number, r: number, id: string, tilt = 0): string {
   const reach = (r * 1.65).toFixed(1);
   const art = `<defs>` +
     `<clipPath id="${id}c"><circle r="${r}"/></clipPath>` +
+    // No horns: the lit shape grown by 2.5 blur widths. It narrows to nothing at the poles, so the
+    // blur softens the terminator without wrapping light onto the dark side.
+    (kc > -1 ? `<clipPath id="${id}t"><path d="${phasePath(f, r, kc)}"/></clipPath>` : '') +
     `<filter id="${id}s" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${soft}"/></filter>` +
     `<filter id="${id}r" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${(r * 0.012).toFixed(2)}"/></filter>` +
     `<filter id="${id}g1" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="${(r * 0.06).toFixed(2)}"/></filter>` +
@@ -68,7 +78,7 @@ export function moonSvg(f: number, r: number, id: string, tilt = 0): string {
     `<g mask="url(#${id}m)"><g filter="url(#${id}r)">${rays}</g></g>` +
     // the moon, with a soft terminator
     `<circle r="${(r - 0.75).toFixed(2)}" fill="${SHADOW}"/>` +
-    `<g clip-path="url(#${id}c)"><g filter="url(#${id}s)"><path d="${lit}" fill="${PAPER}"/>${sides.map(limb).join('')}</g></g>`;
+    `<g clip-path="url(#${id}c)"><g${kc > -1 ? ` clip-path="url(#${id}t)"` : ''}><g filter="url(#${id}s)">${band}${sides.map(limb).join('')}</g></g></g>`;
   return tilt ? `<g transform="rotate(${tilt})">${art}</g>` : art;
 }
 
