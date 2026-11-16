@@ -42,7 +42,7 @@
       '<div class="nc-mark">' + esc(mk[0]) + '<span>' + mk[1] + '</span></div>' +
       '<div class="nc-body"><dl class="nc-rows">' + rows.map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>'; }).join('') + '</dl>' +
       '<div class="nc-qr">' + qr(d.url) + '<div>Scan to check the signature</div></div></div>' +
-      '<div class="nc-how"><b>HOW TO CHECK</b> Scan the code, or open moon369.org/check and drop in the document. If even one byte has changed, it will not match. The signature can also be checked offline with Moon&#39;s public keys at moon369.org/trust.</div>' +
+      '<div class="nc-how"><b>HOW TO CHECK</b> Scan the code, or open moon369.org/verify and drop in the document. If even one byte has changed, it will not match. The signature can also be checked offline with Moon&#39;s public keys at moon369.org/trust.</div>' +
       '<div class="nc-foot">A cryptographic timestamp: it proves this exact document existed at this moment. It does not identify who wrote it or certify any signature in it, and it is not the act of a notary public.</div>' +
       '</article>';
   }

@@ -68,5 +68,12 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/check",
+      "destination": "/verify",
+      "permanent": true
+    }
   ]
 }

@@ -55,7 +55,7 @@
       '<div class="nc-body"><dl class="nc-rows">' + rows.map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>'; }).join('') + '</dl>' +
       '<div class="nc-qr">' + qr(link) + '<div>Scan to check this certificate</div></div></div>' +
       '<div class="ca-sign"><div><span></span>Artist signature</div><div><span></span>Date</div></div>' +
-      '<div class="nc-how"><b>HOW TO CHECK</b> Scan the code: Moon re-checks the artist, title, year and edition against its signature' + (pr ? ', confirms this print number, and shows how often this certificate has been checked' : '') + '. To check the artwork file itself, open moon369.org/check and drop it in.</div>' +
+      '<div class="nc-how"><b>HOW TO CHECK</b> Scan the code: Moon re-checks the artist, title, year and edition against its signature' + (pr ? ', confirms this print number, and shows how often this certificate has been checked' : '') + '. To check the artwork file itself, open moon369.org/verify and drop it in.</div>' +
       '<div class="nc-foot">Moon proves the master file and this certificate&#39;s details existed at the moments shown and have not been changed since. The artist&#39;s name is as stated; Moon does not verify it.' + (pr ? ' Each print has its own ID on Moon, so a print number cannot be invented or changed.' : '') + '</div>' +
       '</article>';
   }

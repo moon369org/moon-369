@@ -112,7 +112,7 @@
         '<div class="mk-coa-e">' + (c.edition ? (c.print ? 'PRINT ' + c.print.n + ' OF ' + esc(c.edition) : 'EDITION OF ' + esc(c.edition)) : 'UNIQUE WORK') + '</div>' +
         (c.edition && c.print ? '<div class="mk-coa-p" data-mk-print>Checking this print on Moon…</div>' : '') +
         '<div class="mk-sig-r"><span>MASTER FILE</span><b title="' + c.master + '">' + c.master.slice(0, 12) + '…' + c.master.slice(-8) + '</b></div>' +
-        '<div class="mk-sig-p">These details match the fingerprint Moon signed, so they have not been changed since. The artist&#39;s name is as stated; Moon does not verify it. Use CHECK A FILE below with the artwork&#39;s master file to match it exactly.</div>';
+        '<div class="mk-sig-p">These details match the fingerprint Moon signed, so they have not been changed since. The artist&#39;s name is as stated; Moon does not verify it. Use VERIFY A FILE below with the artwork&#39;s master file to match it exactly.</div>';
       var pb = box.querySelector('[data-mk-print]');
       if (pb) fetch('https://api.moon369.org/v1/editions/' + rc.sha256 + '/' + c.print.n + '?id=' + encodeURIComponent(c.print.id)).then(function (r) { return r.json(); }).then(function (b) {
         if (!b.valid) { pb.className = 'mk-coa-p bad'; pb.textContent = '✕ ' + (b.registered ? 'This print number does not check out: ' + (b.reason || '') + '.' : 'This edition is not registered on Moon, so the print number cannot be confirmed.'); return; }
@@ -187,7 +187,7 @@
       '<div class="mk-sig-r"><span>KEY</span><b>' + rc.key_id + ' · Ed25519</b></div>' +
       (rc.pq ? '<div class="mk-sig-r"><span>POST-QUANTUM</span><b>ML-DSA-65 · in the saved receipt</b></div>' : '') +
       (nb ? '<div class="mk-sig-r"><span style="display:inline-flex;align-items:center">NOT BEFORE<span class="mi"><button type="button" class="mi-b" aria-label="What NOT BEFORE means" aria-expanded="false" aria-describedby="mi-nb">i</button><span role="tooltip" id="mi-nb" class="mi-t">drand is public randomness from the League of Entropy, independent organizations including Cloudflare. A new value every 3 seconds that no one can predict. This receipt includes one, so it couldn&#39;t have been signed before that value existed.</span></span></span><b title="drand quicknet round ' + nb + '">' + roundUtc(nb) + '</b></div>' : '') +
-      '<label class="mk-sig-btn">CHECK A FILE<input type="file" data-mk-file></label>' +
+      '<label class="mk-sig-btn">VERIFY A FILE<input type="file" data-mk-file></label>' +
       '<a class="mk-sig-btn" href="' + href + '" download="' + rc.moonmark.replace(/[^0-9.]+/g, '_') + '.moonmark.json">SAVE RECEIPT</a>' +
       '<div class="mk-sig-m" data-mk-match></div>';
     var inp = box.querySelector('[data-mk-file]'), out = box.querySelector('[data-mk-match]');

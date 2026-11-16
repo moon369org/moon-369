@@ -49,7 +49,7 @@ nav[aria-label="Docs"] a.ap-on::before{content:"";position:absolute;left:-21px;t
 @keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
 header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
-::selection{background:#050506}::-moz-selection{background:#050506}
+::selection{background:#24262A}::-moz-selection{background:#24262A}
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/moon-phase.js" defer></script>
@@ -157,7 +157,7 @@ footer > div > div:first-child svg{width:64px!important}
 <a href="/tideline">TIDELINE</a>
 <a href="/trust">TRUST</a>
 <a href="/api" aria-current="page">API</a>
-<a href="/check">CHECK</a>
+<a href="/verify">VERIFY</a>
 <a href="/#sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
 </nav>
 <button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
@@ -172,7 +172,7 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 <div style="flex: 0 1 380px; border: 1px solid rgb(36, 38, 42); padding: 24px; display: flex; flex-direction: column; gap: 10px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">LIVE · MOONMARK · GET /v1/now</div>
-<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none; rotate: 17.5deg;"></canvas><div><span style="visibility: hidden;">03:41:40</span></div></div>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none; rotate: 17.5deg;"></canvas><div><span style="visibility: hidden;">04:00:57</span></div></div>
 <div class="ap-hide-m" style="font-family: Syncopate, sans-serif; font-size: 12px; letter-spacing: 0.24em;">CYCLE 1928 · MOON 05 · LUNE 07</div>
 <div class="ap-date" style="display: none;"><div class="ap-date-c"><div class="ap-date-l">CYCLE</div><div class="ap-date-v">1928</div></div><div class="ap-date-c"><div class="ap-date-l">MOON</div><div class="ap-date-v">05</div></div><div class="ap-date-c"><div class="ap-date-l">LUNE</div><div class="ap-date-v">07</div></div></div>
 </div>
@@ -281,7 +281,7 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 <div id="capture" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 16px; padding-top: 24px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">CONTENT CREDENTIALS · C2PA</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">SIGN AT CAPTURE</h2>
-<p style="margin: 0px; max-width: 760px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">For camera and creator apps: sign each photo or clip the moment it's taken. <code>moon369-capture</code> signs the file on Moon, writes C2PA Content Credentials into it with the Moonmark inside, and has Moon's time-stamp authority timestamp them. Any C2PA tool, and <a href="/check" style="color: rgb(242, 242, 240);">moon369.org/check</a>, then shows how it was made, by which app, and when. A file changed after capture fails the&nbsp;check.</p>
+<p style="margin: 0px; max-width: 760px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">For camera and creator apps: sign each photo or clip the moment it's taken. <code>moon369-capture</code> signs the file on Moon, writes C2PA Content Credentials into it with the Moonmark inside, and has Moon's time-stamp authority timestamp them. Any C2PA tool, and <a href="/verify" style="color: rgb(242, 242, 240);">moon369.org/verify</a>, then shows how it was made, by which app, and when. A file changed after capture fails the&nbsp;check.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
@@ -374,11 +374,11 @@ data-compact to hide the local time line.</pre>
   "day": 7,
   "day_of_cycle": 121,
   "moon_length_days": 28,
-  "time": "03:41:40",
-  "moonmark": "1928.05.07 03:41:40.321281000",
-  "phase": { "fraction": 0.228565, "name": "First quarter" },
-  "unix_ms": 1794856128691,
-  "utc": "2026-11-16T19:08:48.691000000Z",
+  "time": "04:00:57",
+  "moonmark": "1928.05.07 04:00:57.120759000",
+  "phase": { "fraction": 0.228992, "name": "First quarter" },
+  "unix_ms": 1794857332194,
+  "utc": "2026-11-16T19:28:52.194000000Z",
   "time_zone": null,
   "dst": false
 }</span></pre>
@@ -706,7 +706,7 @@ curl -X POST https://api.moon369.org/v1/sign \
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 18px;">/v1/lookup/similar</span>
 <span style="font-family: Syncopate, sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid rgb(36, 38, 42); color: rgb(138, 139, 143);">OPEN</span>
 </div>
-<p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">Find edited copies of a photo. Send its 64-bit difference hash (<code>phash</code>, 16 hex): shrink the image to 9×8 grayscale, set each bit when a pixel is brighter than the one to its right, rows top to bottom. Matches are images within 10 of 64 bits, closest first. A match means the picture looks the same, not that it is the same file. Pass <code>phash</code> to <code>/v1/sign</code> to make your own images findable; <a href="/check" style="color: rgb(233, 228, 216);">/embed/moon.js</a> computes it for&nbsp;you.</p>
+<p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">Find edited copies of a photo. Send its 64-bit difference hash (<code>phash</code>, 16 hex): shrink the image to 9×8 grayscale, set each bit when a pixel is brighter than the one to its right, rows top to bottom. Matches are images within 10 of 64 bits, closest first. A match means the picture looks the same, not that it is the same file. Pass <code>phash</code> to <code>/v1/sign</code> to make your own images findable; <a href="/verify" style="color: rgb(233, 228, 216);">/embed/moon.js</a> computes it for&nbsp;you.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span><button type="button" class="at-btn" aria-label="Run this request live">TRY IT</button></span></div>
@@ -1146,7 +1146,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <nav class="ft" aria-label="Footer">
 <div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
-<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/check">Check a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
 <div class="ft-base"><span>Moon · The new standard for time</span><span>Open source under the MIT license</span></div>
 </nav>
 </footer>
@@ -1175,7 +1175,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <a href="/tideline">TIDELINE</a>
 <a href="/trust">TRUST</a>
 <a href="/api" aria-current="page">API</a>
-<a href="/check">CHECK</a>
+<a href="/verify">VERIFY</a>
 <a href="/#sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
 </nav>
 </div>
@@ -1299,7 +1299,7 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 <div id="capture" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">CONTENT CREDENTIALS · C2PA</div>
 <h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">SIGN AT CAPTURE</h2>
-<p style="margin: 0; max-width: 760px; font-size: 16px; line-height: 1.7; color: #A2A3A7">For camera and creator apps: sign each photo or clip the moment it&#39;s taken. <code>moon369-capture</code> signs the file on Moon, writes C2PA Content Credentials into it with the Moonmark inside, and has Moon&#39;s time-stamp authority timestamp them. Any C2PA tool, and <a href="/check" style="color: #F2F2F0">moon369.org/check</a>, then shows how it was made, by which app, and when. A file changed after capture fails the&nbsp;check.</p>
+<p style="margin: 0; max-width: 760px; font-size: 16px; line-height: 1.7; color: #A2A3A7">For camera and creator apps: sign each photo or clip the moment it&#39;s taken. <code>moon369-capture</code> signs the file on Moon, writes C2PA Content Credentials into it with the Moonmark inside, and has Moon&#39;s time-stamp authority timestamp them. Any C2PA tool, and <a href="/verify" style="color: #F2F2F0">moon369.org/verify</a>, then shows how it was made, by which app, and when. A file changed after capture fails the&nbsp;check.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
@@ -1711,7 +1711,7 @@ curl -X POST https://api.moon369.org/v1/sign \
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/lookup/similar</span>
 <span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">OPEN</span>
 </div>
-<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Find edited copies of a photo. Send its 64-bit difference hash (<code>phash</code>, 16 hex): shrink the image to 9×8 grayscale, set each bit when a pixel is brighter than the one to its right, rows top to bottom. Matches are images within 10 of 64 bits, closest first. A match means the picture looks the same, not that it is the same file. Pass <code>phash</code> to <code>/v1/sign</code> to make your own images findable; <a href="/check" style="color: #E9E4D8">/embed/moon.js</a> computes it for&nbsp;you.</p>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Find edited copies of a photo. Send its 64-bit difference hash (<code>phash</code>, 16 hex): shrink the image to 9×8 grayscale, set each bit when a pixel is brighter than the one to its right, rows top to bottom. Matches are images within 10 of 64 bits, closest first. A match means the picture looks the same, not that it is the same file. Pass <code>phash</code> to <code>/v1/sign</code> to make your own images findable; <a href="/verify" style="color: #E9E4D8">/embed/moon.js</a> computes it for&nbsp;you.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
@@ -2151,7 +2151,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <footer style="border-top: 1px solid #1C1D20"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <nav class="ft" aria-label="Footer">
 <div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #3A3C41; stroke-width: 9"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
-<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/check">Check a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
 <div class="ft-base"><span>Moon · The new standard for time</span><span>Open source under the MIT license</span></div>
 </nav>
 </footer>

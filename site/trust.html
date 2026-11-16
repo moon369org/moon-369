@@ -41,7 +41,7 @@ p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
 @keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
 header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
-::selection{background:#050506}::-moz-selection{background:#050506}
+::selection{background:#24262A}::-moz-selection{background:#24262A}
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/header.js" defer></script>
@@ -110,7 +110,7 @@ footer > div > div:first-child svg{width:64px!important}
 <a href="/tideline">TIDELINE</a>
 <a href="/trust" aria-current="page">TRUST</a>
 <a href="/api">API</a>
-<a href="/check">CHECK</a>
+<a href="/verify">VERIFY</a>
 <a href="/#sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
 </nav>
 <button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
@@ -185,7 +185,7 @@ footer > div > div:first-child svg{width:64px!important}
 <article style="border-top: 1px solid rgb(28, 29, 32); padding: 72px 0px; display: flex; flex-direction: column; gap: 32px;">
 <div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">04</div>
-<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">CHECK ONE THREE WAYS</h2>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">VERIFY ONE THREE WAYS</h2>
 <p style="margin: 0px; font-size: 17px; line-height: 1.7; color: rgb(185, 182, 174);">The same answer every way. The third needs nothing from Moon at all.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;"><div style="display: flex; flex-direction: column; gap: 14px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">01 · WEBSITE</div><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Open the link</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Every signed Moonmark has a link. Open it and Moon checks the signature in front of you. Drop in the file to confirm it's the exact one that was signed.</p><a href="/#sign" style="align-self: flex-start; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; color: rgb(233, 228, 216); min-height: 44px; display: inline-flex; align-items: center;">Sign a file to try it →</a></div><div style="display: flex; flex-direction: column; gap: 14px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">02 · API</div><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Ask Moon</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Send the receipt to <code>/v1/verify</code>. Add the file's fingerprint and Moon also confirms it matches.</p><pre style="margin: 0px; padding: 18px 20px; background: rgb(8, 8, 10); border: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; line-height: 1.7; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl -X POST https://api.moon369.org/v1/verify \
@@ -258,7 +258,7 @@ await verify(receipt, { content: file });
 <footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <nav class="ft" aria-label="Footer">
 <div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
-<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/check">Check a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
 <div class="ft-base"><span>Moon · The new standard for time</span><span>Open source under the MIT license</span></div>
 </nav>
 </footer>
@@ -287,7 +287,7 @@ await verify(receipt, { content: file });
 <a href="/tideline">TIDELINE</a>
 <a href="/trust" aria-current="page">TRUST</a>
 <a href="/api">API</a>
-<a href="/check">CHECK</a>
+<a href="/verify">VERIFY</a>
 <a href="/#sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
 </nav>
 </div>
@@ -362,7 +362,7 @@ await verify(receipt, { content: file });
 <article style="border-top: 1px solid #1C1D20; padding: 72px 0; display: flex; flex-direction: column; gap: 32px">
 <div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px">
 <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04</div>
-<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">CHECK ONE THREE WAYS</h2>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">VERIFY ONE THREE WAYS</h2>
 <p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE">The same answer every way. The third needs nothing from Moon at all.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px"><div style="display: flex; flex-direction: column; gap: 14px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">01 · WEBSITE</div><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Open the link</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every signed Moonmark has a link. Open it and Moon checks the signature in front of you. Drop in the file to confirm it&#39;s the exact one that was signed.</p><a href="/#sign" style="align-self: flex-start; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8; min-height: 44px; display: inline-flex; align-items: center">Sign a file to try it &rarr;</a></div><div style="display: flex; flex-direction: column; gap: 14px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">02 · API</div><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Ask Moon</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Send the receipt to <code>/v1/verify</code>. Add the file&#39;s fingerprint and Moon also confirms it matches.</p><pre style="margin: 0; padding: 18px 20px; background: #08080A; border: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; color: #E9E4D8; overflow-x: auto; white-space: pre">curl -X POST https://api.moon369.org/v1/verify \
@@ -435,7 +435,7 @@ await verify(receipt, { content: file });
 <footer style="border-top: 1px solid #1C1D20"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <nav class="ft" aria-label="Footer">
 <div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #3A3C41; stroke-width: 9"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
-<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/check">Check a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
 <div class="ft-base"><span>Moon · The new standard for time</span><span>Open source under the MIT license</span></div>
 </nav>
 </footer>

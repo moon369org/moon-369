@@ -82,7 +82,7 @@ describe('capture', () => {
     expect(a.receipt.sha256).toBe(out.sha256);
   });
 
-  it('computes the same look-alike hash as moon369.org/check does in the browser', async () => {
+  it('computes the same look-alike hash as moon369.org/verify does in the browser', async () => {
     // 554d0f170f4c3355: what /embed/moon.js computes for this photo in Chrome.
     expect(await lookAlikeHash(photo)).toBe('554d0f170f4c3355');
     const out = await capture(photo, { mimeType: 'image/jpeg', signer, moonKey: KEY, api });

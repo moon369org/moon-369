@@ -41,7 +41,7 @@ p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
 @keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
 header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
-::selection{background:#050506}::-moz-selection{background:#050506}
+::selection{background:#24262A}::-moz-selection{background:#24262A}
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/header.js" defer></script>
@@ -143,7 +143,7 @@ footer > div > div:first-child svg{width:64px!important}
 <a href="/tideline">TIDELINE</a>
 <a href="/trust">TRUST</a>
 <a href="/api">API</a>
-<a href="/check">CHECK</a>
+<a href="/verify">VERIFY</a>
 <a href="/#sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
 </nav>
 <button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
@@ -455,7 +455,7 @@ footer > div > div:first-child svg{width:64px!important}
   -H "Authorization: Bearer $MOON_KEY" \
   -H "Content-Type: application/json" \
   -d @sign-request.json</pre></li>
-<li><b>Publish, and let anyone check</b><p>Post the files with their fingerprints. Anyone can drop a copy on <a href="/check">moon369.org/check</a> or call the lookup API to see who registered it and when, and verify the signatures without trusting&nbsp;anyone.</p><pre>curl https://api.moon369.org/v1/lookup/&lt;sha256&gt;</pre></li>
+<li><b>Publish, and let anyone check</b><p>Post the files with their fingerprints. Anyone can drop a copy on <a href="/verify">moon369.org/verify</a> or call the lookup API to see who registered it and when, and verify the signatures without trusting&nbsp;anyone.</p><pre>curl https://api.moon369.org/v1/lookup/&lt;sha256&gt;</pre></li>
 </ol>
 <div class="pr-cta"><p>Start with a <a href="/api#key">free API key</a>. For a verified company name, email <a href="mailto:moon369org@proton.me">moon369org@proton.me</a>. The script we used is <a href="https://github.com/moon369org/moon-369/blob/main/scripts/brand-registry.py">open source</a>, and so is <a href="assets/brand/sign-request.json">the exact request we&nbsp;sent</a>.</p></div>
 <p style="margin: 0px; max-width: 760px; font-size: 13.5px; line-height: 1.7; color: rgb(138, 139, 143);">A Moonmark proves that a file existed at a moment and who registered it. It is strong evidence of authorship and priority, but it is not a trademark or copyright registration, and it is not legal&nbsp;advice.</p>
@@ -466,7 +466,7 @@ footer > div > div:first-child svg{width:64px!important}
 <footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <nav class="ft" aria-label="Footer">
 <div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
-<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/check">Check a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
 <div class="ft-base"><span>Moon · The new standard for time</span><span>Open source under the MIT license</span></div>
 </nav>
 </footer>
@@ -495,7 +495,7 @@ footer > div > div:first-child svg{width:64px!important}
 <a href="/tideline">TIDELINE</a>
 <a href="/trust">TRUST</a>
 <a href="/api">API</a>
-<a href="/check">CHECK</a>
+<a href="/verify">VERIFY</a>
 <a href="/#sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
 </nav>
 </div>
@@ -807,7 +807,7 @@ footer > div > div:first-child svg{width:64px!important}
   -H "Authorization: Bearer $MOON_KEY" \
   -H "Content-Type: application/json" \
   -d @sign-request.json</pre></li>
-<li><b>Publish, and let anyone check</b><p>Post the files with their fingerprints. Anyone can drop a copy on <a href="/check">moon369.org/check</a> or call the lookup API to see who registered it and when, and verify the signatures without trusting&nbsp;anyone.</p><pre>curl https://api.moon369.org/v1/lookup/&lt;sha256&gt;</pre></li>
+<li><b>Publish, and let anyone check</b><p>Post the files with their fingerprints. Anyone can drop a copy on <a href="/verify">moon369.org/verify</a> or call the lookup API to see who registered it and when, and verify the signatures without trusting&nbsp;anyone.</p><pre>curl https://api.moon369.org/v1/lookup/&lt;sha256&gt;</pre></li>
 </ol>
 <div class="pr-cta"><p>Start with a <a href="/api#key">free API key</a>. For a verified company name, email <a href="mailto:moon369org@proton.me">moon369org@proton.me</a>. The script we used is <a href="https://github.com/moon369org/moon-369/blob/main/scripts/brand-registry.py">open source</a>, and so is <a href="assets/brand/sign-request.json">the exact request we&nbsp;sent</a>.</p></div>
 <p style="margin: 0; max-width: 760px; font-size: 13.5px; line-height: 1.7; color: #8A8B8F">A Moonmark proves that a file existed at a moment and who registered it. It is strong evidence of authorship and priority, but it is not a trademark or copyright registration, and it is not legal&nbsp;advice.</p>
@@ -818,7 +818,7 @@ footer > div > div:first-child svg{width:64px!important}
 <footer style="border-top: 1px solid #1C1D20"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <nav class="ft" aria-label="Footer">
 <div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #3A3C41; stroke-width: 9"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
-<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/check">Check a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
 <div class="ft-base"><span>Moon · The new standard for time</span><span>Open source under the MIT license</span></div>
 </nav>
 </footer>

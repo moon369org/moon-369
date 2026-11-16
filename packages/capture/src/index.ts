@@ -83,7 +83,7 @@ const sha256 = (b: Bytes) => createHash('sha256').update(b).digest('hex');
 const asBuf = (x: string | Bytes) => (typeof x === 'string' ? Buffer.from(x) : Buffer.from(x));
 
 /**
- * Moon's look-alike hash (v2), the same as moon369.org/check and the sign page compute: the picture drawn on black
+ * Moon's look-alike hash (v2), the same as moon369.org/verify and the sign page compute: the picture drawn on black
  * at up to 1024 px, averaged over exact 9×8 blocks; each bit says whether a block is brighter than its right neighbour.
  * Needs the optional dependency sharp to decode images; without it, returns null.
  */

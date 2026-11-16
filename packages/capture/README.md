@@ -8,7 +8,7 @@ Sign photos and video **at the moment of capture**, so anyone can later tell a r
 2. **Writes C2PA Content Credentials into the file.** The credentials say which app made it and how ("a digital capture"), and carry the Moonmark receipt inside as the assertion `org.moon369.moonmark`.
 3. **Has Moon timestamp the credentials.** Moon's RFC 3161 Time-Stamp Authority timestamps the credentials' signature, so any C2PA tool shows *timestamp matched: Moon Timestamp Authority*.
 
-`verify()` reads it all back from any copy of the file. So does [moon369.org/check](https://moon369.org/check): drop a file and see its credentials, how it was made, and Moon's proof.
+`verify()` reads it all back from any copy of the file. So does [moon369.org/verify](https://moon369.org/verify): drop a file and see its credentials, how it was made, and Moon's proof.
 
 ```sh
 npm install moon369-capture sharp
@@ -82,7 +82,7 @@ send the shot to your own endpoint, call `capture()` there, and return `out.byte
 |---|---|---|
 | C2PA claim signature | This app made this exact file, unchanged since | Any C2PA tool |
 | Moon RFC 3161 timestamp | The credentials existed at this time | Any C2PA tool |
-| `org.moon369.moonmark` receipt | Moon signed the capture's fingerprint at this Moonmark | `verify()`, moon369.org/check, the `moon369` package |
+| `org.moon369.moonmark` receipt | Moon signed the capture's fingerprint at this Moonmark | `verify()`, moon369.org/verify, the `moon369` package |
 | Moon registry + Tideline | Who registered it, in Moon's public, append-only log | moon369.org/tideline |
 
 MIT licensed.
