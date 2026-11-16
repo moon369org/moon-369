@@ -7,13 +7,22 @@ API="${MOON_API:-https://api.moon369.org}"; OUT="${MOON_OUT:-moon-receipts.json}
 sha() { if command -v sha256sum >/dev/null; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi; }
 
 files=()
-for pat in $MOON_FILES; do for f in $pat; do [ -f "$f" ] && files+=("$f"); done; done
-if [ ${#files[@]} -eq 0 ]; then echo "::error::No files matched: $MOON_FILES"; exit 1; fi
-if [ -z "${MOON_KEY:-}" ] && [ ${#files[@]} -gt 5 ]; then
-  echo "::error::${#files[@]} files to sign. Without an API key Moon signs up to 5 a run. Add a free key as a secret: https://moon369.org/api#key"; exit 1
+for pat in ${MOON_FILES:-}; do for f in $pat; do [ -f "$f" ] && files+=("$f"); done; done
+total=${#files[@]}; [ "${MOON_COMMIT:-false}" = "true" ] && total=$((total + 1))
+if [ "$total" -eq 0 ]; then echo "::error::Nothing to sign. No files matched \"${MOON_FILES:-}\" and commit is off."; exit 1; fi
+if [ -z "${MOON_KEY:-}" ] && [ "$total" -gt 5 ]; then
+  echo "::error::$total items to sign. Without an API key Moon signs up to 5 a run. Add a free key as a secret: https://moon369.org/api#key"; exit 1
 fi
 
 items='[]'
+# The commit itself: the SHA-256 of its exact git object, so anyone with the repo can recompute it:
+#   git cat-file commit <sha> | sha256sum
+if [ "${MOON_COMMIT:-false}" = "true" ]; then
+  rev=$(git rev-parse "${MOON_REF:-HEAD}^{commit}")
+  h=$(git cat-file commit "$rev" | { if command -v sha256sum >/dev/null; then sha256sum; else shasum -a 256; fi; } | cut -d' ' -f1)
+  lab="${LABEL:+$LABEL }commit $rev"
+  items=$(jq -c --arg p "commit:$rev" --arg h "$h" --arg l "${lab:0:120}" '. + [{path: $p, sha256: $h, label: $l}]' <<<"$items")
+fi
 for f in "${files[@]}"; do
   h=$(sha "$f"); name="${f##*/}"; lab="${LABEL:+$LABEL }$name"
   items=$(jq -c --arg p "$f" --arg h "$h" --arg l "${lab:0:120}" '. + [{path: $p, sha256: $h, label: $l}]' <<<"$items")
@@ -49,7 +58,10 @@ jq -e '[.files[] | .receipt.sha256 == .sha256] | all' "$OUT" >/dev/null || { ech
 count=$(jq '.files | length' "$OUT")
 echo "Signed $count file(s) on Moon -> $OUT"
 if [ -n "${GITHUB_OUTPUT:-}" ]; then { echo "receipts=$OUT"; echo "count=$count"; } >> "$GITHUB_OUTPUT"; fi
-if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
-  { echo "### Signed on Moon"; echo; echo "| File | Moonmark | Proof |"; echo "|---|---|---|"
-    jq -r '.files[] | "| `\(.path)` | \(.moonmark[0:19]) | [check](\(.signed_url)) |"' "$OUT"; } >> "$GITHUB_STEP_SUMMARY"
-fi
+# A Markdown table of every proof, for the run summary and (optionally) the release notes.
+table=$( { echo "### Signed on Moon"; echo; echo "| | Moonmark | Proof |"; echo "|---|---|---|"
+  jq -r '.files[] | "| `\(.path)` | \(.moonmark[0:19]) | [check](\(.signed_url)) |"' "$OUT"
+  echo; echo "Each fingerprint was signed by [Moon](https://moon369.org). Check a file at [moon369.org/verify](https://moon369.org/verify); check a commit with \`git cat-file commit <sha> | sha256sum\`."; } )
+printf '%s\n' "$table" > "${OUT%.json}.md"
+if [ -n "${GITHUB_OUTPUT:-}" ]; then echo "notes=${OUT%.json}.md" >> "$GITHUB_OUTPUT"; fi
+if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then printf '%s\n' "$table" >> "$GITHUB_STEP_SUMMARY"; fi

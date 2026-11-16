@@ -52,6 +52,13 @@ All are GET, need no key and return JSON unless noted. Base: `https://api.moon36
 
 Field names to rely on: `moonmark`, `moonmark_url`, `moon_image`, `phase.name`, `phase.illumination` (share of the face lit, 0 to 1), `sky.tilt.rotate_deg`, `utc`, `unix_ns`.
 
+## Signing tools
+
+- No code: https://moon369.org/sign signs any file or pasted text and returns a link, QR code and verification card. `https://moon369.org/sign#text=<url-encoded text>` opens it with text filled in, for handing over AI output.
+- GitHub releases: the `moon369org/moon-369/actions/sign@main` action signs release files and the release commit, and can add a proof table to the release notes.
+- Every commit: a git hook (`actions/git-hook` in the repo) signs each commit's git object and keeps the receipt in `refs/notes/moonmark`.
+- Ready-made examples in the repo's `examples/` folder: `ai-outputs` (sign generated files or text with the model and prompt fingerprint), `contract-snapshot` (save and sign a page or document), `art-certificate`.
+
 ## Offline: the moon369 npm package
 
 `npm install moon369` gives the same answers as the API with no network calls:

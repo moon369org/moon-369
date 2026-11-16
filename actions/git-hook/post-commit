@@ -1,0 +1,24 @@
+#!/bin/sh
+# Moon: sign every commit the moment it is made.
+# Moon signs the SHA-256 of the commit's exact git object (only that fingerprint leaves your machine)
+# and the signed receipt is kept in a git note under refs/notes/moonmark.
+# Anyone with the repo can recompute the fingerprint:  git cat-file commit <sha> | sha256sum
+# Install: copy to .git/hooks/post-commit (or run install.sh). Optional: MOON_KEY for your verified name.
+# Never blocks a commit: if Moon can't be reached in 10 seconds, the commit just isn't signed.
+API="${MOON_API:-https://api.moon369.org}"
+rev=$(git rev-parse HEAD) || exit 0
+if command -v sha256sum >/dev/null 2>&1; then sum="sha256sum"; else sum="shasum -a 256"; fi
+h=$(git cat-file commit "$rev" | $sum | cut -c1-64)
+if [ -n "$MOON_KEY" ]; then
+  res=$(curl -sS -m 10 --fail-with-body -X POST "$API/v1/sign" -H 'Content-Type: application/json' -H "Authorization: Bearer $MOON_KEY" -d "{\"sha256\":\"$h\"}" 2>&1)
+else
+  res=$(curl -sS -m 10 --fail-with-body -X POST "$API/v1/sign" -H 'Content-Type: application/json' -d "{\"sha256\":\"$h\"}" 2>&1)
+fi
+case "$res" in
+  *'"receipt"'*) ;;
+  *) echo "moon: commit not signed ($(printf '%s' "$res" | tr -d '\n' | cut -c1-120))" >&2; exit 0 ;;
+esac
+git notes --ref=moonmark add -f -m "$res" "$rev" >/dev/null 2>&1
+mark=$(printf '%s' "$res" | sed -n 's/.*"moonmark": *"\([0-9. :]*\)".*/\1/p' | head -n 1 | cut -c1-19)
+echo "moon: signed ${rev%"${rev#???????}"} at ${mark:-Moon time}"
+exit 0

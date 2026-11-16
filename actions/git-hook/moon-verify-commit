@@ -1,0 +1,17 @@
+#!/bin/sh
+# Check a commit's Moon signature: recompute its fingerprint, match it to the receipt in its git note,
+# and have Moon check the receipt's signatures.   Usage: moon-verify-commit [commit]   (default HEAD)
+API="${MOON_API:-https://api.moon369.org}"
+rev=$(git rev-parse "${1:-HEAD}^{commit}") || exit 2
+note=$(git notes --ref=moonmark show "$rev" 2>/dev/null) || { echo "No Moon signature for $rev. Fetch notes with: git fetch origin refs/notes/moonmark:refs/notes/moonmark"; exit 1; }
+if command -v sha256sum >/dev/null 2>&1; then sum="sha256sum"; else sum="shasum -a 256"; fi
+h=$(git cat-file commit "$rev" | $sum | cut -c1-64)
+signed=$(printf '%s' "$note" | tr -d '\n' | sed -n 's/.*"receipt": *{[^}]*"sha256": *"\([0-9a-f]\{64\}\)".*/\1/p')
+[ "$h" = "$signed" ] || { echo "MISMATCH: commit $rev has fingerprint $h, but its receipt covers ${signed:-nothing}."; exit 1; }
+out=$(printf '%s' "$note" | curl -sS -m 15 -X POST "$API/v1/verify" -H 'Content-Type: application/json' --data-binary @-)
+case "$out" in
+  *'"valid": true'*|*'"valid":true'*)
+    mark=$(printf '%s' "$out" | sed -n 's/.*"moonmark": *"\([0-9. :]*\)".*/\1/p' | head -n 1)
+    echo "VALID: commit $rev existed at Moonmark $mark. Its fingerprint matches and Moon's signatures check out." ;;
+  *) echo "INVALID: $(printf '%s' "$out" | tr -d '\n' | cut -c1-200)"; exit 1 ;;
+esac
