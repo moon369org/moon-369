@@ -400,6 +400,7 @@ async function signNow(env: Env, sha: string, at?: bigint, who: Who = { registra
     try {
       const reg = makeRegistration(receipt, signed_url, who, (b) => { const x = S.signBytes(b); return { key_id: x.key_id, signature: x.signature }; });
       await env.REGISTRY.add(reg);
+      if (tideline && typeof tideline.leaf === 'string' && env.REGISTRY.addLeaf) await env.REGISTRY.addLeaf(tideline.leaf, sha).catch(() => null);
       registration = { registrant: reg.registrant, registrant_verified: reg.registrant_verified, on_behalf_of: reg.on_behalf_of, label: reg.label, phash: reg.phash, lookup: '/v1/lookup/' + sha };
     } catch { registration = null; }
   }
@@ -769,8 +770,16 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const limit = Math.min(500, Math.max(1, Number(q.get('limit') ?? 200) || 200));
         const hdr = { 'Cache-Control': 'public, max-age=30', ...planHdr };
         if (isSha256Hex(term.toLowerCase())) {
-          const regs = (await env.REGISTRY.bySha(term.toLowerCase(), 50)).sort((a, b) => (BigInt(a.unix_ns) < BigInt(b.unix_ns) ? -1 : 1));
-          return json({ kind: 'file', q: term, count: regs.length, results: regs.map((r) => ({ ...publicRegistration(r), sha256: r.sha256 })) }, 200, hdr);
+          const h = term.toLowerCase(), byTime = (a: Registration, b: Registration) => (BigInt(a.unix_ns) < BigInt(b.unix_ns) ? -1 : 1);
+          const regs = (await env.REGISTRY.bySha(h, 50)).sort(byTime);
+          if (regs.length) return json({ kind: 'file', q: term, count: regs.length, results: regs.map((r) => ({ ...publicRegistration(r), sha256: r.sha256 })) }, 200, hdr);
+          // Not a file: maybe a Tideline entry, the receipt's fingerprint in the log.
+          const fileSha = env.REGISTRY.shaByLeaf ? await env.REGISTRY.shaByLeaf(h) : null;
+          if (fileSha) {
+            const hit = (await env.REGISTRY.bySha(fileSha, 50)).sort(byTime);
+            return json({ kind: 'entry', q: term, count: hit.length, results: hit.slice(0, 1).map(searchView) }, 200, hdr);
+          }
+          return json({ kind: 'file', q: term, count: 0, results: [] }, 200, hdr);
         }
         let w: ReturnType<typeof searchWindow> = null;
         try { w = searchWindow(term); } catch { w = null; }
@@ -783,6 +792,11 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const slug = registrantSlug(term);
         if (!slug || !env.REGISTRY.byRegistrant) return json({ kind: 'none', q: term, count: 0, results: [] }, 200, hdr);
         const regs = await env.REGISTRY.byRegistrant(slug, limit);
+        if (!regs.length && env.REGISTRY.byLabel && term.length >= 2) {
+          // Not a verified name: look through what verified names have registered (labels like file names).
+          const hits = await env.REGISTRY.byLabel(term, limit);
+          return json({ kind: 'label', q: term, count: hits.length, results: hits.map((r) => ({ ...publicRegistration(r), sha256: r.sha256 })) }, 200, hdr);
+        }
         return json({ kind: 'registrant', q: term, slug, registrant: regs[0]?.registrant ?? null, count: regs.length, page: `https://moon369.org/by/${slug}`,
           results: regs.map((r) => ({ ...publicRegistration(r), sha256: r.sha256 })) }, 200, hdr);
       }

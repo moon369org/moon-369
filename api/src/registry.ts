@@ -69,6 +69,11 @@ export interface RegistryStore {
   byTime?(fromMs: number, toMs: number, max: number): Promise<Registration[]>;
   /** A verified registrant's registrations, newest first. */
   byRegistrant?(slug: string, max: number, beforeMs?: number): Promise<Registration[]>;
+  /** Verified registrations whose label contains the text, newest first. */
+  byLabel?(text: string, max: number): Promise<Registration[]>;
+  /** Remember which file a Tideline leaf (a receipt's log fingerprint) belongs to. */
+  addLeaf?(leaf: string, sha: string): Promise<void>;
+  shaByLeaf?(leaf: string): Promise<string | null>;
 }
 
 /** A registrant's name as a URL slug: "Moon" -> "moon", "Acme Inc." -> "acme-inc". */
@@ -77,7 +82,7 @@ export const registrantSlug = (name: string) =>
 const msOf = (r: Registration) => Number(BigInt(r.unix_ns) / 1_000_000n);
 
 export function memoryRegistry(): RegistryStore {
-  const bySha = new Map<string, Registration[]>(), band = new Map<string, Set<string>>();
+  const bySha = new Map<string, Registration[]>(), band = new Map<string, Set<string>>(), leaves = new Map<string, string>();
   return {
     async add(r) {
       (bySha.get(r.sha256) ?? bySha.set(r.sha256, []).get(r.sha256)!).push(r);
@@ -92,6 +97,12 @@ export function memoryRegistry(): RegistryStore {
       return [...bySha.values()].flat().filter((r) => r.registrant_verified && registrantSlug(r.registrant) === slug && (before === undefined || msOf(r) < before))
         .sort((a, b) => msOf(b) - msOf(a)).slice(0, max);
     },
+    async byLabel(text, max) {
+      const t = text.toLowerCase();
+      return [...bySha.values()].flat().filter((r) => r.registrant_verified && (r.label ?? '').toLowerCase().includes(t)).sort((a, b) => msOf(b) - msOf(a)).slice(0, max);
+    },
+    async addLeaf(leaf, sha) { leaves.set(leaf, sha); },
+    async shaByLeaf(leaf) { return leaves.get(leaf) ?? null; },
   };
 }
 
@@ -121,10 +132,19 @@ export function upstashRegistry(url: string, token: string): RegistryStore {
       const [a] = await call([['ZRANGE', `rg:by:${slug}`, before === undefined ? '+inf' : `(${before}`, '-inf', 'BYSCORE', 'REV', 'LIMIT', 0, max]]);
       return ((a as string[]) ?? []).map((x) => JSON.parse(x) as Registration);
     },
+    async byLabel(text, max) {
+      await indexed();
+      const t = text.toLowerCase(), [slugs] = await call([['SMEMBERS', 'rg:verified']]);
+      const lists = (slugs as string[] ?? []).length ? await call((slugs as string[]).map((sl) => ['ZRANGE', `rg:by:${sl}`, 0, 1999])) : [];
+      return (lists as string[][]).flat().map((x) => JSON.parse(x) as Registration).filter((r) => (r.label ?? '').toLowerCase().includes(t))
+        .sort((a, b) => msOf(b) - msOf(a)).slice(0, max);
+    },
+    async addLeaf(leaf, sha) { await call([['SET', `rg:leaf:${leaf}`, sha]]); },
+    async shaByLeaf(leaf) { const [v] = await call([['GET', `rg:leaf:${leaf}`]]); return (v as string) ?? null; },
   };
   function indexCmds(r: Registration, j: string): (string | number)[][] {
     const out: (string | number)[][] = [['ZADD', 'rg:t', msOf(r), j]];
-    if (r.registrant_verified) out.push(['ZADD', `rg:by:${registrantSlug(r.registrant)}`, msOf(r), j]);
+    if (r.registrant_verified) out.push(['ZADD', `rg:by:${registrantSlug(r.registrant)}`, msOf(r), j], ['SADD', 'rg:verified', registrantSlug(r.registrant)]);
     return out;
   }
   // Registrations made before these indexes existed: add them once, on the first search.

@@ -12,9 +12,10 @@ function fakeRedis() {
       case 'RPUSH': { const l = (kv.get(k) as string[]) ?? []; l.push(String(a[0])); kv.set(k, l); return l.length; }
       case 'LRANGE': { const l = (kv.get(k) as string[]) ?? []; const e = Number(a[1]); return l.slice(Number(a[0]), e < 0 ? undefined : e + 1); }
       case 'SADD': { const s = (kv.get(k) as Set<string>) ?? new Set(); s.add(String(a[0])); kv.set(k, s); return 1; }
-      case 'SRANDMEMBER': return [...((kv.get(k) as Set<string>) ?? [])];
+      case 'SRANDMEMBER': case 'SMEMBERS': return [...((kv.get(k) as Set<string>) ?? [])];
       case 'ZADD': z(k).set(String(a[1]), Number(a[0])); return 1;
       case 'ZRANGE': {
+        if (!a.includes('BYSCORE')) { const all = [...z(k)].sort((x, y) => x[1] - y[1]).map(([m]) => m); const e = Number(a[1]); return all.slice(Number(a[0]), e < 0 ? undefined : e + 1); }
         const rev = a.includes('REV'), li = a.indexOf('LIMIT'), off = Number(a[li + 1]), cnt = Number(a[li + 2]);
         const [lo, hi] = rev ? [score(a[1], false), score(a[0], true)] : [score(a[0], false), score(a[1], true)];
         const items = [...z(k)].filter(([, s]) => s >= lo && s <= hi).sort((x, y) => rev ? y[1] - x[1] : x[1] - y[1]);
@@ -31,7 +32,7 @@ function fakeRedis() {
 }
 const reg = (sha: string, ms: number, who: string, verified: boolean): Registration => ({
   registration: 'moon-registration/1', sha256: sha, moonmark: 'm', unix_ns: String(BigInt(ms) * 1_000_000n), registrant: who, registrant_verified: verified,
-  on_behalf_of: null, label: null, phash: null, receipt_signature: 's', signed_url: 'u', signature: { key_id: 'k', signature: 's' },
+  on_behalf_of: null, label: sha[0] + '.png', phash: null, receipt_signature: 's', signed_url: 'u', signature: { key_id: 'k', signature: 's' },
 });
 
 describe('registry on Upstash', () => {
@@ -48,5 +49,8 @@ describe('registry on Upstash', () => {
     expect((await store.byRegistrant!('moon', 50)).map((x) => x.sha256[0])).toEqual(['b', 'a']);
     expect((await store.byRegistrant!('moon', 50, 2000)).map((x) => x.sha256[0])).toEqual(['a']);
     expect(r.kv.get('rg:ix:v1')).toBe('done');
+    expect((await store.byLabel!('B.PNG', 50)).map((x) => x.sha256[0])).toEqual(['b']);   // verified only, any case
+    expect(await store.byLabel!('c.png', 50)).toEqual([]);
+    await store.addLeaf!('f'.repeat(64), 'b'.repeat(64)); expect(await store.shaByLeaf!('f'.repeat(64))).toBe('b'.repeat(64));
   });
 });

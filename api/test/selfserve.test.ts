@@ -5,6 +5,7 @@ import { Signer } from '../src/receipt.js';
 import { envKeyStore, hashKey, memoryKeyStore, chainKeyStores } from '../src/keys.js';
 import { memoryRegistry } from '../src/registry.js';
 import { memoryLimiter } from '../src/ratelimit.js';
+import { memoryStore } from '../src/tideline.js';
 
 const kp = generateKeyPairSync('ed25519');
 const HAND = 'moon_hand_issued_key';
@@ -134,5 +135,14 @@ describe('search', () => {
     const page = await (await get(e, '/v1/registrants/halden-stock')).json() as { verified: boolean; count: number };
     expect(page).toMatchObject({ verified: true, count: 1 });
     expect((await get(e, '/v1/search?q=')).status).toBe(400);
+    const byLabel = await (await get(e, '/v1/search?q=log')).json() as S;
+    expect(byLabel).toMatchObject({ kind: 'label', count: 1 });   // file names of verified registrants
+    expect((await (await get(e, '/v1/search?q=secret')).json() as S).count).toBe(0);   // never an unverified signer's label
+  });
+  it('finds a Tideline entry by its log fingerprint', async () => {
+    const e = { ...env(), TIDES: memoryStore() };
+    const s = await (await post(e, '/v1/sign', { sha256: 'd'.repeat(64), label: 'Deck' }, HAND)).json() as { tideline: { leaf: string } };
+    const hit = await (await get(e, '/v1/search?q=' + s.tideline.leaf)).json() as { kind: string; count: number; results: { label: string }[] };
+    expect(hit).toMatchObject({ kind: 'entry', count: 1 }); expect(hit.results[0].label).toBe('Deck');
   });
 });
