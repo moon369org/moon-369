@@ -5,6 +5,7 @@
  *   data-sea-top="0.45"   where the water line sits, as a share of the canvas height
  *   data-sea-px="220"     or: the water fills this many CSS pixels at the bottom, whatever the canvas height
  *   data-stars="1"        also draw a quiet field of stars above (and faintly under) the water
+ *   data-sea-line="#hex"   trace the water's surface with a thin line in this color
  * Base swell: Gerstner-style waves (sharp crests, wide troughs). Ripples: a 1D spring per column.
  */
 (function () {
@@ -15,6 +16,7 @@
     this.cv = cv; this.ctx = cv.getContext('2d');
     this.top = parseFloat(cv.getAttribute('data-sea-top') || '0.45');
     this.withStars = cv.getAttribute('data-stars') === '1';
+    this.line = cv.getAttribute('data-sea-line');
     this.W = 0; this.H = 0; this.dpr = 1; this.N = 0; this.h = []; this.v = []; this.ptr = null;
     this.t0 = performance.now(); this.stars = [];
     var self = this, host = cv.closest('section') || cv.parentElement;
@@ -89,6 +91,7 @@
     if (!reduce && t < 3 && Math.random() < 0.05) this.splash(Math.random(), (0.5 + Math.random()) * (1 - t / 3));
     var waves = [[620, 7, 0.55, 1], [360, 4.5, 0.8, -1], [210, 2.6, 1.05, 1], [120, 1.4, 1.4, 1], [70, 0.7, 1.9, -1]];
     var base = H * this.top;
+    var pts = [];
     ctx.beginPath(); ctx.moveTo(-0.1 * W, H);
     for (var i = 0; i <= N - 1; i++) {
       var x0 = (-0.06 + i / (N - 1) * 1.12) * W, dx = 0, dy = 0;   // drawn a little past both edges, so no seam shows
@@ -98,7 +101,8 @@
         dy += A * Math.cos(ph);
       }
       var hs = ((h[i - 1] !== undefined ? h[i - 1] : h[i]) + 2 * h[i] + (h[i + 1] !== undefined ? h[i + 1] : h[i])) / 4;
-      ctx.lineTo(x0 + dx, base - dy + hs * 1.6 * u);
+      var px = x0 + dx, py = base - dy + hs * 1.6 * u;
+      ctx.lineTo(px, py); if (this.line) pts.push(px, py);
     }
     ctx.lineTo(1.1 * W, H); ctx.closePath();
     var g = ctx.createLinearGradient(0, base - 20 * u, 0, H);
@@ -106,6 +110,11 @@
     g.addColorStop(0.5, 'rgba(0,0,0,0.62)');
     g.addColorStop(1, 'rgba(0,0,0,0.85)');
     ctx.fillStyle = g; ctx.fill();
+    if (this.line && pts.length) {
+      ctx.beginPath(); ctx.moveTo(pts[0], pts[1]);
+      for (var q = 2; q < pts.length; q += 2) ctx.lineTo(pts[q], pts[q + 1]);
+      ctx.strokeStyle = this.line; ctx.lineWidth = dpr; ctx.lineJoin = 'round'; ctx.stroke();
+    }
   };
 
   function scan() {
