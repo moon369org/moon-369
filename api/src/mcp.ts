@@ -81,6 +81,13 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    name: 'make_event_link', title: 'Make an event link',
+    description: 'Make one link for an event that opens in everyone\'s own local time, with a live countdown, Add to calendar and a share card. Give the event name and its time as ISO 8601 with a Z or the organizer\'s UTC offset. Returns the link, a calendar file link, a Google Calendar link and an embeddable countdown snippet.',
+    inputSchema: { type: 'object', required: ['name', 'utc'], properties: { name: s('What the event is called, up to 80 characters'), utc: s('When it starts: ISO 8601 with Z or an offset, e.g. 2026-12-04T19:00:00-07:00'), minutes: { type: 'integer', description: 'How long it lasts, for calendars (default 60)', minimum: 1, maximum: 10080 } } },
+    annotations: { readOnlyHint: true, openWorldHint: false },
+    call: (a) => ({ method: 'GET', path: '/v1/event?name=' + encodeURIComponent(String(a.name)) + '&utc=' + encodeURIComponent(String(a.utc)) + (a.minutes ? '&minutes=' + Number(a.minutes) : '') }),
+  },
+  {
     name: 'timestamp_fingerprint', title: 'Timestamp a file (Moonmark)',
     description: 'Make a signed, post-quantum timestamp (a Moonmark) for a file\'s SHA-256 fingerprint, proving the file existed now. Send only the 64-character hex SHA-256, never the file. Returns the receipt and a shareable link. Free signing is limited; an API key raises it.',
     inputSchema: {

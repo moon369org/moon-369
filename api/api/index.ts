@@ -7,6 +7,7 @@ import { envKeyStore, upstashKeyStore, chainKeyStores } from '../src/keys.js';
 import { beaconSource } from '../src/beacon.js';
 import { upstashStore } from '../src/tideline.js';
 import { upstashRegistry } from '../src/registry.js';
+import { upstashEditions } from '../src/editions.js';
 import { xrplAnchorer } from '../src/anchor.js';
 import { stamp, upgrade, summarize } from '../src/ots.js';
 import { waitUntil } from '@vercel/functions';
@@ -107,6 +108,7 @@ const route = (req: Request) => {
     DEFER: (p: Promise<unknown>) => waitUntil(p),
     CRON_SECRET: process.env.CRON_SECRET,
     ADMIN_TOKEN: process.env.MOON_ADMIN_TOKEN,
+    EDITIONS: RL_URL && RL_TOKEN ? upstashEditions(RL_URL, RL_TOKEN) : undefined,
   });
 };
 

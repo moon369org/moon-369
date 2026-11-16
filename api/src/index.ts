@@ -13,6 +13,8 @@ import { driftByCentury, gapHours, trueNewMoonMs, gridNewMoonMs, lunationNear } 
 import { parseNight, nightFacts, nightSvg, NightParamError } from './night.js';
 import { hashKey, newKey, type KeyWriter } from './keys.js';
 import { mcp } from './mcp.js';
+import { eventLinks, eventIcs, cleanEventName } from './event.js';
+import { parseStatement, statementSha, newPrintIds, type EditionStore } from './editions.js';
 import { makeRegistration, publicRegistration, isPhash, hamming, bands, SIMILAR_BITS, registrantSlug, type RegistryStore, type Registration } from './registry.js';
 import { svgToPng } from './png.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
@@ -73,6 +75,8 @@ export interface Env {
   OPEN_PER_MIN?: number;
   /** The numbers behind the free plan, for messages and the key response. */
   FREE_LIMITS?: { per_min: number; sign_per_day: number; req_per_day?: number };
+  /** Edition registry for certificates of authenticity. Without it, /v1/editions answers 503. */
+  EDITIONS?: EditionStore;
   /** Admin token (MOON_ADMIN_TOKEN) for issuing verified business keys in one call: POST /v1/admin/keys. Without it, admin routes answer 404. */
   ADMIN_TOKEN?: string;
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
@@ -498,11 +502,11 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
     if (gate instanceof Response) return gate;
     return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, registrantOf(gate));
   }
-  const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof`;
+  const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof` || path === `/${API_VERSION}/editions`;
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/event', '/v1/event.ics', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   if (path.startsWith(`/${API_VERSION}/admin/`)) return adminRoute(req, env, path);
@@ -673,7 +677,27 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         // Resolve a Moonmark link (what a Moonmark QR code points to).
         const raw = decodeURIComponent(path.slice(`/${API_VERSION}/m/`.length));
         const ns = toUnixNs(parseMoonmark(raw));
-        return json(moonBody(toMoon(ns), ns), 200, { ...FOREVER, ...planHdr });
+        const evName = cleanEventName(q.get('event'));
+        return json({ ...moonBody(toMoon(ns), ns), ...(evName ? { event: eventLinks(evName, ns) } : {}) }, 200, { ...FOREVER, ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/event` || path === `/${API_VERSION}/event.ics`: {
+        // An event link: a name and one moment that opens in everyone's own local time.
+        //   /v1/event?name=Launch&utc=2026-12-04T19:00:00-07:00   (or moonmark=..., unix=..., unix_ns=...)
+        const name = cleanEventName(q.get('name'));
+        if (!name) throw new HttpError(400, 'bad_param', 'name: what the event is called, up to 80 characters');
+        const mark = q.get('moonmark');
+        const ns = mark ? toUnixNs(parseMoonmark(mark)) : unixNsFromQuery(q);
+        if (ns === null) throw new HttpError(400, 'bad_param', 'Give the moment as utc (ISO 8601 with Z or an offset), moonmark, unix (ms) or unix_ns');
+        const minutes = q.get('minutes') === null ? 60 : Number(q.get('minutes'));
+        if (!Number.isInteger(minutes) || minutes < 1 || minutes > 10080) throw new HttpError(400, 'bad_param', 'minutes: how long the event lasts, 1 to 10080');
+        if (path.endsWith('.ics')) {
+          return new Response(req.method === 'HEAD' ? null : eventIcs(name, ns, minutes), { status: 200, headers: {
+            'Content-Type': 'text/calendar; charset=utf-8',
+            'Content-Disposition': `attachment; filename="${(name.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'event')}.ics"`,
+            'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=3600', ...planHdr } });
+        }
+        return json(eventLinks(name, ns, minutes), 200, { 'Cache-Control': 'public, max-age=3600', ...planHdr });
       }
 
       case path === `/${API_VERSION}/to-unix`: {
@@ -791,6 +815,37 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         // Accept the receipt itself, or { receipt: {...} }. A bare receipt has its own "receipt" field: the version string.
         const r = (body.receipt && typeof body.receipt === 'object' ? body.receipt : body) as Receipt;
         return json(checkReceipt(r, body.sha256, env), 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/editions`: {
+        // Register an edition: every print gets its own ID. Send the signed moon-coa/1 statement and its receipt.
+        if (!env.EDITIONS) throw new HttpError(503, 'editions_unavailable', 'The edition registry is not configured on this deployment');
+        const body = await readJson(req, 32_768);
+        const text = typeof body.statement === 'string' ? body.statement : '';
+        const st = parseStatement(text);
+        if (!st) throw new HttpError(400, 'bad_param', 'statement: a moon-coa/1 certificate statement');
+        if (st.edition === null) throw new HttpError(400, 'bad_param', 'A unique work has no prints to number');
+        const sha = statementSha(text);
+        const rc = (body.receipt && typeof body.receipt === 'object' ? body.receipt : null) as Receipt | null;
+        if (!rc) throw new HttpError(400, 'bad_param', 'receipt: the receipt Moon gave when it signed the statement');
+        const chk = checkReceipt(rc, sha, env) as { valid: boolean; reason?: string };
+        if (!chk.valid) throw new HttpError(400, 'bad_receipt', 'The receipt does not cover this statement' + (chk.reason ? ` (${chk.reason})` : ''));
+        const ed = await env.EDITIONS.put(sha, { n: st.edition, ids: newPrintIds(st.edition), created: new Date().toISOString(), moonmark: rc.moonmark });
+        return json({ statement_sha256: sha, edition: ed.n, registered: ed.created, prints: ed.ids.map((id, i) => ({ print: i + 1, id })) }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path.startsWith(`/${API_VERSION}/editions/`): {
+        // Check one print: /v1/editions/<statement sha256>/<print>?id=<print id>
+        if (!env.EDITIONS) throw new HttpError(503, 'editions_unavailable', 'The edition registry is not configured on this deployment');
+        const [, , , sha, pn] = path.split('/');
+        const print = Number(pn), id = q.get('id') ?? '';
+        if (!isSha256Hex(sha ?? '') || !Number.isInteger(print) || print < 1) throw new HttpError(400, 'bad_param', 'Use /v1/editions/<statement sha256>/<print number>?id=<print id>');
+        const ed = await env.EDITIONS.get(sha.toLowerCase());
+        if (!ed) return json({ registered: false, valid: false, reason: 'This edition is not registered on Moon' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+        if (print > ed.n || ed.ids[print - 1] !== id)
+          return json({ registered: true, valid: false, edition: ed.n, reason: print > ed.n ? `This edition has ${ed.n} prints` : 'This print ID does not belong to this print' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+        const h = await env.EDITIONS.hit(sha.toLowerCase(), print, new Date().toISOString());
+        return json({ registered: true, valid: true, print, edition: ed.n, registered_at: ed.created, checks: h.count, first_check: h.first }, 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
       case path === `/${API_VERSION}/evidence`: {

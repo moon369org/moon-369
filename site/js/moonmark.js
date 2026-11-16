@@ -92,7 +92,9 @@
     var bin = atob(cm.replace(/-/g, '+').replace(/_/g, '/') + '='), master = '';
     for (var i = 0; i < bin.length; i++) master += bin.charCodeAt(i).toString(16).padStart(2, '0');
     var ce = q.get('ce') || '';
-    return { artist: q.get('ca'), title: q.get('ct'), year: q.get('cy'), edition: /^\d{1,3}$/.test(ce) ? ce : '', master: master };
+    var cp = q.get('cp') || '', cs = q.get('cs') || '';
+    return { artist: q.get('ca'), title: q.get('ct'), year: q.get('cy'), edition: /^\d{1,3}$/.test(ce) ? ce : '', master: master,
+      print: /^\d{1,3}$/.test(cp) && /^[A-Za-z0-9_-]{6,40}$/.test(cs) ? { n: +cp, id: cs } : null };
   }
   function coaStatement(c) { return ['moon-coa/1', 'artist:' + c.artist, 'title:' + c.title, 'year:' + c.year, 'edition:' + (c.edition || 'unique'), 'master:' + c.master].join('\n'); }
   function coaBox(root, rc, c) {
@@ -107,9 +109,17 @@
       document.title = c.title + ' by ' + c.artist + ' · Certificate · Moon';
       box.className = 'mk-coa';
       box.innerHTML = '<div class="mk-coa-t">' + esc(c.title) + '</div><div class="mk-coa-a">' + esc(c.artist) + ', ' + esc(c.year) + '</div>' +
-        '<div class="mk-coa-e">' + (c.edition ? 'EDITION OF ' + esc(c.edition) : 'UNIQUE WORK') + '</div>' +
+        '<div class="mk-coa-e">' + (c.edition ? (c.print ? 'PRINT ' + c.print.n + ' OF ' + esc(c.edition) : 'EDITION OF ' + esc(c.edition)) : 'UNIQUE WORK') + '</div>' +
+        (c.edition && c.print ? '<div class="mk-coa-p" data-mk-print>Checking this print on Moon…</div>' : '') +
         '<div class="mk-sig-r"><span>MASTER FILE</span><b title="' + c.master + '">' + c.master.slice(0, 12) + '…' + c.master.slice(-8) + '</b></div>' +
         '<div class="mk-sig-p">These details match the fingerprint Moon signed, so they have not been changed since. The artist&#39;s name is as stated; Moon does not verify it. Use CHECK A FILE below with the artwork&#39;s master file to match it exactly.</div>';
+      var pb = box.querySelector('[data-mk-print]');
+      if (pb) fetch('https://api.moon369.org/v1/editions/' + rc.sha256 + '/' + c.print.n + '?id=' + encodeURIComponent(c.print.id)).then(function (r) { return r.json(); }).then(function (b) {
+        if (!b.valid) { pb.className = 'mk-coa-p bad'; pb.textContent = '✕ ' + (b.registered ? 'This print number does not check out: ' + (b.reason || '') + '.' : 'This edition is not registered on Moon, so the print number cannot be confirmed.'); return; }
+        var first = new Date(b.first_check).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+        pb.className = 'mk-coa-p ok';
+        pb.textContent = '✓ Print ' + b.print + ' of ' + b.edition + ' is registered on Moon. ' + (b.checks === 1 ? 'This is the first time this certificate has been checked.' : 'This certificate has been checked ' + b.checks + ' times since ' + first + '.');
+      }).catch(function () { pb.textContent = 'Could not reach Moon to check the print number.'; });
     });
   }
   var TICK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
@@ -197,7 +207,7 @@
       '<div><span>UTC</span><b>' + new Date(ms).toISOString().replace('T', ' ').slice(0, 19) + '</b></div>' +
       '</div>' +
       (ev
-        ? '<div class="mk-btns"><a class="mk-p" data-mk-ics href="#" download="">ADD TO CALENDAR</a><a href="' + esc(gcal(ev, ms, url, text(mk))) + '" target="_blank" rel="noopener">GOOGLE CALENDAR</a><button type="button" data-mk-copy>COPY LINK</button></div>'
+        ? '<div class="mk-btns"><a class="mk-p" data-mk-ics href="#" download="">ADD TO CALENDAR</a><a href="' + esc(gcal(ev, ms, url, text(mk))) + '" target="_blank" rel="noopener">GOOGLE CALENDAR</a><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-embed>COPY EMBED CODE</button></div>'
         : '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>') +
       '</div>' +
       '<div class="mk-side"><div class="mk-qr">' + qr + '</div><div class="mk-cap">Scan to open this ' + (ev ? 'event' : 'Moonmark') + ' in your own local time.</div>' +
@@ -213,6 +223,10 @@
       a.href = URL.createObjectURL(new Blob([ics(ev, ms, url, text(mk))], { type: 'text/calendar' }));
       a.download = (ev.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'event') + '.ics';
       countdown(root, ms);
+      root.querySelector('[data-mk-embed]').onclick = function (e) {
+        var code = '<div data-moon-countdown="' + path(mk) + '" data-name="' + esc(ev) + '"></div>\n<script src="https://moon369.org/embed/countdown.js" async><\/script>';
+        try { navigator.clipboard.writeText(code); e.target.textContent = 'EMBED CODE COPIED'; } catch (err) { e.target.textContent = 'COULD NOT COPY'; }
+      };
       var h1 = document.querySelector('h1'), ey = document.querySelector('.mk-ey');
       if (h1) { h1.textContent = ev.toUpperCase(); h1.style.overflowWrap = 'anywhere'; h1.classList.add('mk-h1-s'); }
       if (ey) ey.innerHTML = '<span>AN EVENT ON MOON</span><span class="mk-sep"> · </span><span>THE SAME MOMENT EVERYWHERE</span>';

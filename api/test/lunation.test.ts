@@ -51,3 +51,37 @@ describe('event share cards', () => {
     expect(Buffer.from(await a.arrayBuffer()).equals(Buffer.from(await b.arrayBuffer()))).toBe(false);
   });
 });
+
+describe('event links', () => {
+  it('makes an event link from a local time', async () => {
+    const r = await handle(new Request('https://x/v1/event?name=' + encodeURIComponent('Moon launch party') + '&utc=2026-12-04T19:00:00-07:00'));
+    const j = await r.json() as Record<string, string | number>;
+    expect(r.status).toBe(200);
+    expect(j.utc).toBe('2026-12-05T02:00:00.000000000Z');
+    expect(String(j.event_url)).toMatch(/^https:\/\/moon369\.org\/m\/\d+\.\d{2}\.\d{2}-\d{2}\.\d{2}\.\d{2}\.\d{9}\?e=Moon\+launch\+party$/);
+    expect(String(j.google_calendar_url)).toContain('dates=20261205T020000Z/20261205T030000Z');
+    expect(String(j.embed)).toContain('data-moon-countdown=');
+  });
+  it('serves a calendar file', async () => {
+    const r = await handle(new Request('https://x/v1/event.ics?name=Launch%2C+v2&utc=2026-12-05T02:00:00Z&minutes=90'));
+    const t = await r.text();
+    expect(r.headers.get('content-type')).toContain('text/calendar');
+    expect(t).toContain('DTSTART:20261205T020000Z'); expect(t).toContain('DURATION:PT90M'); expect(t).toContain('SUMMARY:Launch\\, v2');
+  });
+  it('round-trips through the event link Moonmark', async () => {
+    const a = await (await handle(new Request('https://x/v1/event?name=X+Y&utc=2026-12-05T02:00:00Z'))).json() as { event_url: string };
+    const path = new URL(a.event_url).pathname.split('/m/')[1];
+    const b = await (await handle(new Request('https://x/v1/m/' + path + '?event=X+Y'))).json() as { utc: string; event: { utc: string } };
+    expect(b.event.utc.startsWith('2026-12-05T02:00:00')).toBe(true);
+  });
+  it('asks for a name and a time', async () => {
+    expect((await handle(new Request('https://x/v1/event?utc=2026-12-05T02:00:00Z'))).status).toBe(400);
+    expect((await handle(new Request('https://x/v1/event?name=X'))).status).toBe(400);
+  });
+  it('is a tool for AI assistants', async () => {
+    const r = await handle(new Request('https://x/mcp', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'make_event_link', arguments: { name: 'Demo day', utc: '2026-12-05T02:00:00Z' } } }) }));
+    const j = await r.json() as { result: { structuredContent: { event_url: string } } };
+    expect(j.result.structuredContent.event_url).toContain('?e=Demo+day');
+  });
+});

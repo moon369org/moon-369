@@ -32,6 +32,7 @@
   var LOGO = '<svg aria-hidden="true" viewBox="-10 -10 424 120" class="nc-logo"><path d="M4,100 V4 L48,64 L92,4 V100" fill="none" stroke="#0B0B0D" stroke-width="8" stroke-linejoin="bevel"/><circle cx="172" cy="50" r="46" fill="none" stroke="#0B0B0D" stroke-width="8"/><circle cx="232" cy="50" r="46" fill="none" stroke="#F4F1EA" stroke-width="18"/><circle cx="232" cy="50" r="46" fill="none" stroke="#0B0B0D" stroke-width="8"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#F4F1EA" stroke-width="18"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#0B0B0D" stroke-width="8"/><path d="M312,100 V4 L400,96 V0" fill="none" stroke="#0B0B0D" stroke-width="8" stroke-linejoin="bevel"/></svg>';
 
   function certificate(d, no) {
+    var pr = d.prints ? d.prints[no - 1] : null, link = d.url + (pr ? '&cp=' + pr.print + '&cs=' + pr.id : '');
     var c = d.coa, mk = nsGroups(d.master.receipt.moonmark), sk = nsGroups(d.cert.receipt.moonmark);
     var ed = c.edition ? 'No. ' + no + ' of ' + c.edition : 'Unique work';
     var rows = [
@@ -41,6 +42,7 @@
       c.medium ? ['MEDIUM', esc(c.medium)] : null,
       c.size ? ['SIZE', esc(c.size)] : null,
       ['EDITION', '<b class="nc-ed">' + ed + '</b>' + (c.edition ? ' <span class="nc-dim">· edition of ' + c.edition + '</span>' : '')],
+      pr ? ['PRINT ID', pr.id + ' <span class="nc-dim">· registered on Moon</span>'] : null,
       ['MASTER FILE', '<span class="nc-hash">' + c.master + '</span>'],
       ['MASTER SIGNED', esc(mk[0]) + '<span class="nc-dim">' + mk[1] + '</span> <span class="nc-dim">· ' + utc(d.master.receipt) + '</span>'],
       ['CERTIFICATE SIGNED', esc(sk[0]) + '<span class="nc-dim">' + sk[1] + '</span> <span class="nc-dim">· ' + utc(d.cert.receipt) + '</span>'],
@@ -51,20 +53,20 @@
       '<div class="ca-head">' + (d.thumb ? '<img class="ca-thumb" src="' + d.thumb + '" alt="">' : '') +
       '<div><h2 class="nc-title">' + esc(c.title) + '</h2><p class="ca-by">' + esc(c.artist) + ', ' + esc(c.year) + '</p><p class="ca-ed">' + ed + '</p></div></div>' +
       '<div class="nc-body"><dl class="nc-rows">' + rows.map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>'; }).join('') + '</dl>' +
-      '<div class="nc-qr">' + d.qr + '<div>Scan to check this certificate</div></div></div>' +
+      '<div class="nc-qr">' + qr(link) + '<div>Scan to check this certificate</div></div></div>' +
       '<div class="ca-sign"><div><span></span>Artist signature</div><div><span></span>Date</div></div>' +
-      '<div class="nc-how"><b>HOW TO CHECK</b> Scan the code: Moon re-checks the artist, title, year and edition against its signature. To check the artwork file itself, open moon369.org/check and drop it in.</div>' +
-      '<div class="nc-foot">Moon proves the master file and this certificate&#39;s details existed at the moments shown and have not been changed since. The artist&#39;s name is as stated; Moon does not verify it. The print number is written on each certificate; the signature covers the edition as a whole.</div>' +
+      '<div class="nc-how"><b>HOW TO CHECK</b> Scan the code: Moon re-checks the artist, title, year and edition against its signature' + (pr ? ', confirms this print number, and shows how often this certificate has been checked' : '') + '. To check the artwork file itself, open moon369.org/check and drop it in.</div>' +
+      '<div class="nc-foot">Moon proves the master file and this certificate&#39;s details existed at the moments shown and have not been changed since. The artist&#39;s name is as stated; Moon does not verify it.' + (pr ? ' Each print has its own ID on Moon, so a print number cannot be invented or changed.' : '') + '</div>' +
       '</article>';
   }
 
   function show(d) {
     var out = $('[data-ca-out]'), n = d.coa.edition ? Number(d.coa.edition) : 1;
-    var href = URL.createObjectURL(new Blob([JSON.stringify({ master: d.master.receipt, certificate: d.cert.receipt, statement: d.statement }, null, 2) + '\n'], { type: 'application/json' }));
+    var href = URL.createObjectURL(new Blob([JSON.stringify({ master: d.master.receipt, certificate: d.cert.receipt, statement: d.statement, prints: d.prints || undefined }, null, 2) + '\n'], { type: 'application/json' }));
     out.innerHTML = '<div class="nt-done"><div class="nt-ok">SIGNED · ' + (n > 1 ? n + ' CERTIFICATES ARE READY, ONE PER PRINT' : 'YOUR CERTIFICATE IS READY') + '</div>' +
       '<div class="nt-btns"><button type="button" class="nt-p" data-ca-print>PRINT OR SAVE AS PDF</button>' +
       '<a href="' + href + '" download="' + esc(d.coa.title.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'artwork') + '.moon-coa.json">SAVE RECEIPTS</a>' +
-      '<a href="' + esc(d.url) + '" target="_blank" rel="noopener">OPEN WHAT COLLECTORS SEE</a>' +
+      '<a href="' + esc(d.url + (d.prints ? '&cp=1&cs=' + d.prints[0].id : '')) + '" target="_blank" rel="noopener">OPEN WHAT COLLECTORS SEE</a>' +
       '<button type="button" data-ca-again>ANOTHER ARTWORK</button></div>' +
       '<p class="nt-tip">Keep the receipts with your master file. ' + (n > 1 ? 'Below is certificate No. 1; printing gives you all ' + n + '.' : '') + '</p></div>' +
       '<div class="nt-paper">' + certificate(d, 1) + '</div>';
@@ -118,9 +120,14 @@
       d.cert = s;
       var q = '&ca=' + encodeURIComponent(c.artist) + '&ct=' + encodeURIComponent(c.title) + '&cy=' + encodeURIComponent(c.year) + (c.edition ? '&ce=' + c.edition : '') + '&cm=' + b64u(c.master);
       d.url = s.signed_url + q;
-      d.qr = qr(d.url);
-      status('');
-      show(d);
+      if (!c.edition) { status(''); show(d); return; }
+      status('Registering each print on Moon…');
+      return fetch(API + '/v1/editions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ statement: d.statement, receipt: s.receipt }) })
+        .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, b: b }; }); })
+        .then(function (x) {
+          if (!x.ok || !x.b.prints) throw new Error((x.b && x.b.error && x.b.error.message) || 'Could not register the prints. Try again.');
+          d.prints = x.b.prints; status(''); show(d);
+        });
     }).catch(function (e) {
       status(e && e.message && !/fetch|network/i.test(e.message) ? e.message : 'Could not reach Moon. Check your connection and try again.', true);
     });
