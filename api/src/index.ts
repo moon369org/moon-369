@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { createHash, timingSafeEqual, X509Certificate } from 'node:crypto';
 import {
   SPEC_VERSION, EPOCH_UNIX_NS, LUNATION_NS, NUM, DEN, MOON_SECOND_SI, YEAR_DAYS, MOONS,
   toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, phaseName, unixNsToIso, yearInfo,
@@ -19,7 +19,7 @@ import { parseStatement, statementSha, newPrintIds, type EditionStore } from './
 import { makeRegistration, publicRegistration, isPhash, phashKind, hamming, bands, SIMILAR_BITS, registrantSlug, type RegistryStore, type Registration } from './registry.js';
 import { svgToPng } from './png.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
-import { QUICKNET, BEACON_NETWORK, type Beacon, type Chain } from './beacon.js';
+import { QUICKNET, BEACON_NETWORK, roundTimeNs, type Beacon, type Chain } from './beacon.js';
 import { TIDELINE, record, sealDue, upgradeBitcoin, checkpointSoon, proofFor, parseLune, luneLabel, luneOf, luneEndNs, tideBytes, type TideStore, type Anchorer, type BitcoinStamper } from './tideline.js';
 
 /** max overrides the limiter's default requests per minute (used for per-key limits). */
@@ -507,7 +507,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   if (path.startsWith(`/${API_VERSION}/admin/`)) return adminRoute(req, env, path);
@@ -964,6 +964,46 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           grid_anchor: new Date(gridNewMoonMs(0)).toISOString(),
           range: { from_year: from, to_year: to }, lunations, centuries: driftByCentury(-2000, 3000),
         }, 200, { ...FOREVER, ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/status`: {
+        // Is Moon working right now? Every part checked live, with the dates that matter.
+        const t0 = Date.now(), nowNs = nowUnixNs();
+        const part = async <T,>(f: () => Promise<T>) => { const a = Date.now(); try { return { ok: true, ms: Date.now() - a, ...(await f()) }; } catch (e) { return { ok: false, ms: Date.now() - a, error: e instanceof Error ? e.message : 'failed' }; } };
+        const days = (iso: string) => Math.floor((Date.parse(iso) - Date.now()) / 86_400_000);
+        const cert = (der: Uint8Array | string) => { const c = new X509Certificate(typeof der === 'string' ? der : Buffer.from(der)); const na = new Date(c.validTo).toISOString(); return { subject: c.subject.split('\n').find((l) => l.startsWith('CN='))?.slice(3) ?? c.subject, not_after_utc: na, days_left: days(na) }; };
+        const [signing, beacon, tsa, tideline] = await Promise.all([
+          part(async () => {
+            if (!env.SIGNER) throw new Error('Signing is not configured');
+            return { mode: env.SIGNER.pq ? 'hybrid' : 'ed25519', keys: [env.SIGNER.info(), ...(env.SIGNER.pq ? [env.SIGNER.pq.info()] : [])].map((k) => ({ key_id: k.key_id, alg: k.alg })) };
+          }),
+          part(async () => {
+            if (!env.BEACON) throw new Error('No beacon configured');
+            const b = await env.BEACON(nowNs);
+            if (!b) throw new Error('drand did not answer in time');
+            return { network: b.network, round: b.round, age_s: Math.round(Number(nowNs - roundTimeNs(b.round)) / 1e9) };
+          }),
+          part(async () => {
+            if (!env.TSA) throw new Error('The time-stamp authority is not configured');
+            return { certificate: cert(env.TSA.leaf), root: cert(MOON_ROOT_PEM) };
+          }),
+          part(async () => {
+            if (!env.TIDES) throw new Error('The Tideline is not configured');
+            const open = luneOf(nowNs), head = await env.TIDES.head(), first = await env.TIDES.first();
+            const next = head === null ? first : head + 1;
+            const behind = next !== null && next < open ? luneEndNs(next) : null;
+            const overdue = behind !== null && nowNs - behind > 26n * 3_600_000_000_000n;
+            const last = head === null ? null : await env.TIDES.getTide(head);
+            return { open_lune: luneLabel(open), seals_after_utc: unixNsToIso(luneEndNs(open)), last_sealed: last ? { lune: last.lune, size: last.size, sealed_utc: unixNsToIso(BigInt(last.sealed_unix_ns)), bitcoin: last.bitcoin ? { status: last.bitcoin.status, block_height: last.bitcoin.block_height ?? null } : null } : null,
+              waiting_to_seal: behind === null ? 0 : open - next!, overdue, anchoring: { bitcoin: !!env.BITCOIN, xrpl: !!env.ANCHOR } };
+          }),
+        ]);
+        const problems = [
+          ...(!signing.ok ? ['signing'] : []), ...(!beacon.ok ? ['beacon'] : []), ...(!tsa.ok ? ['timestamps'] : []), ...(!tideline.ok ? ['tideline'] : []),
+          ...(tideline.ok && (tideline as { overdue?: boolean }).overdue ? ['tideline_overdue'] : []),
+          ...(tsa.ok && ((tsa as { certificate: { days_left: number } }).certificate.days_left < 60) ? ['tsa_certificate_expiring'] : []),
+        ];
+        return json({ ok: problems.length === 0, problems, checked_utc: unixNsToIso(nowNs), took_ms: Date.now() - t0, signing, beacon, timestamps: tsa, tideline }, 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
       case path === `/${API_VERSION}/tideline`: {
