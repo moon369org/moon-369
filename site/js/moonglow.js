@@ -48,13 +48,34 @@
     ctx.restore();
   }
 
-  // kOverride moves the terminator: a smaller k lights more of the disc (used for the clip below).
-  function litPath(ctx, cx, cy, R, f, kOverride) {
-    var k = kOverride != null ? kOverride : Math.cos(2 * Math.PI * f), wax = f < 0.5;
-    ctx.beginPath();
-    ctx.arc(cx, cy, R, -Math.PI / 2, Math.PI / 2, !wax);
-    ctx.ellipse(cx, cy, Math.abs(k) * R, R, 0, Math.PI / 2, -Math.PI / 2, wax ? k > 0 : k < 0);
-    ctx.closePath();
+  // Sun direction seen from the Moon (x right, y down, z toward us): new moon behind it, full in
+  // front, lit on the right while waxing. Brightness is a smoothstep of the sunlight's angle, so the
+  // terminator is soft in proportion to the sphere, and the edge of the disc is antialiased.
+  function shade(W, cx, cy, R, f) {
+    var cvs = document.createElement('canvas'); cvs.width = cvs.height = W;
+    var c = cvs.getContext('2d'), img = c.createImageData(W, W), d = img.data;
+    var e = 2 * Math.PI * f, sx = Math.sin(e), sz = -Math.cos(e);
+    var ink = INK.split(',').map(Number);
+    var y0 = Math.max(0, Math.floor(cy - R - 1)), y1 = Math.min(W, Math.ceil(cy + R + 1));
+    var x0 = Math.max(0, Math.floor(cx - R - 1)), x1 = Math.min(W, Math.ceil(cx + R + 1));
+    for (var y = y0; y < y1; y++) {
+      var ny = (y + 0.5 - cy) / R;
+      for (var x = x0; x < x1; x++) {
+        var nx = (x + 0.5 - cx) / R, rr = nx * nx + ny * ny;
+        var edge = Math.min(1, Math.max(0, (1 - Math.sqrt(rr)) * R + 0.5));   // antialiased rim
+        if (edge <= 0) continue;
+        var nz = Math.sqrt(Math.max(0, 1 - rr)), dot = nx * sx + nz * sz;
+        // The fade is widest across the middle of the face and tightens toward the rim, so the
+        // terminator stays soft but meets the edge cleanly (no lit horns, no dark notches).
+        var A = -0.03 - 0.22 * nz, B = 0.03 + 0.42 * nz;
+        var tt = Math.min(1, Math.max(0, (dot - A) / (B - A))), a = tt * tt * (3 - 2 * tt) * edge;
+        if (a <= 0) continue;
+        var o = (y * W + x) * 4;
+        d[o] = ink[0]; d[o + 1] = ink[1]; d[o + 2] = ink[2]; d[o + 3] = Math.round(a * 255);
+      }
+    }
+    c.putImageData(img, 0, 0);
+    return cvs;
   }
 
   function draw(cv, t) {
@@ -82,36 +103,20 @@
       cv.__moonKey = sk; st.width = W; st.height = W;
       (function (ctx) {
 
-        // Rule 1 + 2: glow made from the lit crescent, blurred at three radii.
+        // The lit face, shaded like a real sphere: each pixel's brightness follows how squarely the
+        // Sun hits it there, fading to dark across the terminator. Near the poles the sunlight only
+        // grazes, so the lit edge fades out before it gets there: the shadow side meets the edge in
+        // one smooth curve, with no thin horns running along the rim.
+        var lit = shade(W, cx, cy, R, f);
+
+        // Rule 1 + 2: glow made from the lit face itself, blurred at three radii.
         var layers = [[160, 0.4], [70, 0.2], [34, 0.12]];
-        var paintLit = function (c) { litPath(c, cx, cy, R, f); c.fillStyle = 'rgb(' + INK + ')'; c.fill(); };
+        var paintLit = function (c) { c.drawImage(lit, 0, 0); };
         for (var i = 0; i < layers.length; i++) blurDraw(ctx, W, W, Math.max(1, Math.round(W / layers[i][0])), layers[i][1] * strength, 'lighter', paintLit);
-    
-        // The moon.
+
+        // The moon: the shadow disc, then the lit face on top.
         ctx.fillStyle = '#24262A'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
-        // Soft terminator, like a real sphere: the light fades across a band whose width follows the
-        // terminator's own curve, wide at the middle and narrowing to nothing at the poles, so the
-        // shadow side is one smooth curve with no horns. The band is stacked lit shapes (each moves
-        // the terminator a little), then a light blur hides the steps. The lit outer edge stays
-        // crisp: we paint past it, then clip to the disc.
-        var soft = Math.max(1, R * 0.02), K = Math.cos(2 * Math.PI * f), BAND = 0.16, N = 14;
-        var a = 1 - Math.pow(0.03, 1 / N), clampK = function (k) { return Math.max(-1, Math.min(1, k)); };
-        ctx.save();
-        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
-        var kc = K - BAND - (soft * 2.5) / R;   // never let the blur wrap light past the band
-        if (kc > -1) { litPath(ctx, cx, cy, R, f, kc); ctx.clip(); }
-        var lw = R * 0.4, both = Math.abs(f - 0.5) < 0.02;
-        blurDraw(ctx, W, W, Math.max(1, Math.round(soft)), 1, 'source-over', function (c) {
-          c.fillStyle = c.strokeStyle = 'rgb(' + INK + ')';
-          litPath(c, cx, cy, R, f, clampK(K + BAND)); c.fill();
-          c.lineWidth = lw;
-          c.beginPath(); c.arc(cx, cy, R + lw / 2 - 1, -Math.PI / 2, Math.PI / 2, !wax); c.stroke();
-          if (both) { c.beginPath(); c.arc(cx, cy, R + lw / 2 - 1, Math.PI / 2, -Math.PI / 2, !wax); c.stroke(); }
-          c.globalAlpha = a;
-          for (var i = 1; i <= N; i++) { litPath(c, cx, cy, R, f, clampK(K + BAND - 2 * BAND * i / N)); c.fill(); }
-          c.globalAlpha = 1;
-        });
-        ctx.restore();
+        ctx.drawImage(lit, 0, 0);
       })(st.getContext('2d'));
     }
     ctx.drawImage(st, 0, 0);

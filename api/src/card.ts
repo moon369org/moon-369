@@ -33,11 +33,17 @@ export function moonSvg(f: number, r: number, id: string, tilt = 0): string {
   // Soft terminator like a real sphere: a band of stacked lit shapes whose width follows the
   // terminator's curve (wide in the middle, nothing at the poles), so the shadow side is one smooth
   // curve with no horns. A light blur hides the steps; the clip keeps it from wrapping the poles.
-  const K = Math.cos(2 * Math.PI * f), BAND = 0.16, N = 14, a = 1 - Math.pow(0.03, 1 / N);
+  const K = Math.cos(2 * Math.PI * f), BAND = 0.3, N = 20;
   const ck = (k: number) => Math.max(-1, Math.min(1, k));
-  const soft = (r * 0.02).toFixed(2), lw = r * 0.4, kc = K - BAND - 2.5 * 0.02;
-  let band = `<path d="${phasePath(f, r, ck(K + BAND))}" fill="${PAPER}"/>`;
-  for (let i = 1; i <= N; i++) band += `<path d="${phasePath(f, r, ck(K + BAND - 2 * BAND * i / N))}" fill="${PAPER}" fill-opacity="${a.toFixed(4)}"/>`;
+  // Layer j (1 = most lit shape, N = least) gets the alpha that makes the stacked opacity follow a
+  // smoothstep across the band: an even, soft fade instead of a hard line on the shadow side.
+  const T = (j: number) => { const x = j / N; return x * x * (3 - 2 * x); };
+  const soft = (r * 0.03).toFixed(2), lw = r * 0.4, kc = K - BAND - 2.5 * 0.03;
+  let band = '';
+  for (let j = 1; j <= N; j++) {
+    const op = 1 - (1 - T(j)) / (1 - T(j - 1));
+    band += `<path d="${phasePath(f, r, ck(K - BAND + 2 * BAND * (j - 1) / (N - 1)))}" fill="${PAPER}"${op < 1 ? ` fill-opacity="${op.toFixed(4)}"` : ''}/>`;
+  }
   // Light painted past the lit limb, so blurring only softens the terminator.
   const R2 = (r + lw / 2 - 1).toFixed(2);
   const limb = (right: boolean) => `<path d="M0,-${R2} A${R2},${R2} 0 0 ${right ? 1 : 0} 0,${R2}" fill="none" stroke="${PAPER}" stroke-width="${lw.toFixed(2)}"/>`;
