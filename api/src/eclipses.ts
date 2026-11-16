@@ -160,7 +160,7 @@ export function publicEclipse(e: Eclipse) {
     greatest_eclipse_td: tdTime(e), utc: unixNsToIso(ns), unix_ms: e.ms,
     type: e.type, central: e.central, gamma: e.gamma, magnitude: e.magnitude, saros: e.saros, delta_t_s: e.delta_t,
     moonmark: formatMoonmark(t, 0), cycle: t.year, moon: t.moon, lune: t.day,
-    icon: `https://api.moon369.org/v1/eclipse.svg?type=${e.type}`,
+    icon: `https://api.moon369.org/v1/eclipse.svg?type=${e.type}&v=2`,
     page: `https://moon369.org/eclipse/${date}`,
   };
 }

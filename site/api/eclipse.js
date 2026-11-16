@@ -10,7 +10,7 @@ export function previewTags(html, date, type) {
   const title = `${NAME[type]} · ${when}`;
   const desc = `The ${NAME[type].toLowerCase()} of ${when}: its exact moment, its saros family and its place in Moon time. One of 11,896 solar eclipses from 2000 BCE to 3000 CE.`;
   const pageUrl = `https://moon369.org/eclipse/${date}`;
-  const img = `https://api.moon369.org/v1/eclipse.png?date=${date}`;
+  const img = `https://api.moon369.org/v1/eclipse.png?date=${date}&v=2`;
   const set = (re, val) => { html = html.replace(re, (_, a, b) => a + escAttr(val) + b); };
   set(/(<link rel="canonical" href=")[^"]*(")/, pageUrl);
   set(/(<meta property="og:url" content=")[^"]*(")/, pageUrl);
