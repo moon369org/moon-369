@@ -34,7 +34,7 @@
               '<circle cx="' + (p[0] + 3.5) + '" cy="' + (p[1] + 3.5) + '" r="1.5" fill="' + INK + '"/>';
     });
 
-    var mr = clear - 1, lit = phase ? phase.path(f || 0, mr) : '';
+    var mr = clear - 1, lit = phase ? phase.path(f || 0, mr, opts.tilt || 0) : '';
     var moon = '<g transform="translate(' + c + ',' + c + ')">' +
       '<circle r="' + mr + '" fill="' + INK + '"/>' +
       (lit ? '<path d="' + lit + '" fill="' + PAPER + '"/>' : '') +

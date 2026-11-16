@@ -233,13 +233,14 @@
     } catch (e) {}
     var qr = '';
     try {
-      if (window.MoonQR) qr = window.MoonQR.svg(url, f);
+      if (window.MoonQR) qr = window.MoonQR.svg(url, f, { tilt: window.MoonPhase && window.MoonPhase.tilt ? window.MoonPhase.tilt(ms) : 0 });
       else {
         var q = window.qrcode(0, 'H'); q.addData(url); q.make();
         qr = q.createSvgTag({ cellSize: 6, margin: 4, scalable: true }).replace(/fill="white"/g, 'fill="#E9E4D8"').replace(/fill="black"/g, 'fill="#0B0B0D"');
       }
     } catch (e) {}
-    var ph = window.MoonPhase ? window.MoonPhase.path(f, 10) : '';
+    var tl = window.MoonPhase && window.MoonPhase.tilt ? window.MoonPhase.tilt(ms) : 0;
+    var ph = window.MoonPhase ? window.MoonPhase.path(f, 10, tl) : '';
     root.innerHTML =
       '<div class="mk-grid">' +
       '<div class="mk-main">' +

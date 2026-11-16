@@ -8,7 +8,7 @@ import { LOGO } from './logo.js';
 import { PLACES } from './places.js';
 import { eclipseByDate, type EclipseType } from './eclipses.js';
 import { eclipseIcon } from './eclipse-icon.js';
-import { toMoon, truePhase, illumination, moonLength, formatMoonmark } from './moon.js';
+import { toMoon, truePhase, illumination, moonLength, formatMoonmark, moonTilt } from './moon.js';
 /** A bad query parameter; the API turns it into a 400. */
 export class NightParamError extends Error {}
 
@@ -134,7 +134,7 @@ export function nightSvg(n: NightInput, f: ReturnType<typeof nightFacts>, fmt: '
   // On an eclipse day the picture is the eclipse, drawn like the living eclipses on the site.
   const art = (cx: number, cy: number, r: number, id: string) => f.eclipse
     ? eclipseIcon(f.eclipse, Math.round(r / 0.26), false, id).replace('<svg ', `<svg x="${(cx - r / 0.52).toFixed(1)}" y="${(cy - r / 0.52).toFixed(1)}" `)
-    : `<g transform="translate(${cx},${cy})">${moonSvg(f.phase_fraction, r, id)}</g>`;
+    : `<g transform="translate(${cx},${cy})">${moonSvg(f.phase_fraction, r, id, moonTilt(ns(f.unix_ms)))}</g>`;
   const seed = n.y * 10000 + n.mo * 100 + n.d;
   const place = n.place ? 'IN ' + n.place.replace(/&/g, '&amp;').replace(/</g, '&lt;') : '';
   if (fmt === 'og') {

@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual, X509Certificate } from 'node:crypto';
 import {
   SPEC_VERSION, EPOCH_UNIX_NS, LUNATION_NS, NUM, DEN, MOON_SECOND_SI, YEAR_DAYS, MOONS,
-  toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, phaseName, unixNsToIso, yearInfo,
+  toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, moonTilt, phaseName, unixNsToIso, yearInfo,
   moonLength, MoonRangeError, type MoonTime, moonNsOf, moonNsToUnixNs, MOON_DAY_NS, NS_PER_SECOND,
 } from './moon.js';
 import { cardSvg, shareSvg } from './card.js';
@@ -563,7 +563,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const size = sizeRaw === null ? 600 : Number(sizeRaw);
         if (!Number.isInteger(size) || size < 120 || size > 2000) throw new HttpError(400, 'bad_param', 'size must be a whole number of pixels from 120 to 2000');
         const t = toMoon(ns), ph = truePhase(ns);
-        const svg = cardSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, illumination: illumination(ns), name: phaseName(ph), title: fixed ? 'MOONMARK' : undefined }, size);
+        const svg = cardSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, tilt: moonTilt(ns), illumination: illumination(ns), name: phaseName(ph), title: fixed ? 'MOONMARK' : undefined }, size);
         return new Response(req.method === 'HEAD' ? null : svg, { status: 200, headers: {
           'Content-Type': 'image/svg+xml; charset=utf-8',
           'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; font-src data:",
@@ -582,7 +582,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         if (ns === null) ns = nowUnixNs();
         const t = toMoon(ns), ph = truePhase(ns);
         const p2 = (n: number) => String(n).padStart(2, '0');
-        const svg = shareSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, illumination: illumination(ns), name: phaseName(ph),
+        const svg = shareSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, tilt: moonTilt(ns), illumination: illumination(ns), name: phaseName(ph),
           time: `${p2(t.hour)}:${p2(t.minute)}:${p2(t.second)}`, ns: String(t.nanosecond).padStart(9, '0'), title: fixed ? 'MOONMARK' : 'TODAY ON MOON',
           event: (q.get('event') ?? '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || undefined });
         const png = svgToPng(svg, 1200);

@@ -206,6 +206,53 @@ export function illumination(unixNs: bigint): number {
   return (1 + Math.cos(i)) / 2;
 }
 
+/**
+ * Which way the lit side of the Moon points: the position angle of the bright limb, in degrees
+ * from celestial north toward east (Meeus ch. 48), as seen from Earth's centre with north up.
+ * The Sun's place uses the equation of center; the Moon's the principal terms above. Good to
+ * about a degree, which is all a drawing needs.
+ */
+export function limbAngle(unixNs: bigint): number {
+  const cosD = (d: number) => Math.cos(d * RAD);
+  const ms = Number(unixNs / 1_000_000n);
+  const T = (ms / 86_400_000 + 2440587.5 - 2451545.0) / 36525;
+  const D = norm360(297.8501921 + 445267.1114034 * T - 0.0018819 * T * T + T ** 3 / 545868);
+  const M = norm360(357.5291092 + 35999.0502909 * T - 0.0001536 * T * T);
+  const Mp = norm360(134.9633964 + 477198.8675055 * T + 0.0087414 * T * T + T ** 3 / 69699);
+  const F = norm360(93.272095 + 483202.0175233 * T - 0.0036539 * T * T);
+  const E = 1 - 0.002516 * T - 0.0000074 * T * T;
+  const sunLon = norm360(280.46646 + 36000.76983 * T + (1.914602 - 0.004817 * T) * sinD(M) + 0.019993 * sinD(2 * M) + 0.000289 * sinD(3 * M));
+  const moonLon = norm360(218.3164477 + 481267.88123421 * T +
+    6.288774 * sinD(Mp) + 1.274027 * sinD(2 * D - Mp) + 0.658314 * sinD(2 * D) +
+    0.213618 * sinD(2 * Mp) - 0.185116 * E * sinD(M) - 0.114332 * sinD(2 * F) +
+    0.058793 * sinD(2 * D - 2 * Mp) + 0.057066 * E * sinD(2 * D - M - Mp) +
+    0.053322 * sinD(2 * D + Mp) + 0.045758 * E * sinD(2 * D - M) -
+    0.040923 * E * sinD(M - Mp) - 0.03472 * sinD(D) - 0.030383 * E * sinD(M + Mp));
+  const beta = 5.128122 * sinD(F) + 0.280602 * sinD(Mp + F) + 0.277693 * sinD(Mp - F) + 0.173237 * sinD(2 * D - F) +
+    0.055413 * sinD(2 * D - Mp + F) + 0.046271 * sinD(2 * D - Mp - F) + 0.032573 * sinD(2 * D + F) + 0.017198 * sinD(2 * Mp + F);
+  const eps = 23.439291 - 0.0130042 * T;
+  const eq = (lon: number, lat: number) => {
+    const ra = Math.atan2(sinD(lon) * cosD(eps) - Math.tan(lat * RAD) * sinD(eps), cosD(lon));
+    const dec = Math.asin(sinD(lat) * cosD(eps) + cosD(lat) * sinD(eps) * sinD(lon));
+    return [ra, dec];
+  };
+  const [a0, d0] = eq(sunLon, 0), [a, d] = eq(moonLon, beta);
+  const chi = Math.atan2(Math.cos(d0) * Math.sin(a0 - a), Math.sin(d0) * Math.cos(d) - Math.cos(d0) * Math.sin(d) * Math.cos(a0 - a));
+  return norm360(chi / RAD);
+}
+
+/**
+ * How far to turn a standard Moon drawing (lit on the right while waxing, left while waning),
+ * in degrees clockwise on screen, so its lit side points the way the real one does: north up,
+ * east to the left, the way the sky looks facing it.
+ */
+export function moonTilt(unixNs: bigint): number {
+  const pa = limbAngle(unixNs) * RAD;
+  const dir = Math.atan2(-Math.cos(pa), -Math.sin(pa)) / RAD;   // screen angle of the lit side (y down)
+  const t = truePhase(unixNs) < 0.5 ? dir : dir + 180;
+  return Math.round((((t + 180) % 360 + 360) % 360 - 180) * 10) / 10;
+}
+
 export const PHASE_NAMES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
 export const phaseName = (f: number): string => PHASE_NAMES[Math.floor((f * 8 + 0.5) % 8)];
 

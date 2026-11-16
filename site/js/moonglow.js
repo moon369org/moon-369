@@ -65,6 +65,10 @@
     var cx = W / 2, cy = W / 2, R = W / SCALE / 2;
     var at = +cv.getAttribute('data-at') || Date.now();   // data-at="<unix ms>" shows the moon at another moment
     var f = window.MoonPhase ? window.MoonPhase.fraction(at) : 0.17;
+    // Turn the whole canvas so the lit side points the way the real Moon's does (north up).
+    // The CSS rotate property leaves any transform already on the canvas alone.
+    var tilt = window.MoonPhase && window.MoonPhase.tilt ? window.MoonPhase.tilt(at) : 0;
+    if (cv.__tilt !== tilt) { cv.__tilt = tilt; cv.style.rotate = tilt + 'deg'; }
     var wax = f < 0.5, side = wax ? 1 : -1;
     var lit = window.MoonPhase ? window.MoonPhase.illumination(at) : 0.27;
     var strength = Math.min(1, 0.6 + lit * 1.2); // a thin crescent glows a little more gently

@@ -202,11 +202,20 @@
         gl.addColorStop(0, 'rgba(233,228,216,' + (0.38 * (1 - dk * 0.6)).toFixed(3) + ')'); gl.addColorStop(1, 'rgba(233,228,216,0)');
         cx.fillStyle = gl; cx.beginPath(); cx.arc(mx, my, r * 4, 0, 7); cx.fill();
         cx.fillStyle = '#2A2B30'; cx.beginPath(); cx.arc(mx, my, r, 0, 7); cx.fill();
-        // lit side: right when waxing in the north, flipped in the south
-        // lit side: right while waxing in the northern hemisphere, mirrored in the southern
+        // lit side: right while waxing in the northern hemisphere, mirrored in the southern (turned below)
         var k = Math.cos(f * 2 * PI), wax = f < 0.5;
         var lit = new Path2D('M0,' + -r + 'A' + r + ',' + r + ' 0 0 ' + (wax ? 1 : 0) + ' 0,' + r + 'A' + Math.abs(k * r) + ',' + r + ' 0 0 ' + ((k > 0) === wax ? 0 : 1) + ' 0,' + -r + 'Z');
-        cx.save(); cx.translate(mx, my); if (!south) cx.scale(-1, 1);
+        // Turn it the way it really sits in your sky: the lit side's angle from north, minus the
+        // parallactic angle (how far north is tipped from straight up where you stand).
+        var rot = 0;
+        if (window.MoonPhase && window.MoonPhase.limbAngle) {
+          var dd = days(at), mc = moonCoords(dd), H = sidereal(dd, rad * -lng) - mc.ra, phi = rad * lat;
+          var qa = atan2(sin(H), tan(phi) * cos(mc.dec) - sin(mc.dec) * cos(H));
+          var Z = window.MoonPhase.limbAngle(at) * rad - qa;
+          var dir = atan2(-cos(Z), south ? -sin(Z) : sin(Z));   // east is on the left facing south, on the right facing north
+          rot = wax ? dir : dir + PI;
+        }
+        cx.save(); cx.translate(mx, my); if (window.MoonPhase && window.MoonPhase.limbAngle) cx.rotate(rot); else if (!south) cx.scale(-1, 1);
         if (BLUR_OK) cx.filter = 'blur(' + (0.8 * dpr) + 'px)';
         cx.fillStyle = '#E9E4D8'; cx.fill(lit); cx.restore();
       } else {
