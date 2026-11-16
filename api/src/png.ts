@@ -14,7 +14,7 @@ function fonts(): string[] {
   const dir = tmpdir();
   const out: string[] = [];
   for (const [name, b64] of [['moon-syncopate-700.ttf', SYNCOPATE_700_TTF], ['moon-jetbrains-mono-400.ttf', JETBRAINS_MONO_400_TTF]] as const) {
-    const f = join(dir, name);
+    const f = join(dir, name.replace('.ttf', `-${b64.length}.ttf`));   // the size in the name, so a changed subset never reuses an old file
     if (!existsSync(f)) writeFileSync(f, Buffer.from(b64, 'base64'));
     out.push(f);
   }

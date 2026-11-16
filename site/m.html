@@ -141,6 +141,31 @@ footer > div > div:first-child svg{width:64px!important}
 .mk-btns{display:flex;gap:12px;flex-wrap:wrap}
 .mk-btns button{min-height:52px;padding:0 24px;background:none;border:1px solid #E9E4D8;color:#E9E4D8;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10px;letter-spacing:.22em;cursor:pointer}
 .mk-btns .mk-p{background:#E9E4D8;color:#0B0B0D}
+.mk-btns a{min-height:52px;padding:0 24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #E9E4D8;color:#E9E4D8;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10px;letter-spacing:.22em;text-decoration:none;box-sizing:border-box}
+.mk-btns a.mk-p{background:#E9E4D8;color:#0B0B0D}
+.mk-cd{display:flex;flex-direction:column;gap:14px}
+.mk-cd-c{display:flex;border:1px solid #24262A;width:max-content;max-width:100%}
+.mk-cd-c div{display:flex;flex-direction:column;gap:10px;padding:16px 24px;border-left:1px solid #24262A;min-width:76px}
+.mk-cd-c div:first-child{border-left:0}
+.mk-cd-c b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(30px,4.4vw,52px);font-variant-numeric:tabular-nums;line-height:1}
+.mk-cd-c i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.24em;color:#8A8B8F}
+.mk-cd-c .mk-cd-ago{justify-content:flex-end;min-width:0}
+.mk-when{display:flex;flex-direction:column;gap:8px;border-left:2px solid #E9E4D8;padding-left:18px}
+.mk-when span{font-family:'Syncopate',sans-serif;font-size:9.5px;letter-spacing:.22em;color:#8A8B8F}
+.mk-when b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(17px,1.8vw,22px)}
+.ev{border:1px solid #24262A;padding:40px;display:flex;flex-direction:column;gap:20px;margin:0}
+.ev-k{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;color:#8A8B8F}
+.ev-h{margin:0;font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(20px,2.4vw,30px);letter-spacing:.08em;line-height:1.25}
+.ev-p{margin:0;font-size:16px;line-height:1.6;color:#B9B6AE;max-width:640px}
+.ev-f{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.ev-f label{display:flex;flex-direction:column;gap:8px;flex:1 1 260px;font-family:'Syncopate',sans-serif;font-size:9.5px;letter-spacing:.22em;color:#8A8B8F}
+.ev-f input{min-height:52px;box-sizing:border-box;padding:0 16px;background:#0B0B0D;border:1px solid #3A3C41;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:0;color-scheme:dark;border-radius:0}
+.ev-f input:focus{outline:none;border-color:#E9E4D8}
+.ev-f button{min-height:52px;padding:0 28px;background:#E9E4D8;color:#0B0B0D;border:0;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:.24em;cursor:pointer;flex:0 0 auto}
+.ev-f button:hover{background:#fff}
+.ev-z,.ev-o{font-family:'JetBrains Mono',monospace;font-size:12px;color:#8A8B8F}
+.ev-o:empty{display:none}
+@media (max-width:720px){.ev{padding:28px 22px}.ev-f button{width:100%}.mk-cd-c{width:100%}.mk-cd-c div{flex:1;min-width:0;padding:12px 8px}.mk-btns a{width:100%}}
 .mk-side{display:flex;flex-direction:column;gap:14px}
 .mk-qr{background:#E9E4D8;padding:0}.mk-qr svg{display:block;width:100%;height:auto}
 .mk-cap{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#8A8B8F;letter-spacing:.04em}
@@ -199,6 +224,18 @@ footer > div > div:first-child svg{width:64px!important}
 <h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1;">MOONMARK</h1>
 </div>
 <div data-mk-root=""></div>
+<form class="ev" data-ev-form="" data-on="1">
+<div class="ev-k">EVENT LINKS</div>
+<h2 class="ev-h">ONE LINK, EVERY TIME ZONE</h2>
+<p class="ev-p">Name an event and pick its time. You get one link with a countdown that opens in each person's own local time, with Add to calendar and a QR&nbsp;code.</p>
+<div class="ev-f">
+<label>EVENT NAME<input data-ev-name="" maxlength="80" placeholder="Launch party" autocomplete="off"></label>
+<label>DATE AND TIME<input data-ev-when="" type="datetime-local"></label>
+<button type="submit">MAKE EVENT LINK</button>
+</div>
+<div class="ev-z" data-ev-zone="">In UTC. Everyone who opens the link sees it in their own time.</div>
+<div class="ev-o" data-ev-out="" role="status"></div>
+</form>
 <div class="mk-own">
 <div class="mk-own-l">
 <div class="mk-own-k">MAKE YOUR OWN</div>
@@ -261,6 +298,18 @@ footer > div > div:first-child svg{width:64px!important}
 <h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">MOONMARK</h1>
 </div>
 <div data-mk-root></div>
+<form class="ev" data-ev-form>
+<div class="ev-k">EVENT LINKS</div>
+<h2 class="ev-h">ONE LINK, EVERY TIME ZONE</h2>
+<p class="ev-p">Name an event and pick its time. You get one link with a countdown that opens in each person&#39;s own local time, with Add to calendar and a QR&nbsp;code.</p>
+<div class="ev-f">
+<label>EVENT NAME<input data-ev-name maxlength="80" placeholder="Launch party" autocomplete="off"></label>
+<label>DATE AND TIME<input data-ev-when type="datetime-local"></label>
+<button type="submit">MAKE EVENT LINK</button>
+</div>
+<div class="ev-z" data-ev-zone></div>
+<div class="ev-o" data-ev-out role="status"></div>
+</form>
 <div class="mk-own">
 <div class="mk-own-l">
 <div class="mk-own-k">MAKE YOUR OWN</div>

@@ -38,6 +38,42 @@
     rc.signature = g;
     return rc;
   }
+  // An event link carries a name: /m/<moonmark>?e=Launch%20party
+  function eventName() {
+    var e = new URLSearchParams(location.search).get('e') || '';
+    e = e.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim();
+    return e ? e.slice(0, 80) : '';
+  }
+  function icsStamp(ms) { return new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''); }
+  function icsText(x) { return String(x).replace(/\\/g, '\\\\').replace(/[,;]/g, '\\$&').replace(/\n/g, '\\n'); }
+  function ics(name, ms, url, mark) {
+    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Moon//moon369.org//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+      'UID:' + mark.replace(/[^0-9]/g, '') + '-' + Math.abs(name.split('').reduce(function (h, c) { return (h * 31 + c.charCodeAt(0)) | 0; }, 7)) + '@moon369.org',
+      'DTSTAMP:' + icsStamp(Date.now()), 'DTSTART:' + icsStamp(ms), 'DURATION:PT1H',
+      'SUMMARY:' + icsText(name), 'DESCRIPTION:' + icsText('Moonmark ' + mark + '\n' + url), 'URL:' + url,
+      'END:VEVENT', 'END:VCALENDAR'];
+    return lines.join('\r\n') + '\r\n';
+  }
+  function gcal(name, ms, url, mark) {
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(name) + '&dates=' + icsStamp(ms) + '/' + icsStamp(ms + 3600000) +
+      '&details=' + encodeURIComponent('Moonmark ' + mark + '\n' + url);
+  }
+  // Countdown to (or time since) the event, updated every second.
+  function span(ms) {
+    var t = Math.abs(ms), d = Math.floor(t / 864e5), h = Math.floor(t % 864e5 / 36e5), m = Math.floor(t % 36e5 / 6e4), s2 = Math.floor(t % 6e4 / 1e3);
+    return [['DAYS', String(d)], ['HOURS', p(h)], ['MIN', p(m)], ['SEC', p(s2)]];
+  }
+  var cdTimer = 0;
+  function countdown(root, ms) {
+    var box = root.querySelector('[data-mk-cd]'); if (!box) return;
+    clearInterval(cdTimer);
+    var tick = function () {
+      var left = ms - Date.now(), past = left <= 0, live = past && left > -3600000;
+      box.querySelector('[data-mk-cd-l]').textContent = live ? 'HAPPENING NOW · STARTED' : past ? 'THIS EVENT STARTED' : 'STARTS IN';
+      box.querySelector('[data-mk-cd-c]').innerHTML = span(left).map(function (x) { return '<div><b>' + x[1] + '</b><i>' + x[0] + '</i></div>'; }).join('') + (past ? '<div class="mk-cd-ago"><i>AGO</i></div>' : '');
+    };
+    tick(); cdTimer = setInterval(tick, 1000);
+  }
   var esc = function (x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   // Start checking the signature as soon as the script runs, before anything else waits.
   var verifyCache = {};
@@ -92,9 +128,10 @@
       pEl.textContent = 'The details below come from the link. Try again in a moment.';
     });
   }
-  function render(root, mk, fresh, rc) {
+  function render(root, mk, fresh, rc, ev) {
     var ms = toMs(mk);
-    var url = 'https://moon369.org/m/' + path(mk) + (rc ? '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + '&g=' + rc.signature : '');
+    if (ev) ms = Math.round(ms / 1000) * 1000;   // events are set to the second; drop float dust below it
+    var url = 'https://moon369.org/m/' + path(mk) + (rc ? '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + '&g=' + rc.signature : ev ? '?e=' + encodeURIComponent(ev).replace(/%20/g, '+') : '');
     var f = window.MoonPhase ? window.MoonPhase.fraction(ms) : 0;
     var il = window.MoonPhase ? (window.MoonPhase.illumination(ms) * 100).toFixed(1) : '0.0';
     var nm = window.MoonPhase ? window.MoonPhase.name(f) : '';
@@ -118,29 +155,59 @@
       '<div class="mk-grid">' +
       '<div class="mk-main">' +
       (fresh ? '<div class="mk-l">JUST MARKED</div>' : '') +
+      (ev ? '<div class="mk-cd" data-mk-cd><div class="mk-l" data-mk-cd-l>STARTS IN</div><div class="mk-cd-c" data-mk-cd-c></div></div>' +
+        '<div class="mk-when"><span>YOUR LOCAL TIME</span><b>' + esc(local) + ' ' + esc(abbr) + '</b></div>' : '') +
       (rc ? '<div data-mk-sig></div>' : '') +
       '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" role="img" aria-label="' + nm + '"><defs><clipPath id="mk-disc"><circle r="10"/></clipPath><filter id="mk-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="0.8"/></filter></defs><circle r="10" fill="#24262A"/><g clip-path="url(#mk-disc)"><path d="' + ph + '" fill="#E9E4D8" filter="url(#mk-soft)"/></g></svg>' +
       '<div class="mk-cells"><div><i>CYCLE</i><b>' + mk.y + '</b></div><div><i>MOON</i><b>' + p(mk.m) + '</b></div><div><i>LUNE</i><b>' + p(mk.d) + '</b></div></div></div>' +
       '<div class="mk-mark" aria-label="Moonmark ' + text(mk) + '.' + p(mk.ns, 9) + '"><span>' + mk.y + '.' + p(mk.m) + '.' + p(mk.d) + '</span> <span>' + p(mk.h) + ':' + p(mk.mi) + ':' + p(mk.s) + '<span class="mk-ns">' + nsGroups(mk.ns) + '</span></span></div>' +
       '<div class="mk-rows">' +
-      '<div><span>YOUR LOCAL CLOCK</span><b>' + local + ' ' + abbr + '</b></div>' +
+      (ev ? '' : '<div><span>YOUR LOCAL CLOCK</span><b>' + local + ' ' + abbr + '</b></div>') +
       '<div><span>THE MOON THAT NIGHT</span><b>' + nm + ' · ' + il + '% lit<span class="mi"><button type="button" class="mi-b" aria-label="What the lit percentage means" aria-expanded="false" aria-describedby="mi-t3">i</button><span role="tooltip" id="mi-t3" class="mi-t">Share of the moon&#39;s face lit by the sun at this moment, as seen from Earth. Moon calculates it from the moon&#39;s real position (Meeus, Astronomical Algorithms) and checks it against PyEphem, a standard astronomy library: they agree within 0.05 percentage&nbsp;points.</span></span></b></div>' +
       '<div><span>UTC</span><b>' + new Date(ms).toISOString().replace('T', ' ').slice(0, 19) + '</b></div>' +
       '</div>' +
-      '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>' +
+      (ev
+        ? '<div class="mk-btns"><a class="mk-p" data-mk-ics href="#" download="">ADD TO CALENDAR</a><a href="' + esc(gcal(ev, ms, url, text(mk))) + '" target="_blank" rel="noopener">GOOGLE CALENDAR</a><button type="button" data-mk-copy>COPY LINK</button></div>'
+        : '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>') +
       '</div>' +
-      '<div class="mk-side"><div class="mk-qr">' + qr + '</div><div class="mk-cap">Scan to open this Moonmark in your own local time.</div>' +
-      (rc ? '' : '<div class="mk-note">This Moonmark is unsigned. A signed Moonmark from Moon proves when something happened.</div>') + '</div>' +
+      '<div class="mk-side"><div class="mk-qr">' + qr + '</div><div class="mk-cap">Scan to open this ' + (ev ? 'event' : 'Moonmark') + ' in your own local time.</div>' +
+      (rc || ev ? '' : '<div class="mk-note">This Moonmark is unsigned. A signed Moonmark from Moon proves when something happened.</div>') + '</div>' +
       '</div>';
     if (rc) sigBox(root, rc);
     root.querySelector('[data-mk-copy]').onclick = function (e) {
       try { navigator.clipboard.writeText(url); e.target.textContent = 'COPIED'; } catch (err) { e.target.textContent = url; }
     };
+    if (ev) {
+      var a = root.querySelector('[data-mk-ics]');
+      a.href = URL.createObjectURL(new Blob([ics(ev, ms, url, text(mk))], { type: 'text/calendar' }));
+      a.download = (ev.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'event') + '.ics';
+      countdown(root, ms);
+      var h1 = document.querySelector('h1'), ey = document.querySelector('.mk-ey');
+      if (h1) { h1.textContent = ev.toUpperCase(); h1.style.overflowWrap = 'anywhere'; }
+      if (ey) ey.innerHTML = '<span>AN EVENT ON MOON</span><span class="mk-sep"> · </span><span>THE SAME MOMENT EVERYWHERE</span>';
+      document.title = ev + ' · Moon';
+      return;
+    }
     root.querySelector('[data-mk-now]').onclick = function () {
       var nowMs = (performance.timeOrigin || Date.now() - performance.now()) + performance.now();
       var mk2 = fromMs(nowMs);
       history.replaceState(null, '', '/m/' + path(mk2));
       render(root, mk2, true);
+    };
+  }
+  // Make an event link: a name and a local date and time become one Moonmark link.
+  function maker() {
+    var f = document.querySelector('[data-ev-form]'); if (!f || f.dataset.on) return; f.dataset.on = '1';
+    var when = f.querySelector('[data-ev-when]'), name = f.querySelector('[data-ev-name]'), out = f.querySelector('[data-ev-out]');
+    var zone = 'your time zone'; try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || zone; } catch (e) {}
+    var z = f.querySelector('[data-ev-zone]'); if (z) z.textContent = 'In ' + zone + '. Everyone who opens the link sees it in their own time.';
+    if (!when.value) { var d = new Date(Date.now() + 864e5); d.setMinutes(0, 0, 0); when.value = new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16); }
+    f.onsubmit = function (e) {
+      e.preventDefault();
+      var nm = name.value.replace(/\s+/g, ' ').trim().slice(0, 80), t = new Date(when.value).getTime();
+      if (!nm) { out.textContent = 'Give the event a name.'; name.focus(); return; }
+      if (!isFinite(t)) { out.textContent = 'Choose a date and time.'; when.focus(); return; }
+      location.href = '/m/' + path(fromMs(t + 1)) + '?e=' + encodeURIComponent(nm).replace(/%20/g, '+');   // +1 ms so the second never rounds down
     };
   }
   function start() {
@@ -151,7 +218,9 @@
     if (q && !mk) { root.innerHTML = '<div class="mk-l">THAT IS NOT A VALID MOONMARK</div>'; mk = null; }
     var fresh = false;
     if (!mk) { mk = fromMs(Date.now()); fresh = !q; }
-    render(root, mk, false, mk ? receiptFrom(mk) : null);
+    var rc = mk ? receiptFrom(mk) : null;
+    render(root, mk, false, rc, rc || !q || !parse(q) ? '' : eventName());
+    maker();
     return true;
   }
   try {

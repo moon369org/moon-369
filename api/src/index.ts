@@ -527,7 +527,8 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const t = toMoon(ns), ph = truePhase(ns);
         const p2 = (n: number) => String(n).padStart(2, '0');
         const svg = shareSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, illumination: illumination(ns), name: phaseName(ph),
-          time: `${p2(t.hour)}:${p2(t.minute)}:${p2(t.second)}`, ns: String(t.nanosecond).padStart(9, '0'), title: fixed ? 'MOONMARK' : 'TODAY ON MOON' });
+          time: `${p2(t.hour)}:${p2(t.minute)}:${p2(t.second)}`, ns: String(t.nanosecond).padStart(9, '0'), title: fixed ? 'MOONMARK' : 'TODAY ON MOON',
+          event: (q.get('event') ?? '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || undefined });
         const png = svgToPng(svg, 1200);
         return new Response(req.method === 'HEAD' ? null : new Uint8Array(png), { status: 200, headers: {
           'Content-Type': 'image/png',

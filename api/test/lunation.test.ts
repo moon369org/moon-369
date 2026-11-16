@@ -42,3 +42,12 @@ describe('Moon stays locked to the real Moon', () => {
     expect(j.grid_anchor).toMatch(/^2000-01-06T18:14/);
   });
 });
+
+describe('event share cards', () => {
+  it('puts the event name on the card', async () => {
+    const a = await handle(new Request('https://x/v1/card.png?moonmark=1928.05.07-12.00.00.000000000'));
+    const b = await handle(new Request('https://x/v1/card.png?moonmark=1928.05.07-12.00.00.000000000&event=' + encodeURIComponent("Launch party & awards!")));
+    expect(a.status).toBe(200); expect(b.status).toBe(200);
+    expect(Buffer.from(await a.arrayBuffer()).equals(Buffer.from(await b.arrayBuffer()))).toBe(false);
+  });
+});
