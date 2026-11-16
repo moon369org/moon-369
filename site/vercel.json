@@ -17,11 +17,11 @@
     },
     {
       "source": "/by/:name",
-      "destination": "/by.html"
+      "destination": "/by"
     },
     {
       "source": "/tide/:lune",
-      "destination": "/tide.html"
+      "destination": "/tide"
     }
   ],
   "headers": [
