@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};window.moonTrack=function(n,d){try{window.va('event',{name:n,data:d||{}})}catch(e){}};</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="preload" href="/assets/fonts/syncopate-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<script>document.documentElement.classList.add('mm-js')</script>
+<title>Sky Check · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Take a photo of the Moon and check Moon time against the real sky: how much is lit and which way the lit side points, from right where you stand. Your photo never leaves your phone.">
+<link rel="canonical" href="https://moon369.org/sky-check">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/sky-check">
+<meta property="og:title" content="Sky Check · Moon">
+<meta property="og:description" content="Take a photo of the Moon and check Moon time against the real sky: how much is lit and which way the lit side points, from right where you stand. Your photo never leaves your phone.">
+<meta property="og:image" content="https://moon369.org/assets/og/home.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Moon, over a photograph of the moon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sky Check · Moon">
+<meta name="twitter:description" content="Take a photo of the Moon and check Moon time against the real sky: how much is lit and which way the lit side points, from right where you stand. Your photo never leaves your phone.">
+<meta name="twitter:image" content="https://moon369.org/assets/og/home.jpg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<style>x-dc{display:none}html,body{background:#0B0B0D}html{scrollbar-width:thin;scrollbar-color:#2E3035 #0B0B0D}
+*{scrollbar-width:thin;scrollbar-color:#2E3035 transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#24262A;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#3A3B3F;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
+@keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
+header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+
+
+.sc-eye{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;color:#8A8B8F}
+.sc-p{margin:0;max-width:720px;font-size:17px;line-height:1.65;color:#B9B6AE}
+.sc-now{display:flex;align-items:center;gap:22px;border:1px solid #24262A;padding:20px 24px;max-width:720px}
+.sc-now canvas{width:84px;height:84px;flex:none}
+.sc-now b{display:block;font-family:'Syncopate',sans-serif;font-weight:700;font-size:13px;letter-spacing:.16em;margin-bottom:6px}
+.sc-now span{display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;color:#8A8B8F}
+.sc-now button{margin-top:10px;background:none;border:0;padding:0;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.sc-btns{display:flex;gap:12px;flex-wrap:wrap}
+.sc-btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 28px;border:1px solid #E9E4D8;background:none;color:#E9E4D8;font-family:'Syncopate',sans-serif;font-weight:700;font-size:11px;letter-spacing:.22em;cursor:pointer;box-sizing:border-box}
+.sc-btn.p{background:#E9E4D8;color:#0B0B0D}
+.sc-btn input{display:none}
+.sc-tips{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:1px;background:#24262A;border:1px solid #24262A}
+.sc-tips li{background:#0B0B0D;padding:18px 20px;font-size:14px;line-height:1.6;color:#B9B6AE}
+.sc-tips b{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:11px;letter-spacing:.24em;color:#8A8B8F;margin-bottom:6px}
+.sc-res{display:flex;flex-direction:column;gap:24px}
+.sc-res[hidden]{display:none}
+.sc-v{border:1px solid #24262A;padding:22px 24px}
+.sc-v b{display:block;font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(15px,2vw,20px);letter-spacing:.14em;line-height:1.4}
+.sc-v span{display:block;margin-top:8px;font-size:15px;line-height:1.6;color:#B9B6AE}
+.sc-v.match{border-color:#4CC38A}.sc-v.match b{color:#4CC38A}.sc-v.close{border-color:#F2C14E}.sc-v.close b{color:#F2C14E}.sc-v.off{border-color:#F0645C}.sc-v.off b{color:#F0645C}
+.sc-pair{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#24262A;border:1px solid #24262A}
+.sc-pair figure{margin:0;background:#0B0B0D;padding:22px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.sc-pair canvas{width:100%;max-width:300px;aspect-ratio:1;display:block}
+.sc-pair figcaption{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
+.sc-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:#1C1D20;border:1px solid #1C1D20}
+.sc-rows div{background:#0B0B0D;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.sc-rows span{font-family:'Syncopate',sans-serif;font-size:9.5px;letter-spacing:.22em;color:#8A8B8F}
+.sc-rows b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:14px;line-height:1.5}
+.sc-rows em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;color:#8A8B8F}
+.sc-rows a{color:#E9E4D8;text-decoration:underline;text-underline-offset:3px}
+.sc-ok{color:#4CC38A}.sc-warn{color:#F2C14E}.sc-bad{color:#F0645C}
+@media (max-width:720px){.sc-btns .sc-btn{flex:1 1 100%}.sc-pair{grid-template-columns:1fr 1fr}.sc-pair figure{padding:14px}.sc-rows{grid-template-columns:1fr}.sc-now{padding:16px}.sc-now canvas{width:64px;height:64px}}
+</style>
+
+<script src="js/preact.umd.js" defer></script>
+<script src="js/moon-phase.js" defer></script>
+<script src="js/sky-check-core.js" defer></script>
+<script src="js/sky-check.js" defer></script>
+<script src="js/header.js" defer></script>
+<script src="js/dc-lite.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+<!-- page styles -->
+<style>
+body{margin:0;background:#0B0B0D}
+a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
+.pk-a,.pk-b,.pk-f{animation-duration:3.2s;animation-iteration-count:infinite;animation-fill-mode:both}
+.pk-a{animation-name:pkA}.pk-b{animation-name:pkB}.pk-f{animation-name:pkF}
+@keyframes pkA{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(-30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkB{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkF{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.6,1)}36%,54%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.6,1)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pk-a,.pk-b,.pk-f{animation:none}}
+@media (max-width: 720px){
+header > div{padding:16px 20px!important;gap:12px 16px!important}
+nav[aria-label="Main"]{gap:10px 18px!important;font-size:10px!important;letter-spacing:.18em!important}
+nav[aria-label="Main"] a{min-height:44px;display:inline-flex!important;align-items:center}
+nav[aria-label="Main"] a[style*="padding: 14px 22px"]{padding:0 14px!important}
+[style*="padding: 140px 32px"],[style*="padding: 160px 32px"],[style*="padding: 120px 32px"]{padding:72px 20px!important}
+[style*="padding: 120px 32px 140px"]{padding:56px 20px 80px!important}
+[style*="padding: 100px 32px 90px"]{padding:56px 20px 48px!important}
+[style*="padding: 64px 32px 120px"],[style*="padding: 80px 32px 120px"]{padding:40px 20px 80px!important}
+[style*="padding: 40px 32px"]{padding:32px 20px!important}
+[style*="padding: 40px 48px"]{padding:28px 22px!important}
+[style*="padding: 40px; display: flex"]{padding:24px!important;gap:24px!important}
+[style*="gap: 104px"]{gap:72px!important}
+[style*="gap: 80px"]{gap:48px!important}
+[style*="gap: 64px"]{gap:40px!important}
+[style*="gap: 56px"]{gap:36px!important}
+pre{font-size:12.5px!important}
+.mw-hint{display:block!important}
+}
+@media (max-width: 720px){
+footer > div{flex-direction:column!important;align-items:center!important;text-align:center;gap:28px!important}
+footer > div > div:first-child{align-items:center!important}
+footer > div > div:last-child{justify-content:center!important;gap:22px!important}
+footer > div > div:first-child svg{width:64px!important}
+}
+</style>
+</head>
+<body>
+<!--snapshot--><div data-dc-snapshot="" aria-hidden="true">
+<div style="background: rgb(11, 11, 13); color: rgb(233, 228, 216); font-family: Inter, sans-serif; min-height: 100vh;">
+
+<header style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+<a href="/" aria-label="Moon home" style="display: block;">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block;">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+</svg>
+</a>
+<nav aria-label="Main" id="mm-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;">
+<a href="/night">YOUR MOON</a>
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/check">CHECK</a>
+<a href="/#sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
+</nav>
+<button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
+</header>
+
+<section style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 100px 32px 56px; display: flex; flex-direction: column; gap: 26px;">
+<div class="sc-eye">SKY CHECK · YOUR PHOTO NEVER LEAVES YOUR PHONE</div>
+<h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(30px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1; max-width: 1000px;">CHECK MOON TIME AGAINST THE SKY</h1>
+<p class="sc-p">Moon's dates follow the real Moon, so you can check them by looking up. Take a photo of the Moon and Moon measures how much of it is lit and which way the lit side points, then checks both against what Moon time says the sky should show, right where you're standing.</p>
+<div class="sc-now" data-sc-now=""><canvas data-sc-nowcv="" aria-hidden="true"></canvas><div><b data-sc-nowh="">THE MOON RIGHT NOW</b><span data-sc-nowt="">First quarter · 43% lit · Moonmark 1928.05.07 01:43:13<br>Share your location to see which way it tilts where you are.</span><button type="button" data-sc-loc="">USE MY LOCATION</button></div></div>
+<div class="sc-btns"><label class="sc-btn p">TAKE OR CHOOSE A PHOTO<input type="file" accept="image/*" data-sc-file=""></label></div>
+<ul class="sc-tips">
+<li><b>01 · HOLD IT STRAIGHT</b>Keep your phone upright, not tilted, so up in the photo is up in the sky.</li>
+<li><b>02 · ZOOM IN</b>The bigger the Moon in the frame, the better the reading. Night or day both work.</li>
+<li><b>03 · OLD PHOTOS WORK</b>Moon reads when and where a photo was taken when the photo carries it. Otherwise it uses now and here.</li>
+</ul>
+</div>
+</section>
+<section>
+<div style="max-width: 1280px; margin: 0px auto; padding: 56px 32px 110px; display: flex; flex-direction: column; gap: 28px;">
+<div class="sc-res" data-sc-res="">
+<div class="sc-v" data-sc-v="" role="status"></div>
+<div class="sc-pair"><figure><canvas data-sc-photo="" aria-label="Your photo of the Moon"></canvas><figcaption>YOUR PHOTO</figcaption></figure><figure><canvas data-sc-pred="" aria-label="The Moon Moon time predicts"></canvas><figcaption>MOON TIME SAYS</figcaption></figure></div>
+<div class="sc-rows" data-sc-rows=""></div>
+<div class="sc-btns"><button type="button" class="sc-btn p" data-sc-save="">SAVE OR SHARE</button><label class="sc-btn">TRY ANOTHER PHOTO<input type="file" accept="image/*" data-sc-file2=""></label></div>
+</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(18px, 2vw, 24px); letter-spacing: 0.08em;">WHY THIS WORKS</h2>
+<p class="sc-p">Every Moon month starts at the new moon, so the date tells you the phase. And the Moon's phase is the same for everyone on Earth at the same moment, unlike the Sun, which tells the time only where you stand. Which way the lit side tilts depends on your place in the world, so Moon works that out from your location. The sky can confirm the date to about a day; the nanoseconds and the proof come from Moon's signatures.</p>
+</div>
+</section>
+<footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<div style="max-width: 1280px; margin: 0px auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.14em; color: rgb(138, 139, 143);">
+<div style="display: flex; flex-direction: column; gap: 18px;"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap;"><a href="/" style="color: rgb(138, 139, 143);">HOME</a><a href="/calendar" style="color: rgb(138, 139, 143);">CALENDAR</a><a href="/api" style="color: rgb(138, 139, 143);">API</a><a href="/m" style="color: rgb(138, 139, 143);">MOONMARK</a><a href="/uses" style="color: rgb(138, 139, 143);">USES</a><a href="/see" style="color: rgb(138, 139, 143);">SEE IT WORK</a><a href="/trust" style="color: rgb(138, 139, 143);">TRUST</a><a href="/quantum" style="color: rgb(138, 139, 143);">QUANTUM</a><a href="/tideline" style="color: rgb(138, 139, 143);">TIDELINE</a><a href="/evidence" style="color: rgb(138, 139, 143);">EVIDENCE</a><a href="/check" style="color: rgb(138, 139, 143);">CHECK</a><a href="/sky-check" style="color: rgb(138, 139, 143);">SKY CHECK</a><a href="/notarize" style="color: rgb(138, 139, 143);">NOTARIZE</a><a href="/certificate" style="color: rgb(138, 139, 143);">CERTIFICATES</a><a href="/guides" style="color: rgb(138, 139, 143);">GUIDES</a><a href="/status" style="color: rgb(138, 139, 143);">STATUS</a><a href="/night" style="color: rgb(138, 139, 143);">YOUR MOON</a><a href="/eclipses" style="color: rgb(138, 139, 143);">ECLIPSES</a><a href="/press" style="color: rgb(138, 139, 143);">PRESS</a><a href="/#faq" style="color: rgb(138, 139, 143);">FAQ</a></div>
+</div>
+</footer>
+
+</div>
+</div><!--/snapshot-->
+<x-dc>
+<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="/" aria-label="Moon home" style="display: block">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+</svg>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: 'Syncopate', sans-serif; font-size: 11px; letter-spacing: 0.28em">
+<a href="/night">YOUR MOON</a>
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/check">CHECK</a>
+<a href="/#sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
+</nav>
+</div>
+</header>
+
+<section style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 56px; display: flex; flex-direction: column; gap: 26px">
+<div class="sc-eye">SKY CHECK · YOUR PHOTO NEVER LEAVES YOUR PHONE</div>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(30px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1; max-width: 1000px">CHECK MOON TIME AGAINST THE SKY</h1>
+<p class="sc-p">Moon's dates follow the real Moon, so you can check them by looking up. Take a photo of the Moon and Moon measures how much of it is lit and which way the lit side points, then checks both against what Moon time says the sky should show, right where you're standing.</p>
+<div class="sc-now" data-sc-now><canvas data-sc-nowcv aria-hidden="true"></canvas><div><b data-sc-nowh>THE MOON RIGHT NOW</b><span data-sc-nowt>Working it out…</span><button type="button" data-sc-loc>USE MY LOCATION</button></div></div>
+<div class="sc-btns"><label class="sc-btn p">TAKE OR CHOOSE A PHOTO<input type="file" accept="image/*" data-sc-file></label></div>
+<ul class="sc-tips">
+<li><b>01 · HOLD IT STRAIGHT</b>Keep your phone upright, not tilted, so up in the photo is up in the sky.</li>
+<li><b>02 · ZOOM IN</b>The bigger the Moon in the frame, the better the reading. Night or day both work.</li>
+<li><b>03 · OLD PHOTOS WORK</b>Moon reads when and where a photo was taken when the photo carries it. Otherwise it uses now and here.</li>
+</ul>
+</div>
+</section>
+<section>
+<div style="max-width: 1280px; margin: 0 auto; padding: 56px 32px 110px; display: flex; flex-direction: column; gap: 28px">
+<div class="sc-res" data-sc-res hidden>
+<div class="sc-v" data-sc-v role="status"></div>
+<div class="sc-pair"><figure><canvas data-sc-photo aria-label="Your photo of the Moon"></canvas><figcaption>YOUR PHOTO</figcaption></figure><figure><canvas data-sc-pred aria-label="The Moon Moon time predicts"></canvas><figcaption>MOON TIME SAYS</figcaption></figure></div>
+<div class="sc-rows" data-sc-rows></div>
+<div class="sc-btns"><button type="button" class="sc-btn p" data-sc-save>SAVE OR SHARE</button><label class="sc-btn">TRY ANOTHER PHOTO<input type="file" accept="image/*" data-sc-file2></label></div>
+</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(18px, 2vw, 24px); letter-spacing: 0.08em">WHY THIS WORKS</h2>
+<p class="sc-p">Every Moon month starts at the new moon, so the date tells you the phase. And the Moon's phase is the same for everyone on Earth at the same moment, unlike the Sun, which tells the time only where you stand. Which way the lit side tilts depends on your place in the world, so Moon works that out from your location. The sky can confirm the date to about a day; the nanoseconds and the proof come from Moon's signatures.</p>
+</div>
+</section>
+<footer style="border-top: 1px solid #1C1D20"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8A8B8F">
+<div style="display: flex; flex-direction: column; gap: 18px"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #24262A; stroke-width: 9"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap"><a href="/" style="color: #8A8B8F">HOME</a><a href="/calendar" style="color: #8A8B8F">CALENDAR</a><a href="/api" style="color: #8A8B8F">API</a><a href="/m" style="color: #8A8B8F">MOONMARK</a><a href="/uses" style="color: #8A8B8F">USES</a><a href="/see" style="color: #8A8B8F">SEE IT WORK</a><a href="/trust" style="color: #8A8B8F">TRUST</a><a href="/quantum" style="color: #8A8B8F">QUANTUM</a><a href="/tideline" style="color: #8A8B8F">TIDELINE</a><a href="/evidence" style="color: #8A8B8F">EVIDENCE</a><a href="/check" style="color: #8A8B8F">CHECK</a><a href="/sky-check" style="color: #8A8B8F">SKY CHECK</a><a href="/notarize" style="color: #8A8B8F">NOTARIZE</a><a href="/certificate" style="color: #8A8B8F">CERTIFICATES</a><a href="/guides" style="color: #8A8B8F">GUIDES</a><a href="/status" style="color: #8A8B8F">STATUS</a><a href="/night" style="color: #8A8B8F">YOUR MOON</a><a href="/eclipses" style="color: #8A8B8F">ECLIPSES</a><a href="/press" style="color: #8A8B8F">PRESS</a><a href="/#faq" style="color: #8A8B8F">FAQ</a></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2400}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+<script src="js/footglow.js" defer></script>
+</body>
+</html>
