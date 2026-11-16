@@ -27,7 +27,8 @@ export function previewTags(html, raw, signed = false, event = '', coa = null) {
   const ev = signed ? '' : String(event || '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
   const evQ = ev ? encodeURIComponent(ev).replace(/%20/g, '+') : '';
   if (ev) pageUrl += `?e=${evQ}`;
-  const img = `https://api.moon369.org/v1/card.png?moonmark=${path}` + (ev ? `&event=${evQ}` : '');
+  // v = the drawing's version: bump it when the card art changes, so browsers and link previews fetch the new image.
+  const img = `https://api.moon369.org/v1/card.png?moonmark=${path}` + (ev ? `&event=${evQ}` : '') + '&v=2';
   const mark = `${+y}.${p2(+mo)}.${p2(+d)} ${p2(+h)}:${p2(+mi)}:${p2(+s)}`;
   const title = coa ? `${coa.title} by ${coa.artist}` : ev || `${signed ? 'Signed ' : ''}Moonmark ${mark}`;
   const desc = coa

@@ -17,7 +17,8 @@ export function previewTags(html, params) {
   const desc = 'See the moon exactly as it was on any day in history, then share the card. What did yours look like?';
   const rest = new URLSearchParams({ ...(t ? { t: t[1] + t[2] } : {}), ...(z ? { z: z[1] + z[2] + z[3] } : {}), for: occ }).toString();
   const pageUrl = `https://moon369.org/night/${m[0]}?${rest}`;
-  const img = `https://api.moon369.org/v1/night.png?${q}`;
+  // v = the drawing's version: bump it when the card art changes, so browsers and link previews fetch the new image.
+  const img = `https://api.moon369.org/v1/night.png?${q}&v=2`;
   const set = (re, val) => { html = html.replace(re, (_, a, b) => a + escAttr(val) + b); };
   set(/(<link rel="canonical" href=")[^"]*(")/, pageUrl);
   set(/(<meta property="og:url" content=")[^"]*(")/, pageUrl);

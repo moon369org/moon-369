@@ -116,7 +116,7 @@
   function query(n) { return 'd=' + ymd(n) + '&' + rest(n); }
   function path(n) { return '/night/' + ymd(n) + '?' + rest(n); }
   function pageUrl(n) { return 'https://moon369.org' + path(n); }
-  function cardUrl(n) { return API + '/v1/night.png?' + query(n) + '&fmt=story'; }
+  function cardUrl(n) { return API + '/v1/night.png?' + query(n) + '&fmt=story&v=2'; }   // v: bump when the card art changes
   function dateText(n) { return n.d + ' ' + MONTHS[n.mo - 1] + ' ' + n.y; }
 
   function postText(n, r) {
