@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};window.moonTrack=function(n,d){try{window.va('event',{name:n,data:d||{}})}catch(e){}};</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="preload" href="/assets/fonts/syncopate-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<script>document.documentElement.classList.add('mm-js')</script>
+<title>Notarize a document · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Drop a PDF or any document. Moon signs its fingerprint at this exact moment and gives you a printable certificate with a QR code. Your document never leaves your device.">
+<link rel="canonical" href="https://moon369.org/notarize">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/notarize">
+<meta property="og:title" content="Notarize a document on Moon">
+<meta property="og:description" content="Drop a PDF or any document. Moon signs its fingerprint at this exact moment and gives you a printable certificate with a QR code. Your document never leaves your device.">
+<meta property="og:image" content="https://moon369.org/assets/og/home.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Moon, over a photograph of the moon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Notarize a document on Moon">
+<meta name="twitter:description" content="Drop a PDF or any document. Moon signs its fingerprint at this exact moment and gives you a printable certificate with a QR code. Your document never leaves your device.">
+<meta name="twitter:image" content="https://moon369.org/assets/og/home.jpg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<style>x-dc{display:none}html,body{background:#0B0B0D}html{scrollbar-width:thin;scrollbar-color:#2E3035 #0B0B0D}
+*{scrollbar-width:thin;scrollbar-color:#2E3035 transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#24262A;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#3A3B3F;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
+@keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
+header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+
+
+.nt-tool{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:stretch}
+.nt-fields{display:flex;flex-direction:column;gap:14px}
+.nt-fields label{display:flex;flex-direction:column;gap:8px;font-family:'Syncopate',sans-serif;font-size:9.5px;letter-spacing:.22em;color:#8A8B8F}
+.nt-fields input{min-height:52px;box-sizing:border-box;padding:0 16px;background:#0B0B0D;border:1px solid #3A3C41;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:0;border-radius:0}
+.nt-fields input:focus{outline:none;border-color:#E9E4D8}
+.nt-fields small{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0;color:#5E6064}
+.nt-drop{position:relative;border:1px dashed #5E6064;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.nt-drop:hover,.nt-drop.over{border-color:#E9E4D8;background:#111214}
+.nt-drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.nt-drop b{font-family:'Syncopate',sans-serif;font-weight:700;font-size:13px;letter-spacing:.22em}
+.nt-drop span{font-size:14px;color:#8A8B8F;line-height:1.55}
+.nt-drop i{font-style:normal;min-height:52px;padding:0 28px;display:inline-flex;align-items:center;background:#E9E4D8;color:#0B0B0D;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:.24em}
+.nt-status{font-family:'JetBrains Mono',monospace;font-size:13px;color:#A2A3A7;min-height:20px}
+.nt-status.bad{color:#E0A49C}
+.nt-done{display:flex;flex-direction:column;gap:16px}
+.nt-ok{font-family:'Syncopate',sans-serif;font-weight:700;font-size:11px;letter-spacing:.22em}
+.nt-btns{display:flex;flex-wrap:wrap;gap:12px}
+.nt-btns a,.nt-btns button{min-height:52px;padding:0 22px;display:inline-flex;align-items:center;justify-content:center;background:none;border:1px solid #E9E4D8;color:#E9E4D8;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10px;letter-spacing:.22em;text-decoration:none;cursor:pointer;box-sizing:border-box}
+.nt-btns .nt-p{background:#E9E4D8;color:#0B0B0D}
+.nt-tip{margin:0;font-size:14px;color:#8A8B8F}
+.nt-paper{margin-top:28px;background:#1C1D20;padding:clamp(12px,3vw,40px)}
+.nc{background:#F4F1EA;color:#0B0B0D;max-width:860px;margin:0 auto;padding:56px 60px 44px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px;font-family:Inter,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.nc-top{display:flex;justify-content:space-between;align-items:center;gap:20px;border-bottom:2px solid #0B0B0D;padding-bottom:18px}
+.nc-logo{width:110px;height:auto;display:block}
+.nc-kind{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.26em}
+.nc-title{margin:6px 0 0;font-family:Inter,sans-serif;font-weight:600;font-size:28px;line-height:1.25;letter-spacing:-.01em;overflow-wrap:anywhere}
+.nc-lead{margin:0;font-size:15px;line-height:1.6;color:#3A3B3F}
+.nc-mark{font-family:'JetBrains Mono',monospace;font-size:30px;font-variant-numeric:tabular-nums;line-height:1.2}
+.nc-mark span{color:#6B6C70}
+.nc-body{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:28px;align-items:start}
+.nc-rows{margin:0;display:flex;flex-direction:column;border-top:1px solid #CFCAC0}
+.nc-rows div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid #CFCAC0}
+.nc-rows dt{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;color:#6B6C70;padding-top:3px}
+.nc-rows dd{margin:0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.nc-hash{word-break:break-all}
+.nc-dim{color:#6B6C70}
+.nc-qr{display:flex;flex-direction:column;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:#3A3B3F;text-align:center}
+.nc-qr svg{display:block;width:100%;height:auto}
+.nc-how{font-size:12.5px;line-height:1.6;color:#2A2B2F}
+.nc-how b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:9.5px;letter-spacing:.2em;margin-right:8px}
+.nc-foot{border-top:1px solid #CFCAC0;padding-top:12px;font-size:11px;line-height:1.55;color:#6B6C70}
+.nt-know{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1C1D20;border:1px solid #1C1D20}
+.nt-know>div{background:#0B0B0D;padding:28px;display:flex;flex-direction:column;gap:10px}
+.nt-know b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
+.nt-know p{margin:0;font-size:15px;line-height:1.6;color:#B9B6AE}
+@media (max-width:820px){.nt-tool,.nt-know{grid-template-columns:1fr}.nc{padding:28px 22px}.nc-body{grid-template-columns:1fr}.nc-qr{max-width:200px}.nc-rows div{grid-template-columns:1fr;gap:4px}.nc-mark{font-size:22px}.nc-title{font-size:22px}.nt-btns a,.nt-btns button{width:100%}}
+@page{size:letter;margin:.45in}
+#nt-print{display:none}
+@media print{
+  html,body{background:#fff!important}
+  body>*:not(#nt-print){display:none!important}
+  #nt-print{display:block}
+  #nt-print .nc{max-width:none;margin:0;padding:0;background:#fff;gap:18px}
+  #nt-print .nc-body{grid-template-columns:minmax(0,1fr) 1.9in}
+  #nt-print .nc-rows div{grid-template-columns:1.45in minmax(0,1fr)}
+}
+</style>
+
+<script src="js/preact.umd.js" defer></script>
+<script src="js/qrcode.js" defer></script>
+<script src="js/notarize.js" defer></script>
+<script src="js/header.js" defer></script>
+<script src="js/dc-lite.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+<!-- page styles -->
+<style>
+body{margin:0;background:#0B0B0D}
+a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
+.pk-a,.pk-b,.pk-f{animation-duration:3.2s;animation-iteration-count:infinite;animation-fill-mode:both}
+.pk-a{animation-name:pkA}.pk-b{animation-name:pkB}.pk-f{animation-name:pkF}
+@keyframes pkA{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(-30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkB{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkF{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.6,1)}36%,54%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.6,1)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pk-a,.pk-b,.pk-f{animation:none}}
+@media (max-width: 720px){
+header > div{padding:16px 20px!important;gap:12px 16px!important}
+nav[aria-label="Main"]{gap:10px 18px!important;font-size:10px!important;letter-spacing:.18em!important}
+nav[aria-label="Main"] a{min-height:44px;display:inline-flex!important;align-items:center}
+nav[aria-label="Main"] a[style*="padding: 14px 22px"]{padding:0 14px!important}
+[style*="padding: 140px 32px"],[style*="padding: 160px 32px"],[style*="padding: 120px 32px"]{padding:72px 20px!important}
+[style*="padding: 120px 32px 140px"]{padding:56px 20px 80px!important}
+[style*="padding: 100px 32px 90px"]{padding:56px 20px 48px!important}
+[style*="padding: 64px 32px 120px"],[style*="padding: 80px 32px 120px"]{padding:40px 20px 80px!important}
+[style*="padding: 40px 32px"]{padding:32px 20px!important}
+[style*="padding: 40px 48px"]{padding:28px 22px!important}
+[style*="padding: 40px; display: flex"]{padding:24px!important;gap:24px!important}
+[style*="gap: 104px"]{gap:72px!important}
+[style*="gap: 80px"]{gap:48px!important}
+[style*="gap: 64px"]{gap:40px!important}
+[style*="gap: 56px"]{gap:36px!important}
+pre{font-size:12.5px!important}
+.mw-hint{display:block!important}
+}
+@media (max-width: 720px){
+footer > div{flex-direction:column!important;align-items:center!important;text-align:center;gap:28px!important}
+footer > div > div:first-child{align-items:center!important}
+footer > div > div:last-child{justify-content:center!important;gap:22px!important}
+footer > div > div:first-child svg{width:64px!important}
+}
+</style>
+</head>
+<body>
+<!--snapshot--><div data-dc-snapshot="" aria-hidden="true">
+<div style="background: rgb(11, 11, 13); color: rgb(233, 228, 216); font-family: Inter, sans-serif; min-height: 100vh;">
+
+<header style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+<a href="/" aria-label="Moon home" style="display: block;">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block;">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+</svg>
+</a>
+<nav aria-label="Main" id="mm-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;">
+<a href="/night">YOUR MOON</a>
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/#sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
+</nav>
+<button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
+</header>
+
+<section style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 100px 32px 72px; display: flex; flex-direction: column; gap: 28px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">NOTARIZE · A TIMESTAMP FOR ANY DOCUMENT</div>
+<h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(30px, 4.6vw, 60px); letter-spacing: 0.08em; line-height: 1.12;">NOTARIZE A DOCUMENT</h1>
+<p style="margin: 0px; max-width: 760px; font-size: 18px; line-height: 1.65; color: rgb(185, 182, 174);">Drop in a PDF, a contract or any file. Moon signs its fingerprint at this exact moment and gives you a certificate to print or save, with a QR code anyone can scan to check it. Your document never leaves your&nbsp;device.</p>
+<div class="nt-tool">
+<div class="nt-fields">
+<label>DOCUMENT TITLE<input data-nt-title="" maxlength="120" placeholder="Services agreement, version 3" autocomplete="off"></label>
+<label>PREPARED BY<input data-nt-by="" maxlength="80" placeholder="Your name or company" autocomplete="off"></label>
+<small>Both optional. They are printed on the certificate only and are never sent to Moon.</small>
+</div>
+<label class="nt-drop" data-nt-drop="" data-on="1"><input type="file" aria-label="Choose a document to notarize"><b>DROP YOUR DOCUMENT</b><span>PDF or any file, up to 1 GB.<br>Fingerprinted on this device.</span><i>CHOOSE A FILE</i></label>
+</div>
+<div class="nt-status" data-nt-status="" role="status"></div>
+<div data-nt-out=""></div>
+</div>
+</section>
+
+<section>
+<div style="max-width: 1280px; margin: 0px auto; padding: 72px 32px 100px; display: flex; flex-direction: column; gap: 28px;">
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">WHAT THE CERTIFICATE PROVES</h2>
+<div class="nt-know">
+<div><b>01 · THIS EXACT DOCUMENT</b><p>The fingerprint matches only this file. Change one character, one pixel or one byte and it no longer&nbsp;matches.</p></div>
+<div><b>02 · AT THIS MOMENT</b><p>Moon signed it at the time shown, and a public drand beacon proves it could not have been signed any&nbsp;earlier.</p></div>
+<div><b>03 · ANYONE CAN CHECK</b><p>Scan the QR code or drop the document into <a href="/check" style="color: rgb(233, 228, 216);">/check</a>. The receipt also checks offline with Moon's public&nbsp;keys.</p></div>
+</div>
+<p style="margin: 0px; max-width: 760px; font-size: 15px; line-height: 1.7; color: rgb(138, 139, 143);">What it does not prove: who wrote the document, or that anyone signed or agreed to it. It is a cryptographic timestamp, not the act of a notary public. For contracts, sign as you normally would and notarize the signed copy, so the certificate shows when that final version existed. Moon's time-stamp authority also works inside PDF signing tools: <a href="/api#tsa" style="color: rgb(233, 228, 216);">RFC 3161 at /v1/tsa</a>.</p>
+</div>
+</section>
+
+</div>
+
+<footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<div style="max-width: 1280px; margin: 0px auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.14em; color: rgb(138, 139, 143);">
+<div style="display: flex; flex-direction: column; gap: 18px;"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap;"><a href="/" style="color: rgb(138, 139, 143);">HOME</a><a href="/calendar" style="color: rgb(138, 139, 143);">CALENDAR</a><a href="/api" style="color: rgb(138, 139, 143);">API</a><a href="/m" style="color: rgb(138, 139, 143);">MOONMARK</a><a href="/uses" style="color: rgb(138, 139, 143);">USES</a><a href="/see" style="color: rgb(138, 139, 143);">SEE IT WORK</a><a href="/trust" style="color: rgb(138, 139, 143);">TRUST</a><a href="/quantum" style="color: rgb(138, 139, 143);">QUANTUM</a><a href="/tideline" style="color: rgb(138, 139, 143);">TIDELINE</a><a href="/evidence" style="color: rgb(138, 139, 143);">EVIDENCE</a><a href="/check" style="color: rgb(138, 139, 143);">CHECK</a><a href="/notarize" style="color: rgb(138, 139, 143);">NOTARIZE</a><a href="/night" style="color: rgb(138, 139, 143);">YOUR MOON</a><a href="/eclipses" style="color: rgb(138, 139, 143);">ECLIPSES</a><a href="/press" style="color: rgb(138, 139, 143);">PRESS</a><a href="/#faq" style="color: rgb(138, 139, 143);">FAQ</a></div>
+</div>
+</footer>
+
+
+</div><!--/snapshot-->
+<x-dc>
+<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="/" aria-label="Moon home" style="display: block">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+</svg>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: 'Syncopate', sans-serif; font-size: 11px; letter-spacing: 0.28em">
+<a href="/night">YOUR MOON</a>
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/#sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
+</nav>
+</div>
+</header>
+
+<section style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 72px; display: flex; flex-direction: column; gap: 28px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">NOTARIZE · A TIMESTAMP FOR ANY DOCUMENT</div>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(30px, 4.6vw, 60px); letter-spacing: 0.08em; line-height: 1.12">NOTARIZE A DOCUMENT</h1>
+<p style="margin: 0; max-width: 760px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Drop in a PDF, a contract or any file. Moon signs its fingerprint at this exact moment and gives you a certificate to print or save, with a QR code anyone can scan to check it. Your document never leaves your&nbsp;device.</p>
+<div class="nt-tool">
+<div class="nt-fields">
+<label>DOCUMENT TITLE<input data-nt-title maxlength="120" placeholder="Services agreement, version 3" autocomplete="off"></label>
+<label>PREPARED BY<input data-nt-by maxlength="80" placeholder="Your name or company" autocomplete="off"></label>
+<small>Both optional. They are printed on the certificate only and are never sent to Moon.</small>
+</div>
+<label class="nt-drop" data-nt-drop><input type="file" aria-label="Choose a document to notarize"><b>DROP YOUR DOCUMENT</b><span>PDF or any file, up to 1 GB.<br>Fingerprinted on this device.</span><i>CHOOSE A FILE</i></label>
+</div>
+<div class="nt-status" data-nt-status role="status"></div>
+<div data-nt-out></div>
+</div>
+</section>
+
+<section>
+<div style="max-width: 1280px; margin: 0 auto; padding: 72px 32px 100px; display: flex; flex-direction: column; gap: 28px">
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">WHAT THE CERTIFICATE PROVES</h2>
+<div class="nt-know">
+<div><b>01 · THIS EXACT DOCUMENT</b><p>The fingerprint matches only this file. Change one character, one pixel or one byte and it no longer&nbsp;matches.</p></div>
+<div><b>02 · AT THIS MOMENT</b><p>Moon signed it at the time shown, and a public drand beacon proves it could not have been signed any&nbsp;earlier.</p></div>
+<div><b>03 · ANYONE CAN CHECK</b><p>Scan the QR code or drop the document into <a href="/check" style="color: #E9E4D8">/check</a>. The receipt also checks offline with Moon&#39;s public&nbsp;keys.</p></div>
+</div>
+<p style="margin: 0; max-width: 760px; font-size: 15px; line-height: 1.7; color: #8A8B8F">What it does not prove: who wrote the document, or that anyone signed or agreed to it. It is a cryptographic timestamp, not the act of a notary public. For contracts, sign as you normally would and notarize the signed copy, so the certificate shows when that final version existed. Moon&#39;s time-stamp authority also works inside PDF signing tools: <a href="/api#tsa" style="color: #E9E4D8">RFC 3161 at /v1/tsa</a>.</p>
+</div>
+</section>
+
+</div>
+
+<footer style="border-top: 1px solid #1C1D20"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8A8B8F">
+<div style="display: flex; flex-direction: column; gap: 18px"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #24262A; stroke-width: 9"></path></svg><div>MOON · THE NEW STANDARD FOR TIME</div></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap"><a href="/" style="color: #8A8B8F">HOME</a><a href="/calendar" style="color: #8A8B8F">CALENDAR</a><a href="/api" style="color: #8A8B8F">API</a><a href="/m" style="color: #8A8B8F">MOONMARK</a><a href="/uses" style="color: #8A8B8F">USES</a><a href="/see" style="color: #8A8B8F">SEE IT WORK</a><a href="/trust" style="color: #8A8B8F">TRUST</a><a href="/quantum" style="color: #8A8B8F">QUANTUM</a><a href="/tideline" style="color: #8A8B8F">TIDELINE</a><a href="/evidence" style="color: #8A8B8F">EVIDENCE</a><a href="/check" style="color: #8A8B8F">CHECK</a><a href="/notarize" style="color: #8A8B8F">NOTARIZE</a><a href="/night" style="color: #8A8B8F">YOUR MOON</a><a href="/eclipses" style="color: #8A8B8F">ECLIPSES</a><a href="/press" style="color: #8A8B8F">PRESS</a><a href="/#faq" style="color: #8A8B8F">FAQ</a></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2400}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+<script src="js/footglow.js" defer></script>
+</body>
+</html>

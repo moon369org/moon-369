@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import {
   SPEC_VERSION, EPOCH_UNIX_NS, LUNATION_NS, NUM, DEN, MOON_SECOND_SI, YEAR_DAYS, MOONS,
   toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, phaseName, unixNsToIso, yearInfo,
@@ -73,6 +73,8 @@ export interface Env {
   OPEN_PER_MIN?: number;
   /** The numbers behind the free plan, for messages and the key response. */
   FREE_LIMITS?: { per_min: number; sign_per_day: number; req_per_day?: number };
+  /** Admin token (MOON_ADMIN_TOKEN) for issuing verified business keys in one call: POST /v1/admin/keys. Without it, admin routes answer 404. */
+  ADMIN_TOKEN?: string;
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
   RETIRED_KEYS?: Record<string, string>;
 }
@@ -294,6 +296,53 @@ function whoFrom(body: Record<string, unknown>, gate: Gate): Who {
   };
 }
 
+/**
+ * Admin: issue a verified business key in one call, or switch one off or on. Moon's own tool (scripts/moon-key.ps1) calls these.
+ *   POST /v1/admin/keys      {"owner":"Acme","plan":"business","per_min":300,"email":"...","note":"..."}  -> the new key, shown once
+ *   POST /v1/admin/keys/off  {"key":"moon_..."} or {"key_hash":"<sha256>"}
+ *   POST /v1/admin/keys/on   same
+ * Needs X-Moon-Admin: <MOON_ADMIN_TOKEN>. Without the token set, these routes don't exist (404).
+ */
+async function adminRoute(req: Request, env: Env, path: string): Promise<Response> {
+  const notFound = () => json({ error: { code: 'not_found', message: 'No such endpoint' } }, 404);
+  if (!env.ADMIN_TOKEN || env.ADMIN_TOKEN.length < 32) return notFound();
+  const given = req.headers.get('X-Moon-Admin') ?? '';
+  const a = createHash('sha256').update(given).digest(), b = createHash('sha256').update(env.ADMIN_TOKEN).digest();
+  if (!given || !timingSafeEqual(a, b)) return json({ error: { code: 'forbidden', message: 'Wrong admin token' } }, 403);
+  const noStore = { 'Cache-Control': 'no-store' };
+  try {
+    if (!env.KEYS_WRITE?.set || !env.KEYS_WRITE.read) throw new HttpError(503, 'keys_unavailable', 'The key store is not connected on this deployment');
+    const body = await readJson(req);
+    if (path === `/${API_VERSION}/admin/keys`) {
+      const owner = cleanText(body.owner, 80);
+      if (!owner || owner.length < 2) throw new HttpError(400, 'bad_param', 'owner: the verified name registrations will show, 2 to 80 characters');
+      const plan = cleanText(body.plan, 32) ?? 'business';
+      if (!/^[a-z][a-z0-9-]{1,31}$/.test(plan) || plan === 'free' || plan === 'open') throw new HttpError(400, 'bad_param', 'plan: a lowercase plan name such as business or pro (not free or open)');
+      const per_min = body.per_min === undefined ? 300 : Number(body.per_min);
+      if (!Number.isInteger(per_min) || per_min < 1 || per_min > 100_000) throw new HttpError(400, 'bad_param', 'per_min: whole requests a minute, 1 to 100000');
+      const email = cleanText(body.email, 200), note = cleanText(body.note, 300);
+      const key = newKey(), hash = hashKey(key);
+      const ok = await env.KEYS_WRITE.put(hash, { owner, plan, per_min, verified: true, email: email ?? undefined, note: note ?? undefined, created: new Date().toISOString() });
+      if (!ok) throw new HttpError(500, 'key_failed', 'Could not create a key. Try again.');
+      return json({ key, key_hash: hash, owner, owner_verified: true, plan, per_min, note: 'Shown once. Only its SHA-256 is stored. Send it as Authorization: Bearer <key>. Works right away, no redeploy.' }, 201, noStore);
+    }
+    const on = path === `/${API_VERSION}/admin/keys/on`;
+    if (on || path === `/${API_VERSION}/admin/keys/off`) {
+      const hash = typeof body.key === 'string' && body.key.startsWith('moon_') ? hashKey(body.key.trim())
+        : typeof body.key_hash === 'string' && /^[0-9a-f]{64}$/i.test(body.key_hash) ? body.key_hash.toLowerCase() : null;
+      if (!hash) throw new HttpError(400, 'bad_param', 'Send {"key":"moon_..."} or {"key_hash":"<64 hex>"}');
+      const rec = await env.KEYS_WRITE.read(hash);
+      if (!rec) throw new HttpError(404, 'unknown_key', 'No key with that hash in the key store. Keys set in MOON_API_KEYS are changed in Vercel instead.');
+      await env.KEYS_WRITE.set(hash, { ...rec, active: on });
+      return json({ key_hash: hash, owner: rec.owner, plan: rec.plan, active: on }, 200, noStore);
+    }
+    return notFound();
+  } catch (e) {
+    if (e instanceof HttpError) return json({ error: { code: e.code, message: e.message } }, e.status, noStore);
+    return json({ error: { code: 'internal', message: 'Something went wrong' } }, 500, noStore);
+  }
+}
+
 async function readJson(req: Request, max = 16_384): Promise<Record<string, unknown>> {
   const text = await req.text();
   if (text.length > max) throw new HttpError(413, 'too_large', 'Send only the SHA-256 fingerprint or the receipt, not the content');
@@ -449,12 +498,14 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
     if (gate instanceof Response) return gate;
     return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, registrantOf(gate));
   }
-  const postOnly = path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof`;
+  const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof`;
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
   if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
+
+  if (path.startsWith(`/${API_VERSION}/admin/`)) return adminRoute(req, env, path);
 
   const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
   const gate = await authAndLimit(req, env, signing);

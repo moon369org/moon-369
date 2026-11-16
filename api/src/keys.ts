@@ -14,8 +14,8 @@ import type { KeyStore } from './index.js';
 
 export interface KeyRecord { owner?: string; plan?: string; per_min?: number; active?: boolean; note?: string; verified?: boolean; email?: string; use?: string; created?: string }
 
-/** Where self-serve keys are written. */
-export interface KeyWriter { put(hash: string, rec: KeyRecord): Promise<boolean> }
+/** Where self-serve and admin-issued keys are written. put never overwrites; set does (switching a key off or on). */
+export interface KeyWriter { put(hash: string, rec: KeyRecord): Promise<boolean>; set?(hash: string, rec: KeyRecord): Promise<void>; read?(hash: string): Promise<KeyRecord | null> }
 
 export const KEY_PREFIX = 'moon_';
 export const hashKey = (key: string) => createHash('sha256').update(key, 'utf8').digest('hex');
@@ -40,6 +40,8 @@ export function upstashKeyStore(url: string, token: string): KeyStore & KeyWrite
   return {
     async get(hash) { return ((await call(['GET', `key:${hash.toLowerCase()}`])) as string | null) ?? null; },
     async put(hash, rec) { return (await call(['SET', `key:${hash.toLowerCase()}`, JSON.stringify(rec), 'NX'])) === 'OK'; },
+    async set(hash, rec) { await call(['SET', `key:${hash.toLowerCase()}`, JSON.stringify(rec)]); },
+    async read(hash) { const r = (await call(['GET', `key:${hash.toLowerCase()}`])) as string | null; return r ? JSON.parse(r) as KeyRecord : null; },
   };
 }
 
@@ -49,6 +51,8 @@ export function memoryKeyStore(): KeyStore & KeyWriter {
   return {
     async get(hash) { return m.get(hash.toLowerCase()) ?? null; },
     async put(hash, rec) { if (m.has(hash)) return false; m.set(hash.toLowerCase(), JSON.stringify(rec)); return true; },
+    async set(hash, rec) { m.set(hash.toLowerCase(), JSON.stringify(rec)); },
+    async read(hash) { const r = m.get(hash.toLowerCase()); return r ? JSON.parse(r) as KeyRecord : null; },
   };
 }
 

@@ -106,6 +106,7 @@ const route = (req: Request) => {
     TSA,
     DEFER: (p: Promise<unknown>) => waitUntil(p),
     CRON_SECRET: process.env.CRON_SECRET,
+    ADMIN_TOKEN: process.env.MOON_ADMIN_TOKEN,
   });
 };
 
