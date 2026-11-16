@@ -102,7 +102,7 @@
       if (h !== rc.sha256) { box.className = 'mk-coa mk-coa-bad'; box.innerHTML = '<div class="mk-sig-h">THESE DETAILS DO NOT MATCH THE SIGNATURE</div><div class="mk-sig-p">The artwork details in this link were changed after Moon signed them. Do not rely on them.</div>'; return; }
       window.__moonCoaMaster = c.master;
       var h1 = document.querySelector('h1'), ey = document.querySelector('.mk-ey');
-      if (h1) h1.textContent = 'CERTIFICATE OF AUTHENTICITY';
+      if (h1) { h1.textContent = 'CERTIFICATE OF AUTHENTICITY'; h1.classList.add('mk-h1-s'); }
       if (ey) ey.innerHTML = '<span>ART</span><span class="mk-sep"> · </span><span>SIGNED ON MOON</span>';
       document.title = c.title + ' by ' + c.artist + ' · Certificate · Moon';
       box.className = 'mk-coa';
@@ -214,7 +214,7 @@
       a.download = (ev.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'event') + '.ics';
       countdown(root, ms);
       var h1 = document.querySelector('h1'), ey = document.querySelector('.mk-ey');
-      if (h1) { h1.textContent = ev.toUpperCase(); h1.style.overflowWrap = 'anywhere'; }
+      if (h1) { h1.textContent = ev.toUpperCase(); h1.style.overflowWrap = 'anywhere'; h1.classList.add('mk-h1-s'); }
       if (ey) ey.innerHTML = '<span>AN EVENT ON MOON</span><span class="mk-sep"> · </span><span>THE SAME MOMENT EVERYWHERE</span>';
       document.title = ev + ' · Moon';
       return;
