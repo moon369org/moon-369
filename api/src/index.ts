@@ -20,7 +20,7 @@ import { makeRegistration, publicRegistration, isPhash, phashKind, hamming, band
 import { svgToPng } from './png.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
 import { QUICKNET, BEACON_NETWORK, roundTimeNs, type Beacon, type Chain } from './beacon.js';
-import { TIDELINE, record, sealDue, upgradeBitcoin, checkpointSoon, proofFor, parseLune, luneLabel, luneOf, luneEndNs, tideBytes, type TideStore, type Anchorer, type BitcoinStamper } from './tideline.js';
+import { TIDELINE, record, sealDue, sealIfDue, upgradeBitcoin, checkpointSoon, proofFor, parseLune, luneLabel, luneOf, luneEndNs, tideBytes, type TideStore, type Anchorer, type BitcoinStamper } from './tideline.js';
 
 /** max overrides the limiter's default requests per minute (used for per-key limits). */
 export interface RateLimiter { limit(o: { key: string; max?: number }): Promise<{ success: boolean }> }
@@ -112,13 +112,20 @@ const FOREVER = { 'Cache-Control': 'public, max-age=31536000, immutable' };
 /** Server time in Unix ns. the platform exposes millisecond time; finer digits come from the conversion. */
 const nowUnixNs = (): bigint => BigInt(Date.now()) * 1_000_000n;
 
-/** When the nightly seal next runs after a moment: daily at 07:23 UTC (api/vercel.json "crons"). Keep the two in step. */
-const SEAL_RUN_UTC_MIN = 7 * 60 + 23;
+/** Auto-seal: at most once a minute per instance, check after the response whether a lune has ended and seal it. The nightly cron stays as the backstop and still upgrades Bitcoin proofs. */
+let lastSealCheckMs = 0;
+export const AUTO_SEAL_EVERY_MS = 60_000;
+export function autoSeal(env: Env, nowMs = Date.now()): boolean {
+  if (!env.TIDES || !env.SIGNER || !env.DEFER || nowMs - lastSealCheckMs < AUTO_SEAL_EVERY_MS) return false;
+  lastSealCheckMs = nowMs;
+  env.DEFER(sealIfDue(env.TIDES, env.SIGNER, nowUnixNs(), env.ANCHOR, env.BITCOIN).catch(() => null));
+  return true;
+}
+export const resetAutoSeal = () => { lastSealCheckMs = 0; };
+
+/** When a lune seals: the moment it ends, or now if it already has (auto-seal runs on the next request). The nightly cron is only a backstop. */
 export function nextSealRun(afterNs: bigint, nowNs: bigint): string {
-  const from = Number((afterNs > nowNs ? afterNs : nowNs) / 1_000_000n), day = 86_400_000;
-  let t = Math.floor(from / day) * day + SEAL_RUN_UTC_MIN * 60_000;
-  if (t <= from) t += day;
-  return new Date(t).toISOString();
+  return new Date(Number((afterNs > nowNs ? afterNs : nowNs) / 1_000_000n)).toISOString();
 }
 
 function moonBody(t: MoonTime, unixNs: bigint) {
@@ -526,6 +533,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   const gate = await authAndLimit(req, env, signing);
   if (gate instanceof Response) return gate;
   const planHdr = { 'X-Moon-Plan': gate.plan };
+  autoSeal(env);
 
   try {
     switch (true) {

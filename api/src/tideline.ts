@@ -205,18 +205,36 @@ export async function sealDue(store: TideStore, signer: Signer, nowNs: bigint, a
     const s = signer.signBytes(bytes);
     const tide: Tide = { tideline: TIDELINE, ...body, key_id: s.key_id, signature: s.signature, ...(s.pq ? { pq: s.pq as Tide['pq'] } : {}), hash: sha(bytes), anchor: null };
     if (anchor) { try { tide.anchor = await anchor(tide); } catch { tide.anchor = null; } }
+    let ots: Buffer | null = null;
     if (btc) {
       try {
-        const f = await btc.stamp(tide.hash);
-        if (f) { await store.putOts(next, f); tide.bitcoin = { status: 'pending', calendars: btc.summarize(f).pending.length, ots: `/v1/tideline/${tide.lune}.ots` }; }
+        ots = await btc.stamp(tide.hash);
+        if (ots) tide.bitcoin = { status: 'pending', calendars: btc.summarize(ots).pending.length, ots: `/v1/tideline/${tide.lune}.ots` };
       } catch { /* the next run can stamp it */ }
     }
-    if (await store.putTide(tide)) out.push(tide);
+    if (await store.putTide(tide)) {
+      if (ots) await store.putOts(next, ots);   // only the run whose tide was kept writes its proof
+      out.push(tide);
+      prevHash = tide.hash;
+    } else {
+      prevHash = (await store.getTide(next))?.hash ?? tide.hash;   // another run sealed it first: chain onto theirs
+    }
     await store.setHead(next);
-    prevHash = tide.hash;
     next++;
   }
   return out;
+}
+
+/** True when a finished lune is waiting to be sealed. Two cheap reads. */
+export async function sealIsDue(store: TideStore, nowNs: bigint): Promise<boolean> {
+  const head = await store.head();
+  const next = head === null ? await store.first() : head + 1;
+  return next !== null && luneEndNs(next) <= nowNs;
+}
+
+/** Seal right away once a lune ends, on the first request after it, instead of waiting for the nightly run. */
+export async function sealIfDue(store: TideStore, signer: Signer, nowNs: bigint, anchor?: Anchorer, btc?: BitcoinStamper): Promise<Tide[]> {
+  return (await sealIsDue(store, nowNs)) ? sealDue(store, signer, nowNs, anchor, 5, btc) : [];
 }
 
 /** Inclusion proof for a receipt, once its lune is sealed. */

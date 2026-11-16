@@ -1,5 +1,5 @@
 /* moon369.org/tideline: the sealing module. Shows the lunes that have ended and are waiting to be
-   sealed into a tide, how many receipts they hold, and a live countdown to the nightly seal.
+   sealed into a tide, how many receipts they hold, and a live countdown to the seal.
    Data: api.moon369.org/v1/status (tideline.waiting, next_seal_run_utc, last_sealed). */
 (function () {
   var API = 'https://api.moon369.org';
@@ -31,7 +31,7 @@
         '<div><div class="tl-seal-k">ALL TIDES SEALED</div><div class="tl-seal-h">TIDE ' + esc(ls.lune) + '</div>' +
         '<p class="tl-seal-p">Sealed ' + esc(local(ls.sealed_utc)) + (ls.bitcoin ? ' · Bitcoin ' + (ls.bitcoin.status === 'confirmed' ? 'confirmed' + (ls.bitcoin.block_height ? ' in block ' + ls.bitcoin.block_height : '') : 'confirming') : '') + '.</p></div>' +
         '<div class="tl-seal-ns"><div class="tl-seal-n"><b>' + ls.size + '</b><span>RECEIPTS</span></div></div>' +
-        '<div class="tl-seal-foot"><span>The next lune seals the night after it ends</span><span><a href="/tide/' + esc(ls.lune) + '">See the tide</a></span></div>';
+        '<div class="tl-seal-foot"><span>The next lune seals the moment it ends</span><span><a href="/tide/' + esc(ls.lune) + '">See the tide</a></span></div>';
       return;
     }
     var total = t.waiting.reduce(function (a, w) { return a + w.size; }, 0);
@@ -52,7 +52,7 @@
       '<img src="/assets/moon-loader.svg" alt="" aria-hidden="true">' +
       '<div><div class="tl-seal-k">' + (due ? 'SEALING NOW' : 'WAITING TO BE SEALED') + '</div><div class="tl-seal-h">' + esc(label) + '</div>' +
       '<p class="tl-seal-p">' + (due
-        ? 'The nightly seal is running. These receipts are about to become one tide, chained to the last and signed with Moon\'s keys.'
+        ? 'The lune has ended and the seal is running. These receipts are about to become one tide, chained to the last and signed with Moon\'s keys.'
         : 'This lune ended <span data-ago>' + ago(now - ended) + '</span> ago. Tonight its receipts become one tide: a single fingerprint of all of them, chained to the last tide, signed with Moon\'s keys and anchored to Bitcoin.') + '</p></div>' +
       '<div class="tl-seal-ns"><div class="tl-seal-n"><b>' + total + '</b><span>RECEIPT' + (total === 1 ? '' : 'S') + '</span></div>' +
       '<div class="tl-seal-n"><b data-cd>' + (due ? 'NOW' : clock(left)) + '</b><span>' + (due ? 'SEALING' : 'UNTIL THE SEAL') + '</span></div></div>' +

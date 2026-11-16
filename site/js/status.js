@@ -1,4 +1,4 @@
-/* moon369.org/status: is Moon working right now? Live checks from your browser, every nightly seal, and the dates that matter. */
+/* moon369.org/status: is Moon working right now? Live checks from your browser, every tide seal, and the dates that matter. */
 (function () {
   var API = 'https://api.moon369.org';
   var $ = function (s) { return document.querySelector(s); };
@@ -55,7 +55,7 @@
     var tides = (tl && tl.b && tl.b.tides) || [], rows = $('[data-st-tides]');
     if (!tides.length) {
       var after = s && s.tideline && s.tideline.ok ? s.tideline.seals_after_utc : (tl && tl.b && tl.b.seals_after_utc);
-      rows.innerHTML = '<tr><td colspan="4" class="st-empty">No tide has sealed yet. The first one seals after ' + (after ? fmt(after) : 'the current lune ends') + ', on the next nightly run.</td></tr>';
+      rows.innerHTML = '<tr><td colspan="4" class="st-empty">No tide has sealed yet. The first one seals after ' + (after ? fmt(after) : 'the current lune ends') + '.</td></tr>';
     } else rows.innerHTML = tides.map(function (x) {
       var b = x.bitcoin, btc = !b ? '<span class="st-mut">not anchored</span>' : b.status === 'confirmed' ? 'Block ' + Number(b.block_height).toLocaleString('en-US') : '<span class="st-mut">confirming</span>';
       return '<tr><td><a href="/tide/' + esc(x.lune) + '">' + esc(x.lune) + '</a></td><td>' + Number(x.size).toLocaleString('en-US') + '</td><td>' + fmt(new Date(Number(BigInt(x.sealed_unix_ns) / 1000000n)).toISOString()) + '</td><td>' + btc + '</td></tr>';

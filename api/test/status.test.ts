@@ -28,9 +28,8 @@ describe('status', () => {
 import { nextSealRun } from '../src/index.js';
 describe('next seal run', () => {
   const ns = (iso: string) => BigInt(Date.parse(iso)) * 1_000_000n;
-  it('is the next 07:23 UTC after the lune ends', () => {
-    expect(nextSealRun(ns('2026-11-16T15:18:00Z'), ns('2026-11-16T18:00:00Z'))).toBe('2026-11-17T07:23:00.000Z');
-    expect(nextSealRun(ns('2026-11-17T05:00:00Z'), ns('2026-11-16T18:00:00Z'))).toBe('2026-11-17T07:23:00.000Z');
-    expect(nextSealRun(ns('2026-11-17T08:00:00Z'), ns('2026-11-16T18:00:00Z'))).toBe('2026-11-18T07:23:00.000Z');
+  it('is when the lune ends, or now if it already has', () => {
+    expect(nextSealRun(ns('2026-11-16T15:18:00Z'), ns('2026-11-16T18:00:00Z'))).toBe('2026-11-16T18:00:00.000Z');
+    expect(nextSealRun(ns('2026-11-17T05:00:00Z'), ns('2026-11-16T18:00:00Z'))).toBe('2026-11-17T05:00:00.000Z');
   });
 });
