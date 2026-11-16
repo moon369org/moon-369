@@ -108,3 +108,31 @@ describe('MCP server', () => {
     expect((await handle(new Request('http://x/mcp'), {})).status).toBe(405);
   });
 });
+
+describe('search', () => {
+  it('finds by file, by moment, and by verified name, and keeps unverified signers private', async () => {
+    const e = env();
+    const a = await (await post(e, '/v1/sign', { sha256: 'a'.repeat(64), label: 'Logo' }, HAND)).json() as { receipt: { moonmark: string } };
+    const k = (await (await post(e, '/v1/api-keys', { name: 'Getty Images', email: 'x@y.co' })).json() as { key: string }).key;
+    await post(e, '/v1/sign', { sha256: 'b'.repeat(64), label: 'secret plan' }, k);
+    await post(e, '/v1/sign', { sha256: 'c'.repeat(64) });
+    type S = { kind: string; count: number; results: { registrant: string; label?: string; sha256?: string }[] };
+    const byFile = await (await get(e, '/v1/search?q=' + 'a'.repeat(64))).json() as S;
+    expect(byFile).toMatchObject({ kind: 'file', count: 1 }); expect(byFile.results[0].registrant).toBe('Halden Stock');
+    const lune = a.receipt.moonmark.slice(0, 10);
+    const byLune = await (await get(e, '/v1/search?q=' + encodeURIComponent(lune))).json() as S;
+    expect(byLune.kind).toBe('time'); expect(byLune.count).toBe(3);
+    const named = byLune.results.find((r) => r.registrant === 'Halden Stock')!; expect(named.label).toBe('Logo'); expect(named.sha256).toBe('a'.repeat(64));
+    const others = byLune.results.filter((r) => r.registrant !== 'Halden Stock');
+    expect(others.map((r) => r.registrant).sort()).toEqual(['anonymous', 'unverified']);
+    expect(others.every((r) => r.label === undefined && r.sha256 === undefined)).toBe(true);   // nobody browses other people's files
+    const sec = await (await get(e, '/v1/search?q=' + encodeURIComponent(a.receipt.moonmark.slice(0, 19)))).json() as S;
+    expect(sec.results.some((r) => r.registrant === 'Halden Stock')).toBe(true);
+    const byName = await (await get(e, '/v1/search?q=Halden%20Stock')).json() as S & { slug: string };
+    expect(byName).toMatchObject({ kind: 'registrant', slug: 'halden-stock', count: 1 });
+    expect((await (await get(e, '/v1/search?q=Getty%20Images')).json() as S).count).toBe(0);   // self-serve names get no page
+    const page = await (await get(e, '/v1/registrants/halden-stock')).json() as { verified: boolean; count: number };
+    expect(page).toMatchObject({ verified: true, count: 1 });
+    expect((await get(e, '/v1/search?q=')).status).toBe(400);
+  });
+});

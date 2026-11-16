@@ -14,6 +14,10 @@
     {
       "source": "/m/:mark",
       "destination": "/api/m?mark=:mark"
+    },
+    {
+      "source": "/by/:name",
+      "destination": "/by.html"
     }
   ]
 }

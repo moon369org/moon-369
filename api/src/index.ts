@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import {
   SPEC_VERSION, EPOCH_UNIX_NS, LUNATION_NS, NUM, DEN, MOON_SECOND_SI, YEAR_DAYS, MOONS,
   toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, phaseName, unixNsToIso, yearInfo,
-  moonLength, MoonRangeError, type MoonTime,
+  moonLength, MoonRangeError, type MoonTime, moonNsOf, moonNsToUnixNs, MOON_DAY_NS, NS_PER_SECOND,
 } from './moon.js';
 import { cardSvg, shareSvg } from './card.js';
 import { TsaSigner, TsaReject, parseRequest as parseTsq, issue as issueTst, reject as tsaReject, FAIL as TSA_FAIL, TSA_POLICY, TSA_EXT_MOONMARK } from './tsa.js';
@@ -12,7 +12,7 @@ import { eclipseIcon } from './eclipse-icon.js';
 import { parseNight, nightFacts, nightSvg, NightParamError } from './night.js';
 import { hashKey, newKey, type KeyWriter } from './keys.js';
 import { mcp } from './mcp.js';
-import { makeRegistration, publicRegistration, isPhash, hamming, bands, SIMILAR_BITS, type RegistryStore } from './registry.js';
+import { makeRegistration, publicRegistration, isPhash, hamming, bands, SIMILAR_BITS, registrantSlug, type RegistryStore, type Registration } from './registry.js';
 import { svgToPng } from './png.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
 import { QUICKNET, BEACON_NETWORK, type Beacon, type Chain } from './beacon.js';
@@ -246,6 +246,33 @@ async function authAndLimit(req: Request, env: Env, signing = false): Promise<Ga
   return { plan: 'open' };
 }
 
+
+// ---------- search ----------
+/** What anyone may see of a registration found by time: everything for verified names, only the moment for the rest. */
+function searchView(r: Registration) {
+  if (r.registrant_verified) return { ...publicRegistration(r), sha256: r.sha256 };
+  return { moonmark: r.moonmark, utc: new Date(Number(BigInt(r.unix_ns) / 1_000_000n)).toISOString(), registrant: r.registrant === 'anonymous' ? 'anonymous' : 'unverified', registrant_verified: false };
+}
+/** A Moonmark or a UTC date/time as a window in Unix ms: as wide as the precision given (a lune, a minute, a second). */
+function searchWindow(q: string): { from: number; to: number; label: string } | null {
+  const mm = /^(-?\d+)\.(\d{1,2})\.(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?)?$/.exec(q);
+  if (mm) {
+    const t = parseMoonmark(`${mm[1]}.${mm[2]}.${mm[3]}` + (mm[4] ? ` ${mm[4]}:${mm[5]}` + (mm[6] ? `:${mm[6]}` : '') : ''));
+    t.nanosecond = 0;
+    const start = moonNsOf(t), unit = mm[6] ? NS_PER_SECOND : mm[5] ? 60n * NS_PER_SECOND : MOON_DAY_NS;
+    const a = moonNsToUnixNs(start), b = moonNsToUnixNs(start + unit);
+    return { from: Number(a / 1_000_000n), to: Number(b / 1_000_000n), label: mm[6] ? 'second' : mm[5] ? 'minute' : 'lune' };
+  }
+  const iso = /^(\d{4}-\d{2}-\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?Z?)?$/.exec(q);
+  if (iso) {
+    const from = Date.parse(iso[1] + 'T' + (iso[2] ? `${iso[2]}:${iso[3]}:${iso[4] ?? '00'}` : '00:00:00') + 'Z');
+    if (!Number.isFinite(from)) return null;
+    const span = iso[4] ? 1000 : iso[2] ? 60_000 : 86_400_000;
+    return { from, to: from + span, label: iso[4] ? 'second' : iso[2] ? 'minute' : 'utc_day' };
+  }
+  return null;
+}
+
 function cleanText(x: unknown, max: number): string | null {
   if (typeof x !== 'string') return null;
   const t = x.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, max);
@@ -424,7 +451,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
@@ -733,6 +760,45 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const r = (body.receipt && typeof body.receipt === 'object' ? body.receipt : body) as Receipt;
         if (!r || typeof r !== 'object' || typeof (r as Receipt).unix_ns !== 'string' || !/^-?\d+$/.test((r as Receipt).unix_ns)) throw new HttpError(400, 'bad_param', 'Send a signed Moonmark receipt');
         return json(await proofFor(env.TIDES, r), 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/search`: {
+        if (!env.REGISTRY) throw new HttpError(503, 'registry_unavailable', 'Search is not configured on this deployment');
+        const term = (q.get('q') ?? '').trim();
+        if (!term || term.length > 120) throw new HttpError(400, 'bad_param', 'Search for a SHA-256, a Moonmark (1928.05.06 10:43:17), a lune (1928.05.06), a UTC date, or a verified name');
+        const limit = Math.min(500, Math.max(1, Number(q.get('limit') ?? 200) || 200));
+        const hdr = { 'Cache-Control': 'public, max-age=30', ...planHdr };
+        if (isSha256Hex(term.toLowerCase())) {
+          const regs = (await env.REGISTRY.bySha(term.toLowerCase(), 50)).sort((a, b) => (BigInt(a.unix_ns) < BigInt(b.unix_ns) ? -1 : 1));
+          return json({ kind: 'file', q: term, count: regs.length, results: regs.map((r) => ({ ...publicRegistration(r), sha256: r.sha256 })) }, 200, hdr);
+        }
+        let w: ReturnType<typeof searchWindow> = null;
+        try { w = searchWindow(term); } catch { w = null; }
+        if (w) {
+          if (!env.REGISTRY.byTime) throw new HttpError(503, 'search_unavailable', 'Search by time is not available here');
+          const regs = await env.REGISTRY.byTime(w.from, w.to, limit);
+          return json({ kind: 'time', q: term, window: { from_utc: new Date(w.from).toISOString(), to_utc: new Date(w.to).toISOString(), span: w.label }, count: regs.length,
+            note: 'Registrations under a verified name are shown in full; for everyone else, only the moment is shown.', results: regs.map(searchView), ...(regs.length === limit ? { truncated: true } : {}) }, 200, hdr);
+        }
+        const slug = registrantSlug(term);
+        if (!slug || !env.REGISTRY.byRegistrant) return json({ kind: 'none', q: term, count: 0, results: [] }, 200, hdr);
+        const regs = await env.REGISTRY.byRegistrant(slug, limit);
+        return json({ kind: 'registrant', q: term, slug, registrant: regs[0]?.registrant ?? null, count: regs.length, page: `https://moon369.org/by/${slug}`,
+          results: regs.map((r) => ({ ...publicRegistration(r), sha256: r.sha256 })) }, 200, hdr);
+      }
+
+      case path.startsWith(`/${API_VERSION}/registrants/`): {
+        if (!env.REGISTRY?.byRegistrant) throw new HttpError(503, 'registry_unavailable', 'Registrant pages are not configured on this deployment');
+        const slug = registrantSlug(decodeURIComponent(path.split('/').pop() ?? ''));
+        if (!slug) throw new HttpError(400, 'bad_param', 'Put a registrant name in the path, like /v1/registrants/moon');
+        const limit = Math.min(500, Math.max(1, Number(q.get('limit') ?? 200) || 200));
+        const before = q.get('before') ? Number(q.get('before')) : undefined;
+        if (before !== undefined && !Number.isFinite(before)) throw new HttpError(400, 'bad_param', 'before is a Unix time in ms');
+        const regs = await env.REGISTRY.byRegistrant(slug, limit, before);
+        const last = regs.at(-1);
+        return json({ slug, registrant: regs[0]?.registrant ?? null, verified: regs.length > 0, count: regs.length,
+          results: regs.map((r) => ({ ...publicRegistration(r), sha256: r.sha256 })),
+          ...(regs.length === limit && last ? { next_before: Number(BigInt(last.unix_ns) / 1_000_000n) } : {}) }, 200, { 'Cache-Control': 'public, max-age=60', ...planHdr });
       }
 
       case path === `/${API_VERSION}/tideline`: {

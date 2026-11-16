@@ -65,7 +65,16 @@ export interface RegistryStore {
   add(r: Registration): Promise<void>;
   bySha(sha: string, max: number): Promise<Registration[]>;
   candidatesByBand(band: string): Promise<string[]>;
+  /** Registrations signed in [fromMs, toMs), oldest first. */
+  byTime?(fromMs: number, toMs: number, max: number): Promise<Registration[]>;
+  /** A verified registrant's registrations, newest first. */
+  byRegistrant?(slug: string, max: number, beforeMs?: number): Promise<Registration[]>;
 }
+
+/** A registrant's name as a URL slug: "Moon" -> "moon", "Acme Inc." -> "acme-inc". */
+export const registrantSlug = (name: string) =>
+  name.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 64);
+const msOf = (r: Registration) => Number(BigInt(r.unix_ns) / 1_000_000n);
 
 export function memoryRegistry(): RegistryStore {
   const bySha = new Map<string, Registration[]>(), band = new Map<string, Set<string>>();
@@ -76,6 +85,13 @@ export function memoryRegistry(): RegistryStore {
     },
     async bySha(sha, max) { return (bySha.get(sha) ?? []).slice(0, max); },
     async candidatesByBand(b) { return [...(band.get(b) ?? [])]; },
+    async byTime(from, to, max) {
+      return [...bySha.values()].flat().filter((r) => { const t = msOf(r); return t >= from && t < to; }).sort((a, b) => msOf(a) - msOf(b)).slice(0, max);
+    },
+    async byRegistrant(slug, max, before) {
+      return [...bySha.values()].flat().filter((r) => r.registrant_verified && registrantSlug(r.registrant) === slug && (before === undefined || msOf(r) < before))
+        .sort((a, b) => msOf(b) - msOf(a)).slice(0, max);
+    },
   };
 }
 
@@ -89,13 +105,47 @@ export function upstashRegistry(url: string, token: string): RegistryStore {
   };
   return {
     async add(r) {
-      const cmds: (string | number)[][] = [['RPUSH', `rg:sha:${r.sha256}`, JSON.stringify(r)]];
+      const j = JSON.stringify(r), cmds: (string | number)[][] = [['RPUSH', `rg:sha:${r.sha256}`, j], ...indexCmds(r, j)];
       if (r.phash) for (const b of bands(r.phash)) cmds.push(['SADD', `rg:ph:${b}`, r.sha256]);
       await call(cmds);
     },
     async bySha(sha, max) { const [a] = await call([['LRANGE', `rg:sha:${sha}`, 0, max - 1]]); return ((a as string[]) ?? []).map((x) => JSON.parse(x) as Registration); },
     async candidatesByBand(b) { const [a] = await call([['SRANDMEMBER', `rg:ph:${b}`, 200]]); return (a as string[]) ?? []; },
+    async byTime(from, to, max) {
+      await indexed();
+      const [a] = await call([['ZRANGE', 'rg:t', from, `(${to}`, 'BYSCORE', 'LIMIT', 0, max]]);
+      return ((a as string[]) ?? []).map((x) => JSON.parse(x) as Registration);
+    },
+    async byRegistrant(slug, max, before) {
+      await indexed();
+      const [a] = await call([['ZRANGE', `rg:by:${slug}`, before === undefined ? '+inf' : `(${before}`, '-inf', 'BYSCORE', 'REV', 'LIMIT', 0, max]]);
+      return ((a as string[]) ?? []).map((x) => JSON.parse(x) as Registration);
+    },
   };
+  function indexCmds(r: Registration, j: string): (string | number)[][] {
+    const out: (string | number)[][] = [['ZADD', 'rg:t', msOf(r), j]];
+    if (r.registrant_verified) out.push(['ZADD', `rg:by:${registrantSlug(r.registrant)}`, msOf(r), j]);
+    return out;
+  }
+  // Registrations made before these indexes existed: add them once, on the first search.
+  async function indexed() {
+    const [done] = await call([['GET', 'rg:ix:v1']]);
+    if (done === 'done') return;
+    const [lock] = await call([['SET', 'rg:ix:v1', 'running', 'NX', 'EX', 120]]);
+    if (lock !== 'OK') return;
+    let cursor = '0';
+    do {
+      const [res] = await call([['SCAN', cursor, 'MATCH', 'rg:sha:*', 'COUNT', 500]]);
+      const [next, keys] = res as [string, string[]];
+      cursor = next;
+      if (keys.length) {
+        const lists = await call(keys.map((k) => ['LRANGE', k, 0, -1]));
+        const cmds = (lists as string[][]).flat().flatMap((j) => indexCmds(JSON.parse(j) as Registration, j));
+        if (cmds.length) await call(cmds);
+      }
+    } while (cursor !== '0');
+    await call([['SET', 'rg:ix:v1', 'done']]);
+  }
 }
 
 /** Public view of a registration (what lookups return). */
