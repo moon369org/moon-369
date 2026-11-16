@@ -289,7 +289,16 @@
     for (var q = 0; q < 64; q += 4) out += parseInt(bits.slice(q, q + 4), 2).toString(16);
     return out;
   }
+  // Video and audio: Moon's media look-alike hash, from a script loaded only when a clip is signed.
+  var mediaReady = null;
+  function mediaHash(file) {
+    if (!mediaReady) mediaReady = window.MoonMediaHash ? Promise.resolve() : new Promise(function (ok, no) {
+      var sc = document.createElement('script'); sc.src = '/js/media-hash.js'; sc.async = true; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc);
+    });
+    return mediaReady.then(function () { return window.MoonMediaHash.hash(file); }).catch(function () { return null; });
+  }
   function dhash(file) {
+    if (/^(video|audio)\//.test(file.type)) return mediaHash(file);
     if (!/^image\//.test(file.type) || !window.createImageBitmap) return Promise.resolve(null);
     return createImageBitmap(file).then(dhashBox).catch(function () { return null; });
   }

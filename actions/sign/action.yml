@@ -1,0 +1,54 @@
+name: Sign files on Moon
+description: 'Timestamp release files with signed Moonmarks (Ed25519 + ML-DSA-65). Only SHA-256 fingerprints leave the runner.'
+author: Moon
+branding:
+  icon: moon
+  color: gray-dark
+inputs:
+  files:
+    description: 'Files or glob patterns to sign, one per line or space-separated (for example "dist/*" or "build/**/*.zip").'
+    required: true
+  api-key:
+    description: 'A Moon API key (store it as a secret). Without one, Moon signs up to 5 files a run. Free keys at https://moon369.org/api#key'
+    required: false
+    default: ''
+  label:
+    description: 'Optional label stored with each registration, before the file name (for example "v1.2.0").'
+    required: false
+    default: ''
+  output:
+    description: 'Where to write the receipts (JSON).'
+    required: false
+    default: moon-receipts.json
+  upload-to-release:
+    description: 'Attach the receipts file to the GitHub release that triggered the run ("true" or "false"). Needs "permissions: contents: write".'
+    required: false
+    default: 'false'
+  api:
+    description: 'Moon API base URL.'
+    required: false
+    default: https://api.moon369.org
+outputs:
+  receipts:
+    description: 'Path of the receipts file.'
+    value: ${{ steps.sign.outputs.receipts }}
+  count:
+    description: 'How many files were signed.'
+    value: ${{ steps.sign.outputs.count }}
+runs:
+  using: composite
+  steps:
+    - id: sign
+      shell: bash
+      env:
+        MOON_FILES: ${{ inputs.files }}
+        MOON_KEY: ${{ inputs.api-key }}
+        MOON_LABEL: ${{ inputs.label }}
+        MOON_OUT: ${{ inputs.output }}
+        MOON_API: ${{ inputs.api }}
+      run: bash "${{ github.action_path }}/sign.sh"
+    - if: ${{ inputs.upload-to-release == 'true' && github.event_name == 'release' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh release upload "${{ github.event.release.tag_name }}" "${{ steps.sign.outputs.receipts }}" --clobber --repo "${{ github.repository }}"

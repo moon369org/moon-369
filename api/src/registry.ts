@@ -48,15 +48,20 @@ export function makeRegistration(
 }
 
 // ---------- perceptual hash helpers ----------
-export const isPhash = (x: unknown): x is string => typeof x === 'string' && /^[0-9a-f]{16}$/.test(x);
-/** Bits that differ between two 64-bit hashes. */
+// An image hash is 16 hex. Video and audio hashes carry their kind: "v:" or "a:" + 16 hex. Kinds never match each other.
+export const isPhash = (x: unknown): x is string => typeof x === 'string' && /^(?:[va]:)?[0-9a-f]{16}$/.test(x);
+const kindOf = (p: string) => (p[1] === ':' ? p[0] : '');
+const bitsOf = (p: string) => (p[1] === ':' ? p.slice(2) : p);
+export const phashKind = (p: string): 'image' | 'video' | 'audio' => (kindOf(p) === 'v' ? 'video' : kindOf(p) === 'a' ? 'audio' : 'image');
+/** Bits that differ between two 64-bit hashes of the same kind (64 when the kinds differ). */
 export function hamming(a: string, b: string): number {
-  let x = BigInt('0x' + a) ^ BigInt('0x' + b), n = 0;
+  if (kindOf(a) !== kindOf(b)) return 64;
+  let x = BigInt('0x' + bitsOf(a)) ^ BigInt('0x' + bitsOf(b)), n = 0;
   while (x) { n += Number(x & 1n); x >>= 1n; }
   return n;
 }
 /** Four 16-bit bands. Two images within 3 bits share at least one band exactly (pigeonhole). */
-export const bands = (p: string) => [0, 1, 2, 3].map((i) => `${i}:${p.slice(i * 4, i * 4 + 4)}`);
+export const bands = (p: string) => { const k = kindOf(p), h = bitsOf(p); return [0, 1, 2, 3].map((i) => `${k}${i}:${h.slice(i * 4, i * 4 + 4)}`); };
 /** Look-alike threshold: at most this many of 64 bits differ. */
 export const SIMILAR_BITS = 10;
 

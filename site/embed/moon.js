@@ -46,7 +46,16 @@
     return out;
   }
   /** The look-alike hashes of an image: { v2, v1 }. v1 is the older, browser-dependent hash, still checked for earlier registrations. */
+  // Video and audio look-alike hashes come from a separate script, loaded only when a clip is checked.
+  var mediaReady = null;
+  function mediaHash(file) {
+    if (!mediaReady) mediaReady = window.MoonMediaHash ? Promise.resolve() : new Promise(function (ok, no) {
+      var sc = document.createElement('script'); sc.src = 'https://moon369.org/js/media-hash.js'; sc.async = true; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc);
+    });
+    return mediaReady.then(function () { return window.MoonMediaHash.hash(file); }).then(function (h) { return h ? { v2: h, v1: null } : null; }).catch(function () { return null; });
+  }
   function dhashes(file) {
+    if (/^(video|audio)\//.test(file.type)) return mediaHash(file);
     if (!/^image\//.test(file.type)) return Promise.resolve(null);
     var load = window.createImageBitmap ? createImageBitmap(file) : new Promise(function (ok, no) { var im = new Image(); im.onload = function () { ok(im); }; im.onerror = no; im.src = URL.createObjectURL(file); });
     return load.then(function (src) { return { v2: dhashBox(src), v1: dhashFromSource(src) }; }).catch(function () { return null; });
@@ -157,7 +166,7 @@
         '.f{font:400 11.5px/1.6 ' + MONO + ';color:' + C.dim + ';word-break:break-all;margin-bottom:14px}.m{border:1px solid ' + C.line + ';padding:16px 18px 10px;margin-top:12px}' +
         '.n{font-size:13.5px;line-height:1.6;color:#B9B6AE}a{color:' + C.fg + '}</style>' +
         '<label class="z" part="zone"><input type="file" aria-label="Choose a file to check">' + moonSvg(30) +
-        '<div class="t">DROP A FILE TO CHECK IT</div><div class="s">See if it is on Moon, who registered it and when. For photos, Moon also finds edited and resized copies. Your file stays on your device.</div></label>' +
+        '<div class="t">DROP A FILE TO CHECK IT</div><div class="s">See if it is on Moon, who registered it and when. For photos, video and audio, Moon also finds edited and re-encoded copies. Your file stays on your device.</div></label>' +
         '<div class="o" part="result" aria-live="polite"></div>';
       var z = root.querySelector('.z'), inp = root.querySelector('input'), out = root.querySelector('.o');
       ['dragenter', 'dragover'].forEach(function (ev) { z.addEventListener(ev, function (e) { e.preventDefault(); z.classList.add('on'); }); });
@@ -192,7 +201,7 @@
           if (ex.count > 1) html += '<div class="n" style="margin-top:10px">Registered ' + ex.count + ' times. The earliest is shown.</div>';
         } else if (others.length) {
           html += '<div class="h" style="color:' + C.warn + '">' + moonSvg(16) + 'AN EDITED COPY OF A FILE ON MOON</div>' + fp +
-            '<div class="n">This exact file was never registered, but it looks like ' + (others.length === 1 ? 'a picture that was' : others.length + ' pictures that were') + '. The earliest registration is usually the original.</div>';
+            '<div class="n">This exact file was never registered, but it ' + (/^v:/.test(ph || '') ? 'looks like ' + (others.length === 1 ? 'a video that was' : others.length + ' videos that were') : /^a:/.test(ph || '') ? 'sounds like ' + (others.length === 1 ? 'a recording that was' : others.length + ' recordings that were') : 'looks like ' + (others.length === 1 ? 'a picture that was' : others.length + ' pictures that were')) + '. The earliest registration is usually the original.</div>';
         } else {
           html += '<div class="h">NOT ON MOON</div>' + fp + '<div class="n">Nobody has registered this file' + (ph ? ' or anything that looks like it' : '') + '. <a href="https://moon369.org/#sign">Sign it now</a> to be the first.</div>';
         }

@@ -14,8 +14,9 @@ import { parseNight, nightFacts, nightSvg, NightParamError } from './night.js';
 import { hashKey, newKey, type KeyWriter } from './keys.js';
 import { mcp } from './mcp.js';
 import { eventLinks, eventIcs, cleanEventName } from './event.js';
+import { RESEAL, resealFingerprint } from './reseal.js';
 import { parseStatement, statementSha, newPrintIds, type EditionStore } from './editions.js';
-import { makeRegistration, publicRegistration, isPhash, hamming, bands, SIMILAR_BITS, registrantSlug, type RegistryStore, type Registration } from './registry.js';
+import { makeRegistration, publicRegistration, isPhash, phashKind, hamming, bands, SIMILAR_BITS, registrantSlug, type RegistryStore, type Registration } from './registry.js';
 import { svgToPng } from './png.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
 import { QUICKNET, BEACON_NETWORK, type Beacon, type Chain } from './beacon.js';
@@ -502,16 +503,16 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
     if (gate instanceof Response) return gate;
     return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, registrantOf(gate));
   }
-  const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof` || path === `/${API_VERSION}/editions`;
+  const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof` || path === `/${API_VERSION}/editions` || path === `/${API_VERSION}/reseal` || path === `/${API_VERSION}/reseal/verify`;
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/event', '/v1/event.ics', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   if (path.startsWith(`/${API_VERSION}/admin/`)) return adminRoute(req, env, path);
 
-  const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
+  const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/reseal` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
   const gate = await authAndLimit(req, env, signing);
   if (gate instanceof Response) return gate;
   const planHdr = { 'X-Moon-Plan': gate.plan };
@@ -776,7 +777,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         if (!env.REGISTRY) throw new HttpError(503, 'registry_unavailable', 'Lookups are not configured on this deployment');
         const body = await readJson(req);
         const ph = typeof body.phash === 'string' ? body.phash.toLowerCase() : body.phash;
-        if (!isPhash(ph)) throw new HttpError(400, 'bad_param', 'phash must be the 16-character hex 64-bit difference hash of the image');
+        if (!isPhash(ph)) throw new HttpError(400, 'bad_param', 'phash must be a 64-bit look-alike hash: 16 hex for an image, or "v:" / "a:" + 16 hex for video or audio');
         const cands = new Set<string>();
         for (const b of bands(ph)) for (const c of await env.REGISTRY.candidatesByBand(b)) { cands.add(c); if (cands.size >= 200) break; }
         const matches = [];
@@ -789,7 +790,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           if (d <= SIMILAR_BITS) matches.push({ sha256: c, distance: d, first: publicRegistration(withPh[0]) });
         }
         matches.sort((a, b) => a.distance - b.distance || (BigInt(a.first.statement.unix_ns) < BigInt(b.first.statement.unix_ns) ? -1 : 1));
-        return json({ phash: ph, threshold_bits: SIMILAR_BITS, count: matches.length, matches: matches.slice(0, 20), note: 'Look-alike images: a match means the picture looks the same, not that it is the same file. The earliest registration is usually the original.' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+        return json({ phash: ph, threshold_bits: SIMILAR_BITS, count: matches.length, matches: matches.slice(0, 20), kind: phashKind(ph), note: 'Look-alikes: a match means the picture, video or sound is very close, not that it is the same file. The earliest registration is usually the original.' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
       case path === `/${API_VERSION}/tsa`:
@@ -846,6 +847,33 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           return json({ registered: true, valid: false, edition: ed.n, reason: print > ed.n ? `This edition has ${ed.n} prints` : 'This print ID does not belong to this print' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
         const h = await env.EDITIONS.hit(sha.toLowerCase(), print, new Date().toISOString());
         return json({ registered: true, valid: true, print, edition: ed.n, registered_at: ed.created, checks: h.count, first_check: h.first }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/reseal`: {
+        // Re-seal an old receipt: Moon signs its fingerprint now, with today's algorithms.
+        if (!env.SIGNER) throw new HttpError(503, 'signing_unavailable', 'Signing is not configured on this deployment');
+        const body = await readJson(req, 65_536);
+        const old = (body.receipt && typeof body.receipt === 'object' ? body.receipt : null) as Receipt | null;
+        if (!old) throw new HttpError(400, 'bad_param', 'receipt: the old receipt to re-seal, as JSON');
+        const before = checkReceipt(old, undefined, env) as { valid: boolean; reason?: string };
+        if (!before.valid) throw new HttpError(400, 'bad_receipt', 'Moon re-seals only receipts that still check out' + (before.reason ? ` (${before.reason})` : ''));
+        const fp = resealFingerprint(old);
+        const out = await signNow(env, fp, undefined, whoFrom(body, gate));
+        return json({ reseal: RESEAL, fingerprint: fp, of: old, ...out,
+          how: 'fingerprint = SHA-256 of "moonmark-reseal/1\n" + the old receipt as JSON with keys sorted at every level. Check with POST /v1/reseal/verify {"receipt": <new>, "of": <old>}.' },
+          200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/reseal/verify`: {
+        const body = await readJson(req, 131_072);
+        const rc = body.receipt as Receipt, old = body.of;
+        if (!rc || typeof rc !== 'object' || !old || typeof old !== 'object') throw new HttpError(400, 'bad_param', 'Send {"receipt": <the re-seal receipt>, "of": <the old receipt>}');
+        const fp = resealFingerprint(old);
+        const now = checkReceipt(rc, fp, env) as { valid: boolean; moonmark?: string; reason?: string };
+        const then = checkReceipt(old as Receipt, undefined, env) as { valid: boolean; moonmark?: string; reason?: string };
+        return json({ valid: now.valid, fingerprint: fp, resealed_at: now.moonmark ?? null, reseal: now, original: { moonmark: (old as Receipt).moonmark, still_valid: then.valid, ...(then.valid ? {} : { reason: then.reason }) },
+          meaning: now.valid ? 'The old receipt, exactly as given, existed when Moon re-sealed it. That holds even if the old receipt\'s own algorithms are broken later.' : 'The re-seal does not cover this receipt.' },
+          200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
       case path === `/${API_VERSION}/evidence`: {
@@ -960,7 +988,12 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           if (!f) throw new HttpError(404, 'not_found', 'This tide has no Bitcoin proof yet');
           return new Response(new Uint8Array(f), { headers: { ...CORS, 'Content-Type': 'application/vnd.opentimestamps.v1', 'Content-Disposition': `attachment; filename="tide-${tide.lune}.txt.ots"`, 'Cache-Control': 'public, max-age=300' } });
         }
-        if (tide) return json(tide, 200, { 'Cache-Control': 'public, max-age=300', ...planHdr });
+        if (tide) {
+          // A sealed tide with every entry, so anyone can recompute its Merkle root and each entry's proof.
+          const all = await env.TIDES.leaves(lune), MAXS = 5000;
+          const entries = all.slice(0, MAXS).map((leaf, index) => ({ index, leaf }));
+          return json({ ...tide, status: 'sealed', entries, ...(all.length > MAXS ? { entries_truncated: true } : {}) }, 200, { 'Cache-Control': 'public, max-age=300', ...planHdr });
+        }
         const leaves = await env.TIDES.leaves(lune), size = leaves.length;
         const last = (await env.TIDES.checkpoints(lune)).at(-1) ?? null;
         // The lune's entries so far, in order: the public log before it seals. A leaf is a one-way fingerprint of a receipt.

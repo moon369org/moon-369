@@ -18,6 +18,55 @@
     {
       "source": "/by/:name",
       "destination": "/by.html"
+    },
+    {
+      "source": "/tide/:lune",
+      "destination": "/tide.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/pki/(.*).crl",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/pkix-crl"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    },
+    {
+      "source": "/pki/(.*).cer",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/pkix-cert"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    },
+    {
+      "source": "/pki/(.*).pem",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/x-pem-file"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
     }
   ]
 }

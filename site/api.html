@@ -156,6 +156,7 @@ footer > div > div:first-child svg{width:64px!important}
 <a href="/tideline">TIDELINE</a>
 <a href="/trust">TRUST</a>
 <a href="/api" aria-current="page">API</a>
+<a href="/check">CHECK</a>
 <a href="/#sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
 </nav>
 <button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
@@ -170,7 +171,7 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 <div style="flex: 0 1 380px; border: 1px solid rgb(36, 38, 42); padding: 24px; display: flex; flex-direction: column; gap: 10px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">LIVE · MOONMARK · GET /v1/now</div>
-<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none;"></canvas><div><span style="visibility: hidden;">15:01:41</span></div></div>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none;"></canvas><div><span style="visibility: hidden;">15:52:04</span></div></div>
 <div class="ap-hide-m" style="font-family: Syncopate, sans-serif; font-size: 12px; letter-spacing: 0.24em;">CYCLE 1928 · MOON 05 · LUNE 06</div>
 <div class="ap-date" style="display: none;"><div class="ap-date-c"><div class="ap-date-l">CYCLE</div><div class="ap-date-v">1928</div></div><div class="ap-date-c"><div class="ap-date-l">MOON</div><div class="ap-date-v">05</div></div><div class="ap-date-c"><div class="ap-date-l">LUNE</div><div class="ap-date-v">06</div></div></div>
 </div>
@@ -372,11 +373,11 @@ data-compact to hide the local time line.</pre>
   "day": 6,
   "day_of_cycle": 120,
   "moon_length_days": 28,
-  "time": "15:01:41",
-  "moonmark": "1928.05.06 15:01:41.216181000",
-  "phase": { "fraction": 0.211846, "name": "First quarter" },
-  "unix_ms": 1794808688611,
-  "utc": "2026-11-16T05:58:08.611000000Z",
+  "time": "15:52:04",
+  "moonmark": "1928.05.06 15:52:04.787392000",
+  "phase": { "fraction": 0.212950, "name": "First quarter" },
+  "unix_ms": 1794811834253,
+  "utc": "2026-11-16T06:50:34.253000000Z",
   "time_zone": null,
   "dst": false
 }</span></pre>
@@ -865,6 +866,39 @@ openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
 </div>
 <div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0px; border-top: 1px solid rgb(28, 29, 32);">
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px;">
+<span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; padding: 6px 10px; border: 1px solid rgb(233, 228, 216); color: rgb(233, 228, 216);">POST</span>
+<span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 18px;">/v1/reseal</span>
+<span style="font-family: Syncopate, sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid rgb(36, 38, 42); color: rgb(138, 139, 143);">SIGNED</span>
+</div>
+<p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">Re-seal an old receipt with today's algorithms: Moon signs a fingerprint of the whole receipt now and logs it on the Tideline. The fingerprint is SHA-256 of <code>moonmark-reseal/1</code>, a newline, and the receipt as JSON with keys sorted at every level. Check with <code>POST /v1/reseal/verify {"receipt": &lt;new&gt;, "of": &lt;old&gt;}</code>. <a href="/guides#reseal" style="color: rgb(242, 242, 240);">Guide</a>.</p>
+<pre style="margin: 0px; padding: 24px 20px; background: rgb(8, 8, 10); border: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl -X POST https://api.moon369.org/v1/reseal \
+  -H "Content-Type: application/json" -d '{"receipt": {...}}'
+{ "reseal": "moonmark-reseal/1", "fingerprint": "…", "of": {...}, "receipt": {...} }</pre>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0px; border-top: 1px solid rgb(28, 29, 32);">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px;">
+<span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; padding: 6px 10px; border: 1px solid rgb(233, 228, 216); color: rgb(233, 228, 216);">GET</span>
+<span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 18px;">/v1/tideline/{lune}</span>
+
+</div>
+<p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">One lune of the Tideline. A sealed tide comes with every entry, so anyone can recompute its Merkle root and each entry's proof; <a href="/tide/1928.05.06" style="color: rgb(242, 242, 240);">moon369.org/tide/{lune}</a> does that in the browser. Add <code>.txt</code> for the exact signed bytes.</p>
+<pre style="margin: 0px; padding: 24px 20px; background: rgb(8, 8, 10); border: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl https://api.moon369.org/v1/tideline/1928.05.06
+{ "lune": "1928.05.06", "status": "sealed", "size": 37, "root": "…", "hash": "…",
+  "prev": "…", "key_id": "…", "signature": "…", "entries": [{ "index": 0, "leaf": "…" }, …] }</pre>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0px; border-top: 1px solid rgb(28, 29, 32);">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px;">
+<span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; padding: 6px 10px; border: 1px solid rgb(233, 228, 216); color: rgb(233, 228, 216);">POST</span>
+<span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 18px;">/v1/editions</span>
+
+</div>
+<p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">Number the prints of an edition for a certificate of authenticity. Send the signed <code>moon-coa/1</code> statement and its receipt; every print gets its own ID. <code>GET /v1/editions/{statement}/{print}?id=</code> confirms one print and counts its checks. <a href="/certificate" style="color: rgb(242, 242, 240);">moon369.org/certificate</a> does all of this for you.</p>
+<pre style="margin: 0px; padding: 24px 20px; background: rgb(8, 8, 10); border: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">curl -X POST https://api.moon369.org/v1/editions \
+  -H "Content-Type: application/json" -d '{"statement": "moon-coa/1\nartist:…", "receipt": {...}}'
+{ "edition": 25, "prints": [{ "print": 1, "id": "S5baxD6u8Fc" }, …] }</pre>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0px; border-top: 1px solid rgb(28, 29, 32);">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px;">
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; padding: 6px 10px; background: rgb(233, 228, 216); color: rgb(11, 11, 13);">GET</span>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 18px;">/v1/spec</span>
 </div>
@@ -1110,7 +1144,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <div style="max-width: 1280px; margin: 0px auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.14em; color: rgb(138, 139, 143);">
 <div style="display: flex; flex-direction: column; gap: 18px;"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(36, 38, 42); stroke-width: 9;"></path></svg><div>MOON API · V1</div></div>
-<div style="display: flex; gap: 28px; flex-wrap: wrap;"><a href="/" style="color: rgb(138, 139, 143);">HOME</a><a href="/calendar" style="color: rgb(138, 139, 143);">CALENDAR</a><a href="/api" style="color: rgb(138, 139, 143);">API</a><a href="/m" style="color: rgb(138, 139, 143);">MOONMARK</a><a href="/uses" style="color: rgb(138, 139, 143);">USES</a><a href="/see" style="color: rgb(138, 139, 143);">SEE IT WORK</a><a href="/trust" style="color: rgb(138, 139, 143);">TRUST</a><a href="/quantum" style="color: rgb(138, 139, 143);">QUANTUM</a><a href="/tideline" style="color: rgb(138, 139, 143);">TIDELINE</a><a href="/evidence" style="color: rgb(138, 139, 143);">EVIDENCE</a><a href="/check" style="color: rgb(138, 139, 143);">CHECK</a><a href="/notarize" style="color: rgb(138, 139, 143);">NOTARIZE</a><a href="/certificate" style="color: rgb(138, 139, 143);">CERTIFICATES</a><a href="/night" style="color: rgb(138, 139, 143);">YOUR MOON</a><a href="/eclipses" style="color: rgb(138, 139, 143);">ECLIPSES</a><a href="/press" style="color: rgb(138, 139, 143);">PRESS</a><a href="/#faq" style="color: rgb(138, 139, 143);">FAQ</a></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap;"><a href="/" style="color: rgb(138, 139, 143);">HOME</a><a href="/calendar" style="color: rgb(138, 139, 143);">CALENDAR</a><a href="/api" style="color: rgb(138, 139, 143);">API</a><a href="/m" style="color: rgb(138, 139, 143);">MOONMARK</a><a href="/uses" style="color: rgb(138, 139, 143);">USES</a><a href="/see" style="color: rgb(138, 139, 143);">SEE IT WORK</a><a href="/trust" style="color: rgb(138, 139, 143);">TRUST</a><a href="/quantum" style="color: rgb(138, 139, 143);">QUANTUM</a><a href="/tideline" style="color: rgb(138, 139, 143);">TIDELINE</a><a href="/evidence" style="color: rgb(138, 139, 143);">EVIDENCE</a><a href="/check" style="color: rgb(138, 139, 143);">CHECK</a><a href="/notarize" style="color: rgb(138, 139, 143);">NOTARIZE</a><a href="/certificate" style="color: rgb(138, 139, 143);">CERTIFICATES</a><a href="/guides" style="color: rgb(138, 139, 143);">GUIDES</a><a href="/night" style="color: rgb(138, 139, 143);">YOUR MOON</a><a href="/eclipses" style="color: rgb(138, 139, 143);">ECLIPSES</a><a href="/press" style="color: rgb(138, 139, 143);">PRESS</a><a href="/#faq" style="color: rgb(138, 139, 143);">FAQ</a></div>
 </div>
 </footer>
 
@@ -1138,6 +1172,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <a href="/tideline">TIDELINE</a>
 <a href="/trust">TRUST</a>
 <a href="/api" aria-current="page">API</a>
+<a href="/check">CHECK</a>
 <a href="/#sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
 </nav>
 </div>
@@ -1834,6 +1869,39 @@ openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
 </div>
 <div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; border: 1px solid #E9E4D8; color: #E9E4D8">POST</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/reseal</span>
+<span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">SIGNED</span>
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Re-seal an old receipt with today&#39;s algorithms: Moon signs a fingerprint of the whole receipt now and logs it on the Tideline. The fingerprint is SHA-256 of <code>moonmark-reseal/1</code>, a newline, and the receipt as JSON with keys sorted at every level. Check with <code>POST /v1/reseal/verify {"receipt": &lt;new&gt;, "of": &lt;old&gt;}</code>. <a href="/guides#reseal" style="color: #F2F2F0">Guide</a>.</p>
+<pre style="margin: 0; padding: 24px 20px; background: #08080A; border: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl -X POST https://api.moon369.org/v1/reseal \
+  -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;receipt&quot;: {...}}&#x27;
+{ &quot;reseal&quot;: &quot;moonmark-reseal/1&quot;, &quot;fingerprint&quot;: &quot;…&quot;, &quot;of&quot;: {...}, &quot;receipt&quot;: {...} }</pre>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; border: 1px solid #E9E4D8; color: #E9E4D8">GET</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/tideline/{lune}</span>
+
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">One lune of the Tideline. A sealed tide comes with every entry, so anyone can recompute its Merkle root and each entry&#39;s proof; <a href="/tide/1928.05.06" style="color: #F2F2F0">moon369.org/tide/{lune}</a> does that in the browser. Add <code>.txt</code> for the exact signed bytes.</p>
+<pre style="margin: 0; padding: 24px 20px; background: #08080A; border: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl https://api.moon369.org/v1/tideline/1928.05.06
+{ &quot;lune&quot;: &quot;1928.05.06&quot;, &quot;status&quot;: &quot;sealed&quot;, &quot;size&quot;: 37, &quot;root&quot;: &quot;…&quot;, &quot;hash&quot;: &quot;…&quot;,
+  &quot;prev&quot;: &quot;…&quot;, &quot;key_id&quot;: &quot;…&quot;, &quot;signature&quot;: &quot;…&quot;, &quot;entries&quot;: [{ &quot;index&quot;: 0, &quot;leaf&quot;: &quot;…&quot; }, …] }</pre>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; border: 1px solid #E9E4D8; color: #E9E4D8">POST</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/editions</span>
+
+</div>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Number the prints of an edition for a certificate of authenticity. Send the signed <code>moon-coa/1</code> statement and its receipt; every print gets its own ID. <code>GET /v1/editions/{statement}/{print}?id=</code> confirms one print and counts its checks. <a href="/certificate" style="color: #F2F2F0">moon369.org/certificate</a> does all of this for you.</p>
+<pre style="margin: 0; padding: 24px 20px; background: #08080A; border: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">curl -X POST https://api.moon369.org/v1/editions \
+  -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;statement&quot;: &quot;moon-coa/1\nartist:…&quot;, &quot;receipt&quot;: {...}}&#x27;
+{ &quot;edition&quot;: 25, &quot;prints&quot;: [{ &quot;print&quot;: 1, &quot;id&quot;: &quot;S5baxD6u8Fc&quot; }, …] }</pre>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 32px 0; border-top: 1px solid #1C1D20">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 10px; background: #E9E4D8; color: #0B0B0D">GET</span>
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/spec</span>
 </div>
@@ -2079,7 +2147,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <footer style="border-top: 1px solid #1C1D20"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8A8B8F">
 <div style="display: flex; flex-direction: column; gap: 18px"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 72px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #24262A; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #24262A; stroke-width: 9"></path></svg><div>MOON API · V1</div></div>
-<div style="display: flex; gap: 28px; flex-wrap: wrap"><a href="/" style="color: #8A8B8F">HOME</a><a href="/calendar" style="color: #8A8B8F">CALENDAR</a><a href="/api" style="color: #8A8B8F">API</a><a href="/m" style="color: #8A8B8F">MOONMARK</a><a href="/uses" style="color: #8A8B8F">USES</a><a href="/see" style="color: #8A8B8F">SEE IT WORK</a><a href="/trust" style="color: #8A8B8F">TRUST</a><a href="/quantum" style="color: #8A8B8F">QUANTUM</a><a href="/tideline" style="color: #8A8B8F">TIDELINE</a><a href="/evidence" style="color: #8A8B8F">EVIDENCE</a><a href="/check" style="color: #8A8B8F">CHECK</a><a href="/notarize" style="color: #8A8B8F">NOTARIZE</a><a href="/certificate" style="color: #8A8B8F">CERTIFICATES</a><a href="/night" style="color: #8A8B8F">YOUR MOON</a><a href="/eclipses" style="color: #8A8B8F">ECLIPSES</a><a href="/press" style="color: #8A8B8F">PRESS</a><a href="/#faq" style="color: #8A8B8F">FAQ</a></div>
+<div style="display: flex; gap: 28px; flex-wrap: wrap"><a href="/" style="color: #8A8B8F">HOME</a><a href="/calendar" style="color: #8A8B8F">CALENDAR</a><a href="/api" style="color: #8A8B8F">API</a><a href="/m" style="color: #8A8B8F">MOONMARK</a><a href="/uses" style="color: #8A8B8F">USES</a><a href="/see" style="color: #8A8B8F">SEE IT WORK</a><a href="/trust" style="color: #8A8B8F">TRUST</a><a href="/quantum" style="color: #8A8B8F">QUANTUM</a><a href="/tideline" style="color: #8A8B8F">TIDELINE</a><a href="/evidence" style="color: #8A8B8F">EVIDENCE</a><a href="/check" style="color: #8A8B8F">CHECK</a><a href="/notarize" style="color: #8A8B8F">NOTARIZE</a><a href="/certificate" style="color: #8A8B8F">CERTIFICATES</a><a href="/guides" style="color: #8A8B8F">GUIDES</a><a href="/night" style="color: #8A8B8F">YOUR MOON</a><a href="/eclipses" style="color: #8A8B8F">ECLIPSES</a><a href="/press" style="color: #8A8B8F">PRESS</a><a href="/#faq" style="color: #8A8B8F">FAQ</a></div>
 </div>
 </footer>
 
