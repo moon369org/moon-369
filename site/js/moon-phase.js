@@ -15,6 +15,8 @@
  *   MoonPhase.name(fraction)    "Waxing crescent", ...
  *   MoonPhase.path(fraction, r, tilt) SVG path of the lit part for a disc of radius r, turned by tilt
  *   MoonPhase.limbAngle(ms)     which way the lit side points: degrees from north toward east
+ *   MoonPhase.distance(ms)      Earth-Moon distance in km
+ *   MoonPhase.sky(ms)           phase, tilt, distance and tide strength at one instant (same as the API's "sky")
  *   MoonPhase.tilt(ms)          degrees to turn a standard drawing (lit right while waxing) clockwise
  *                               so its lit side points the real way, north up and east to the left
  */
@@ -108,7 +110,39 @@
     return Math.round(((((t + 180) % 360) + 360) % 360 - 180) * 10) / 10;
   }
 
-  const api = { elongation, fraction, illumination, name, path, limbAngle, tilt };
+  function distance(ms) {
+    const T = (ms / 86400000 + 2440587.5 - 2451545.0) / 36525;
+    const D = norm(297.8501921 + 445267.1114034 * T - 0.0018819 * T * T + T * T * T / 545868);
+    const M = norm(357.5291092 + 35999.0502909 * T - 0.0001536 * T * T);
+    const Mp = norm(134.9633964 + 477198.8675055 * T + 0.0087414 * T * T + T * T * T / 69699);
+    const F = norm(93.2720950 + 483202.0175233 * T - 0.0036539 * T * T);
+    const E = 1 - 0.002516 * T - 0.0000074 * T * T;
+    return 385000.56 - 20905.355 * cos(Mp) - 3699.111 * cos(2 * D - Mp) - 2955.968 * cos(2 * D) - 569.925 * cos(2 * Mp) +
+      48.888 * E * cos(M) - 3.149 * cos(2 * F) + 246.158 * cos(2 * D - 2 * Mp) - 152.138 * E * cos(2 * D - M - Mp) -
+      170.733 * cos(2 * D + Mp) - 204.586 * E * cos(2 * D - M) - 129.620 * E * cos(M - Mp) + 108.743 * cos(D) + 104.755 * E * cos(M + Mp);
+  }
+  // Same rules as the API (api/src/moon.ts skyAt): spring within about 2.5 days of new or full,
+  // neap within about 2.5 days of a quarter, king when a spring tide meets a supermoon.
+  const TIDE_NOTES = {
+    king: 'Spring tide with the Moon near its closest: the biggest swings of the month',
+    spring: 'Sun and Moon in line: the biggest swings of the month',
+    medium: 'Between spring and neap tides',
+    neap: 'Sun and Moon at right angles: the smallest swings of the month',
+  };
+  function sky(ms) {
+    const f = fraction(ms), el = f * 360, lit = illumination(ms), km = distance(ms);
+    const fromSyzygy = Math.min(el, Math.abs(el - 180), 360 - el);
+    const syzygy = fromSyzygy < 30, quarter = Math.abs(fromSyzygy - 90) < 30, supermoon = syzygy && km < 367600;
+    const strength = syzygy ? (supermoon ? 'king' : 'spring') : quarter ? 'neap' : 'medium';
+    return {
+      phase: { name: name(f), fraction: Math.round(f * 1e6) / 1e6, illumination: Math.round(lit * 1e4) / 1e4 },
+      tilt: { limb_angle_deg: Math.round(limbAngle(ms) * 10) / 10, rotate_deg: tilt(ms), fully_lit: lit > 0.98 },
+      distance: { km: Math.round(km), vs_average_km: Math.round(km - 384400), supermoon: supermoon },
+      tide: { strength: strength, note: TIDE_NOTES[strength] },
+    };
+  }
+
+  const api = { elongation, fraction, illumination, name, path, limbAngle, tilt, distance, sky };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.MoonPhase = api;
 })(typeof window !== 'undefined' ? window : globalThis);

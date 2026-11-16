@@ -217,6 +217,18 @@
       pEl.textContent = 'The details below come from the link. Try again in a moment.';
     });
   }
+  // The sky at this Moonmark: phase, tilt, distance and tides, from the Moon's real position.
+  function skyBox(ms) {
+    if (!window.MoonPhase || !window.MoonPhase.sky) return '';
+    var k = window.MoonPhase.sky(ms), n = function (x) { return Math.abs(x).toLocaleString('en-US'); };
+    var cell = function (h, v, sub) { return '<div><span>' + h + '</span><b>' + v + '</b><em>' + sub + '</em></div>'; };
+    return '<div class="mk-skyw"><div class="mk-skyh"><span>THE SKY AT THIS MOONMARK</span></div><div class="mk-rows mk-sky">' +
+      cell('PHASE', esc(k.phase.name), (k.phase.illumination * 100).toFixed(1) + '% lit') +
+      cell('TILT', k.tilt.fully_lit ? 'Full disc' : k.tilt.limb_angle_deg.toFixed(1) + '°', k.tilt.fully_lit ? 'Fully lit, no tilt to see' : 'Lit side, measured from north') +
+      cell('DISTANCE', n(k.distance.km) + ' km', n(k.distance.vs_average_km) + ' km ' + (k.distance.vs_average_km < 0 ? 'closer' : 'farther') + ' than average' + (k.distance.supermoon ? ' · a supermoon' : '')) +
+      cell('TIDES', k.tide.strength.charAt(0).toUpperCase() + k.tide.strength.slice(1) + ' tide', esc(k.tide.note)) +
+      '</div></div>';
+  }
   function render(root, mk, fresh, rc, ev) {
     var ms = toMs(mk), coa = rc ? coaFrom() : null;
     if (ev) ms = Math.round(ms / 1000) * 1000;   // events are set to the second; drop float dust below it
@@ -257,6 +269,7 @@
       '<div><span>THE MOON THAT NIGHT</span><b>' + nm + ' · ' + il + '% lit<span class="mi"><button type="button" class="mi-b" aria-label="What the lit percentage means" aria-expanded="false" aria-describedby="mi-t3">i</button><span role="tooltip" id="mi-t3" class="mi-t">Share of the moon&#39;s face lit by the sun at this moment, as seen from Earth. Moon calculates it from the moon&#39;s real position (Meeus, Astronomical Algorithms) and checks it against PyEphem, a standard astronomy library: they agree within 0.05 percentage&nbsp;points.</span></span></b></div>' +
       '<div><span>UTC</span><b>' + new Date(ms).toISOString().replace('T', ' ').slice(0, 19) + '</b></div>' +
       '</div>' +
+      skyBox(ms) +
       (ev
         ? '<div class="mk-btns"><a class="mk-p" data-mk-ics href="#" download="">ADD TO CALENDAR</a><a href="' + esc(gcal(ev, ms, url, text(mk))) + '" target="_blank" rel="noopener">GOOGLE CALENDAR</a><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-embed>COPY EMBED CODE</button></div>'
         : '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>') +

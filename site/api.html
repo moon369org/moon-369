@@ -171,9 +171,9 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 <div style="flex: 0 1 380px; border: 1px solid rgb(36, 38, 42); padding: 24px; display: flex; flex-direction: column; gap: 10px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">LIVE · MOONMARK · GET /v1/now</div>
-<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none; rotate: 16.9deg;"></canvas><div><span style="visibility: hidden;">23:39:11</span></div></div>
-<div class="ap-hide-m" style="font-family: Syncopate, sans-serif; font-size: 12px; letter-spacing: 0.24em;">CYCLE 1928 · MOON 05 · LUNE 06</div>
-<div class="ap-date" style="display: none;"><div class="ap-date-c"><div class="ap-date-l">CYCLE</div><div class="ap-date-v">1928</div></div><div class="ap-date-c"><div class="ap-date-l">MOON</div><div class="ap-date-v">05</div></div><div class="ap-date-c"><div class="ap-date-l">LUNE</div><div class="ap-date-v">06</div></div></div>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none; rotate: 16.9deg;"></canvas><div><span style="visibility: hidden;">00:05:58</span></div></div>
+<div class="ap-hide-m" style="font-family: Syncopate, sans-serif; font-size: 12px; letter-spacing: 0.24em;">CYCLE 1928 · MOON 05 · LUNE 07</div>
+<div class="ap-date" style="display: none;"><div class="ap-date-c"><div class="ap-date-l">CYCLE</div><div class="ap-date-v">1928</div></div><div class="ap-date-c"><div class="ap-date-l">MOON</div><div class="ap-date-v">05</div></div><div class="ap-date-c"><div class="ap-date-l">LUNE</div><div class="ap-date-v">07</div></div></div>
 </div>
 </div>
 </section>
@@ -370,14 +370,14 @@ data-compact to hide the local time line.</pre>
 <pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;"><span style="visibility: hidden;">{
   "cycle": 1928,
   "moon": 5,
-  "day": 6,
-  "day_of_cycle": 120,
+  "day": 7,
+  "day_of_cycle": 121,
   "moon_length_days": 28,
-  "time": "23:39:11",
-  "moonmark": "1928.05.06 23:39:11.055496000",
-  "phase": { "fraction": 0.223215, "name": "First quarter" },
-  "unix_ms": 1794840992027,
-  "utc": "2026-11-16T14:56:32.027000000Z",
+  "time": "00:05:58",
+  "moonmark": "1928.05.07 00:05:58.280911000",
+  "phase": { "fraction": 0.223805, "name": "First quarter" },
+  "unix_ms": 1794842664141,
+  "utc": "2026-11-16T15:24:24.141000000Z",
   "time_zone": null,
   "dst": false
 }</span></pre>
@@ -525,6 +525,7 @@ data-compact to hide the local time line.</pre>
 </div>
 <p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">The Today on Moon card as an image: cycle, moon, lune and the real moon phase. Drop it into any page, app or README with one <code>&lt;img&gt;</code> tag and it stays current, refreshing every minute. Add <code>moonmark</code>, <code>unix_ns</code> or <code>utc</code> to draw any moment, and <code>size</code> for pixels from 120 to&nbsp;2000. For link previews, <code>/v1/card.png</code> returns a 1200×630 PNG of any Moonmark, the image every Moonmark link shows when&nbsp;shared.</p>
 <p style="margin: 0px; max-width: 720px; font-size: 14px; line-height: 1.7; color: rgb(138, 139, 143);"><code>phase.illumination</code> in every response is the share of the moon's face lit by the sun at that instant, not the moon's age. It comes from the moon's real position (Meeus, Astronomical Algorithms, ch. 47–49): its phase angle, latitude and distance and matches PyEphem within 0.05 percentage points across 2000–2050. <code>/v1/spec</code> lists the method under <code>illumination</code>.</p>
+<p style="margin: 16px 0px 0px; max-width: 720px; font-size: 14px; line-height: 1.7; color: rgb(138, 139, 143);"><code>sky</code> in every Moonmark response is what the sky was doing at that instant: <code>phase</code>, <code>tilt</code> (<code>limb_angle_deg</code>, the way the lit side points measured from north toward east, and <code>rotate_deg</code>, how far to turn a standard drawing to match), <code>distance</code> (km, compared with the 384,400 km average, and whether it is a supermoon) and <code>tide</code> (<code>king</code>, <code>spring</code>, <code>medium</code> or <code>neap</code>). Tide strength comes from the Sun-Moon angle and holds on every coast; local high-tide times depend on the coastline and are not included.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>EMBED</span><span></span></div>
@@ -1528,6 +1529,7 @@ data-compact to hide the local time line.</pre>
 </div>
 <p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">The Today on Moon card as an image: cycle, moon, lune and the real moon phase. Drop it into any page, app or README with one <code>&lt;img&gt;</code> tag and it stays current, refreshing every minute. Add <code>moonmark</code>, <code>unix_ns</code> or <code>utc</code> to draw any moment, and <code>size</code> for pixels from 120 to&nbsp;2000. For link previews, <code>/v1/card.png</code> returns a 1200×630 PNG of any Moonmark, the image every Moonmark link shows when&nbsp;shared.</p>
 <p style="margin: 0; max-width: 720px; font-size: 14px; line-height: 1.7; color: #8A8B8F"><code>phase.illumination</code> in every response is the share of the moon&#39;s face lit by the sun at that instant, not the moon&#39;s age. It comes from the moon&#39;s real position (Meeus, Astronomical Algorithms, ch. 47–49): its phase angle, latitude and distance and matches PyEphem within 0.05 percentage points across 2000–2050. <code>/v1/spec</code> lists the method under <code>illumination</code>.</p>
+<p style="margin: 16px 0 0; max-width: 720px; font-size: 14px; line-height: 1.7; color: #8A8B8F"><code>sky</code> in every Moonmark response is what the sky was doing at that instant: <code>phase</code>, <code>tilt</code> (<code>limb_angle_deg</code>, the way the lit side points measured from north toward east, and <code>rotate_deg</code>, how far to turn a standard drawing to match), <code>distance</code> (km, compared with the 384,400 km average, and whether it is a supermoon) and <code>tide</code> (<code>king</code>, <code>spring</code>, <code>medium</code> or <code>neap</code>). Tide strength comes from the Sun-Moon angle and holds on every coast; local high-tide times depend on the coastline and are not included.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start">
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>EMBED</span><span></span></div>

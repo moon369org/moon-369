@@ -253,6 +253,53 @@ export function moonTilt(unixNs: bigint): number {
   return Math.round((((t + 180) % 360 + 360) % 360 - 180) * 10) / 10;
 }
 
+/** Earth-Moon distance in km, centre to centre (Meeus ch. 47, principal terms; good to a few hundred km). */
+export function moonDistanceKm(unixNs: bigint): number {
+  const cosD = (d: number) => Math.cos(d * RAD);
+  const ms = Number(unixNs / 1_000_000n);
+  const T = (ms / 86_400_000 + 2440587.5 - 2451545.0) / 36525;
+  const D = norm360(297.8501921 + 445267.1114034 * T - 0.0018819 * T * T + T ** 3 / 545868);
+  const M = norm360(357.5291092 + 35999.0502909 * T - 0.0001536 * T * T);
+  const Mp = norm360(134.9633964 + 477198.8675055 * T + 0.0087414 * T * T + T ** 3 / 69699);
+  const F = norm360(93.272095 + 483202.0175233 * T - 0.0036539 * T * T);
+  const E = 1 - 0.002516 * T - 0.0000074 * T * T;
+  return 385000.56 - 20905.355 * cosD(Mp) - 3699.111 * cosD(2 * D - Mp) - 2955.968 * cosD(2 * D) - 569.925 * cosD(2 * Mp) +
+    48.888 * E * cosD(M) - 3.149 * cosD(2 * F) + 246.158 * cosD(2 * D - 2 * Mp) - 152.138 * E * cosD(2 * D - M - Mp) -
+    170.733 * cosD(2 * D + Mp) - 204.586 * E * cosD(2 * D - M) - 129.62 * E * cosD(M - Mp) + 108.743 * cosD(D) + 104.755 * E * cosD(M + Mp);
+}
+
+export const MOON_AVERAGE_KM = 384_400;
+/** Closer than this at a new or full moon counts as a supermoon (about 90% of the way to the nearest perigee). */
+export const SUPERMOON_KM = 367_600;
+
+export type TideStrength = 'king' | 'spring' | 'medium' | 'neap';
+const TIDE_NOTES: Record<TideStrength, string> = {
+  king: 'Spring tide with the Moon near its closest: the biggest swings of the month',
+  spring: 'Sun and Moon in line: the biggest swings of the month',
+  medium: 'Between spring and neap tides',
+  neap: 'Sun and Moon at right angles: the smallest swings of the month',
+};
+
+/**
+ * Everything the sky was doing at one instant, from the Moon's real position: phase, which way it
+ * tilts, how far away it is, and how strong the tides are. Tide strength follows the Sun-Moon angle
+ * (spring within about two and a half days of new or full, neap within about two and a half days of a quarter) and is
+ * true on every coast; local high-tide times depend on the coastline and are not given here.
+ */
+export function skyAt(unixNs: bigint) {
+  const f = truePhase(unixNs), el = f * 360, lit = illumination(unixNs), km = moonDistanceKm(unixNs);
+  const fromSyzygy = Math.min(el, Math.abs(el - 180), 360 - el);
+  const syzygy = fromSyzygy < 30, quarter = Math.abs(fromSyzygy - 90) < 30;
+  const supermoon = syzygy && km < SUPERMOON_KM;
+  const strength: TideStrength = syzygy ? (supermoon ? 'king' : 'spring') : quarter ? 'neap' : 'medium';
+  return {
+    phase: { name: phaseName(f), fraction: Math.round(f * 1e6) / 1e6, illumination: Math.round(lit * 1e4) / 1e4 },
+    tilt: { limb_angle_deg: Math.round(limbAngle(unixNs) * 10) / 10, rotate_deg: moonTilt(unixNs), fully_lit: lit > 0.98 },
+    distance: { km: Math.round(km), vs_average_km: Math.round(km - MOON_AVERAGE_KM), supermoon },
+    tide: { strength, note: TIDE_NOTES[strength] },
+  };
+}
+
 export const PHASE_NAMES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
 export const phaseName = (f: number): string => PHASE_NAMES[Math.floor((f * 8 + 0.5) % 8)];
 

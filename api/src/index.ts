@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual, X509Certificate } from 'node:crypto';
 import {
   SPEC_VERSION, EPOCH_UNIX_NS, LUNATION_NS, NUM, DEN, MOON_SECOND_SI, YEAR_DAYS, MOONS,
-  toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, moonTilt, phaseName, unixNsToIso, yearInfo,
+  toMoon, toUnixNs, formatMoonmark, parseMoonmark, moonmarkPath, truePhase, illumination, moonTilt, skyAt, phaseName, unixNsToIso, yearInfo,
   moonLength, MoonRangeError, type MoonTime, moonNsOf, moonNsToUnixNs, MOON_DAY_NS, NS_PER_SECOND,
 } from './moon.js';
 import { cardSvg, shareSvg } from './card.js';
@@ -127,6 +127,7 @@ function moonBody(t: MoonTime, unixNs: bigint) {
     moonmark: formatMoonmark(t),
     moonmark_url: MARK_BASE + moonmarkPath(formatMoonmark(t)),
     phase: { fraction: Math.round(ph * 1e6) / 1e6, illumination: Math.round(illumination(unixNs) * 1e4) / 1e4, name: phaseName(ph) },
+    sky: skyAt(unixNs),
     moon_ns: t.moonNs,
     unix_ns: unixNs,
     unix_ms: Number(unixNs / 1_000_000n),
@@ -582,7 +583,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         if (ns === null) ns = nowUnixNs();
         const t = toMoon(ns), ph = truePhase(ns);
         const p2 = (n: number) => String(n).padStart(2, '0');
-        const svg = shareSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, tilt: moonTilt(ns), illumination: illumination(ns), name: phaseName(ph),
+        const svg = shareSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, tilt: moonTilt(ns), sky: skyAt(ns), illumination: illumination(ns), name: phaseName(ph),
           time: `${p2(t.hour)}:${p2(t.minute)}:${p2(t.second)}`, ns: String(t.nanosecond).padStart(9, '0'), title: fixed ? 'MOONMARK' : 'TODAY ON MOON',
           event: (q.get('event') ?? '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || undefined });
         const png = svgToPng(svg, 1200);

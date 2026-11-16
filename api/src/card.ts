@@ -1,6 +1,7 @@
 // The "Today on Moon" card as a standalone SVG. Fonts are embedded so it renders
 // the same inside an <img>, where external fonts and scripts never load.
 import { SYNCOPATE_700_WOFF2, JETBRAINS_MONO_400_WOFF2 } from './card-fonts.js';
+import type { skyAt } from './moon.js';
 
 export interface CardData {
   year: number; moon: number; lune: number; lunesInMoon: number;
@@ -105,7 +106,7 @@ export function cardSvg(d: CardData, size = 600): string {
     `</svg>`;
 }
 
-export interface ShareData extends CardData { time: string; ns: string; event?: string }
+export interface ShareData extends CardData { time: string; ns: string; event?: string; sky?: ReturnType<typeof skyAt> }
 
 /** An event name over the Moonmark: up to two lines that fit the 528 px column, shrinking for long names. */
 function eventTitle(name: string): string {
@@ -130,14 +131,28 @@ function eventTitle(name: string): string {
 export function shareSvg(d: ShareData): string {
   const pct = (d.illumination * 100).toFixed(1);
   const nsG = '.' + d.ns.slice(0, 3) + ' ' + d.ns.slice(3, 6) + ' ' + d.ns.slice(6, 9);
-  const cells = [['CYCLE', String(d.year)], ['MOON', pad2(d.moon)], ['LUNE', pad2(d.lune)]];
-  const cw = 176;
-  const grid = cells.map(([k, v], i) => {
+  // With the sky: phase, tilt, distance and tides, in four cells. Without it: cycle, moon, lune.
+  const sk = d.sky;
+  const cells: [string, string, boolean?][] = sk
+    ? [['PHASE', `${pct}%`], ['TILT', sk.tilt.fully_lit ? 'FULL' : String(Math.round(sk.tilt.limb_angle_deg)), !sk.tilt.fully_lit],
+       ['KM AWAY', sk.distance.km.toLocaleString('en-US')], ['TIDES', sk.tide.strength.toUpperCase()]]
+    : [['CYCLE', String(d.year)], ['MOON', pad2(d.moon)], ['LUNE', pad2(d.lune)]];
+  const cw = 528 / cells.length;
+  const grid = cells.map(([k, v, deg], i) => {
     const x = 560 + cw * i;
+    if (sk) {
+      // Values in mono (0.6 em a character) so they fit; the degree sign is drawn, the fonts carry no glyph for it.
+      const fs = 24, w = v.length * fs * 0.6;
+      return `<text x="${x + 18}" y="452" font-family="JetBrains Mono" font-size="14" letter-spacing="4" fill="${ASH}">${k}</text>` +
+        `<text x="${x + 18}" y="497" font-family="JetBrains Mono" font-size="${fs}" fill="${PAPER}">${esc(v)}</text>` +
+        (deg ? `<circle cx="${(x + 18 + w + 6).toFixed(1)}" cy="480" r="3.2" fill="none" stroke="${PAPER}" stroke-width="2"/>` : '');
+    }
     const fs = v.length > 5 ? Math.max(22, 34 - (v.length - 5) * 4) : 34;
     return `<text x="${x + 22}" y="452" font-family="JetBrains Mono" font-size="15" letter-spacing="4" fill="${ASH}">${k}</text>` +
       `<text x="${x + 22}" y="500" font-family="Syncopate" font-weight="700" font-size="${fs}" letter-spacing="1.5" fill="${PAPER}">${esc(v)}</text>`;
   }).join('');
+  const lines = cells.slice(1).map((_, i) => `M${(560 + cw * (i + 1)).toFixed(1)} 412V528`).join('');
+  const foot = sk ? `${d.name.toUpperCase()} · LUNE ${d.lune}` : `${d.name.toUpperCase()} · ${pct}% LIT`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">` +
     `<defs><radialGradient id="g" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="${PAPER}" stop-opacity="0.09"/><stop offset="1" stop-color="${PAPER}" stop-opacity="0"/></radialGradient></defs>` +
     `<rect width="1200" height="630" fill="${INK}"/>` +
@@ -148,9 +163,9 @@ export function shareSvg(d: ShareData): string {
     `<text x="556" y="232" font-family="JetBrains Mono" font-size="64" fill="${PAPER}">${d.year}.${pad2(d.moon)}.${pad2(d.lune)}</text>` +
     `<text x="556" y="310" font-family="JetBrains Mono" font-size="64" fill="${PAPER}">${esc(d.time)}</text>` +
     `<text x="560" y="362" font-family="JetBrains Mono" font-size="34" fill="${ASH}">${nsG}</text>` +
-    `<path d="M560 412H1088M560 528H1088M${560 + cw} 412V528M${560 + 2 * cw} 412V528" stroke="${LINE}" stroke-width="2" fill="none"/>` +
+    `<path d="M560 412H1088M560 528H1088${lines}" stroke="${LINE}" stroke-width="2" fill="none"/>` +
     grid +
-    `<text x="560" y="584" font-family="JetBrains Mono" font-size="17" letter-spacing="3" fill="#B9B6AE">${esc(d.name.toUpperCase())} · ${pct}% LIT</text>` +
+    `<text x="560" y="584" font-family="JetBrains Mono" font-size="17" letter-spacing="3" fill="#B9B6AE">${esc(foot)}</text>` +
     `<text x="1088" y="584" font-family="JetBrains Mono" font-size="17" letter-spacing="3" fill="${ASH}" text-anchor="end">MOON369.ORG</text>` +
     `</svg>`;
 }
