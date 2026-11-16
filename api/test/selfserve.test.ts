@@ -51,6 +51,18 @@ describe('self-serve API keys', () => {
     expect((await post(e, '/v1/sign', { sha256: SHA }, k)).status).toBe(200);
     expect((await post(e, '/v1/sign', { sha256: SHA }, k)).status).toBe(429);
   });
+  it('caps all requests a day on free keys, not on business keys', async () => {
+    const e = { ...env(), FREE_REQ_DAY: memoryLimiter(3, 86_400_000), FREE_LIMITS: { per_min: 60, sign_per_day: 2, req_per_day: 3 } };
+    const k = (await (await post(e, '/v1/api-keys', { name: 'Cy', email: 'c@c.co' })).json() as { key: string; requests_per_day: number });
+    expect(k.requests_per_day).toBe(3);
+    for (let i = 0; i < 3; i++) expect((await get(e, '/v1/now', k.key)).status).toBe(200);
+    const r = await get(e, '/v1/now', k.key);
+    expect(r.status).toBe(429); expect(r.headers.get('Retry-After')).toBeTruthy();
+    const err = await r.json() as { error: { code: string; message: string } };
+    expect(err.error.code).toBe('daily_limit'); expect(err.error.message).toMatch(/business key/);
+    for (let i = 0; i < 5; i++) expect((await get(e, '/v1/now', HAND)).status).toBe(200);
+    expect((await get(e, '/v1/now')).status).toBe(200);   // no key: per-minute limits only
+  });
   it('says so when self-serve keys are not switched on', async () => {
     expect((await post({}, '/v1/api-keys', { name: 'Ana', email: 'a@b.co' })).status).toBe(503);
   });

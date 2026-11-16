@@ -66,8 +66,12 @@ export interface Env {
   KEY_CREATE_LIMIT?: RateLimiter;
   /** Signing on free self-serve keys, per key per day. */
   FREE_SIGN_DAY?: RateLimiter;
+  /** All requests a day per free key: personal projects fit, businesses need a paid key. */
+  FREE_REQ_DAY?: RateLimiter;
+  /** The open tier's per-minute limit, for error messages. */
+  OPEN_PER_MIN?: number;
   /** The numbers behind the free plan, for messages and the key response. */
-  FREE_LIMITS?: { per_min: number; sign_per_day: number };
+  FREE_LIMITS?: { per_min: number; sign_per_day: number; req_per_day?: number };
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
   RETIRED_KEYS?: Record<string, string>;
 }
@@ -214,20 +218,25 @@ async function authAndLimit(req: Request, env: Env, signing = false): Promise<Ga
     if (env.RATE_LIMITER_KEYED && !(await env.RATE_LIMITER_KEYED.limit({ key: hash.slice(0, 32), max: per_min })).success) {
       return json({ error: { code: 'rate_limited', contact: 'moon369org@proton.me', message: `Key rate limit reached${per_min ? ` (${per_min} requests a minute)` : ''}. For a higher limit email moon369org@proton.me.` } }, 429, { 'Retry-After': '60' });
     }
+    const untilMidnight = String(86400 - Math.floor(Date.now() / 1000) % 86400);
+    if (rec.plan === 'free' && env.FREE_REQ_DAY && !(await env.FREE_REQ_DAY.limit({ key: hash.slice(0, 32) })).success) {
+      const n = env.FREE_LIMITS?.req_per_day ?? 5000;
+      return json({ error: { code: 'daily_limit', contact: 'moon369org@proton.me', message: `Free key daily limit reached (${n} requests a day, resets at 00:00 UTC). Building something bigger? Email moon369org@proton.me for a business key.` } }, 429, { 'Retry-After': untilMidnight });
+    }
     if (signing && rec.plan === 'free' && env.FREE_SIGN_DAY && !(await env.FREE_SIGN_DAY.limit({ key: hash.slice(0, 32) })).success) {
       const n = env.FREE_LIMITS?.sign_per_day ?? 500;
-      return json({ error: { code: 'sign_daily_limit', contact: 'moon369org@proton.me', message: `Free key signing limit reached (${n} a day). For more, email moon369org@proton.me.` } }, 429, { 'Retry-After': String(86400 - Math.floor(Date.now() / 1000) % 86400) });
+      return json({ error: { code: 'sign_daily_limit', contact: 'moon369org@proton.me', message: `Free key signing limit reached (${n} a day). For more, email moon369org@proton.me for a business key.` } }, 429, { 'Retry-After': untilMidnight });
     }
     // Hand-issued keys are verified by Moon; self-serve keys carry whatever name was typed, so they are not.
     return { plan: rec.plan ?? 'keyed', owner: rec.owner, per_min, verified: rec.verified !== false };
   }
   const ip = req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'anonymous';
   if (env.RATE_LIMITER && !(await env.RATE_LIMITER.limit({ key: ip })).success) {
-    return json({ error: { code: 'rate_limited', contact: 'moon369org@proton.me', message: 'Open rate limit reached (120 requests a minute). For higher limits email moon369org@proton.me, or run the MIT reference code locally.' } }, 429, { 'Retry-After': '60' });
+    return json({ error: { code: 'rate_limited', contact: 'moon369org@proton.me', message: `Open rate limit reached (${env.OPEN_PER_MIN ?? 120} requests a minute). For higher limits email moon369org@proton.me, or run the MIT reference code locally.` } }, 429, { 'Retry-After': '60' });
   }
   if (signing) {
     // Signing is the paid product: the open tier gets enough to try it; volume needs an API key.
-    const L = env.SIGN_LIMITS ?? { per_min: 10, per_day: 100 };
+    const L = env.SIGN_LIMITS ?? { per_min: 5, per_day: 50 };
     const msg = (what: string) => `Free signing limit reached (${what}). Signing at volume needs an API key: email moon369org@proton.me.`;
     if (env.SIGN_LIMIT_MIN && !(await env.SIGN_LIMIT_MIN.limit({ key: ip })).success)
       return json({ error: { code: 'sign_rate_limited', contact: 'moon369org@proton.me', message: msg(`${L.per_min} a minute`) } }, 429, { 'Retry-After': '60' });
@@ -619,7 +628,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const key = newKey();
         const ok = await env.KEYS_WRITE.put(hashKey(key), { owner: name, plan: 'free', per_min: L.per_min, verified: false, email, use: use ?? undefined, created: new Date().toISOString() });
         if (!ok) throw new HttpError(500, 'key_failed', 'Could not create a key. Try again.');
-        return json({ key, owner: name, owner_verified: false, plan: 'free', per_min: L.per_min, signing_per_day: L.sign_per_day,
+        return json({ key, owner: name, owner_verified: false, plan: 'free', per_min: L.per_min, requests_per_day: L.req_per_day ?? 5000, signing_per_day: L.sign_per_day,
           note: 'Keep this key secret: it is shown once and cannot be recovered. Send it as Authorization: Bearer <key>. Registrations made with it show your name as unverified; for a verified name, email moon369org@proton.me.' },
           201, { 'Cache-Control': 'no-store', ...planHdr });
       }

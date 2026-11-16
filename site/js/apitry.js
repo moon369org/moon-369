@@ -108,7 +108,7 @@
         myKey = j.key;
         track('API key created', {});
         $('[data-ak-key]').textContent = j.key;
-        $('[data-ak-example]').textContent = 'curl https://api.moon369.org/v1/me \\\n  -H "Authorization: Bearer ' + j.key + '"\n\n# ' + j.per_min + ' requests a minute · ' + j.signing_per_day + ' signatures a day · batch signing on';
+        $('[data-ak-example]').textContent = 'curl https://api.moon369.org/v1/me \\\n  -H "Authorization: Bearer ' + j.key + '"\n\n# ' + j.per_min + ' requests a minute · ' + (j.requests_per_day || 5000).toLocaleString('en-US') + ' a day · ' + j.signing_per_day + ' signatures a day · batch signing on';
         f.setAttribute('data-off', ''); $('[data-ak-out]').removeAttribute('data-off');
         setUp();   // examples that need a key can run now
       })

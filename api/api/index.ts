@@ -25,14 +25,17 @@ const RATE_LIMITER = RL_URL && RL_TOKEN
 
 // Customer API keys: MOON_API_KEYS is JSON of SHA-256(key) -> { owner, plan, per_min, active }.
 // Each key gets its own per-minute limit (per_min, default KEY_RATE_LIMIT_PER_MIN).
-const KEY_PER_MIN = Number(process.env.KEY_RATE_LIMIT_PER_MIN ?? 1000);
+const KEY_PER_MIN = Number(process.env.KEY_RATE_LIMIT_PER_MIN ?? 300);
 let HAND_KEYS: ReturnType<typeof envKeyStore> | undefined;
 try { if (process.env.MOON_API_KEYS) HAND_KEYS = envKeyStore(process.env.MOON_API_KEYS); } catch { HAND_KEYS = undefined; }
 // Self-serve free keys (POST /v1/api-keys) live in Upstash. Hand-issued keys are checked first.
 const SELF_KEYS = RL_URL && RL_TOKEN ? upstashKeyStore(RL_URL, RL_TOKEN) : undefined;
 const API_KEYS = chainKeyStores(HAND_KEYS, SELF_KEYS);
 const FREE_PER_MIN = Number(process.env.FREE_KEY_PER_MIN ?? 60);
-const FREE_SIGN_PER_DAY = Number(process.env.FREE_KEY_SIGN_PER_DAY ?? 500);
+const FREE_SIGN_PER_DAY = Number(process.env.FREE_KEY_SIGN_PER_DAY ?? 200);
+// All requests a day per free key: room for personal projects, not for a business.
+const FREE_REQ_PER_DAY = Number(process.env.FREE_KEY_REQ_PER_DAY ?? 5000);
+const FREE_REQ_DAY = RL_URL && RL_TOKEN ? upstashLimiter(RL_URL, RL_TOKEN, FREE_REQ_PER_DAY, 'moon:rlq', 86_400_000) : memoryLimiter(FREE_REQ_PER_DAY, 86_400_000);
 const FREE_SIGN_DAY = RL_URL && RL_TOKEN ? upstashLimiter(RL_URL, RL_TOKEN, FREE_SIGN_PER_DAY, 'moon:rlf', 86_400_000) : memoryLimiter(FREE_SIGN_PER_DAY, 86_400_000);
 // New keys per address per day, so nobody mints keys by the thousand.
 const KEY_CREATE_LIMIT = RL_URL && RL_TOKEN ? upstashLimiter(RL_URL, RL_TOKEN, Number(process.env.KEY_CREATE_PER_DAY ?? 3), 'moon:rlc', 86_400_000) : memoryLimiter(3, 86_400_000);
@@ -41,8 +44,8 @@ const RATE_LIMITER_KEYED = RL_URL && RL_TOKEN
   : memoryLimiter(KEY_PER_MIN);
 
 // Free signing on the open tier (sign, tsa, evidence): small, so volume comes through API keys.
-const SIGN_PER_MIN = Number(process.env.SIGN_RATE_PER_MIN ?? 10);
-const SIGN_PER_DAY = Number(process.env.SIGN_RATE_PER_DAY ?? 100);
+const SIGN_PER_MIN = Number(process.env.SIGN_RATE_PER_MIN ?? 5);
+const SIGN_PER_DAY = Number(process.env.SIGN_RATE_PER_DAY ?? 50);
 const SIGN_LIMIT_MIN = RL_URL && RL_TOKEN ? upstashLimiter(RL_URL, RL_TOKEN, SIGN_PER_MIN, 'moon:rls') : memoryLimiter(SIGN_PER_MIN);
 const SIGN_LIMIT_DAY = RL_URL && RL_TOKEN ? upstashLimiter(RL_URL, RL_TOKEN, SIGN_PER_DAY, 'moon:rld', 86_400_000) : memoryLimiter(SIGN_PER_DAY, 86_400_000);
 
@@ -86,11 +89,13 @@ const route = (req: Request) => {
     SIGN_LIMIT_MIN,
     SIGN_LIMIT_DAY,
     SIGN_LIMITS: { per_min: SIGN_PER_MIN, per_day: SIGN_PER_DAY },
+    OPEN_PER_MIN: PER_MIN,
     API_KEYS,
     KEYS_WRITE: SELF_KEYS,
     KEY_CREATE_LIMIT,
     FREE_SIGN_DAY,
-    FREE_LIMITS: { per_min: FREE_PER_MIN, sign_per_day: FREE_SIGN_PER_DAY },
+    FREE_REQ_DAY,
+    FREE_LIMITS: { per_min: FREE_PER_MIN, sign_per_day: FREE_SIGN_PER_DAY, req_per_day: FREE_REQ_PER_DAY },
     SIGNER,
     RETIRED_KEYS,
     BEACON,
