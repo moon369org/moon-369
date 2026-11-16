@@ -20,7 +20,8 @@
       '<div class="pr-nm"><b>' + esc(f.file) + '</b><span>' + esc(f.what) + ' · ' + (f.bytes < 1024 ? f.bytes + ' B' : Math.round(f.bytes / 1024) + ' KB') + (f.phash ? ' · look-alike hash ' + esc(f.phash) : '') + '</span></div>' +
       '<button type="button" class="pr-sha" data-sha="' + f.sha256 + '" title="Copy the SHA-256" aria-label="Copy the SHA-256 of ' + esc(f.file) + '">' + f.sha256 + '</button>' +
       '<moon-badge sha256="' + f.sha256 + '" show-missing></moon-badge>' +
-      '<a class="pr-dl" href="' + BASE + esc(f.file) + '" download>GET ↓</a></div>';
+      '<div class="pr-acts">' + (MM && MM.by_sha[f.sha256] ? '<a class="pr-dl" href="' + esc(MM.by_sha[f.sha256].url) + '" target="_blank" rel="noopener" title="Signed at ' + esc(MM.by_sha[f.sha256].moonmark) + '">MOONMARK ↗</a>' : '') +
+      '<a class="pr-dl" href="' + BASE + esc(f.file) + '" download>GET ↓</a></div></div>';
   }
 
   function stats(manifestSha, count) {
@@ -32,6 +33,25 @@
       var w = $('[data-pr-when]'); w.textContent = mine.moonmark;
       w.title = mine.utc;
     }).catch(function () { $('[data-pr-when]').textContent = 'Could not reach Moon'; });
+  }
+
+  var MM = null;   // signed Moonmarks: { by_sha: { sha: { moonmark, url } }, paths: { 'assets/…': sha } }
+
+  // Next to every asset download on the page, a link to that exact file's signed Moonmark.
+  function markLinks() {
+    if (!MM) return;
+    Array.prototype.forEach.call(document.querySelectorAll('a[download][href^="assets/"]'), function (a) {
+      if (a.__mm || a.closest('.pr-row, .pr-reg-top, [data-dc-snapshot]') || a.classList.contains('pr-btn')) return;
+      var sha = MM.paths[a.getAttribute('href')], m = sha && MM.by_sha[sha];
+      if (!m || !/border-bottom/.test(a.getAttribute('style') || '')) return;
+      a.__mm = true;
+      var l = document.createElement('a');
+      l.href = m.url; l.target = '_blank'; l.rel = 'noopener'; l.textContent = 'MOONMARK ↗';
+      l.setAttribute('style', a.getAttribute('style').replace(/#E9E4D8/g, '#8A8B8F'));
+      l.title = 'Signed by Moon at ' + m.moonmark;
+      l.setAttribute('aria-label', 'Signed Moonmark for ' + a.getAttribute('href').split('/').pop() + ', opens in a new tab');
+      a.parentNode.insertBefore(l, a.nextSibling);
+    });
   }
 
   function load() {
@@ -55,6 +75,6 @@
   (function boot(n) {
     var el = $('[data-pr-reg]'), snap = document.querySelector('[data-dc-snapshot]');
     if (!el || (snap && snap.contains(el))) { if (n < 200) setTimeout(function () { boot(n + 1); }, 25); return; }
-    load();
+    fetch(BASE + 'moonmarks.json').then(function (r) { return r.json(); }).then(function (j) { MM = j; }).catch(function () {}).then(function () { load(); markLinks(); });
   })(0);
 })();

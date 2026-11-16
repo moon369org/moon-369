@@ -18,7 +18,7 @@ import hashlib, json, os, zipfile
 ROOT = os.path.join(os.path.dirname(__file__), '..', 'site', 'assets')
 BRAND = os.path.join(ROOT, 'brand')
 ZIP = os.path.join(ROOT, 'Moon-Press-Kit.zip')
-SKIP = {'moon-brand-manifest.json', 'sign-request.json', 'moon-brand-receipts.json'}
+SKIP = {'moon-brand-manifest.json', 'sign-request.json', 'moon-brand-receipts.json', 'moonmarks.json'}
 
 WHAT = {
     'logo': 'Wordmark', 'mark': 'Mark', 'app-icon': 'App icon', 'badges': 'Powered by Moon badge',
