@@ -83,6 +83,7 @@ footer > div > div:last-child{justify-content:center!important;gap:22px!importan
 footer > div > div:first-child svg{width:64px!important}
 }
 </style>
+<script src="js/drift.js" defer></script>
 </head>
 <body>
 <!--snapshot--><div data-dc-snapshot="" aria-hidden="true">
@@ -197,6 +198,24 @@ await verify(receipt, { content: file });
 <p style="margin: 0px; font-size: 17px; line-height: 1.7; color: rgb(185, 182, 174);">Cryptography ages. Quantum computers will one day break the signatures most of the internet uses today. Moon is designed to upgrade its cryptography without breaking anything it has already&nbsp;signed. <a href="/quantum" style="text-decoration: underline; text-underline-offset: 3px;">How Moon is quantum ready</a>.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: rgb(36, 38, 42); border: 1px solid rgb(36, 38, 42);"><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Two signatures today</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Every receipt is signed twice over the same bytes: Ed25519, today's standard, and ML-DSA-65, NIST's post-quantum standard (FIPS 204). A receipt counts only when both check out, so forging one means breaking&nbsp;both.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Every receipt names its method</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Each receipt starts with its version, like <code>moonmark-receipt/3</code>. That tells anyone exactly how to check it, so Moon can adopt new cryptography without breaking a single old&nbsp;receipt.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Old receipts keep working</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Every version Moon has ever issued stays verifiable. Retired keys stay published, and checkers accept every past&nbsp;version.</p></div><div style="background: rgb(11, 11, 13); padding: 28px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 17px; font-weight: 500; color: rgb(233, 228, 216);">Re-sealed over time</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Through the <a href="/tideline" style="color: rgb(233, 228, 216); text-decoration: underline; text-underline-offset: 3px;">Tideline</a>, Moon's public log, old receipts can be re-anchored with fresh, stronger fingerprints and signatures, so a receipt from 2026 is still provable in 2056 after today's algorithms&nbsp;age.</p></div></div>
+</article>
+
+<article id="locked" style="border-top: 1px solid rgb(28, 29, 32); padding: 72px 0px; display: flex; flex-direction: column; gap: 32px;">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">07</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">STILL LOCKED TO THE MOON</h2>
+<p style="margin: 0px; font-size: 17px; line-height: 1.7; color: rgb(185, 182, 174);">Moon divides time into equal lunations, each as long as the average lunar month. The real Moon runs a little fast or slow from month to month, because its orbit is an ellipse tugged by the Sun. That wobble is expected. Moon would only be drifting if the average gap moved over the&nbsp;years.</p>
+</div>
+<figure style="margin: 0px; display: flex; flex-direction: column; gap: 12px; max-width: 1040px;">
+<figcaption style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.2em; color: rgb(138, 139, 143);">EACH REAL NEW MOON MINUS MOON'S GRID, 1900 TO 2100</figcaption>
+<div data-drift-wobble="" style="min-height: 200px;"><p style="color:#8A8B8F;font-size:14px;margin:0">Could not reach Moon.</p></div>
+</figure>
+<figure style="margin: 0px; display: flex; flex-direction: column; gap: 12px; max-width: 1040px;">
+<figcaption style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.2em; color: rgb(138, 139, 143);">THE AVERAGE, CENTURY BY CENTURY, 2000 BCE TO 3000 CE</figcaption>
+<div data-drift-centuries="" style="min-height: 200px;"><p style="color:#8A8B8F;font-size:14px;margin:0">Could not reach Moon.</p></div>
+</figure>
+<p data-drift-note="" style="margin: 0px; max-width: 760px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">Loading the Moon's new moons…</p>
+<p style="margin: 0px; max-width: 760px; font-size: 13.5px; line-height: 1.7; color: rgb(138, 139, 143);">Real new moons from Meeus, <i>Astronomical Algorithms</i>, chapter 49, checked against every solar eclipse from 1000 to 3000. The same test runs with every change to Moon, and fails if the average ever drifts. Data: <a href="https://api.moon369.org/v1/drift" style="color: rgb(233, 228, 216);">/v1/drift</a>.</p>
 </article>
 </div>
 </section>
@@ -334,6 +353,24 @@ await verify(receipt, { content: file });
 <p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE">Cryptography ages. Quantum computers will one day break the signatures most of the internet uses today. Moon is designed to upgrade its cryptography without breaking anything it has already&nbsp;signed. <a href="/quantum" style="text-decoration: underline; text-underline-offset: 3px">How Moon is quantum ready</a>.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: #24262A; border: 1px solid #24262A"><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Two signatures today</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every receipt is signed twice over the same bytes: Ed25519, today&#39;s standard, and ML-DSA-65, NIST&#39;s post-quantum standard (FIPS 204). A receipt counts only when both check out, so forging one means breaking&nbsp;both.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Every receipt names its method</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Each receipt starts with its version, like <code>moonmark-receipt/3</code>. That tells anyone exactly how to check it, so Moon can adopt new cryptography without breaking a single old&nbsp;receipt.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Old receipts keep working</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every version Moon has ever issued stays verifiable. Retired keys stay published, and checkers accept every past&nbsp;version.</p></div><div style="background: #0B0B0D; padding: 28px; display: flex; flex-direction: column; gap: 12px"><div style="font-size: 17px; font-weight: 500; color: #E9E4D8">Re-sealed over time</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Through the <a href="/tideline" style="color: #E9E4D8; text-decoration: underline; text-underline-offset: 3px">Tideline</a>, Moon&#39;s public log, old receipts can be re-anchored with fresh, stronger fingerprints and signatures, so a receipt from 2026 is still provable in 2056 after today&#39;s algorithms&nbsp;age.</p></div></div>
+</article>
+
+<article id="locked" style="border-top: 1px solid #1C1D20; padding: 72px 0; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">07</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">STILL LOCKED TO THE MOON</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #B9B6AE">Moon divides time into equal lunations, each as long as the average lunar month. The real Moon runs a little fast or slow from month to month, because its orbit is an ellipse tugged by the Sun. That wobble is expected. Moon would only be drifting if the average gap moved over the&nbsp;years.</p>
+</div>
+<figure style="margin: 0; display: flex; flex-direction: column; gap: 12px; max-width: 1040px">
+<figcaption style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: #8A8B8F">EACH REAL NEW MOON MINUS MOON&#39;S GRID, 1900 TO 2100</figcaption>
+<div data-drift-wobble style="min-height: 200px"></div>
+</figure>
+<figure style="margin: 0; display: flex; flex-direction: column; gap: 12px; max-width: 1040px">
+<figcaption style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: #8A8B8F">THE AVERAGE, CENTURY BY CENTURY, 2000 BCE TO 3000 CE</figcaption>
+<div data-drift-centuries style="min-height: 200px"></div>
+</figure>
+<p data-drift-note style="margin: 0; max-width: 760px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Loading the Moon&#39;s new moons…</p>
+<p style="margin: 0; max-width: 760px; font-size: 13.5px; line-height: 1.7; color: #8A8B8F">Real new moons from Meeus, <i>Astronomical Algorithms</i>, chapter 49, checked against every solar eclipse from 1000 to 3000. The same test runs with every change to Moon, and fails if the average ever drifts. Data: <a href="https://api.moon369.org/v1/drift" style="color: #E9E4D8">/v1/drift</a>.</p>
 </article>
 </div>
 </section>

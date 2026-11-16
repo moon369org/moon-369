@@ -9,6 +9,7 @@ import { TsaSigner, TsaReject, parseRequest as parseTsq, issue as issueTst, reje
 import { MOON_ROOT_PEM } from './tsa-certs.js';
 import { allEclipses, indexAfter, publicEclipse, eclipseByDate, eclipseCardSvg, ymdOf, tdTime, ECLIPSE_TYPES, type EclipseType } from './eclipses.js';
 import { eclipseIcon } from './eclipse-icon.js';
+import { driftByCentury, gapHours, trueNewMoonMs, gridNewMoonMs, lunationNear } from './lunation.js';
 import { parseNight, nightFacts, nightSvg, NightParamError } from './night.js';
 import { hashKey, newKey, type KeyWriter } from './keys.js';
 import { mcp } from './mcp.js';
@@ -452,7 +453,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
@@ -813,6 +814,21 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         return json({ slug, registrant: regs[0]?.registrant ?? null, verified: regs.length > 0, count: regs.length,
           results: regs.map((r) => ({ ...publicRegistration(r), sha256: r.sha256 })),
           ...(regs.length === limit && last ? { next_before: Number(BigInt(last.unix_ns) / 1_000_000n) } : {}) }, 200, { 'Cache-Control': 'public, max-age=60', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/drift`: {
+        // How closely Moon's lunations track the real Moon: the gap at every new moon, and its average by century.
+        const from = Math.max(-2000, Math.min(2999, Number(q.get('from') ?? 1900) || 1900)), to = Math.max(from + 1, Math.min(3000, Number(q.get('to') ?? 2100) || 2100));
+        if (to - from > 500) throw new HttpError(400, 'bad_param', 'Ask for at most 500 years of lunations at a time');
+        const k0 = lunationNear(Date.UTC(2000, 0, 1) + (from - 2000) * 365.2425 * 86_400_000), k1 = lunationNear(Date.UTC(2000, 0, 1) + (to - 2000) * 365.2425 * 86_400_000);
+        const lunations = [];
+        for (let k = k0; k < k1; k++) lunations.push({ k, utc: new Date(Math.round(trueNewMoonMs(k))).toISOString(), gap_h: Math.round(gapHours(k) * 1000) / 1000 });
+        return json({
+          about: 'Real new moon minus the start of the matching lunation on Moon\'s grid, in hours. The gap wobbles by up to about 14 hours as the Moon speeds up and slows down; Moon drifts only if the century averages move.',
+          method: 'True new moons: Meeus, Astronomical Algorithms, ch. 49, all periodic and planetary terms; UTC via Espenak & Meeus Delta T. Grid: equal lunations of 29.530588853 days from the real new moon of 6 January 2000.',
+          grid_anchor: new Date(gridNewMoonMs(0)).toISOString(),
+          range: { from_year: from, to_year: to }, lunations, centuries: driftByCentury(-2000, 3000),
+        }, 200, { ...FOREVER, ...planHdr });
       }
 
       case path === `/${API_VERSION}/tideline`: {
