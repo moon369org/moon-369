@@ -1,0 +1,45 @@
+name: Publish to npm
+# Stages moon369 and moon369-capture on npm whenever their version in package.json is new.
+# A staged version goes live only after a maintainer approves it with 2FA on npmjs.com.
+# No tokens: npm Trusted Publishing lets this workflow publish through GitHub's identity (OIDC).
+# Set up once per package on npmjs.com: package > Settings > Trusted Publisher > GitHub Actions,
+# owner moon369org, repository moon-369, workflow publish.yml.
+on:
+  push:
+    branches: [main]
+    paths: ['packages/moon369/package.json', 'packages/capture/package.json', '.github/workflows/publish.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write   # lets npm confirm this run really comes from this repo
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, registry-url: 'https://registry.npmjs.org' }
+      - run: npm install -g npm@latest   # staged publishing needs npm 11.15 or newer
+
+      # moon369 first: moon369-capture depends on it.
+      - name: moon369
+        working-directory: packages/moon369
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if npm view "moon369@$V" version >/dev/null 2>&1; then echo "moon369@$V is already on npm"; exit 0; fi
+          npm ci
+          npm stage publish --access public
+
+      - name: moon369-capture
+        working-directory: packages/capture
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if npm view "moon369-capture@$V" version >/dev/null 2>&1; then echo "moon369-capture@$V is already on npm"; exit 0; fi
+          if ! npm view moon369-capture name >/dev/null 2>&1; then
+            echo "::warning::moon369-capture isn't on npm yet. Trusted Publishing only works on a package that exists, so publish it once by hand, then add the Trusted Publisher on npmjs.com."
+            exit 0
+          fi
+          npm install --no-package-lock
+          npm stage publish --access public
