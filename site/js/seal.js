@@ -271,21 +271,27 @@
 
   // Standalone signing, for pages without their own flow (the Moonmark page).
   function emit(d) { window.dispatchEvent(new CustomEvent('moon:seal', { detail: d })); }
-  // 64-bit difference hash, the same one /embed/moon.js computes, so edited copies can be found later.
+  // Moon's look-alike hash v2, the same one /embed/moon.js and the capture SDK compute, so edited copies can be found later.
+
+  /* Moon's look-alike hash, v2: the same on every device. The picture is drawn on black at up to 1024 px,
+     averaged over exact 9×8 blocks, and each bit says whether a block is brighter than its right neighbour. */
+  function dhashBox(src) {
+    var w = src.width || src.naturalWidth, h = src.height || src.naturalHeight; if (!w || !h) return null;
+    var s = Math.min(1, 1024 / Math.max(w, h)), W = Math.max(9, Math.round(w * s)), H = Math.max(8, Math.round(h * s));
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var x = cv.getContext('2d', { willReadFrequently: true }); x.fillStyle = '#000'; x.fillRect(0, 0, W, H); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+    x.drawImage(src, 0, 0, W, H);
+    var d = x.getImageData(0, 0, W, H).data, g = new Float64Array(72), n = new Float64Array(72);
+    for (var yy = 0; yy < H; yy++) { var cy = Math.min(7, Math.floor(yy * 8 / H)); for (var xx = 0; xx < W; xx++) {
+      var c = cy * 9 + Math.min(8, Math.floor(xx * 9 / W)), i = (yy * W + xx) * 4; g[c] += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; n[c]++; } }
+    var bits = '', out = '';
+    for (var y = 0; y < 8; y++) for (var k = 0; k < 8; k++) bits += g[y * 9 + k] / n[y * 9 + k] > g[y * 9 + k + 1] / n[y * 9 + k + 1] ? '1' : '0';
+    for (var q = 0; q < 64; q += 4) out += parseInt(bits.slice(q, q + 4), 2).toString(16);
+    return out;
+  }
   function dhash(file) {
     if (!/^image\//.test(file.type) || !window.createImageBitmap) return Promise.resolve(null);
-    return createImageBitmap(file).then(function (src) {
-      var cv = document.createElement('canvas'); cv.width = 9; cv.height = 8;
-      var x = cv.getContext('2d', { willReadFrequently: true }); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
-      x.drawImage(src, 0, 0, 9, 8);
-      var d = x.getImageData(0, 0, 9, 8).data, bits = '', out = '';
-      for (var y = 0; y < 8; y++) for (var i = 0; i < 8; i++) {
-        var a = (y * 9 + i) * 4, b = a + 4;
-        bits += (0.299 * d[a] + 0.587 * d[a + 1] + 0.114 * d[a + 2]) > (0.299 * d[b] + 0.587 * d[b + 1] + 0.114 * d[b + 2]) ? '1' : '0';
-      }
-      for (var k = 0; k < 64; k += 4) out += parseInt(bits.slice(k, k + 4), 2).toString(16);
-      return out;
-    }).catch(function () { return null; });
+    return createImageBitmap(file).then(dhashBox).catch(function () { return null; });
   }
   function sign(file) {
     if (!file) return;

@@ -28,6 +28,29 @@
     var out = ''; for (var k = 0; k < 64; k += 4) out += parseInt(bits.slice(k, k + 4), 2).toString(16);
     return out;
   }
+
+  /* Moon's look-alike hash, v2: the same on every device. The picture is drawn on black at up to 1024 px,
+     averaged over exact 9×8 blocks, and each bit says whether a block is brighter than its right neighbour. */
+  function dhashBox(src) {
+    var w = src.width || src.naturalWidth, h = src.height || src.naturalHeight; if (!w || !h) return null;
+    var s = Math.min(1, 1024 / Math.max(w, h)), W = Math.max(9, Math.round(w * s)), H = Math.max(8, Math.round(h * s));
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var x = cv.getContext('2d', { willReadFrequently: true }); x.fillStyle = '#000'; x.fillRect(0, 0, W, H); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+    x.drawImage(src, 0, 0, W, H);
+    var d = x.getImageData(0, 0, W, H).data, g = new Float64Array(72), n = new Float64Array(72);
+    for (var yy = 0; yy < H; yy++) { var cy = Math.min(7, Math.floor(yy * 8 / H)); for (var xx = 0; xx < W; xx++) {
+      var c = cy * 9 + Math.min(8, Math.floor(xx * 9 / W)), i = (yy * W + xx) * 4; g[c] += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; n[c]++; } }
+    var bits = '', out = '';
+    for (var y = 0; y < 8; y++) for (var k = 0; k < 8; k++) bits += g[y * 9 + k] / n[y * 9 + k] > g[y * 9 + k + 1] / n[y * 9 + k + 1] ? '1' : '0';
+    for (var q = 0; q < 64; q += 4) out += parseInt(bits.slice(q, q + 4), 2).toString(16);
+    return out;
+  }
+  /** The look-alike hashes of an image: { v2, v1 }. v1 is the older, browser-dependent hash, still checked for earlier registrations. */
+  function dhashes(file) {
+    if (!/^image\//.test(file.type)) return Promise.resolve(null);
+    var load = window.createImageBitmap ? createImageBitmap(file) : new Promise(function (ok, no) { var im = new Image(); im.onload = function () { ok(im); }; im.onerror = no; im.src = URL.createObjectURL(file); });
+    return load.then(function (src) { return { v2: dhashBox(src), v1: dhashFromSource(src) }; }).catch(function () { return null; });
+  }
   function dhash(file) {
     if (!/^image\//.test(file.type)) return Promise.resolve(null);
     var load = window.createImageBitmap ? createImageBitmap(file) : new Promise(function (ok, no) {
@@ -56,6 +79,45 @@
     return (extra || '') + row('MOONMARK', esc(when(r))) + row('REGISTERED BY', who(r)) + (r.label ? row('LABEL', esc(r.label)) : '') +
       row('PROOF', '<a href="' + esc(r.signed_url) + '" target="_blank" rel="noopener" style="color:' + C.fg + '">Open the signed Moonmark ↗</a>');
   }
+
+
+  /* ---------- Content Credentials (C2PA), when the page loads /js/c2pa-read.js ---------- */
+  var SRC = { 'http://cv.iptc.org/newscodes/digitalsourcetype/digitalCapture': 'a camera capture', 'http://cv.iptc.org/newscodes/digitalsourcetype/computationalCapture': 'a computational capture',
+    'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia': 'AI-generated', 'http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia': 'edited with AI' };
+  function readCredentials(file) { return window.MoonC2pa ? window.MoonC2pa.read(file).catch(function () { return null; }) : Promise.resolve(null); }
+  function credInfo(store) {
+    var m = store && store.manifests && store.manifests[store.active_manifest]; if (!m) return null;
+    var res = (store.validation_results && store.validation_results.activeManifest) || {};
+    var fails = (res.failure || []).map(function (f) { return f.code; }).filter(function (c) { return c !== 'signingCredential.untrusted'; });
+    var ts = (res.success || []).filter(function (x) { return x.code === 'timeStamp.validated'; })[0];
+    var acts = ((m.assertions || []).filter(function (a) { return /^c2pa\.actions/.test(a.label); })[0] || { data: { actions: [] } }).data.actions || [];
+    var made = acts.filter(function (a) { return a.action === 'c2pa.created'; })[0];
+    var moonA = ((m.assertions || []).filter(function (a) { return a.label === 'org.moon369.moonmark'; })[0] || {}).data || null;
+    return { ok: fails.length === 0, fails: fails, app: (m.claim_generator_info && m.claim_generator_info[0] && m.claim_generator_info[0].name) || m.claim_generator || '',
+      signer: (m.signature_info && m.signature_info.common_name) || '', issuer: (m.signature_info && m.signature_info.issuer) || '', when: (m.signature_info && m.signature_info.time) || '',
+      how: made && made.digitalSourceType ? (SRC[made.digitalSourceType] || made.digitalSourceType.split('/').pop()) : '',
+      tsa: ts ? ((/matched: (.+)$/.exec(ts.explanation || '') || [])[1] || '') : '', moon: moonA };
+  }
+  function credCard(c) {
+    var head = c.ok ? '<div class="h" style="color:' + C.ok + '">' + moonSvg(16) + 'CONTENT CREDENTIALS CHECK OUT</div>'
+      : '<div class="h" style="color:' + C.warn + '">' + moonSvg(16) + 'CONTENT CREDENTIALS DO NOT MATCH THIS FILE</div><div class="n">It was changed after it was signed, or the credentials are broken.</div>';
+    var rows = (c.how ? row('MADE AS', esc(c.how)) : '') + (c.app ? row('MADE WITH', esc(c.app)) : '') +
+      (c.signer ? row('SIGNED BY', esc(c.signer) + (c.issuer ? ' <span style="color:' + C.dim + '">· certificate from ' + esc(c.issuer) + '</span>' : '')) : '') +
+      (c.tsa ? row('TIMESTAMP', esc(c.tsa) + (c.when ? ' <span style="color:' + C.dim + '">· ' + esc(c.when.replace('T', ' ').slice(0, 19)) + ' UTC</span>' : '')) : '');
+    if (c.moon && c.moon.receipt) rows += row('ON MOON', '<span data-moon-capture>Signed at capture, ' + esc(c.moon.moonmark || '') + '. Checking the receipt…</span>');
+    return head + '<div class="m">' + rows + '</div>';
+  }
+  function checkCapture(c, root) {
+    if (!c || !c.moon || !c.moon.receipt) return;
+    var el = function () { return root.querySelector('[data-moon-capture]'); };
+    Promise.all([getJson('/v1/verify', { receipt: c.moon.receipt }), lookup(c.moon.receipt.sha256).catch(function () { return null; })]).then(function (a) {
+      var v = a[0], lk = a[1], e = el(); if (!e) return;
+      if (!v.valid) { e.innerHTML = '<span style="color:' + C.warn + '">The Moonmark inside does not verify (' + esc(v.reason || 'invalid') + ').</span>'; return; }
+      var who = lk && lk.first ? who_(lk.first) : '';
+      e.innerHTML = 'Signed at capture, ' + esc(c.moon.moonmark) + (who ? ', registered by ' + who : '') + '. ' + (c.moon.signed_url ? '<a href="' + esc(c.moon.signed_url) + '" target="_blank" rel="noopener">Open the signed Moonmark ↗</a>' : '');
+    }).catch(function () { var e = el(); if (e) e.textContent = 'Signed at capture, ' + (c.moon.moonmark || '') + '. Could not reach Moon to check the receipt.'; });
+  }
+  function who_(r) { return r.registrant_verified ? esc(r.registrant) + ' <span style="color:' + C.ok + '">verified</span>' : '<span style="color:' + C.dim + '">' + (r.registrant === 'anonymous' ? 'anonymous' : 'an unverified name') + '</span>'; }
 
   /* ---------- <moon-badge sha256="…"> ---------- */
   class MoonBadge extends HTMLElement {
@@ -105,15 +167,27 @@
     }
     check(file, out) {
       out.innerHTML = '<div class="h">CHECKING ' + esc(file.name).toUpperCase() + '…</div>';
-      var sha, ph;
-      Promise.all([sha256(file), dhash(file)]).then(function (a) {
-        sha = a[0]; ph = a[1];
-        return Promise.all([lookup(sha), ph ? similar(ph) : Promise.resolve(null)]);
+      var sha, ph, cred, root = this.shadowRoot;
+      Promise.all([sha256(file), dhashes(file), readCredentials(file)]).then(function (a) {
+        sha = a[0]; var hs = a[1]; ph = hs ? hs.v2 : null; cred = credInfo(a[2]);
+        var sims = hs ? [similar(hs.v2)].concat(hs.v1 && hs.v1 !== hs.v2 ? [similar(hs.v1)] : []) : [];
+        return Promise.all([lookup(sha), Promise.all(sims).then(function (rs) {
+          if (!rs.length) return null;
+          var seen = {}, matches = [];
+          rs.forEach(function (r) { (r.matches || []).forEach(function (m) { if (!seen[m.sha256] || seen[m.sha256].distance > m.distance) seen[m.sha256] = m; }); });
+          Object.keys(seen).forEach(function (k) { matches.push(seen[k]); });
+          matches.sort(function (x, y) { return x.distance - y.distance; });
+          return { matches: matches };
+        })]);
       }).then(function (a) {
         var ex = a[0], sim = a[1], fp = '<div class="f">SHA-256 ' + sha + (ph ? '<br>LOOK-ALIKE HASH ' + ph : '') + '</div>';
-        var others = sim ? sim.matches.filter(function (m) { return m.sha256 !== sha; }) : [];
-        var html = '';
-        if (ex.registered) {
+        var capSha = cred && cred.moon && cred.moon.captured ? cred.moon.captured.sha256 : null;
+        // The capture itself (before its credentials were written in) is not an "edited copy" of this file.
+        var others = sim ? sim.matches.filter(function (m) { return m.sha256 !== sha && m.sha256 !== capSha; }) : [];
+        var html = cred ? credCard(cred) : '';
+        if (cred && cred.moon && !ex.registered && !others.length) {
+          html += fp;
+        } else if (ex.registered) {
           html += '<div class="h" style="color:' + C.ok + '">' + moonSvg(16) + 'THIS EXACT FILE IS ON MOON</div>' + fp + '<div class="m">' + regCard(ex.first) + '</div>';
           if (ex.count > 1) html += '<div class="n" style="margin-top:10px">Registered ' + ex.count + ' times. The earliest is shown.</div>';
         } else if (others.length) {
@@ -126,6 +200,7 @@
           html += '<div class="m">' + regCard(m.first, row('MATCH', (64 - m.distance) + ' of 64 look-alike bits match')) + '</div>';
         });
         out.innerHTML = html;
+        checkCapture(cred, root);
         out.dispatchEvent(new CustomEvent('moon:checked', { bubbles: true, composed: true, detail: { sha256: sha, phash: ph, exact: ex, similar: sim } }));
       }).catch(function (e) { out.innerHTML = '<div class="h" style="color:' + C.warn + '">COULD NOT CHECK</div><div class="n">' + esc(e.message || e) + '</div>'; });
     }
@@ -133,5 +208,5 @@
 
   if (!customElements.get('moon-badge')) customElements.define('moon-badge', MoonBadge);
   if (!customElements.get('moon-check')) customElements.define('moon-check', MoonCheck);
-  window.MoonEmbed = { sha256: sha256, dhash: dhash, lookup: lookup, similar: similar, api: API };
+  window.MoonEmbed = { sha256: sha256, dhash: function (f) { return dhashes(f).then(function (h) { return h && h.v2; }); }, dhashes: dhashes, lookup: lookup, similar: similar, api: API };
 })();

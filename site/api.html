@@ -168,7 +168,7 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 <div style="flex: 0 1 380px; border: 1px solid rgb(36, 38, 42); padding: 24px; display: flex; flex-direction: column; gap: 10px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">LIVE · MOONMARK · GET /v1/now</div>
-<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none;"></canvas><div><span style="visibility: hidden;">11:23:21</span></div></div>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none;"></canvas><div><span style="visibility: hidden;">11:43:13</span></div></div>
 <div class="ap-hide-m" style="font-family: Syncopate, sans-serif; font-size: 12px; letter-spacing: 0.24em;">CYCLE 1928 · MOON 05 · LUNE 06</div>
 <div class="ap-date" style="display: none;"><div class="ap-date-c"><div class="ap-date-l">CYCLE</div><div class="ap-date-v">1928</div></div><div class="ap-date-c"><div class="ap-date-l">MOON</div><div class="ap-date-v">05</div></div><div class="ap-date-c"><div class="ap-date-l">LUNE</div><div class="ap-date-v">06</div></div></div>
 </div>
@@ -182,6 +182,7 @@ footer > div > div:first-child svg{width:64px!important}
 <a href="#start" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Quick start</a>
 <a href="#key" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Free key</a>
 <a href="#mcp" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">AI assistants (MCP)</a>
+<a href="#capture" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Sign at capture</a>
 <a href="#constants" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Constants</a>
 <a href="#endpoints" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Endpoints</a>
 <a href="#errors" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Errors &amp; limits</a>
@@ -271,6 +272,36 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 </section>
 
 <section style="display: flex; flex-direction: column; gap: 28px;">
+<div id="capture" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 16px; padding-top: 24px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">CONTENT CREDENTIALS · C2PA</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">SIGN AT CAPTURE</h2>
+<p style="margin: 0px; max-width: 760px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">For camera and creator apps: sign each photo or clip the moment it's taken. <code>moon369-capture</code> signs the file on Moon, writes C2PA Content Credentials into it with the Moonmark inside, and has Moon's time-stamp authority timestamp them. Any C2PA tool, and <a href="/check" style="color: rgb(242, 242, 240);">moon369.org/check</a>, then shows how it was made, by which app, and when. A file changed after capture fails the&nbsp;check.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>ON YOUR SERVER (NODE)</span><span>npm i moon369-capture sharp</span></div>
+<pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">import { capture } from 'moon369-capture';
+
+const out = await capture(photo, {
+  mimeType: 'image/jpeg',
+  moonKey: process.env.MOON_KEY,
+  signer: { certChainPem, privateKeyPem },  // your C2PA certificate
+  app: { name: 'Lumen Camera' },
+});
+// out.bytes: the photo with Content Credentials
+// out.moonmark: 1928.05.06 10:43:17.958952179</pre>
+</div>
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px; padding: 24px 22px; display: flex; flex-direction: column; gap: 14px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.2em; color: rgb(138, 139, 143);">WHAT GOES INTO THE FILE</div>
+<p style="margin: 0px; font-size: 14.5px; line-height: 1.65; color: rgb(185, 182, 174);"><b style="color: rgb(233, 228, 216); font-weight: 500;">C2PA claim</b>, signed with your certificate: this app made this exact file, as a digital&nbsp;capture.</p>
+<p style="margin: 0px; font-size: 14.5px; line-height: 1.65; color: rgb(185, 182, 174);"><b style="color: rgb(233, 228, 216); font-weight: 500;">Moon timestamp</b> (RFC 3161) on that signature: C2PA tools show “Moon Timestamp&nbsp;Authority”.</p>
+<p style="margin: 0px; font-size: 14.5px; line-height: 1.65; color: rgb(185, 182, 174);"><b style="color: rgb(233, 228, 216); font-weight: 500;"><code>org.moon369.moonmark</code></b>: the signed Moonmark of the capture, registered under your name, with a look-alike hash so edited copies are&nbsp;found.</p>
+<p style="margin: 0px; font-size: 13.5px; line-height: 1.65; color: rgb(138, 139, 143);">Trusted credentials need a claim signing certificate from a CA on the <a href="https://c2pa.org/conformance" style="color: rgb(233, 228, 216);">C2PA Trust List</a>. Keys stay on your server; browser camera apps send the shot to their own backend. <a href="https://github.com/moon369org/moon-369/tree/main/packages/capture#readme" style="color: rgb(233, 228, 216);">Full guide</a>.</p>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px;">
 <div id="constants" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">02</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">CONSTANTS</h2>
@@ -305,11 +336,11 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
   "day": 6,
   "day_of_cycle": 120,
   "moon_length_days": 28,
-  "time": "11:23:21",
-  "moonmark": "1928.05.06 11:23:21.598680000",
-  "phase": { "fraction": 0.207067, "name": "First quarter" },
-  "unix_ms": 1794795060122,
-  "utc": "2026-11-16T02:11:00.122000000Z",
+  "time": "11:43:13",
+  "moonmark": "1928.05.06 11:43:13.381764000",
+  "phase": { "fraction": 0.207502, "name": "First quarter" },
+  "unix_ms": 1794796300021,
+  "utc": "2026-11-16T02:31:40.021000000Z",
   "time_zone": null,
   "dst": false
 }</span></pre>
@@ -1099,6 +1130,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <a href="#start" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Quick start</a>
 <a href="#key" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Free key</a>
 <a href="#mcp" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">AI assistants (MCP)</a>
+<a href="#capture" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Sign at capture</a>
 <a href="#constants" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Constants</a>
 <a href="#endpoints" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Endpoints</a>
 <a href="#errors" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Errors &amp; limits</a>
@@ -1184,6 +1216,36 @@ await verify(receipt, { content: file });  // { valid: true, ... }</pre>
 <div><b>timestamp_fingerprint</b><span>A signed Moonmark for a file's SHA-256</span></div>
 <div><b>lookup_fingerprint</b><span>Who registered a file, and when</span></div>
 <div><b>verify_receipt</b><span>Check a Moonmark's signatures</span></div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="capture" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">CONTENT CREDENTIALS · C2PA</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">SIGN AT CAPTURE</h2>
+<p style="margin: 0; max-width: 760px; font-size: 16px; line-height: 1.7; color: #A2A3A7">For camera and creator apps: sign each photo or clip the moment it&#39;s taken. <code>moon369-capture</code> signs the file on Moon, writes C2PA Content Credentials into it with the Moonmark inside, and has Moon&#39;s time-stamp authority timestamp them. Any C2PA tool, and <a href="/check" style="color: #F2F2F0">moon369.org/check</a>, then shows how it was made, by which app, and when. A file changed after capture fails the&nbsp;check.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>ON YOUR SERVER (NODE)</span><span>npm i moon369-capture sharp</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">import { capture } from 'moon369-capture';
+
+const out = await capture(photo, {
+  mimeType: 'image/jpeg',
+  moonKey: process.env.MOON_KEY,
+  signer: { certChainPem, privateKeyPem },  // your C2PA certificate
+  app: { name: 'Lumen Camera' },
+});
+// out.bytes: the photo with Content Credentials
+// out.moonmark: 1928.05.06 10:43:17.958952179</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0; padding: 24px 22px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: #8A8B8F">WHAT GOES INTO THE FILE</div>
+<p style="margin: 0; font-size: 14.5px; line-height: 1.65; color: #B9B6AE"><b style="color: #E9E4D8; font-weight: 500">C2PA claim</b>, signed with your certificate: this app made this exact file, as a digital&nbsp;capture.</p>
+<p style="margin: 0; font-size: 14.5px; line-height: 1.65; color: #B9B6AE"><b style="color: #E9E4D8; font-weight: 500">Moon timestamp</b> (RFC 3161) on that signature: C2PA tools show &ldquo;Moon Timestamp&nbsp;Authority&rdquo;.</p>
+<p style="margin: 0; font-size: 14.5px; line-height: 1.65; color: #B9B6AE"><b style="color: #E9E4D8; font-weight: 500"><code>org.moon369.moonmark</code></b>: the signed Moonmark of the capture, registered under your name, with a look-alike hash so edited copies are&nbsp;found.</p>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.65; color: #8A8B8F">Trusted credentials need a claim signing certificate from a CA on the <a href="https://c2pa.org/conformance" style="color: #E9E4D8">C2PA Trust List</a>. Keys stay on your server; browser camera apps send the shot to their own backend. <a href="https://github.com/moon369org/moon-369/tree/main/packages/capture#readme" style="color: #E9E4D8">Full guide</a>.</p>
+</div>
 </div>
 </section>
 
