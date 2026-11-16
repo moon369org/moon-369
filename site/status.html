@@ -44,18 +44,18 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 
 
 .st-banner{display:flex;gap:16px;align-items:center;border:1px solid #24262A;padding:22px 24px}
-.st-banner.ok{border-color:#E9E4D8}.st-banner.bad{border-color:#E0A49C}
-.st-banner b{display:block;font-family:'Syncopate',sans-serif;font-weight:700;font-size:13px;letter-spacing:.2em;line-height:1.5}
-.st-banner.bad b{color:#E0A49C}
+.st-banner.ok{border-color:#4CC38A}.st-banner.warn{border-color:#F2C14E}.st-banner.bad{border-color:#F0645C}
+.st-banner b{display:block;text-transform:uppercase;font-family:'Syncopate',sans-serif;font-weight:700;font-size:13px;letter-spacing:.2em;line-height:1.5}
+.st-banner.bad b{color:#F0645C}.st-banner.warn b{color:#F2C14E}
 .st-banner span{display:block;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#8A8B8F}
 .st-dot{display:inline-block;flex:none;width:9px;height:9px;border-radius:50%;margin-right:10px;vertical-align:1px;background:#5E6064}
-.st-dot.ok{background:#E9E4D8;box-shadow:0 0 0 3px rgba(233,228,216,.12)}.st-dot.warn{background:#E2C08D}.st-dot.bad{background:#E0A49C}.st-dot.off{background:transparent;border:1px solid #5E6064}
+.st-dot.ok{background:#4CC38A;box-shadow:0 0 0 3px rgba(76,195,138,.18)}.st-dot.warn{background:#F2C14E;box-shadow:0 0 0 3px rgba(242,193,78,.18)}.st-dot.bad{background:#F0645C;box-shadow:0 0 0 3px rgba(240,100,92,.2)}.st-dot.off{background:transparent;border:1px solid #5E6064}
 .st-banner .st-dot{width:12px;height:12px;margin:0}
 .st-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:1px;background:#24262A;border:1px solid #24262A}
 .st-c{background:#0B0B0D;padding:22px 24px;display:flex;flex-direction:column;gap:10px;min-height:120px}
 .st-ch{display:flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:#8A8B8F}
 .st-ch b{margin-left:auto;font-weight:400;font-size:10.5px;letter-spacing:.2em}
-.st-ok{color:#E9E4D8}.st-warn{color:#E2C08D}.st-bad{color:#E0A49C}.st-off{color:#8A8B8F}
+.st-ok{color:#4CC38A}.st-warn{color:#F2C14E}.st-bad{color:#F0645C}.st-off{color:#8A8B8F}
 .st-cv{font-size:19px;font-weight:500;color:#E9E4D8}
 .st-cn{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;color:#8A8B8F;overflow-wrap:anywhere}
 .st-h{margin:0;font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(18px,2vw,24px);letter-spacing:.08em}
@@ -145,7 +145,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="max-width: 1280px; margin: 0px auto; padding: 100px 32px 56px; display: flex; flex-direction: column; gap: 24px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">LIVE · CHECKED FROM YOUR BROWSER</div>
 <h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1;">STATUS</h1>
-<div class="st-banner bad" data-st-banner="" role="status"><span class="st-dot bad" aria-hidden="true"></span><div><b>The API is not answering · Moon could not run its checks</b><span>Checked 1:19 PM · updates every minute</span></div></div>
+<div class="st-banner bad" data-st-banner="" role="status"><span class="st-dot bad" aria-hidden="true"></span><div><b>The API is not answering · Moon could not run its checks</b><span>Checked 1:32 PM · updates every minute</span></div></div>
 </div>
 </section>
 

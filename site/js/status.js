@@ -46,9 +46,9 @@
     } else problems.push('Moon could not run its checks');
     if (!health || !health.ok) problems.unshift('The API is not answering');
 
-    var banner = $('[data-st-banner]');
-    banner.className = 'st-banner ' + (problems.length ? 'bad' : 'ok');
-    banner.innerHTML = dot(problems.length ? 'bad' : 'ok') + '<div><b>' + (problems.length ? esc(problems.join(' · ')) : 'ALL SYSTEMS WORKING') + '</b><span>Checked ' + fmt(new Date().toISOString(), false) + ' · updates every minute</span></div>';
+    var banner = $('[data-st-banner]'), down = problems.filter(function (x) { return !/behind/.test(x); }).length, level = down ? 'bad' : problems.length ? 'warn' : 'ok';
+    banner.className = 'st-banner ' + level;
+    banner.innerHTML = dot(level) + '<div><b>' + (problems.length ? esc(problems.join(' · ')) : 'ALL SYSTEMS WORKING') + '</b><span>Checked ' + fmt(new Date().toISOString(), false) + ' · updates every minute</span></div>';
     $('[data-st-cards]').innerHTML = cards.join('');
 
     // Nightly record
