@@ -216,29 +216,14 @@
     }
   }
 
-  // The live moon is the site's own: moon-phase.js does the astronomy, moonglow.js draws every canvas.hm-moonglow.
-  var SITE = (document.currentScript && document.currentScript.getAttribute('data-site')) || API.replace('//api.', '//'), liveReady = null;
-  function loadLive() {
-    if (liveReady) return liveReady;
-    var add = function (src) { return new Promise(function (ok, no) { var sc = document.createElement('script'); sc.src = src; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); }); };
-    liveReady = (window.MoonPhase ? Promise.resolve() : add(SITE + '/js/moon-phase.js')).then(function () { return window.__moonglow ? null : add(SITE + '/js/moonglow.js'); });
-    return liveReady;
+  // <moon-live>: loaded only when a page uses it, from the same one-file script the moon369 npm package ships.
+  var SITE = (document.currentScript && document.currentScript.getAttribute('data-site')) || API.replace('//api.', '//'), liveAsked = false;
+  function wantLive() {
+    if (liveAsked || customElements.get('moon-live') || !document.querySelector('moon-live')) return;
+    liveAsked = true; var sc = document.createElement('script'); sc.src = SITE + '/js/moon-live.js'; sc.async = true; document.head.appendChild(sc);
   }
-  class MoonLive extends HTMLElement {
-    static get observedAttributes() { return ['size', 'at']; }
-    connectedCallback() { this.draw(); loadLive().catch(function () {}); }
-    attributeChangedCallback() { if (this.cv) this.draw(); }
-    draw() {
-      var n = Math.max(16, Math.min(2000, parseInt(this.getAttribute('size'), 10) || 160)), at = this.getAttribute('at');
-      this.style.display = 'inline-block'; this.style.position = 'relative'; this.style.width = n + 'px'; this.style.height = n + 'px'; this.style.verticalAlign = 'middle';
-      if (!this.getAttribute('role')) { this.setAttribute('role', 'img'); this.setAttribute('aria-label', 'The Moon'); }
-      if (!this.cv) { this.cv = document.createElement('canvas'); this.cv.className = 'hm-moonglow'; this.cv.setAttribute('aria-hidden', 'true'); this.appendChild(this.cv); }
-      var w = n * 1.9;   // room for the glow to fade out
-      this.cv.style.cssText = 'position:absolute;left:50%;top:50%;width:' + w + 'px;height:' + w + 'px;margin:' + (-w / 2) + 'px 0 0 ' + (-w / 2) + 'px;pointer-events:none;display:block';
-      if (at) this.cv.setAttribute('data-at', at); else this.cv.removeAttribute('data-at');
-    }
-  }
-  if (!customElements.get('moon-live')) customElements.define('moon-live', MoonLive);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wantLive); else wantLive();
+  if (window.MutationObserver) { var mo = new MutationObserver(function () { wantLive(); if (liveAsked) mo.disconnect(); }); mo.observe(document.documentElement, { childList: true, subtree: true }); }
   if (!customElements.get('moon-badge')) customElements.define('moon-badge', MoonBadge);
   if (!customElements.get('moon-check')) customElements.define('moon-check', MoonCheck);
   window.MoonEmbed = { sha256: sha256, dhash: function (f) { return dhashes(f).then(function (h) { return h && h.v2; }); }, dhashes: dhashes, lookup: lookup, similar: similar, api: API };

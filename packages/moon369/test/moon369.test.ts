@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { generateKeyPairSync } from 'node:crypto';
 import { Signer, PqSigner } from '../../../api/src/receipt.js';
 import * as TL from '../../../api/src/tideline.js';
@@ -145,5 +145,14 @@ describe('Tideline checks', () => {
       const p: any = await TL.proofFor(store, r);
       expect(libIncl(receiptLeaf(r as any), p.index, p.size, p.path, p.root)).toBe(true);
     }
+  });
+});
+
+describe('moon-live.js', () => {
+  it('ships, and matches the site build (run node scripts/build-live.cjs after changing the moon)', () => {
+    const pkg = readFileSync(new URL('../moon-live.js', import.meta.url), 'utf8');
+    expect(pkg).toContain("customElements.define('moon-live'");
+    const site = new URL('../../../site/js/moon-live.js', import.meta.url);
+    if (existsSync(site)) expect(pkg).toBe(readFileSync(site, 'utf8'));
   });
 });

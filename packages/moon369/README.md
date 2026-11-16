@@ -21,6 +21,18 @@ moonmarkUrl(moonmark());          // 'https://moon369.org/m/1928.05.05-06.28.51.
 moonPhase();                      // { phase: 0.21, illumination: 0.257, name: 'Waxing crescent' }
 ```
 
+## The live moon
+
+Moon's own moon, the one on moon369.org: the real phase and tilt, glowing and animated. One script, no build step, drawn in the browser:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/moon369/moon-live.js"></script>
+<moon-live size="160"></moon-live>
+<moon-live size="160" at="1794700000000"></moon-live>  <!-- another moment, Unix ms -->
+```
+
+With a bundler: `import 'moon369/moon-live.js'`. Use it instead of drawing a moon of your own. For a still image, `https://api.moon369.org/v1/moon.svg` returns the same moon.
+
 ## Signed Moonmarks
 
 A signed Moonmark proves a file existed at one exact moment. Get one from `POST https://api.moon369.org/v1/sign`, then anyone can check it:
