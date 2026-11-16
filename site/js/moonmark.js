@@ -84,6 +84,34 @@
   }
   // drand quicknet: round n was published at genesis + (n - 1) * 3 seconds, so this needs no network.
   function roundUtc(n) { return new Date((1692803367 + (n - 1) * 3) * 1000).toISOString().replace('T', ' ').slice(0, 19) + ' UTC'; }
+  // A certificate of authenticity link carries its details: &ca=artist&ct=title&cy=year&ce=edition&cm=<master sha256, base64url>.
+  // They are trusted only if their SHA-256, as a moon-coa/1 statement, is exactly the fingerprint Moon signed.
+  function coaFrom() {
+    var q = new URLSearchParams(location.search), cm = q.get('cm');
+    if (!q.get('ca') || !q.get('ct') || !q.get('cy') || !/^[A-Za-z0-9_-]{43}$/.test(cm || '')) return null;
+    var bin = atob(cm.replace(/-/g, '+').replace(/_/g, '/') + '='), master = '';
+    for (var i = 0; i < bin.length; i++) master += bin.charCodeAt(i).toString(16).padStart(2, '0');
+    var ce = q.get('ce') || '';
+    return { artist: q.get('ca'), title: q.get('ct'), year: q.get('cy'), edition: /^\d{1,3}$/.test(ce) ? ce : '', master: master };
+  }
+  function coaStatement(c) { return ['moon-coa/1', 'artist:' + c.artist, 'title:' + c.title, 'year:' + c.year, 'edition:' + (c.edition || 'unique'), 'master:' + c.master].join('\n'); }
+  function coaBox(root, rc, c) {
+    var box = root.querySelector('[data-mk-coa]'); if (!box) return;
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(coaStatement(c))).then(function (d) {
+      var h = Array.from(new Uint8Array(d), function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+      if (h !== rc.sha256) { box.className = 'mk-coa mk-coa-bad'; box.innerHTML = '<div class="mk-sig-h">THESE DETAILS DO NOT MATCH THE SIGNATURE</div><div class="mk-sig-p">The artwork details in this link were changed after Moon signed them. Do not rely on them.</div>'; return; }
+      window.__moonCoaMaster = c.master;
+      var h1 = document.querySelector('h1'), ey = document.querySelector('.mk-ey');
+      if (h1) h1.textContent = 'CERTIFICATE OF AUTHENTICITY';
+      if (ey) ey.innerHTML = '<span>ART</span><span class="mk-sep"> · </span><span>SIGNED ON MOON</span>';
+      document.title = c.title + ' by ' + c.artist + ' · Certificate · Moon';
+      box.className = 'mk-coa';
+      box.innerHTML = '<div class="mk-coa-t">' + esc(c.title) + '</div><div class="mk-coa-a">' + esc(c.artist) + ', ' + esc(c.year) + '</div>' +
+        '<div class="mk-coa-e">' + (c.edition ? 'EDITION OF ' + esc(c.edition) : 'UNIQUE WORK') + '</div>' +
+        '<div class="mk-sig-r"><span>MASTER FILE</span><b title="' + c.master + '">' + c.master.slice(0, 12) + '…' + c.master.slice(-8) + '</b></div>' +
+        '<div class="mk-sig-p">These details match the fingerprint Moon signed, so they have not been changed since. The artist&#39;s name is as stated; Moon does not verify it. Use CHECK A FILE below with the artwork&#39;s master file to match it exactly.</div>';
+    });
+  }
   var TICK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
   function sigBox(root, rc) {
     var box = root.querySelector('[data-mk-sig]'); if (!box) return;
@@ -108,8 +136,9 @@
       out.textContent = 'Fingerprinting ' + f.name + '…';
       f.arrayBuffer().then(function (b2) { return crypto.subtle.digest('SHA-256', b2); }).then(function (d) {
         var h = Array.from(new Uint8Array(d), function (x) { return x.toString(16).padStart(2, '0'); }).join('');
-        out.className = 'mk-sig-m ' + (h === rc.sha256 ? 'yes' : 'no');
-        out.textContent = h === rc.sha256 ? '✓ ' + f.name + ' is the exact file Moon signed.' : '✕ ' + f.name + ' is not the file Moon signed.';
+        var mst = window.__moonCoaMaster, ok = h === rc.sha256 || h === mst;
+        out.className = 'mk-sig-m ' + (ok ? 'yes' : 'no');
+        out.textContent = h === mst ? '✓ ' + f.name + ' is the exact master file of this artwork.' : ok ? '✓ ' + f.name + ' is the exact file Moon signed.' : '✕ ' + f.name + ' is not the file Moon signed' + (mst ? ' or the master file.' : '.');
       }).catch(function () { out.textContent = 'Could not read that file.'; });
     };
     var hEl = box.querySelector('[data-mk-h]'), pEl = box.querySelector('[data-mk-p]');
@@ -129,9 +158,9 @@
     });
   }
   function render(root, mk, fresh, rc, ev) {
-    var ms = toMs(mk);
+    var ms = toMs(mk), coa = rc ? coaFrom() : null;
     if (ev) ms = Math.round(ms / 1000) * 1000;   // events are set to the second; drop float dust below it
-    var url = 'https://moon369.org/m/' + path(mk) + (rc ? '?s=' + rc.sha256 + '&u=' + rc.unix_ns + '&k=' + rc.key_id + '&g=' + rc.signature : ev ? '?e=' + encodeURIComponent(ev).replace(/%20/g, '+') : '');
+    var url = 'https://moon369.org/m/' + path(mk) + (rc ? location.search : ev ? '?e=' + encodeURIComponent(ev).replace(/%20/g, '+') : '');
     var f = window.MoonPhase ? window.MoonPhase.fraction(ms) : 0;
     var il = window.MoonPhase ? (window.MoonPhase.illumination(ms) * 100).toFixed(1) : '0.0';
     var nm = window.MoonPhase ? window.MoonPhase.name(f) : '';
@@ -157,6 +186,7 @@
       (fresh ? '<div class="mk-l">JUST MARKED</div>' : '') +
       (ev ? '<div class="mk-cd" data-mk-cd><div class="mk-l" data-mk-cd-l>STARTS IN</div><div class="mk-cd-c" data-mk-cd-c></div></div>' +
         '<div class="mk-when"><span>YOUR LOCAL TIME</span><b>' + esc(local) + ' ' + esc(abbr) + '</b></div>' : '') +
+      (rc && coa ? '<div data-mk-coa></div>' : '') +
       (rc ? '<div data-mk-sig></div>' : '') +
       '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" role="img" aria-label="' + nm + '"><defs><clipPath id="mk-disc"><circle r="10"/></clipPath><filter id="mk-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="0.8"/></filter></defs><circle r="10" fill="#24262A"/><g clip-path="url(#mk-disc)"><path d="' + ph + '" fill="#E9E4D8" filter="url(#mk-soft)"/></g></svg>' +
       '<div class="mk-cells"><div><i>CYCLE</i><b>' + mk.y + '</b></div><div><i>MOON</i><b>' + p(mk.m) + '</b></div><div><i>LUNE</i><b>' + p(mk.d) + '</b></div></div></div>' +
@@ -174,6 +204,7 @@
       (rc || ev ? '' : '<div class="mk-note">This Moonmark is unsigned. A signed Moonmark from Moon proves when something happened.</div>') + '</div>' +
       '</div>';
     if (rc) sigBox(root, rc);
+    if (rc && coa) coaBox(root, rc, coa);
     root.querySelector('[data-mk-copy]').onclick = function (e) {
       try { navigator.clipboard.writeText(url); e.target.textContent = 'COPIED'; } catch (err) { e.target.textContent = url; }
     };
