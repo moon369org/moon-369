@@ -1,7 +1,8 @@
 /*
  * dc-lite: renders the Moon site pages without a build step.
  *
- * Each page keeps its markup in <x-dc> and its logic in
+ * Each page keeps its markup in <template data-dc> (inert, so readers and crawlers skip the raw
+ * {{placeholders}}; older pages may still use <x-dc>) and its logic in
  * <script type="text/x-dc" data-dc-script>class Component extends DCLogic { ... }</script>.
  * Supported template features:
  *   {{path.to.value}}  in text and attributes (whole-value attributes keep raw values, e.g. functions)
@@ -91,9 +92,10 @@
   window.DCLogic = DCLogic;
 
   function mount() {
-    const tpl = document.querySelector('x-dc');
+    const tpl = document.querySelector('template[data-dc]') || document.querySelector('x-dc');
     if (!tpl) return;
-    const helmet = tpl.querySelector('helmet');
+    const box = tpl.content || tpl;   // a <template>'s markup lives in its content fragment
+    const helmet = box.querySelector('helmet');
     if (helmet) {
       for (const el of Array.from(helmet.children)) document.head.appendChild(el.cloneNode(true));
       helmet.remove();
@@ -106,7 +108,7 @@
     }
     // Keep the template as an inert fragment, then render in its place.
     const template = document.createElement('div');
-    while (tpl.firstChild) template.appendChild(tpl.firstChild);
+    while (box.firstChild) template.appendChild(box.firstChild);
     const root = document.createElement('div');
     root.setAttribute('data-dc-root', '');
     tpl.replaceWith(root);

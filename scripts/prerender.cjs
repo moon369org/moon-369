@@ -42,11 +42,10 @@ function hoistHelmet(html) {
       clone.querySelectorAll('canvas').forEach((c) => { c.removeAttribute('width'); c.removeAttribute('height'); });
       clone.removeAttribute('data-dc-root');
       clone.setAttribute('data-dc-snapshot', '');
-      clone.setAttribute('aria-hidden', 'true');
       return clone.outerHTML;
     });
     await pg.close();
-    html = fs.readFileSync(file, 'utf8').replace('<x-dc>', '<!--snapshot-->' + snap + '<!--/snapshot-->\n<x-dc>');
+    html = fs.readFileSync(file, 'utf8').replace('<template data-dc>', '<!--snapshot-->' + snap + '<!--/snapshot-->\n<template data-dc>');
     fs.writeFileSync(file, html);
     console.log(name, Math.round(snap.length / 1024) + ' KB');
   }
