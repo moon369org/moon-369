@@ -172,7 +172,7 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 <div style="flex: 0 1 380px; border: 1px solid rgb(36, 38, 42); padding: 24px; display: flex; flex-direction: column; gap: 10px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">LIVE · MOONMARK · GET /v1/now</div>
-<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none; rotate: 17.8deg;"></canvas><div><span style="visibility: hidden;">05:37:12</span></div></div>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="First quarter" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none; rotate: 17.8deg;"></canvas><div>05:58:35</div></div>
 <div class="ap-hide-m" style="font-family: Syncopate, sans-serif; font-size: 12px; letter-spacing: 0.24em;">CYCLE 1928 · MOON 05 · LUNE 07</div>
 <div class="ap-date" style="display: none;"><div class="ap-date-c"><div class="ap-date-l">CYCLE</div><div class="ap-date-v">1928</div></div><div class="ap-date-c"><div class="ap-date-l">MOON</div><div class="ap-date-v">05</div></div><div class="ap-date-c"><div class="ap-date-l">LUNE</div><div class="ap-date-v">07</div></div></div>
 </div>
@@ -374,11 +374,11 @@ data-compact to hide the local time line.</pre>
   "day": 7,
   "day_of_cycle": 121,
   "moon_length_days": 28,
-  "time": "05:37:12",
-  "moonmark": "1928.05.07 05:37:12.642343000",
-  "phase": { "fraction": 0.231121, "name": "First quarter" },
-  "unix_ms": 1794863340891,
-  "utc": "2026-11-16T21:09:00.891000000Z",
+  "time": "05:58:35",
+  "moonmark": "1928.05.07 05:58:35.987775000",
+  "phase": { "fraction": 0.231594, "name": "First quarter" },
+  "unix_ms": 1794864676049,
+  "utc": "2026-11-16T21:31:16.049000000Z",
   "time_zone": null,
   "dst": false
 }</span></pre>
@@ -526,20 +526,33 @@ data-compact to hide the local time line.</pre>
 </div>
 <p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">Moon's own moon, the one on this site and on every card: the real phase, lit by the sun, glowing, turned to its real tilt. Use it instead of drawing a moon yourself. <code>size</code> sets pixels from 32 to&nbsp;2000 (default 512), <code>bg=dark</code> fills the background (default transparent), <code>tilt=off</code> points the lit side straight right or left, and <code>moonmark</code>, <code>unix_ns</code> or <code>utc</code> draw any moment. <code>/v1/moon.png</code> takes the same options and returns a PNG. Every Moonmark response carries <code>moon_image</code>, a link to this image for that exact moment.</p>
 <p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">For the live, animated moon in a web page, add <code>&lt;moon-live&gt;</code> from <code>moon369.org/embed/moon.js</code>. It is the exact moon from this site, with its moving light, and updates on its own. <code>size</code> sets pixels; <code>at</code> (Unix ms) shows another moment.</p>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start;">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: stretch;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>EMBED</span><span></span></div>
-<pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">&lt;!-- an image, anywhere --&gt;
-&lt;img src="https://api.moon369.org/v1/moon.svg?size=256"
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>IMAGE · ANY APP</span><span>SVG OR PNG</span></div>
+<pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">&lt;img src="https://api.moon369.org/v1/moon.svg?size=256"
      width="256" height="256" alt="The Moon today"&gt;
 
-&lt;!-- live and animated, in a web page --&gt;
-&lt;script src="https://moon369.org/embed/moon.js" defer&gt;&lt;/script&gt;
-&lt;moon-live size="160"&gt;&lt;/moon-live&gt;</pre>
+&lt;!-- PNG, dark background, any moment --&gt;
+https://api.moon369.org/v1/moon.png?size=512&amp;bg=dark&amp;moonmark=1928.05.12-15.00.00.0</pre>
 </div>
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>PREVIEW</span><span></span></div>
-<div style="padding: 24px 20px; display: flex; justify-content: center;"><img src="https://api.moon369.org/v1/moon.svg?size=256" width="256" height="256" alt="The Moon today, as Moon draws it" loading="lazy" style="max-width: 100%; height: auto;"></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>PREVIEW</span><span>STILL</span></div>
+<div style="padding: 24px 20px; display: flex; justify-content: center; align-items: center; min-height: 256px;"><img src="https://api.moon369.org/v1/moon.svg?size=256" width="256" height="256" alt="The Moon today, as Moon draws it" loading="lazy" style="max-width: 100%; height: auto;"></div>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: stretch;">
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>LIVE · WEB PAGES</span><span>ANIMATED</span></div>
+<pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">&lt;script src="https://moon369.org/embed/moon.js" defer&gt;&lt;/script&gt;
+
+&lt;moon-live size="160"&gt;&lt;/moon-live&gt;
+
+&lt;!-- another moment (Unix ms) --&gt;
+&lt;moon-live size="160" at="1794700000000"&gt;&lt;/moon-live&gt;</pre>
+</div>
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>PREVIEW</span><span>LIVE</span></div>
+<div style="padding: 24px 20px; display: flex; justify-content: center; align-items: center; min-height: 256px; overflow: hidden;"><div style="position: relative; width: 160px; height: 160px;"><canvas class="hm-moonglow" role="img" aria-label="The Moon right now, animated" style="position: absolute; left: 50%; top: 50%; width: 304px; height: 304px; margin: -152px 0px 0px -152px; display: block; pointer-events: none;"></canvas></div></div>
 </div>
 </div>
 </div>
@@ -1556,20 +1569,33 @@ data-compact to hide the local time line.</pre>
 </div>
 <p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">Moon&#39;s own moon, the one on this site and on every card: the real phase, lit by the sun, glowing, turned to its real tilt. Use it instead of drawing a moon yourself. <code>size</code> sets pixels from 32 to&nbsp;2000 (default 512), <code>bg=dark</code> fills the background (default transparent), <code>tilt=off</code> points the lit side straight right or left, and <code>moonmark</code>, <code>unix_ns</code> or <code>utc</code> draw any moment. <code>/v1/moon.png</code> takes the same options and returns a PNG. Every Moonmark response carries <code>moon_image</code>, a link to this image for that exact moment.</p>
 <p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">For the live, animated moon in a web page, add <code>&lt;moon-live&gt;</code> from <code>moon369.org/embed/moon.js</code>. It is the exact moon from this site, with its moving light, and updates on its own. <code>size</code> sets pixels; <code>at</code> (Unix ms) shows another moment.</p>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: stretch">
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>EMBED</span><span></span></div>
-<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">&lt;!-- an image, anywhere --&gt;
-&lt;img src=&quot;https://api.moon369.org/v1/moon.svg?size=256&quot;
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>IMAGE · ANY APP</span><span>SVG OR PNG</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">&lt;img src=&quot;https://api.moon369.org/v1/moon.svg?size=256&quot;
      width=&quot;256&quot; height=&quot;256&quot; alt=&quot;The Moon today&quot;&gt;
 
-&lt;!-- live and animated, in a web page --&gt;
-&lt;script src=&quot;https://moon369.org/embed/moon.js&quot; defer&gt;&lt;/script&gt;
-&lt;moon-live size=&quot;160&quot;&gt;&lt;/moon-live&gt;</pre>
+&lt;!-- PNG, dark background, any moment --&gt;
+https://api.moon369.org/v1/moon.png?size=512&amp;bg=dark&amp;moonmark=1928.05.12-15.00.00.0</pre>
 </div>
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>PREVIEW</span><span></span></div>
-<div style="padding: 24px 20px; display: flex; justify-content: center"><img src="https://api.moon369.org/v1/moon.svg?size=256" width="256" height="256" alt="The Moon today, as Moon draws it" loading="lazy" style="max-width: 100%; height: auto"></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>PREVIEW</span><span>STILL</span></div>
+<div style="padding: 24px 20px; display: flex; justify-content: center; align-items: center; min-height: 256px"><img src="https://api.moon369.org/v1/moon.svg?size=256" width="256" height="256" alt="The Moon today, as Moon draws it" loading="lazy" style="max-width: 100%; height: auto"></div>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: stretch">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>LIVE · WEB PAGES</span><span>ANIMATED</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">&lt;script src=&quot;https://moon369.org/embed/moon.js&quot; defer&gt;&lt;/script&gt;
+
+&lt;moon-live size=&quot;160&quot;&gt;&lt;/moon-live&gt;
+
+&lt;!-- another moment (Unix ms) --&gt;
+&lt;moon-live size=&quot;160&quot; at=&quot;1794700000000&quot;&gt;&lt;/moon-live&gt;</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>PREVIEW</span><span>LIVE</span></div>
+<div style="padding: 24px 20px; display: flex; justify-content: center; align-items: center; min-height: 256px; overflow: hidden"><div style="position: relative; width: 160px; height: 160px"><canvas class="hm-moonglow" role="img" aria-label="The Moon right now, animated" style="position: absolute; left: 50%; top: 50%; width: 304px; height: 304px; margin: -152px 0 0 -152px; display: block; pointer-events: none"></canvas></div></div>
 </div>
 </div>
 </div>
