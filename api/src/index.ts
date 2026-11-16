@@ -740,7 +740,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const idx = await env.TIDES.recent(30);
         const tides = (await Promise.all(idx.map((i) => env.TIDES!.getTide(i)))).filter(Boolean);
         const open = luneOf(nowUnixNs());
-        return json({ tideline: TIDELINE, about: 'Every lune, Moon seals its signed Moonmarks into a tide: a Merkle root, chained to the previous tide, signed and anchored on the XRP Ledger.', open_lune: luneLabel(open), seals_after_utc: unixNsToIso(luneEndNs(open)), head: tides[0] ?? null, tides }, 200, { 'Cache-Control': 'public, max-age=60', ...planHdr });
+        return json({ tideline: TIDELINE, about: 'Every lune, Moon seals its signed Moonmarks into a tide: a Merkle root of every receipt, chained to the previous tide and signed with Moon\'s keys.', open_lune: luneLabel(open), seals_after_utc: unixNsToIso(luneEndNs(open)), anchoring: { xrpl: !!env.ANCHOR, bitcoin: !!env.BITCOIN }, head: tides[0] ?? null, tides }, 200, { 'Cache-Control': 'public, max-age=60', ...planHdr });
       }
 
       case path.startsWith(`/${API_VERSION}/tideline/`): {
@@ -758,9 +758,13 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           return new Response(new Uint8Array(f), { headers: { ...CORS, 'Content-Type': 'application/vnd.opentimestamps.v1', 'Content-Disposition': `attachment; filename="tide-${tide.lune}.txt.ots"`, 'Cache-Control': 'public, max-age=300' } });
         }
         if (tide) return json(tide, 200, { 'Cache-Control': 'public, max-age=300', ...planHdr });
-        const size = (await env.TIDES.leaves(lune)).length;
+        const leaves = await env.TIDES.leaves(lune), size = leaves.length;
         const last = (await env.TIDES.checkpoints(lune)).at(-1) ?? null;
-        return json({ tideline: TIDELINE, lune: luneLabel(lune), last_checkpoint: last, status: luneEndNs(lune) > nowUnixNs() ? 'open' : 'pending', size, seals_after_utc: unixNsToIso(luneEndNs(lune)) }, 200, { 'Cache-Control': 'public, max-age=60', ...planHdr });
+        // The lune's entries so far, in order: the public log before it seals. A leaf is a one-way fingerprint of a receipt.
+        const MAX = 2000;
+        const entries = leaves.slice(0, MAX).map((leaf, index) => ({ index, leaf }));
+        return json({ tideline: TIDELINE, lune: luneLabel(lune), last_checkpoint: last, status: luneEndNs(lune) > nowUnixNs() ? 'open' : 'pending', size, seals_after_utc: unixNsToIso(luneEndNs(lune)),
+          entries, ...(size > MAX ? { entries_truncated: true } : {}) }, 200, { 'Cache-Control': 'public, max-age=30', ...planHdr });
       }
 
       case path.startsWith(`/${API_VERSION}/cycle/`) || path.startsWith(`/${API_VERSION}/year/`): {

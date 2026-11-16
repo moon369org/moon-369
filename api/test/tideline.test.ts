@@ -67,10 +67,12 @@ describe('the Tideline', () => {
     expect((await handle(new Request('https://api.example.org/v1/tideline/seal'), env)).status).toBe(403);
     const open: any = await (await handle(new Request(`https://api.example.org/v1/tideline/${s.tideline.lune}`), env)).json();
     expect(open).toMatchObject({ status: 'open', size: 1 });
+    expect(open.entries).toEqual([{ index: 0, leaf: s.tideline.leaf }]);   // the public log lists the lune's entries
     const pr: any = await (await handle(new Request('https://api.example.org/v1/tideline/proof', { method: 'POST', body: JSON.stringify({ receipt: s.receipt }) }), env)).json();
     expect(pr.status).toBe('pending');
     const list: any = await (await handle(new Request('https://api.example.org/v1/tideline'), env)).json();
     expect(list.tideline).toBe('tideline/1');
+    expect(list.anchoring).toEqual({ xrpl: false, bitcoin: false });
   });
 
   it('503 when not configured', async () => {
