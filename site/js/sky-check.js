@@ -101,7 +101,10 @@
     var m = last.m, k = last.k, W = size || 600; cv.width = cv.height = W;
     var c = cv.getContext('2d'), half = m.r * 1.6 / k;   // in the original photo's pixels
     c.fillStyle = '#0B0B0D'; c.fillRect(0, 0, W, W);
-    c.drawImage(last.bmp, m.cx / k - half, m.cy / k - half, half * 2, half * 2, 0, 0, W, W);
+    // Safari draws nothing if the source box runs off the photo, so clip the box to the photo first.
+    var iw = last.bmp.width, ih = last.bmp.height, sx0 = m.cx / k - half, sy0 = m.cy / k - half, scl = W / (half * 2);
+    var ax = Math.max(0, sx0), ay = Math.max(0, sy0), bx = Math.min(iw, sx0 + half * 2), by = Math.min(ih, sy0 + half * 2);
+    if (bx > ax && by > ay) c.drawImage(last.bmp, ax, ay, bx - ax, by - ay, (ax - sx0) * scl, (ay - sy0) * scl, (bx - ax) * scl, (by - ay) * scl);
     // the circle Moon found, and the way the lit side points
     var s = W / (half * 2), R = m.r / k * s;
     c.strokeStyle = 'rgba(233,228,216,.55)'; c.lineWidth = Math.max(1, W / 300); c.setLineDash([W / 90, W / 120]);

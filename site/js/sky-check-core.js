@@ -42,7 +42,9 @@
     var top = 0, seen = 0;
     for (i = 255; i >= 0; i--) { seen += hist[i]; if (seen >= 12) { top = i; break; } }
     if (top < 60) return { ok: false, reason: 'dark' };
-    var T = Math.max(40, Math.round(top * 0.35));
+    // A phone usually overexposes the Moon: its face clips to white and a glow spreads around it.
+    // Then cut higher, so the glow isn't counted as Moon.
+    var T = Math.max(40, Math.round(top * (top >= 245 ? 0.6 : 0.35)));
 
     // The largest bright patch is the Moon.
     var lab = new Int32Array(w * h), best = -1, bestN = 0, q = new Int32Array(w * h), id = 0;
