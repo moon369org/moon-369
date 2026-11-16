@@ -65,7 +65,8 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .sc-v.match{border-color:#4CC38A}.sc-v.match b{color:#4CC38A}.sc-v.close{border-color:#F2C14E}.sc-v.close b{color:#F2C14E}.sc-v.off{border-color:#F0645C}.sc-v.off b{color:#F0645C}
 .sc-pair{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#24262A;border:1px solid #24262A}
 .sc-pair figure{margin:0;background:#0B0B0D;padding:22px;display:flex;flex-direction:column;align-items:center;gap:14px}
-.sc-pair canvas{width:100%;max-width:300px;height:auto;display:block}
+.sc-art{position:relative;width:100%;max-width:300px}.sc-art::before{content:'';display:block;padding-top:100%}
+.sc-art canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block}
 .sc-pair figcaption{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
 .sc-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:#1C1D20;border:1px solid #1C1D20}
 .sc-rows div{background:#0B0B0D;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
@@ -156,7 +157,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="sc-eye">SKY CHECK · YOUR PHOTO NEVER LEAVES YOUR PHONE</div>
 <h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(30px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1; max-width: 1000px;">CHECK MOON TIME AGAINST THE SKY</h1>
 <p class="sc-p">Moon's dates follow the real Moon, so you can check them by looking up. Take a photo of the Moon and Moon measures how much of it is lit and which way the lit side points, then checks both against what Moon time says the sky should show, right where you're standing.</p>
-<div class="sc-now" data-sc-now=""><canvas data-sc-nowcv="" aria-hidden="true"></canvas><div><b data-sc-nowh="">THE MOON RIGHT NOW</b><span data-sc-nowt="">First quarter · 43% lit · Moonmark 1928.05.07 02:03:09<br>Share your location to see which way it tilts where you are.</span><button type="button" data-sc-loc="">USE MY LOCATION</button></div></div>
+<div class="sc-now" data-sc-now=""><canvas data-sc-nowcv="" aria-hidden="true"></canvas><div><b data-sc-nowh="">THE MOON RIGHT NOW</b><span data-sc-nowt="">First quarter · 43% lit · Moonmark 1928.05.07 02:12:20<br>Share your location to see which way it tilts where you are.</span><button type="button" data-sc-loc="">USE MY LOCATION</button></div></div>
 <div class="sc-btns"><label class="sc-btn p">TAKE OR CHOOSE A PHOTO<input type="file" accept="image/*" data-sc-file=""></label></div>
 <ul class="sc-tips">
 <li><b>01 · HOLD IT STRAIGHT</b>Keep your phone upright, not tilted, so up in the photo is up in the sky.</li>
@@ -169,7 +170,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="max-width: 1280px; margin: 0px auto; padding: 56px 32px 110px; display: flex; flex-direction: column; gap: 28px;">
 <div class="sc-res" data-sc-res="">
 <div class="sc-v" data-sc-v="" role="status"></div>
-<div class="sc-pair"><figure><canvas data-sc-photo="" aria-label="Your photo of the Moon"></canvas><figcaption>YOUR PHOTO</figcaption></figure><figure><canvas data-sc-pred="" aria-label="The Moon Moon time predicts"></canvas><figcaption>MOON TIME SAYS</figcaption></figure></div>
+<div class="sc-pair"><figure><div class="sc-art"><canvas data-sc-photo="" aria-label="Your photo of the Moon"></canvas></div><figcaption>YOUR PHOTO</figcaption></figure><figure><div class="sc-art"><canvas data-sc-pred="" aria-label="The Moon Moon time predicts"></canvas></div><figcaption>MOON TIME SAYS</figcaption></figure></div>
 <div class="sc-rows" data-sc-rows=""></div>
 <div class="sc-btns"><button type="button" class="sc-btn p" data-sc-save="">SAVE OR SHARE</button><label class="sc-btn">TRY ANOTHER PHOTO<input type="file" accept="image/*" data-sc-file2=""></label></div>
 </div>
@@ -232,7 +233,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="max-width: 1280px; margin: 0 auto; padding: 56px 32px 110px; display: flex; flex-direction: column; gap: 28px">
 <div class="sc-res" data-sc-res hidden>
 <div class="sc-v" data-sc-v role="status"></div>
-<div class="sc-pair"><figure><canvas data-sc-photo aria-label="Your photo of the Moon"></canvas><figcaption>YOUR PHOTO</figcaption></figure><figure><canvas data-sc-pred aria-label="The Moon Moon time predicts"></canvas><figcaption>MOON TIME SAYS</figcaption></figure></div>
+<div class="sc-pair"><figure><div class="sc-art"><canvas data-sc-photo aria-label="Your photo of the Moon"></canvas></div><figcaption>YOUR PHOTO</figcaption></figure><figure><div class="sc-art"><canvas data-sc-pred aria-label="The Moon Moon time predicts"></canvas></div><figcaption>MOON TIME SAYS</figcaption></figure></div>
 <div class="sc-rows" data-sc-rows></div>
 <div class="sc-btns"><button type="button" class="sc-btn p" data-sc-save>SAVE OR SHARE</button><label class="sc-btn">TRY ANOTHER PHOTO<input type="file" accept="image/*" data-sc-file2></label></div>
 </div>
