@@ -2,6 +2,7 @@
 // the same inside an <img>, where external fonts and scripts never load.
 import { SYNCOPATE_700_WOFF2, JETBRAINS_MONO_400_WOFF2 } from './card-fonts.js';
 import type { skyAt } from './moon.js';
+import { deflateSync } from 'node:zlib';
 
 export interface CardData {
   year: number; moon: number; lune: number; lunesInMoon: number;
@@ -23,68 +24,124 @@ export function phasePath(f: number, r: number, kOverride?: number): string {
   return `M0,-${r} A${r},${r} 0 0 ${outer} 0,${r} A${rx.toFixed(3)},${r} 0 0 ${inner} 0,-${r}Z`;
 }
 
+// A tiny PNG encoder (RGBA, no filtering) so the lit face can be shaded per pixel like the site's.
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = (b: Buffer) => { let c = 0xffffffff; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+function pngRGBA(w: number, h: number, px: Uint8Array): Buffer {
+  const chunk = (type: string, data: Buffer) => {
+    const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
+    const td = Buffer.concat([Buffer.from(type, 'ascii'), data]), crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(td));
+    return Buffer.concat([len, td, crc]);
+  };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 6;
+  const raw = Buffer.alloc((w * 4 + 1) * h);
+  for (let y = 0; y < h; y++) Buffer.from(px.buffer, px.byteOffset + y * w * 4, w * 4).copy(raw, y * (w * 4 + 1) + 1);
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+}
+
 /**
- * The moon as the site draws it: a soft terminator (light blurs into shadow, the lit edge
- * stays crisp) and the Edge Corona (white rays off the lit limb that fade to nothing, zero
- * at the poles). Centered on 0,0, radius r. `id` keeps defs unique within one SVG.
+ * The lit face, shaded per pixel exactly as the site's living moon (site/js/moonglow.js shade):
+ * brightness is a smoothstep of the Sun's angle on a sphere, widest across the face and tight at
+ * the rim, so the terminator is a soft gradient that meets the edge cleanly. Returns a data URI.
+ */
+function litFace(f: number, size: number): string {
+  const px = new Uint8Array(size * size * 4), R = size / 2, e = 2 * Math.PI * f, sx = Math.sin(e), sz = -Math.cos(e);
+  const ink = [0xE9, 0xE4, 0xD8];
+  for (let y = 0; y < size; y++) {
+    const ny = (y + 0.5 - R) / R;
+    for (let x = 0; x < size; x++) {
+      const nx = (x + 0.5 - R) / R, rr = nx * nx + ny * ny;
+      const edge = Math.min(1, Math.max(0, (1 - Math.sqrt(rr)) * R + 0.5));
+      if (edge <= 0) continue;
+      const nz = Math.sqrt(Math.max(0, 1 - rr)), dot = nx * sx + nz * sz;
+      const A = -0.03 - 0.22 * nz, B = 0.03 + 0.42 * nz;
+      const t = Math.min(1, Math.max(0, (dot - A) / (B - A))), a = t * t * (3 - 2 * t) * edge;
+      if (a <= 0) continue;
+      const o = (y * size + x) * 4;
+      px[o] = ink[0]; px[o + 1] = ink[1]; px[o + 2] = ink[2]; px[o + 3] = Math.round(a * 255);
+    }
+  }
+  return 'data:image/png;base64,' + pngRGBA(size, size, px).toString('base64');
+}
+
+/**
+ * The halo past the lit edge: white light that fades out to 1.6 moon radii, in each direction as
+ * bright as the face is lit just inside the rim there. Drawn at half resolution; it is blurred.
+ */
+function halo(f: number, r: number): string {
+  const size = Math.max(8, Math.round(r * 1.6)), c = size / 2, R = c / 1.6;   // 1.6 radii each way
+  const e = 2 * Math.PI * f, sx = Math.sin(e), sz = -Math.cos(e), px = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const dx = x + 0.5 - c, dy = y + 0.5 - c, d = Math.hypot(dx, dy) / R;
+    if (d < 0.97 || d > 1.6) continue;
+    const cos = dx / (d * R), dot = 0.97 * cos * sx + 0.243 * sz;               // a point just inside the rim
+    const t = Math.min(1, Math.max(0, (dot + 0.02) / 0.3)), lit = t * t * (3 - 2 * t);
+    const q = Math.max(0, (d - 1) / 0.6), fall = d < 1 ? 1 : Math.pow(1 - q, 2.6);   // eased out to nothing
+    const a = lit * fall * 0.25;
+    if (a <= 0.002) continue;
+    const o = (y * size + x) * 4; px[o] = px[o + 1] = px[o + 2] = 255; px[o + 3] = Math.round(a * 255);
+  }
+  return 'data:image/png;base64,' + pngRGBA(size, size, px).toString('base64');
+}
+
+/**
+ * The moon as the site's living moon draws it, frozen at one frame: the lit face shaded like a
+ * sphere, a glow made from that same face blurred at three radii, and the Edge Corona (thin rays
+ * off the lit limb that fade to nothing along their length and are zero at the poles). Same
+ * proportions as site/js/moonglow.js. Centered on 0,0, radius r. `id` keeps defs unique.
  */
 export function moonSvg(f: number, r: number, id: string, tilt = 0): string {
-  const waxing = f < 0.5, full = Math.abs(f - 0.5) < 0.02, lit = phasePath(f, r);
-  // Soft terminator like a real sphere: a band of stacked lit shapes whose width follows the
-  // terminator's curve (wide in the middle, nothing at the poles), so the shadow side is one smooth
-  // curve with no horns. A light blur hides the steps; the clip keeps it from wrapping the poles.
-  const K = Math.cos(2 * Math.PI * f), BAND = 0.3, N = 20;
-  const ck = (k: number) => Math.max(-1, Math.min(1, k));
-  // Layer j (1 = most lit shape, N = least) gets the alpha that makes the stacked opacity follow a
-  // smoothstep across the band: an even, soft fade instead of a hard line on the shadow side.
-  const T = (j: number) => { const x = j / N; return x * x * (3 - 2 * x); };
-  const soft = (r * 0.03).toFixed(2), lw = r * 0.4, kc = K - BAND - 2.5 * 0.03;
-  let band = '';
-  for (let j = 1; j <= N; j++) {
-    const op = 1 - (1 - T(j)) / (1 - T(j - 1));
-    band += `<path d="${phasePath(f, r, ck(K - BAND + 2 * BAND * (j - 1) / (N - 1)))}" fill="${PAPER}"${op < 1 ? ` fill-opacity="${op.toFixed(4)}"` : ''}/>`;
-  }
-  // Light painted past the lit limb, so blurring only softens the terminator.
-  const R2 = (r + lw / 2 - 1).toFixed(2);
-  const limb = (right: boolean) => `<path d="M0,-${R2} A${R2},${R2} 0 0 ${right ? 1 : 0} 0,${R2}" fill="none" stroke="${PAPER}" stroke-width="${lw.toFixed(2)}"/>`;
-  const sides = full ? [true, false] : [waxing];
-  // Rays: tapered, widest at the surface, faded by a radial mask; deterministic so the card is stable.
-  let rays = '';
-  const n = 120;
-  for (const right of sides) {
+  const wax = f < 0.5, lit = (1 - Math.cos(2 * Math.PI * f)) / 2;
+  const strength = Math.min(1, 0.6 + lit * 1.2);
+  const W = r * 3.8, u = W / 404;          // the site's canvas is 1.9 moon diameters wide
+  const size = Math.min(1200, Math.ceil(r * 4));   // the face at 2x for a crisp edge
+  const face = `<image href="${litFace(f, size)}" x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}"/>`;
+  // Glow: the site blurs the lit face at W/160, W/70 and W/34.
+  const glow = [[160, 0.4], [70, 0.2], [34, 0.12]].map(([d, o], i) =>
+    `<filter id="${id}g${i}" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="${(W / d).toFixed(2)}"/></filter>`);
+  const glowUse = [0, 1, 2].map((i) => `<g filter="url(#${id}g${i})" opacity="${([0.4, 0.2, 0.12][i] * strength).toFixed(3)}">${face}</g>`).join('');
+  // Rays like the site's, at the iPhone's gentler strength.
+  const t = 40, n = 150, R = r;
+  const sides = Math.abs(f - 0.5) < 0.02 ? [1, -1] : [wax ? 1 : -1];
+  let rays = '', grads = '', g = 0;
+  for (const side of sides) {
     for (let j = 0; j < n; j++) {
       const v = j / (n - 1), ang = -Math.PI / 2 + v * Math.PI;
       const env = Math.pow(Math.max(0, Math.cos(ang)), 1.6);
-      if (env < 0.03) continue;
-      const h1 = Math.abs(Math.sin(j * 12.9898 + (right ? 0 : 7)) * 43758.5453) % 1;
-      const h2 = Math.abs(Math.sin(j * 78.233 + (right ? 0 : 3)) * 12543.31) % 1;
-      const len = r * (0.18 + 0.42 * h1) * env, a = (0.25 + 0.75 * h2) * env;
-      const dx = Math.cos(ang) * (right ? 1 : -1), dy = Math.sin(ang), w = r * 0.012 * (0.6 + 1.6 * h2);
-      const x0 = dx * r * 0.97, y0 = dy * r * 0.97, x1 = dx * (r + len), y1 = dy * (r + len);
-      rays += `<path d="M${(x0 - dy * w).toFixed(1)},${(y0 + dx * w).toFixed(1)}L${x1.toFixed(1)},${y1.toFixed(1)}L${(x0 + dy * w).toFixed(1)},${(y0 - dx * w).toFixed(1)}Z" fill="${PAPER}" fill-opacity="${a.toFixed(2)}"/>`;
+      if (env < 0.02) continue;
+      // A still frame: the site's ray shape, with lengths and brightness scattered evenly (seeded,
+      // so a card never changes) instead of one moment of its rolling light.
+      const h1 = Math.abs(Math.sin(j * 12.9898 + (side > 0 ? 0 : 7)) * 43758.5453) % 1;
+      const h2 = Math.abs(Math.sin(j * 78.233 + (side > 0 ? 0 : 3)) * 12543.31) % 1;
+      const lift = 0, sway = Math.sin(t * 0.21 + v * 11) * R * 0.012;
+      const len = R * (0.24 + 0.3 * h1) * env;
+      const a = Math.min(1, (0.45 + 0.55 * h2) * env * strength * 1.2) * 0.45;
+      if (a < 0.01) continue;
+      const dx = Math.cos(ang) * side, dy = Math.sin(ang);
+      const x0 = dx * R * 0.96 + sway * side, y0 = dy * R * 0.96 + lift, x1 = dx * (R + len) + sway * side, y1 = dy * (R + len) + lift;
+      const gid = `${id}y${g++}`;
+      grads += `<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}">` +
+        `<stop offset="0" stop-color="${PAPER}" stop-opacity="${(a * 0.3).toFixed(3)}"/><stop offset="0.12" stop-color="${PAPER}" stop-opacity="${a.toFixed(3)}"/>` +
+        `<stop offset="0.35" stop-color="${PAPER}" stop-opacity="${(a * 0.55).toFixed(3)}"/><stop offset="0.7" stop-color="${PAPER}" stop-opacity="${(a * 0.15).toFixed(3)}"/><stop offset="1" stop-color="${PAPER}" stop-opacity="0"/></linearGradient>`;
+      rays += `<path d="M${x0.toFixed(1)},${y0.toFixed(1)}L${x1.toFixed(1)},${y1.toFixed(1)}" stroke="url(#${gid})" stroke-width="${(2.2 * u).toFixed(2)}" stroke-linecap="round"/>`;
     }
   }
-  const reach = (r * 1.65).toFixed(1);
-  const art = `<defs>` +
-    `<clipPath id="${id}c"><circle r="${r}"/></clipPath>` +
-    // No horns: the lit shape grown by 2.5 blur widths. It narrows to nothing at the poles, so the
-    // blur softens the terminator without wrapping light onto the dark side.
-    (kc > -1 ? `<clipPath id="${id}t"><path d="${phasePath(f, r, kc)}"/></clipPath>` : '') +
-    `<filter id="${id}s" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${soft}"/></filter>` +
-    `<filter id="${id}r" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${(r * 0.012).toFixed(2)}"/></filter>` +
-    `<filter id="${id}g1" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="${(r * 0.06).toFixed(2)}"/></filter>` +
-    `<filter id="${id}g2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="${(r * 0.16).toFixed(2)}"/></filter>` +
-    `<radialGradient id="${id}f" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="${reach}"><stop offset="${(r * 0.97 / (r * 1.65)).toFixed(3)}" stop-color="#fff"/><stop offset="${(r * 1.12 / (r * 1.65)).toFixed(3)}" stop-color="#fff" stop-opacity="0.45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>` +
-    `<mask id="${id}m" maskUnits="userSpaceOnUse" x="-${reach}" y="-${reach}" width="${(r * 3.3).toFixed(1)}" height="${(r * 3.3).toFixed(1)}"><circle r="${reach}" fill="url(#${id}f)"/></mask>` +
-    `</defs>` +
-    // glow from the lit shape itself
-    `<path d="${lit}" fill="${PAPER}" fill-opacity="0.32" filter="url(#${id}g2)"/>` +
-    `<path d="${lit}" fill="${PAPER}" fill-opacity="0.35" filter="url(#${id}g1)"/>` +
-    // rays
-    `<g mask="url(#${id}m)"><g filter="url(#${id}r)">${rays}</g></g>` +
-    // the moon, with a soft terminator
-    `<circle r="${(r - 0.75).toFixed(2)}" fill="${SHADOW}"/>` +
-    `<g clip-path="url(#${id}c)"><g${kc > -1 ? ` clip-path="url(#${id}t)"` : ''}><g filter="url(#${id}s)">${band}${sides.map(limb).join('')}</g></g></g>`;
+  // A bright white edge on the lit limb: a thin white ring, kept only where the face is lit (the
+  // face itself is the mask, so it fades with the terminator), then blurred so it blooms out.
+  const rim = (w: number, blur: number, op: number, k: string) =>
+    `<g filter="url(#${id}${k})" opacity="${op}"><circle r="${(r - w / 2).toFixed(2)}" fill="none" stroke="#FFFFFF" stroke-width="${w.toFixed(2)}" mask="url(#${id}m)"/></g>`;
+  const art = `<defs>${glow.join('')}<filter id="${id}r" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${Math.max(0.5, W / 340).toFixed(2)}"/></filter>${grads}` +
+    `<mask id="${id}m" maskUnits="userSpaceOnUse" x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}">${face}</mask>` +
+    `<filter id="${id}e1" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${(r * 0.008).toFixed(2)}"/></filter>` +
+    `<filter id="${id}e2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${(r * 0.035).toFixed(2)}"/></filter>` +
+    // Halo: a gradient of light running out past the lit edge, as bright as the rim is lit in each
+    // direction, so it follows the lit side and thins away toward the shadow.
+    `<filter id="${id}hb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${(r * 0.04).toFixed(2)}"/></filter></defs>` +
+    glowUse +
+    `<g filter="url(#${id}hb)"><image href="${halo(f, r)}" x="${(-r * 1.6).toFixed(1)}" y="${(-r * 1.6).toFixed(1)}" width="${(r * 3.2).toFixed(1)}" height="${(r * 3.2).toFixed(1)}"/></g>` +
+    `<circle r="${r}" fill="#24262A"/>` + face +
+    rim(r * 0.09, r * 0.035, 0.55, 'e2') + rim(r * 0.025, r * 0.008, 0.95, 'e1') +
+    `<g filter="url(#${id}r)">${rays}</g>`;
   return tilt ? `<g transform="rotate(${tilt})">${art}</g>` : art;
 }
 
