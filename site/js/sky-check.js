@@ -46,18 +46,49 @@
     var dir = ex.dir != null ? ex.dir : (window.MoonPhase.tilt(ms) + (ex.fraction < 0.5 ? 90 : 270));
     drawMoon($('[data-sc-nowcv]'), ex.fraction, dir, 84);
     var t = ex.name + ' · ' + (ex.lit * 100).toFixed(0) + '% lit · Moonmark ' + moonmark(ms).text + '<br>';
-    if (ex.dir == null) t += 'Share your location to see which way it tilts where you are.';
+    if (ex.dir == null) t += 'Add your location to see which way it tilts where you are.';
     else t += 'Lit side points ' + clockWord(ex.dir) + ' (' + deg(ex.dir) + ' from straight up)' + (ex.alt < 0 ? '. It is below your horizon right now.' : '.');
     $('[data-sc-nowt]').innerHTML = t;
     $('[data-sc-nowh]').textContent = loc ? 'THE MOON RIGHT NOW, FROM WHERE YOU ARE' : 'THE MOON RIGHT NOW';
-    var b = $('[data-sc-loc]'); if (b) b.style.display = loc ? 'none' : '';
   }
 
-  function askLocation(then) {
-    if (!navigator.geolocation) { if (then) then(); return; }
+  // Location: from the phone, or a city typed in (for when the phone won't share it).
+  function placeMsg(t) { document.querySelectorAll('[data-sc-plmsg]').forEach(function (el) { el.textContent = t || ''; }); }
+  function setPlace(p) { loc = p; placeMsg(''); nowPanel(); withPlace(); renderPlaceBlocks(); }
+  function askLocation(then, quiet) {
+    if (!navigator.geolocation) { if (!quiet) placeMsg('This browser can\'t share your location. Type your city instead.'); if (then) then(); return; }
+    if (!quiet) placeMsg('Finding you…');
     navigator.geolocation.getCurrentPosition(function (p) {
-      loc = { lat: p.coords.latitude, lng: p.coords.longitude, from: 'your location' }; nowPanel(); if (then) then();
-    }, function () { if (then) then(); }, { maximumAge: 600000, timeout: 8000 });
+      setPlace({ lat: p.coords.latitude, lng: p.coords.longitude, from: 'your location' }); if (then) then();
+    }, function (err) {
+      if (!quiet) placeMsg(err && err.code === 1
+        ? 'Location is blocked for this site. On iPhone: Settings, Privacy & Security, Location Services, Safari Websites, While Using. Or type your city.'
+        : 'Couldn\'t get your location. Type your city instead.');
+      if (then) then();
+    }, { maximumAge: 600000, timeout: 10000 });
+  }
+  function placeBlock() {
+    if (loc) return '';
+    return '<div class="sc-pl"><div class="sc-pl-row"><button type="button" data-sc-loc>USE MY LOCATION</button></div>' +
+      '<input type="text" data-sc-city placeholder="or type your city" autocomplete="off" aria-label="Your city"><div class="sc-pl-list" data-sc-cities role="listbox"></div>' +
+      '<span class="sc-pl-msg" data-sc-plmsg role="status"></span></div>';
+  }
+  function renderPlaceBlocks() {
+    document.querySelectorAll('[data-sc-place]').forEach(function (el) { el.innerHTML = placeBlock(); bindPlace(el); });
+  }
+  function bindPlace(el) {
+    var b = el.querySelector('[data-sc-loc]'); if (b) b.onclick = function () { askLocation(); };
+    var inp = el.querySelector('[data-sc-city]'), list = el.querySelector('[data-sc-cities]'), P = window.MoonPlaces;
+    if (!inp || !P) return;
+    var found = [];
+    inp.onfocus = function () { P.load(); };
+    inp.oninput = function () {
+      P.load().then(function () {
+        found = P.search(inp.value).slice(0, 6);
+        list.innerHTML = found.map(function (c, i) { return '<button type="button" data-i="' + i + '">' + esc(P.label(c)) + '</button>'; }).join('');
+        list.querySelectorAll('button').forEach(function (bt) { bt.onclick = function () { var c = found[+bt.dataset.i]; setPlace({ lat: c.lat, lng: c.lng, from: P.label(c) }); }; });
+      });
+    };
   }
 
   function readPhoto(file) {
@@ -146,14 +177,14 @@
     var rows = '';
     rows += '<div><span>LIT</span><b>' + mark(c.phase) + 'Photo ' + (m.lit * 100).toFixed(0) + '% · Moon time ' + (e.lit * 100).toFixed(0) + '%</b><em>' + esc(e.name) + '</em></div>';
     var tiltTxt = c.tilt === 'skip'
-      ? (e.dir == null ? 'Share your location to check the tilt.' : e.lit >= 0.94 ? 'A full Moon has no tilt to check.'
+      ? (e.dir == null ? 'Add your location below to check the tilt.' : e.lit >= 0.94 ? 'A full Moon has no tilt to check.'
         : m.dir == null ? 'The photo shows a full Moon, so there is no tilt to compare.' : 'Too thin a crescent to read the tilt.')
       : mark(c.tilt) + 'Photo ' + deg(m.dir) + ' · Moon time ' + deg(e.dir);
     rows += '<div><span>LIT SIDE POINTS</span><b>' + tiltTxt + '</b><em>Degrees clockwise from straight up</em></div>';
     rows += '<div><span>WHEN</span><b>' + esc(when(last.ms)) + '</b><em>' + (last.useExif ? 'When the photo was taken' : 'Now (the photo didn\'t say when it was taken)') + ' · <a href="/m/' + mk.path + '">' + mk.text + '</a></em></div>';
-    rows += '<div><span>WHERE</span><b>' + (last.place ? last.place.lat.toFixed(2) + ', ' + last.place.lng.toFixed(2) : 'Not shared') + '</b><em>' + (last.place ? 'From ' + last.place.from + '. Used only on this page.' : '<a href="#" data-sc-loc2>Use my location</a> to check the tilt') + '</em></div>';
+    rows += '<div><span>WHERE</span><b>' + (last.place ? last.place.lat.toFixed(2) + ', ' + last.place.lng.toFixed(2) : 'Not shared') + '</b><em>' + (last.place ? 'From ' + esc(last.place.from) + '. Used only on this page.' : 'Needed to check the tilt.') + '</em>' + (last.place ? '' : '<div data-sc-place></div>') + '</div>';
     $('[data-sc-rows]').innerHTML = rows;
-    var l2 = $('[data-sc-loc2]'); if (l2) l2.onclick = function (ev) { ev.preventDefault(); askLocation(withPlace); };
+    renderPlaceBlocks();
     try { window.moonTrack && window.moonTrack('sky_check', { verdict: c.verdict }); } catch (er) {}
   }
 
@@ -199,11 +230,11 @@
 
   function start() {
     nowPanel(); setInterval(nowPanel, 60000);
-    var lb = $('[data-sc-loc]'); if (lb) lb.onclick = function () { askLocation(); };
-    if (navigator.permissions && navigator.permissions.query) navigator.permissions.query({ name: 'geolocation' }).then(function (p) { if (p.state === 'granted') askLocation(); }).catch(function () {});
+    renderPlaceBlocks();
+    if (navigator.permissions && navigator.permissions.query) navigator.permissions.query({ name: 'geolocation' }).then(function (p) { if (p.state === 'granted') askLocation(null, true); }).catch(function () {});
     [$('[data-sc-file]'), $('[data-sc-file2]')].forEach(function (inp) {
       if (!inp) return;
-      inp.onchange = function () { var f = inp.files && inp.files[0]; if (f) { if (!loc) askLocation(withPlace); readPhoto(f); } inp.value = ''; };
+      inp.onchange = function () { var f = inp.files && inp.files[0]; if (f) { if (!loc) askLocation(null, true); readPhoto(f); } inp.value = ''; };
     });
     $('[data-sc-save]').onclick = save;
   }
