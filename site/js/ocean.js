@@ -5,6 +5,7 @@
  *   data-sea-top="0.45"   where the water line sits, as a share of the canvas height
  *   data-sea-px="220"     or: the water fills this many CSS pixels at the bottom, whatever the canvas height
  *   data-stars="1"        also draw a quiet field of stars above (and faintly under) the water
+ *   data-sea-flow="right"  swells roll in one way (right: left to right; left: right to left), in sets, slightly different on every visit
  *   data-sea-line="#hex"   trace the water's surface with a line in this color
  *   data-sea-line-w="3"     its width in CSS pixels (default 1)   data-sea-line-a="0.5"  its opacity (default 1)
  * Base swell: Gerstner-style waves (sharp crests, wide troughs). Ripples: a 1D spring per column.
@@ -18,6 +19,15 @@
     this.top = parseFloat(cv.getAttribute('data-sea-top') || '0.45');
     this.withStars = cv.getAttribute('data-stars') === '1';
     this.line = cv.getAttribute('data-sea-line');
+    var fl = cv.getAttribute('data-sea-flow'); this.flow = fl === 'left' || fl === 'right'; this.dir = fl === 'left' ? -1 : 1;
+    // A sea of its own each visit: every swell gets a slightly different length, height, speed and start.
+    var R = Math.random;
+    this.waves = [[620, 7, 0.55, 1], [360, 4.5, 0.8, -1], [210, 2.6, 1.05, 1], [120, 1.4, 1.4, 1], [70, 0.7, 1.9, -1]].map(function (w, i) {
+      if (!this.flow) return w.concat(i * 1.3);
+      return [w[0] * (0.85 + R() * 0.3), w[1] * (0.85 + R() * 0.3), w[2] * (0.85 + R() * 0.3), this.dir, R() * 6.2832];
+    }, this);
+    // Sets: a long, slow envelope that rolls the same way, so some swells arrive bigger than others.
+    this.sets = [{ L: 1700 + R() * 900, v: 0.22 + R() * 0.12, p: R() * 6.2832 }, { L: 2900 + R() * 1400, v: 0.13 + R() * 0.08, p: R() * 6.2832 }];
     this.lineW = parseFloat(cv.getAttribute('data-sea-line-w') || '1'); this.lineA = parseFloat(cv.getAttribute('data-sea-line-a') || '1');
     this.W = 0; this.H = 0; this.dpr = 1; this.N = 0; this.h = []; this.v = []; this.ptr = null;
     this.t0 = performance.now(); this.stars = [];
@@ -91,14 +101,16 @@
     // More energy for the first few seconds, settling to a calm swell.
     var boost = reduce ? 1 : 1 + 1.4 * Math.exp(-t / 2.6);
     if (!reduce && t < 3 && Math.random() < 0.05) this.splash(Math.random(), (0.5 + Math.random()) * (1 - t / 3));
-    var waves = [[620, 7, 0.55, 1], [360, 4.5, 0.8, -1], [210, 2.6, 1.05, 1], [120, 1.4, 1.4, 1], [70, 0.7, 1.9, -1]];
+    var waves = this.waves, sets = this.sets, flow = this.flow;
     var base = H * this.top;
     var pts = [];
     ctx.beginPath(); ctx.moveTo(-0.1 * W, H);
     for (var i = 0; i <= N - 1; i++) {
       var x0 = (-0.06 + i / (N - 1) * 1.12) * W, dx = 0, dy = 0;   // drawn a little past both edges, so no seam shows
+      var env = 1;
+      if (flow) for (var e = 0; e < sets.length; e++) env *= 0.72 + 0.28 * Math.sin(2 * Math.PI / (sets[e].L * dpr) * x0 - this.dir * sets[e].v * t + sets[e].p);
       for (var w = 0; w < waves.length; w++) {
-        var L = waves[w][0] * dpr, A = waves[w][1] * u * boost, k = 2 * Math.PI / L, ph = k * x0 - waves[w][2] * t * waves[w][3] + w * 1.3;
+        var L = waves[w][0] * dpr, A = waves[w][1] * u * boost * (w < 3 ? env : 1), k = 2 * Math.PI / L, ph = k * x0 - waves[w][2] * t * waves[w][3] + waves[w][4];
         dx -= 0.55 * A * Math.sin(ph);
         dy += A * Math.cos(ph);
       }
