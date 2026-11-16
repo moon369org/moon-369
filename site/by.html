@@ -42,6 +42,7 @@ p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
 @keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
 header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+::selection{background:#050506}::-moz-selection{background:#050506}
 </style>
 <script src="js/preact.umd.js" defer></script>
 <script src="js/header.js" defer></script>
