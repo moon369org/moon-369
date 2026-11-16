@@ -54,9 +54,11 @@ Field names to rely on: `moonmark`, `moonmark_url`, `moon_image`, `phase.name`, 
 
 ## Signing tools
 
-- No code: https://moon369.org/sign signs any file or pasted text and returns a link, QR code and verification card. `https://moon369.org/sign#text=<url-encoded text>` opens it with text filled in, for handing over AI output.
+- No code: https://moon369.org/sign signs any file, photo (on phones, straight from the camera) or pasted text and returns a link, QR code and verification card. `https://moon369.org/sign#text=<url-encoded text>` opens it with text filled in, for handing over AI output.
 - GitHub releases: the `moon369org/moon-369/actions/sign@main` action signs release files and the release commit, and can add a proof table to the release notes.
 - Every commit: a git hook (`actions/git-hook` in the repo) signs each commit's git object and keeps the receipt in `refs/notes/moonmark`.
+- Plugins in the repo's `integrations/` folder: a browser extension (right-click to sign an image, text or page), a Figma plugin, a ComfyUI node, an Automatic1111/Forge extension and a one-file Python helper (`moon_sign.py`).
+- Command line: `npx moon369 sign <files>` and `npx moon369 verify <file>`.
 - Ready-made examples in the repo's `examples/` folder: `ai-outputs` (sign generated files or text with the model and prompt fingerprint), `contract-snapshot` (save and sign a page or document), `art-certificate`.
 
 ## Offline: the moon369 npm package

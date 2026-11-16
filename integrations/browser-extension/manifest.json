@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Moon: sign anything",
+  "short_name": "Moon",
+  "version": "1.0.0",
+  "description": "Right-click any image, selected text or page to sign it on Moon. Get a proof link and QR code anyone can check. Only fingerprints leave your browser.",
+  "homepage_url": "https://moon369.org/sign",
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "action": { "default_title": "Sign this page on Moon", "default_popup": "popup.html", "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png" } },
+  "background": { "service_worker": "background.js", "type": "module" },
+  "permissions": ["contextMenus", "scripting", "activeTab", "storage"],
+  "host_permissions": ["<all_urls>"]
+}

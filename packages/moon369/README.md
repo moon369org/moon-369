@@ -21,6 +21,17 @@ moonmarkUrl(moonmark());          // 'https://moon369.org/m/1928.05.05-06.28.51.
 moonPhase();                      // { phase: 0.21, illumination: 0.257, name: 'Waxing crescent' }
 ```
 
+## Command line
+
+```bash
+npx moon369 now                         # the current Moonmark
+npx moon369 sign dist/app.zip model.bin   # sign files: writes <file>.moonmark.json, prints each proof link
+npx moon369 sign --text "We agree to the terms."
+npx moon369 verify dist/app.zip           # VALID: app.zip existed at Moonmark ...
+```
+
+Only SHA-256 fingerprints are sent. `--key` (or `MOON_KEY`) registers under your verified name and lifts the rate limit; `--label` adds a label; `--json` prints machine-readable output. `verify` also reads the GitHub Action's `moon-receipts.json`.
+
 ## The live moon
 
 Moon's own moon, the one on moon369.org: the real phase and tilt, glowing and animated. One script, no build step, drawn in the browser:

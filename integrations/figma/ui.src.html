@@ -1,0 +1,69 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;padding:18px;background:#0B0B0D;color:#E9E4D8;font:13px/1.55 Inter,system-ui,sans-serif}
+.k{font:11px/1.4 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.22em;color:#8A8B8F}.ok{color:#4CC38A}.bad{color:#F0645C}
+h1{margin:4px 0 8px;font:700 16px/1.2 system-ui,sans-serif;letter-spacing:.12em}p{margin:0 0 12px;color:#A2A3A7}
+.btn{display:flex;width:100%;align-items:center;justify-content:center;min-height:40px;margin-top:8px;border:1px solid #E9E4D8;background:none;color:#E9E4D8;font:700 10.5px system-ui,sans-serif;letter-spacing:.2em;cursor:pointer}
+.btn.p{background:#E9E4D8;color:#0B0B0D}.btn:disabled{opacity:.4;cursor:default}
+.mark{font:20px ui-monospace,Menlo,Consolas,monospace;margin:6px 0 2px;word-break:break-all}.dim{color:#8A8B8F}
+.qr svg{width:150px;height:150px;display:block;margin:12px auto}.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;word-break:break-all;color:#B9B6AE}
+input{width:100%;box-sizing:border-box;background:#08080A;border:1px solid #24262A;color:#E9E4D8;padding:8px;font:11px ui-monospace,monospace;margin-top:8px}
+</style></head><body>
+<div class="k">MOON</div><h1>SIGN YOUR DESIGN</h1>
+<p>Exports the selected frame as PNG and has Moon sign its fingerprint. The design never leaves Figma.</p>
+<div class="k" id="sel">SELECT A FRAME</div>
+<button class="btn p" id="sign" disabled>SIGN SELECTION</button>
+<div id="out"></div>
+<details style="margin-top:14px;color:#8A8B8F"><summary>API key (optional)</summary><input id="key" type="password" placeholder="moon_..." autocomplete="off"><p style="margin-top:6px">Registers designs under your verified name. Free at moon369.org/api#key. Kept in this panel only.</p></details>
+<script>/*INLINE*/</script>
+<script>
+const API = 'https://api.moon369.org', $ = (s) => document.querySelector(s);
+const esc = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let last = null;
+try { $('#key').value = localStorage.getItem('moonKey') || ''; } catch (e) {}
+$('#key').onchange = () => { try { localStorage.setItem('moonKey', $('#key').value.trim()); } catch (e) {} };
+// SHA-256 in plain JS: the panel may not be a secure context, so crypto.subtle isn't guaranteed.
+function sha256(bytes) {
+  if (window.crypto && crypto.subtle) return crypto.subtle.digest('SHA-256', bytes).then((d) => Array.from(new Uint8Array(d), (b) => b.toString(16).padStart(2, '0')).join(''));
+  const K = [1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298];
+  const l = bytes.length, n = ((l + 9 + 63) >> 6) << 6, m = new Uint8Array(n); m.set(bytes); m[l] = 0x80;
+  const dv = new DataView(m.buffer); dv.setUint32(n - 4, (l * 8) >>> 0); dv.setUint32(n - 8, Math.floor(l / 0x20000000));
+  let H = [1779033703,3144134277,1013904242,2773480762,1359893119,2600822924,528734635,1541459225]; const w = new Uint32Array(64);
+  const r = (x, k) => (x >>> k) | (x << (32 - k));
+  for (let o = 0; o < n; o += 64) {
+    for (let i = 0; i < 16; i++) w[i] = dv.getUint32(o + i * 4);
+    for (let i = 16; i < 64; i++) { const a = w[i - 15], b = w[i - 2]; w[i] = (w[i - 16] + (r(a, 7) ^ r(a, 18) ^ (a >>> 3)) + w[i - 7] + (r(b, 17) ^ r(b, 19) ^ (b >>> 10))) >>> 0; }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) { const t1 = (h + (r(e, 6) ^ r(e, 11) ^ r(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) >>> 0, t2 = ((r(a, 2) ^ r(a, 13) ^ r(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) >>> 0; h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0; }
+    H = H.map((v, i) => (v + [a, b, c, d, e, f, g, h][i]) >>> 0);
+  }
+  return Promise.resolve(H.map((v) => v.toString(16).padStart(8, '0')).join(''));
+}
+function save(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+$('#sign').onclick = () => { $('#sign').disabled = true; $('#out').innerHTML = '<p class="dim">Exporting…</p>'; parent.postMessage({ pluginMessage: { type: 'export' } }, '*'); };
+onmessage = async (ev) => {
+  const m = ev.data && ev.data.pluginMessage; if (!m) return;
+  if (m.type === 'selection') { $('#sel').textContent = m.name ? 'SELECTED: ' + m.name.toUpperCase() : m.count > 1 ? 'SELECT ONE FRAME' : 'SELECT A FRAME'; $('#sign').disabled = !m.name; }
+  else if (m.type === 'error') { $('#out').innerHTML = '<p class="bad">' + esc(m.message) + '</p>'; $('#sign').disabled = false; }
+  else if (m.type === 'exported') {
+    try {
+      $('#out').innerHTML = '<p class="dim">Moon is signing it…</p>';
+      const sha = await sha256(m.bytes), key = $('#key').value.trim();
+      const r = await fetch(API + '/v1/sign', { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, key ? { Authorization: 'Bearer ' + key } : {}), body: JSON.stringify({ sha256: sha, label: ('Design: ' + m.name).slice(0, 120) }) });
+      const b = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error((b.error && b.error.message) || 'Moon returned ' + r.status);
+      const rc = b.receipt, ms = Number(BigInt(rc.unix_ns) / 1000000n), qr = window.MoonQR.svg(b.signed_url, window.MoonPhase.fraction(ms));
+      last = { name: m.name, bytes: m.bytes, rc, url: b.signed_url, qr };
+      $('#out').innerHTML = '<div class="k ok" style="margin-top:16px">SIGNED ON MOON</div><div class="mark">' + esc(rc.moonmark.slice(0, 19)) + '</div><div class="dim">' + esc(new Date(ms).toLocaleString()) + '</div>' +
+        '<div class="qr">' + qr + '</div><div class="mono">' + sha + '</div>' +
+        '<button class="btn p" id="png">SAVE THE SIGNED PNG</button><button class="btn" id="rc">SAVE RECEIPT</button><button class="btn" id="copy">COPY PROOF LINK</button><button class="btn" id="label">ADD LABEL TO CANVAS</button>' +
+        '<p class="dim" style="margin-top:10px">Keep the saved PNG: it is the exact file that was signed. A fresh export may differ by a byte and won\'t match. Check it at moon369.org/verify.</p>';
+      const base = m.name.replace(/[^A-Za-z0-9._-]+/g, '_').slice(0, 60) || 'design';
+      $('#png').onclick = () => save(new Blob([last.bytes], { type: 'image/png' }), base + '.png');
+      $('#rc').onclick = () => save(new Blob([JSON.stringify(rc, null, 2) + '\n'], { type: 'application/json' }), base + '.png.moonmark.json');
+      $('#copy').onclick = () => { const i = document.createElement('textarea'); i.value = last.url; document.body.appendChild(i); i.select(); document.execCommand('copy'); i.remove(); $('#copy').textContent = 'COPIED'; };
+      $('#label').onclick = () => parent.postMessage({ pluginMessage: { type: 'label', moonmark: rc.moonmark.slice(0, 19), qrSvg: last.qr } }, '*');
+    } catch (e) { $('#out').innerHTML = '<p class="bad">' + esc(e.message || e) + '</p>'; }
+    $('#sign').disabled = false;
+  }
+};
+</script></body></html>

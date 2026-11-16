@@ -1,0 +1,13 @@
+{
+  "name": "Moon: sign your design",
+  "id": "moon-sign-design",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["https://api.moon369.org"],
+    "reasoning": "Sends the SHA-256 fingerprint of the exported design to Moon to be signed. The design itself never leaves Figma."
+  }
+}

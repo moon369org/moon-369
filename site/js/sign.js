@@ -66,6 +66,7 @@
             '<button type="button" class="sg-btn" data-sg-a="card">SAVE CARD</button>' +
             '<button type="button" class="sg-btn" data-sg-a="receipt">SAVE RECEIPT</button>' +
             (L.item.kind === 'text' ? '<button type="button" class="sg-btn" data-sg-a="text">SAVE TEXT</button>' : '') +
+            (/^photo-\d{8}-\d{6}\./.test(L.item.name || '') ? '<button type="button" class="sg-btn" data-sg-a="photo">SAVE PHOTO</button>' : '') +
             '<a class="sg-btn" href="' + esc(L.url) + '" target="_blank" rel="noopener">OPEN →</a>' +
           '</div>' +
           '<p class="sg-note">' + (L.item.kind === 'text'
@@ -132,6 +133,8 @@
       navigator.share({ title: 'Signed on Moon', text: 'Signed on Moon at ' + L.rc.moonmark.slice(0, 19) + '. Check it:', url: L.url }).catch(function () {});
     } else if (a === 'receipt') {
       download(new Blob([JSON.stringify(L.rc, null, 2) + '\n'], { type: 'application/json' }), base + '.moonmark.json');
+    } else if (a === 'photo') {
+      download(L.item.file, L.item.name);
     } else if (a === 'text') {
       download(new Blob([L.item.text], { type: 'text/plain;charset=utf-8' }), base + '.txt');
     } else if (a === 'card') {
@@ -148,6 +151,13 @@
     var fi = $('[data-sg-file]'), zone = $('[data-sg-zone]'), ta = $('[data-sg-text]');
     var pick = function (f) { if (!f) return; if (f.size > 1024 * 1024 * 1024) { status('That file is over 1 GB. Fingerprint it yourself and send the SHA-256 to the API.', true); return; } sign({ kind: 'file', file: f, name: f.name, size: f.size }); };
     fi.onchange = function () { pick(fi.files && fi.files[0]); fi.value = ''; };
+    // Phones: take a photo and sign it on the spot. Named by the moment it was taken, since cameras hand over generic names.
+    var cam = $('[data-sg-cam]');
+    if (cam) cam.onchange = function () {
+      var f = cam.files && cam.files[0]; cam.value = ''; if (!f) return;
+      var d = new Date(), p2 = function (n) { return String(n).padStart(2, '0'); }, ext = (/\.(\w+)$/.exec(f.name) || [, 'jpg'])[1];
+      sign({ kind: 'file', file: f, name: 'photo-' + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + '-' + p2(d.getHours()) + p2(d.getMinutes()) + p2(d.getSeconds()) + '.' + ext, size: f.size });
+    };
     ['dragenter', 'dragover'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('over'); }); });
     ['dragleave', 'drop'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove('over'); }); });
     zone.addEventListener('drop', function (e) { pick(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]); });

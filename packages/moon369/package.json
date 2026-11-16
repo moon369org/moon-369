@@ -1,6 +1,6 @@
 {
   "name": "moon369",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Moon time, offline: the worldwide timestamp locked to the moon. Moonmarks, Moon dates, moon phase, Moon's live moon (<moon-live>) and signed Moonmark verification.",
   "license": "MIT",
   "author": "Moon <moon369org@proton.me>",
@@ -32,6 +32,7 @@
   },
   "files": [
     "dist",
+    "bin",
     "moon-live.js",
     "README.md",
     "LICENSE"
@@ -57,5 +58,8 @@
     "@types/node": "^22.20.5",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9"
+  },
+  "bin": {
+    "moon369": "./bin/moon369.mjs"
   }
 }
