@@ -521,6 +521,7 @@
     setInterval(showEvents, 30000);
     $$('[data-tab]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-tab')); }; });
     $$('[data-view]').forEach(function (b) { b.onclick = function () { setView(b.getAttribute('data-view'), true); }; });
+    $('[data-home]').onclick = function (e) { e.preventDefault(); go('now'); buzz(); };   // the logo goes to Now, inside the app
     $('[data-sky-loc]').onclick = askPlace;
     bindTideDrag();
     // Language picker: the globe in the top bar. Automatic follows the phone.
