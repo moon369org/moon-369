@@ -328,7 +328,7 @@
       cell('TIDES', k.tide.strength.charAt(0).toUpperCase() + k.tide.strength.slice(1) + ' tide', esc(k.tide.note)) +
       '</div></div>';
   }
-  function render(root, mk, fresh, rc, ev) {
+  function render(root, mk, fresh, rc, ev, post) {
     var ms = toMs(mk), coa = rc ? coaFrom() : null;
     if (ev) ms = Math.round(ms / 1000) * 1000;   // events are set to the second; drop float dust below it
     var note = noteText();
@@ -353,15 +353,19 @@
     } catch (e) {}
     var tl = window.MoonPhase && window.MoonPhase.tilt ? window.MoonPhase.tilt(ms) : 0;
     var ph = window.MoonPhase ? window.MoonPhase.path(f, 10, tl) : '';
+    var stamp = '';
+    try { stamp = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(ms) + ' · ' + new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(ms); } catch (e) {}
     root.innerHTML =
       '<div class="mk-grid">' +
       '<div class="mk-main">' +
+      (post && rc && linkedFile() ? '<div class="mk-art" data-mk-art></div>' : '') +
       (fresh ? '<div class="mk-l">JUST MARKED</div>' : '') +
       (note ? '<blockquote class="mk-q">' + esc(note) + '</blockquote>' : '') +
+      (post ? '<div class="mk-ts" translate="no">' + esc(stamp) + '</div>' : '') +
       (ev ? '<div class="mk-cd" data-mk-cd><div class="mk-l" data-mk-cd-l>STARTS IN</div><div class="mk-cd-c" data-mk-cd-c></div></div>' +
         '<div class="mk-when"><span>YOUR LOCAL TIME</span><b>' + esc(local) + ' ' + esc(abbr) + '</b></div>' : '') +
       (rc && coa ? '<div data-mk-coa></div>' : '') +
-      (rc && linkedFile() ? '<div class="mk-art" data-mk-art></div>' : '') +
+      (!post && rc && linkedFile() ? '<div class="mk-art" data-mk-art></div>' : '') +
       (rc ? '<div data-mk-sig></div><div class="mk-rec" data-mk-rec></div>' : '') +
       '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" role="img" aria-label="' + nm + '"><defs><clipPath id="mk-disc"><circle r="10"/></clipPath><filter id="mk-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="0.8"/></filter></defs><circle r="10" fill="#24262A"/><g clip-path="url(#mk-disc)"><path d="' + ph + '" fill="#E9E4D8" filter="url(#mk-soft)"/></g></svg>' +
       '<div class="mk-cells"><div><i>CYCLE</i><b>' + mk.y + '</b></div><div><i>MOON</i><b>' + p(mk.m) + '</b></div><div><i>LUNE</i><b>' + p(mk.d) + '</b></div></div></div>' +
@@ -400,11 +404,52 @@
       document.title = ev + ' · Moon';
       return;
     }
-    root.querySelector('[data-mk-now]').onclick = function () {
+    var markNow = function () {
       var nowMs = (performance.timeOrigin || Date.now() - performance.now()) + performance.now();
       var mk2 = fromMs(nowMs);
       history.replaceState(null, '', '/m/' + path(mk2));
-      render(root, mk2, true);
+      render(root, mk2, true, null, '', post);
+    };
+    root.querySelector('[data-mk-now]').onclick = markNow;
+    if (post) postBar(url, qr, markNow);
+  }
+  // A moment opens like a post: a top bar with back, the title and a menu.
+  function postBar(url, qr, markNow) {
+    document.documentElement.classList.add('mk-post');
+    var old = document.querySelector('.mk-top'); if (old) old.remove();
+    var bar = document.createElement('div'); bar.className = 'mk-top';
+    bar.innerHTML = '<button type="button" class="mk-top-b" data-mk-back aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+      '<b>Moment</b>' +
+      '<button type="button" class="mk-top-b" data-mk-more aria-label="More" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg></button>' +
+      '<div class="mk-menu" role="menu" hidden>' +
+      '<button type="button" role="menuitem" data-mi="copy">Copy link</button>' +
+      (navigator.share ? '<button type="button" role="menuitem" data-mi="share">Share</button>' : '') +
+      '<button type="button" role="menuitem" data-mi="qr">Show QR code</button>' +
+      '<button type="button" role="menuitem" data-mi="now">Mark this moment</button>' +
+      '<a role="menuitem" href="/app">Open the Moon app</a></div>';
+    document.body.insertBefore(bar, document.body.firstChild);
+    bar.querySelector('[data-mk-back]').onclick = function () {
+      var same = false; try { same = document.referrer && new URL(document.referrer).origin === location.origin; } catch (e) {}
+      if (same && history.length > 1) history.back(); else location.href = '/';
+    };
+    var menu = bar.querySelector('.mk-menu'), more = bar.querySelector('[data-mk-more]');
+    var shut = function () { menu.hidden = true; more.setAttribute('aria-expanded', 'false'); };
+    more.onclick = function (e) { e.stopPropagation(); menu.hidden = !menu.hidden; more.setAttribute('aria-expanded', String(!menu.hidden)); };
+    document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('.mk-menu')) shut(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') shut(); });
+    menu.onclick = function (e) {
+      var b = e.target.closest('[data-mi]'); if (!b) return; var k = b.dataset.mi;
+      if (k === 'copy') { try { navigator.clipboard.writeText(url); b.textContent = 'Copied'; setTimeout(shut, 700); } catch (err) {} return; }
+      shut();
+      if (k === 'share') navigator.share({ url: url }).catch(function () {});
+      if (k === 'now') markNow();
+      if (k === 'qr') {
+        var lb = document.createElement('div'); lb.className = 'mk-lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'QR code');
+        lb.innerHTML = '<div class="mk-lb-top"><span></span><button type="button" class="mk-lb-x" aria-label="Close">✕</button></div><div class="mk-lb-img"><div class="mk-qr mk-qr-lb">' + qr + '</div></div><div class="mk-lb-bar"><span class="mk-lb-t">Scan to open this Moonmark in your own local time.</span></div>';
+        var close = function () { lb.remove(); document.documentElement.style.overflow = ''; };
+        lb.addEventListener('click', function (ev2) { if (ev2.target === lb || ev2.target.classList.contains('mk-lb-img') || ev2.target.closest('.mk-lb-x')) close(); });
+        document.body.appendChild(lb); document.documentElement.style.overflow = 'hidden';
+      }
     };
   }
   // Make an event link: a name and a local date and time become one Moonmark link.
@@ -431,7 +476,8 @@
     var fresh = false;
     if (!mk) { mk = fromMs(Date.now()); fresh = !q; }
     var rc = mk ? receiptFrom(mk) : null;
-    render(root, mk, false, rc, rc || !q || !parse(q) ? '' : eventName());
+    var ev = rc || !q || !parse(q) ? '' : eventName();
+    render(root, mk, false, rc, ev, !!(q && parse(q) && !ev));
     maker();
     return true;
   }

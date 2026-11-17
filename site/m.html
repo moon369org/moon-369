@@ -164,6 +164,27 @@ footer > div > div:first-child svg{width:64px!important}
 .mk-own-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .mk-own-a{font-family:'JetBrains Mono',monospace;font-size:13px;color:#8A8B8F;min-height:44px;display:inline-flex;align-items:center}
 @media (max-width:720px){.mk-own{padding:28px 22px}.mk-own-r{width:100%}.mk-own-btn{width:100%}}
+.mk-top{position:sticky;top:0;z-index:50;display:none;grid-template-columns:52px 1fr 52px;align-items:center;height:56px;padding:0 max(8px,calc(50% - 330px));background:rgba(11,11,13,.86);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid #1C1D20;color:#E9E4D8}
+.mk-post .mk-top{display:grid}
+.mk-top b{justify-self:center;font:700 17px Inter,sans-serif;letter-spacing:0}
+.mk-top-b{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;background:none;border:0;border-radius:50%;color:#E9E4D8;cursor:pointer}
+.mk-top-b:hover{background:#1C1D20}.mk-top-b svg{width:22px;height:22px}
+.mk-top-b[data-mk-more]{justify-self:end}
+.mk-menu{position:absolute;top:52px;right:12px;min-width:220px;display:flex;flex-direction:column;background:#111114;border:1px solid #2E3035;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:6px 0}
+.mk-menu[hidden]{display:none}
+.mk-menu button,.mk-menu a{display:block;text-align:left;padding:13px 18px;background:none;border:0;color:#E9E4D8;font:15px Inter,sans-serif;cursor:pointer}
+.mk-menu button:hover,.mk-menu a:hover{background:#1C1D20}
+.mk-post body>div>header,.mk-post header{display:none!important}
+.mk-post [data-mk-root]{order:-1}
+.mk-post section:has([data-mk-root])>div:first-child{display:none}
+.mk-post section:has([data-mk-root]){max-width:640px!important;padding:12px 20px 80px!important;gap:32px!important}
+.mk-post .mk-grid{display:block}
+.mk-post .mk-side{display:none}
+.mk-post .mk-art{grid-template-columns:1fr;margin:0}
+.mk-post .mk-art-thumb img{max-height:none;max-height:80vh}
+.mk-post .mk-q{border:0;padding:0;margin:0;font-size:clamp(19px,2.4vw,23px)}
+.mk-ts{font-family:'JetBrains Mono',monospace;font-size:13px;color:#8A8B8F;padding-bottom:18px;border-bottom:1px solid #1C1D20}
+.mk-qr-lb{width:min(80vw,420px)}
 .mk-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:48px;align-items:start}
 .mk-main{display:flex;flex-direction:column;gap:26px}
 .mk-l{font-family:'Syncopate',sans-serif;font-size:10px;letter-spacing:.26em;color:#8A8B8F}

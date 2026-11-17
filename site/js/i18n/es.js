@@ -219,6 +219,7 @@
 "bajando",
 "VOLVER A AHORA"],
   site: {
+    "Moment": "Momento", "Back": "Atrás", "More": "Más", "Copy link": "Copiar enlace", "Copied": "Copiado", "Share": "Compartir", "Show QR code": "Mostrar código QR", "Mark this moment": "Marcar este momento", "Open the Moon app": "Abrir la app Moon", "Scan to open this Moonmark in your own local time.": "Escanea para abrir este Moonmark en tu hora local.",
   // header, footer, shared
   'YOUR MOON': 'TU LUNA', 'USES': 'USOS', 'TRUST': 'CONFIANZA', 'VERIFY': 'VERIFICAR', 'SIGN A FILE': 'FIRMAR UN ARCHIVO',
   'Worldwide time, locked to the Moon.': 'La hora mundial, anclada a la Luna.', 'Signed, checkable and open to everyone.': 'Firmada, comprobable y abierta a todos.',
