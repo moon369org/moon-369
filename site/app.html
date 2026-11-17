@@ -38,9 +38,11 @@ a{color:#E9E4D8}
 .top svg{width:96px;height:auto;display:block}
 .top a{font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8A8B8F;text-decoration:none}
 main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px calc(96px + env(safe-area-inset-bottom));max-width:520px;width:100%;margin:0 auto}
-.stage{position:relative;width:min(49.6vw,192px);aspect-ratio:1;margin:8px 0 18px}
+.stage{position:relative;width:min(62vw,240px);aspect-ratio:1;margin:8px 0 18px}
 .stage[hidden],[data-sky-chart][hidden],.sky-h[hidden]{display:none}
 .stage canvas{position:absolute;left:-45%;top:-45%;width:190%;height:190%;pointer-events:none}
+/* The NOW moon: 80% of its box, centered, so the stars get the room around it. */
+[data-app-moon]{left:-26%!important;top:-26%!important;width:152%!important;height:152%!important}
 .k{font:11px 'JetBrains Mono',monospace;letter-spacing:.26em;color:#8A8B8F;text-align:center}
 .date{margin-top:8px;font:700 clamp(26px,8vw,38px)/1.1 Syncopate,sans-serif;letter-spacing:.06em;text-align:center}
 .clock{margin-top:8px;font:400 clamp(30px,10vw,46px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;text-align:center}
