@@ -23,7 +23,10 @@
   var path = function (k) { return k.y + '.' + p(k.m) + '.' + p(k.d) + '-' + p(k.h) + '.' + p(k.mi) + '.' + p(k.s); };
   // A moment's link: the Moonmark, to the second, with an optional name. It opens in each person's own time.
   // Events carry their name as e= (a title with a countdown); moments carry what's happening as n= (a note).
-  function link(ms, name, kind) { return 'https://moon369.org/m/' + path(moon(Math.floor(ms / 1000) * 1000 + 1)) + (name ? (kind === 'moment' ? '?n=' : '?e=') + encodeURIComponent(name).replace(/%20/g, '+') : ''); }
+  var ns9 = function (k) { return String(Math.min(999999999, Math.floor(k.f * 1e9))).padStart(9, '0'); };
+  var nowMs = function () { return (performance.timeOrigin || Date.now() - performance.now()) + performance.now(); };
+  // Moments keep the exact instant, to the nanosecond; events stay on the second.
+  function link(ms, name, kind) { return 'https://moon369.org/m/' + (kind === 'moment' ? (function (k) { return path(k) + '.' + ns9(k); })(moon(ms)) : path(moon(Math.floor(ms / 1000) * 1000 + 1))) + (name ? (kind === 'moment' ? '?n=' : '?e=') + encodeURIComponent(name).replace(/%20/g, '+') : ''); }
   function localStr(ms, opts) { try { return new Intl.DateTimeFormat(LOC, opts || { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(ms); } catch (e) { return new Date(ms).toString(); } }
   function buzz() { try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} }
   function toast(t) { var el = $('[data-app-toast]'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 2400); }
@@ -185,8 +188,10 @@
     $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'MARK IT';
     $('[data-sheet-name]').classList.toggle('short', kind === 'event'); $('[data-sheet-name]').maxLength = kind === 'event' ? 80 : 280;
     $('[data-sheet-name]').value = name || ''; $('[data-sheet-name]').placeholder = kind === 'event' ? 'Name the event' : "What's happening? (optional)";
-    $('[data-sheet-mk]').textContent = 'Moonmark ' + text(moon(cur.ms + 1));
-    $('[data-sheet-lt]').textContent = T('{t} your time.', { t: localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) });
+    if (kind === 'event') {
+      $('[data-sheet-mk]').textContent = 'Moonmark ' + text(moon(cur.ms + 1));
+      $('[data-sheet-lt]').textContent = T('{t} your time.', { t: localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) });
+    } else runClock();
     $('[data-sheet-close]').textContent = 'CANCEL';
     clearPhoto(); $('[data-ready-photo]').hidden = true;
     $('[data-first-star]').hidden = kind === 'event' || store('moonMoments').length > 0;
@@ -194,18 +199,38 @@
     // Focus in the same tap that opened the sheet: that is what lets iPhone show the keyboard.
     if (kind === 'event' && name) create(); else { try { $('[data-sheet-name]').focus({ preventScroll: true }); } catch (e) { $('[data-sheet-name]').focus(); } }
   }
-  function closeSheet() { $('[data-app-sheet]').hidden = true; }
+  // A moment's time runs live in the sheet and stops on the tap of Mark It.
+  var clockRaf = 0;
+  function runClock() {
+    cancelAnimationFrame(clockRaf);
+    var mkEl = $('[data-sheet-mk]'), ltEl = $('[data-sheet-lt]'), lastLt = '';
+    var tick = function () {
+      var ms = nowMs(), k = moon(ms), n = ns9(k);
+      mkEl.textContent = text(k) + '.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6);
+      var lt = T('{t} your time.', { t: localStr(ms, { dateStyle: 'full', timeStyle: 'medium' }) }); if (lt !== lastLt) { ltEl.textContent = lt; lastLt = lt; }
+      clockRaf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  function stopClock(ms) {
+    cancelAnimationFrame(clockRaf); clockRaf = 0;
+    if (ms == null) return;
+    var k = moon(ms), n = ns9(k);
+    $('[data-sheet-mk]').textContent = text(k) + '.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6);
+  }
+  function closeSheet() { stopClock(); $('[data-app-sheet]').hidden = true; }
   var signing = false;
   function create() {
     var name = $('[data-sheet-name]').value.replace(/\s+/g, ' ').trim().slice(0, cur.kind === 'event' ? 80 : 280);
     if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return; }
+    if (cur.kind !== 'event') { if (signing) return; cur.ms = nowMs(); stopClock(cur.ms); }   // the moment is the tap of Mark It
     if (cur.kind !== 'event' && cur.photo) {
       if (signing) return; signing = true;
       var btn = $('[data-sheet-create]'); btn.textContent = 'SIGNING THE PHOTO…'; btn.disabled = true;
       var c0 = cur;
       signPhoto(cur.photo).then(function (s) {
         if (cur !== c0) return;
-        cur.ms = Math.floor(s.ms / 1000) * 1000;
+        cur.ms = s.ms;
         var url = s.url + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
         try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
         // Save the photo before opening the moment, so its page can show it at the top.
@@ -213,6 +238,7 @@
           if (cur === c0) finish(name, url, { ms: s.ms, name: name, url: url, sha: s.sha });
         });
       }).catch(function (e) {
+        if (cur === c0) runClock();
         toast(navigator.onLine === false ? 'Signing a photo needs a connection' : (e && e.message) || 'Moon could not sign it. Try again.');
       }).then(function () { signing = false; btn.disabled = false; btn.textContent = 'MARK IT'; });
       return;
