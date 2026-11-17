@@ -8,6 +8,7 @@
 import { createHash } from 'node:crypto';
 import { lookup as dnsLookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
+import { classifyHost, type HostClass } from './hosts.js';
 
 export const FILE_CHECK_MAX = 25 * 1024 * 1024;
 
@@ -48,18 +49,8 @@ export async function safeUrl(raw: string, lookup: Lookup = defaultLookup): Prom
 }
 
 /** Clues that a file existed before it was signed: dates written inside it, the host's own date, a public library. */
-export interface Provenance { created: { date: string; source: 'exif' | 'xmp' | 'png' } | null; last_modified: string | null; library: string | null }
+export interface Provenance { created: { date: string; source: 'exif' | 'xmp' | 'png' } | null; last_modified: string | null; host: HostClass | null; library: string | null }
 export interface FileCheck { match: boolean; sha256: string; bytes: number; content_type: string | null; image: boolean; final_url: string; provenance: Provenance }
-
-/** Public image libraries and archives: a file hosted there is very unlikely to be the signer's own original. */
-export const LIBRARIES: [RegExp, string][] = [
-  [/(^|\.)(wikimedia|wikipedia)\.org$/, 'Wikimedia Commons'], [/(^|\.)unsplash\.com$/, 'Unsplash'], [/(^|\.)pexels\.com$/, 'Pexels'],
-  [/(^|\.)pixabay\.com$/, 'Pixabay'], [/(^|\.)(flickr\.com|staticflickr\.com)$/, 'Flickr'], [/(^|\.)(gettyimages|istockphoto)\.[a-z.]+$/, 'Getty Images'],
-  [/(^|\.)shutterstock\.com$/, 'Shutterstock'], [/(^|\.)alamy\.com$/, 'Alamy'], [/(^|\.)adobestock\.com$|(^|\.)stock\.adobe\.com$|(^|\.)ftcdn\.net$/, 'Adobe Stock'],
-  [/(^|\.)nasa\.gov$/, 'NASA'], [/(^|\.)archive\.org$/, 'the Internet Archive'], [/(^|\.)(pinimg\.com|pinterest\.[a-z.]+)$/, 'Pinterest'],
-  [/(^|\.)(googleusercontent|gstatic)\.com$/, 'Google image search'], [/(^|\.)(dreamstime|depositphotos|123rf|freepik|vecteezy)\.com$/, 'a stock library'],
-];
-export const libraryOf = (host: string): string | null => { const h = host.toLowerCase(); for (const [re, name] of LIBRARIES) if (re.test(h)) return name; return null; };
 
 const exifDate = (s: string): string | null => {
   const m = /^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/.exec(s.trim());
@@ -140,7 +131,8 @@ export async function checkLinkedFile(raw: string, want: string, opts: { fetch?:
   }
   const first = new Uint8Array(kept); { let o = 0; for (const c of head) { first.set(c, o); o += c.byteLength; } }
   const lm = Date.parse(r.headers.get('last-modified') || '');
-  const provenance: Provenance = { created: embeddedDate(first), last_modified: Number.isFinite(lm) ? new Date(lm).toISOString() : null, library: libraryOf(new URL(raw).hostname) || libraryOf(u.hostname) };
+  const host = (await classifyHost(new URL(raw).hostname, { fetch: f, lookup: opts.lookup }).catch(() => null)) ?? (u.hostname !== new URL(raw).hostname ? await classifyHost(u.hostname, { fetch: f, lookup: opts.lookup }).catch(() => null) : null);
+  const provenance: Provenance = { created: embeddedDate(first), last_modified: Number.isFinite(lm) ? new Date(lm).toISOString() : null, host, library: host?.kind === 'library' ? host.name : null };
   const sha = h.digest('hex'), ct = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase() || null;
   return { match: sha === want, sha256: sha, bytes: n, content_type: ct, image: !!ct && /^image\/(png|jpeg|gif|webp|avif|svg\+xml)$/.test(ct), final_url: u.toString(), provenance };
 }

@@ -41,7 +41,9 @@ describe('linked file check', () => {
 });
 
 import { readFileSync } from 'node:fs';
-import { embeddedDate, libraryOf } from '../src/filecheck';
+import { embeddedDate } from '../src/filecheck';
+import { knownHost } from '../src/hosts';
+const libraryOf = (h: string) => { const k = knownHost(h); return k && k.kind === 'library' ? k.name : null; };
 describe('provenance clues', () => {
   it('reads the camera date inside a JPEG', () => {
     expect(embeddedDate(new Uint8Array(readFileSync(new URL('./fixtures/exif-2010.jpg', import.meta.url))))).toEqual({ date: '2010-12-21T08:17:00.000Z', source: 'exif' });
@@ -57,6 +59,6 @@ describe('provenance clues', () => {
   it('returns the host date and library with the check', async () => {
     const f = serve({ 'https://upload.wikimedia.org/a.png': () => new Response(png, { headers: { 'content-type': 'image/png', 'last-modified': 'Tue, 21 Dec 2010 08:17:00 GMT' } }) });
     const c = await checkLinkedFile('https://upload.wikimedia.org/a.png', sha(png), { fetch: f, lookup: pub });
-    expect(c.provenance).toEqual({ created: null, last_modified: '2010-12-21T08:17:00.000Z', library: 'Wikimedia Commons' });
+    expect(c.provenance).toEqual({ created: null, last_modified: '2010-12-21T08:17:00.000Z', host: { kind: 'library', name: 'Wikimedia Commons', by: 'list' }, library: 'Wikimedia Commons' });
   });
 });

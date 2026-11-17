@@ -272,16 +272,20 @@
       }
       // Clues the file existed well before it was signed.
       var pv = api.provenance || {}, clues = [];
-      if (pv.library) clues.push('It is hosted on ' + esc(pv.library) + ', a public image library, so it may not be the signer&#39;s own work.');
+      var hc = pv.host || (pv.library ? { kind: 'library', name: pv.library } : null);
+      if (hc && hc.kind === 'library') clues.push('It is hosted on ' + esc(hc.name) + ', a public image library, so it may not be the signer&#39;s own work.');
+      if (hc && hc.kind === 'anonymous') clues.push('It was uploaded to ' + esc(hc.name) + ', an image host anyone can use without a name, so where it came from can&#39;t be shown.');
+      if (hc && hc.kind === 'social') clues.push('It was posted on ' + esc(hc.name) + ', where anyone can upload anything, so the link can&#39;t show who made it.');
       if (pv.created && Date.parse(pv.created.date) < signedMs - EARLIER_MS) clues.push('The ' + (pv.created.source === 'exif' ? 'camera' : 'creation') + ' date inside the file is ' + day(pv.created.date) + ', ' + yearsBefore(Date.parse(pv.created.date), signedMs) + ' before it was signed.');
       var lm = pv.last_modified || (br && br.lm ? new Date(br.lm).toISOString() : null);
       if (lm && Date.parse(lm) < signedMs - EARLIER_MS) clues.push(esc(host) + ' has had this file since at least ' + day(lm) + ', ' + yearsBefore(Date.parse(lm), signedMs) + ' before it was signed.');
       prior.forEach(function (p) { if (p.ms < signedMs - 60000) clues.push(p.text); });
       var warn = clues.length > 0;
-      var badge = '<span class="mk-art-badge' + (warn ? ' warn' : '') + '">' + MOON_ICON + '<b>' + (warn ? 'NOT PROVEN ORIGINAL' : 'VERIFIED') + '</b></span>';
+      // Moon only ever claims what it can prove: this exact file existed by this moment.
+      var badge = '<span class="mk-art-badge' + (warn ? ' warn' : '') + '">' + MOON_ICON + '<b>' + (warn ? 'ORIGIN NOT PROVEN' : 'EXISTED BY ' + esc(rc.moonmark.slice(0, 10))) + '</b></span>';
       var cap = warn
-        ? '<b>NOT PROVEN ORIGINAL</b><span>This is the exact file Moon signed at ' + esc(mark) + ', but it looks older than that, so Moon cannot verify it as the signer&#39;s original:</span><ul class="mk-art-clues">' + clues.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>'
-        : '<b>THE SIGNED FILE</b><span>This exact file existed by ' + esc(mark) + '. Fetched from ' + esc(host) + ' and checked by ' + c.by + '. Moon found no sign of it earlier, though a signature can&#39;t prove who made it.</span>';
+        ? '<b>ORIGIN NOT PROVEN</b><span>This is the exact file Moon signed at ' + esc(mark) + ', so it existed by then. Moon can&#39;t show it&#39;s the signer&#39;s original:</span><ul class="mk-art-clues">' + clues.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>'
+        : '<b>THE SIGNED FILE</b><span>This exact file existed by ' + esc(mark) + '. Fetched from ' + esc(host) + ' and checked by ' + c.by + '. Moon found no sign it came from somewhere else, but a signature alone can&#39;t prove who made it.</span>';
       box.className = 'mk-art' + (warn ? ' mk-art-warn' : '');
       box.innerHTML = (c.image
         ? '<button type="button" class="mk-art-thumb" data-mk-art-open aria-label="View the signed file"><img src="' + esc(c.src) + '" alt="The signed file" referrerpolicy="no-referrer">' + badge + '</button>'
@@ -296,8 +300,8 @@
     lb.className = 'mk-lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'Verified file');
     lb.innerHTML = '<div class="mk-lb-top"><span class="mk-lb-moon">' + MOON_ICON + '</span><button type="button" class="mk-lb-x" aria-label="Close">✕</button></div>' +
       '<div class="mk-lb-img"><img src="' + esc(src) + '" alt="The signed file" referrerpolicy="no-referrer"></div>' +
-      '<div class="mk-lb-bar">' + (warn ? '<span class="mk-lb-v warn">SIGNED · NOT PROVEN ORIGINAL</span><span class="mk-lb-t">The exact file Moon signed at ' + esc(mark) + ', but it looks older than that. From ' + esc(host) + '.</span>'
-        : '<span class="mk-lb-v">' + TICK + 'SIGNED · VERIFIED</span><span class="mk-lb-t">This exact file existed by ' + esc(mark) + '. From ' + esc(host) + '.</span>') +
+      '<div class="mk-lb-bar">' + (warn ? '<span class="mk-lb-v warn">SIGNED · ORIGIN NOT PROVEN</span><span class="mk-lb-t">This exact file existed by ' + esc(mark) + ', but Moon can&#39;t show it&#39;s the signer&#39;s original. From ' + esc(host) + '.</span>'
+        : '<span class="mk-lb-v">' + TICK + 'SIGNED · EXISTED BY ' + esc(mark.slice(0, 10)) + '</span><span class="mk-lb-t">This exact file existed by ' + esc(mark) + '. From ' + esc(host) + '.</span>') +
       '<a href="' + esc(f) + '" target="_blank" rel="noopener nofollow">OPEN ORIGINAL ↗</a></div>';
     var close = function () { document.removeEventListener('keydown', key); lb.remove(); document.documentElement.style.overflow = ''; if (prev && prev.focus) prev.focus(); };
     var key = function (e) { if (e.key === 'Escape') close(); };

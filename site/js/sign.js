@@ -71,7 +71,7 @@
             (/^photo-\d{8}-\d{6}\./.test(L.item.name || '') ? '<button type="button" class="sg-btn" data-sg-a="photo">SAVE PHOTO</button>' : '') +
             '<a class="sg-btn" href="' + esc(L.url) + '" target="_blank" rel="noopener">OPEN →</a>' +
           '</div>' +
-          (L.item.kind === 'file' ? '<div class="sg-where"><label for="sg-where">WHERE IS IT ONLINE? <span>Optional. Link your original file and it shows on the Moonmark, verified, in a viewer.</span></label>' +
+          (L.item.kind === 'file' ? '<div class="sg-where"><label for="sg-where">WHERE IS IT ONLINE? <span>Optional. Link your original on your own site and it shows on the Moonmark in a viewer. Image hosts and social sites are marked as origin not proven.</span></label>' +
             '<div class="sg-link"><input id="sg-where" type="url" inputmode="url" placeholder="https://your-site.com/work/original.png" value="' + esc(L.fileUrl || '') + '" data-sg-where><button type="button" class="sg-btn" data-sg-a="where">' + (L.fileUrl ? 'UPDATE' : 'ADD TO LINK') + '</button></div>' +
             '<div class="sg-where-m" data-sg-where-m>' + (L.whereMsg || '') + '</div></div>' : '') +
           '<p class="sg-note">' + (L.item.kind === 'text'
@@ -146,11 +146,12 @@
             // Same clues the Moonmark uses: a public library, or dates more than 30 days before signing.
             return fetch(API + '/v1/file-check?url=' + encodeURIComponent(v) + '&sha256=' + L.sha).then(function (r) { return r.json(); }).catch(function () { return {}; }).then(function (k) {
               var pv = k.provenance || {}, cut = Number(BigInt(L.rc.unix_ns) / 1000000n) - 30 * 864e5, why = [];
-              if (pv.library) why.push('it is hosted on ' + pv.library);
+              var hc = pv.host || (pv.library ? { kind: 'library', name: pv.library } : null);
+              if (hc) why.push(hc.kind === 'library' ? 'it is hosted on ' + hc.name + ', a public image library' : hc.kind === 'anonymous' ? 'it is on ' + hc.name + ', an image host anyone can use without a name' : 'it is on ' + hc.name + ', where anyone can post anything');
               if (pv.created && Date.parse(pv.created.date) < cut) why.push('the date inside the file is ' + pv.created.date.slice(0, 10));
               if (pv.last_modified && Date.parse(pv.last_modified) < cut) why.push('the site has had it since ' + pv.last_modified.slice(0, 10));
-              L.whereMsg = why.length ? '<span class="warn">Added, but the Moonmark will say NOT PROVEN ORIGINAL: ' + esc(why.join(', and ')) + '. Moon proves when a file existed, not who made it.</span>'
-                : '<span class="ok">✓ That is the exact file. The link above now shows it on the Moonmark, verified.</span>';
+              L.whereMsg = why.length ? '<span class="warn">Added, but the Moonmark will say ORIGIN NOT PROVEN: ' + esc(why.join(', and ')) + '. Moon proves when a file existed, not who made it.</span>'
+                : '<span class="ok">✓ That is the exact file. The Moonmark now shows it, marked as existing by this moment. For the strongest proof, link your own site.</span>';
               show();
             });
           }
