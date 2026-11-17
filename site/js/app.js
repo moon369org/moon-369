@@ -191,7 +191,8 @@
     clearPhoto(); $('[data-ready-photo]').hidden = true;
     $('[data-first-star]').hidden = kind === 'event' || store('moonMoments').length > 0;
     step('name'); $('[data-app-sheet]').hidden = false; buzz();
-    if (kind === 'event' && name) create(); else if (window.matchMedia && matchMedia('(pointer: fine)').matches) setTimeout(function () { $('[data-sheet-name]').focus(); }, 60);   // on phones, focus by script leaves iOS with no keyboard
+    // Focus in the same tap that opened the sheet: that is what lets iPhone show the keyboard.
+    if (kind === 'event' && name) create(); else { try { $('[data-sheet-name]').focus({ preventScroll: true }); } catch (e) { $('[data-sheet-name]').focus(); } }
   }
   function closeSheet() { $('[data-app-sheet]').hidden = true; }
   var signing = false;
