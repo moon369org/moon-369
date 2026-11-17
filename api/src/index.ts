@@ -1071,7 +1071,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           const t = await tidesNear(Math.round(lat * 10) / 10, Math.round(lng * 10) / 10, Date.now());
           return json(t, 200, { 'Cache-Control': 'public, max-age=900, s-maxage=1800' });
         } catch (e) {
-          return json({ error: { code: 'tides_unavailable', message: 'Tide predictions are not available right now' } }, 502, { 'Cache-Control': 'no-store' });
+          return json({ error: { code: 'tides_unavailable', message: 'Tide predictions are not available right now', detail: String((e as Error)?.message ?? e).slice(0, 200) } }, 502, { 'Cache-Control': 'no-store' });
         }
       }
 

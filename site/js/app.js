@@ -364,11 +364,12 @@
     var key = p.lat + ',' + p.lng, c = tideCache[key];
     if (c && Date.now() - c.at < 15 * 60000) return showTide(c.d, fmt, dfmt);
     $('[data-tide-h]').textContent = 'Finding the nearest tide station…';
+    var why = '';
     fetch(API + '/v1/tides?lat=' + p.lat + '&lng=' + p.lng).then(function (r) { return r.json(); }).then(function (d) {
-      if (!d || !d.hilo) throw 0; tideCache[key] = { at: Date.now(), d: d }; if (view === 'tide') showTide(d, fmt, dfmt);
+      if (!d || !d.hilo) { why = d && d.error && d.error.detail ? d.error.detail : ''; throw 0; } tideCache[key] = { at: Date.now(), d: d }; if (view === 'tide') showTide(d, fmt, dfmt);
     }).catch(function () {
       $('[data-tide-h]').textContent = navigator.onLine === false ? 'Tides need a connection.' : 'Tide times are not available right now.';
-      $('[data-tide-chart]').innerHTML = ''; $('[data-tide-list]').innerHTML = ''; $('[data-tide-ax]').innerHTML = ''; $('[data-tide-src]').textContent = '';
+      $('[data-tide-chart]').innerHTML = ''; $('[data-tide-list]').innerHTML = ''; $('[data-tide-ax]').innerHTML = ''; $('[data-tide-src]').textContent = why ? 'Details: ' + why : '';
     });
   }
   function showTide(d, fmt, dfmt) {

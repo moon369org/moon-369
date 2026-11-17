@@ -18,6 +18,8 @@ describe('tides', () => {
     const t = await tidesNear(40.7, -74.0, Date.UTC(2026, 10, 17), f);
     expect(t.station).toMatchObject({ id: '8518750', name: 'The Battery', distance_km: 1 });
     expect(t.hilo).toEqual([{ utc: '2026-11-17T03:12:00Z', ft: 5.81, type: 'high' }, { utc: '2026-11-17T09:40:00Z', ft: -0.31, type: 'low' }]);
-    expect(t.curve[1]).toEqual({ utc: '2026-11-17T03:30:00Z', ft: 5.8 });
+    // drawn between the turns: starts at the high, ends near the low
+    expect(t.curve[0].utc).toBe('2026-11-17T03:30:00Z');
+    expect(t.curve[0].ft).toBeLessThan(5.81); expect(t.curve[t.curve.length - 1].ft).toBeGreaterThan(-0.31);
   });
 });
