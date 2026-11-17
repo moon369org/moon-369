@@ -439,7 +439,7 @@
   }
   // A moment opens like a post: a top bar with back, the title and a menu.
   function postBar(url, qr, markNow) {
-    document.documentElement.classList.add('mk-post');
+    document.documentElement.classList.add('mk-post', 'mk-ready');
     var old = document.querySelector('.mk-top'); if (old) old.remove();
     var bar = document.createElement('div'); bar.className = 'mk-top';
     bar.innerHTML = '<button type="button" class="mk-top-b" data-mk-back aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +

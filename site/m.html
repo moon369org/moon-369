@@ -9,6 +9,7 @@
 <link rel="preload" href="/assets/fonts/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts/fonts.css">
 <script>document.documentElement.classList.add('mm-js')</script>
+<script>(function(){var h=document.documentElement,q=new URLSearchParams(location.search);if((/\/m\/[^/?#]+/.test(location.pathname)||q.get('m'))&&!q.get('e')){h.classList.add('mk-post');setTimeout(function(){h.classList.add('mk-ready')},4000)}})()</script>
 <link rel="preconnect" href="https://api.moon369.org" crossorigin>
 <title>Moonmark · Moon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -166,6 +167,7 @@ footer > div > div:first-child svg{width:64px!important}
 @media (max-width:720px){.mk-own{padding:28px 22px}.mk-own-r{width:100%}.mk-own-btn{width:100%}}
 .mk-top{position:sticky;top:0;z-index:50;display:none;grid-template-columns:52px 1fr 52px;align-items:center;height:56px;padding:0 max(8px,calc(50% - 330px));background:rgba(11,11,13,.86);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid #1C1D20;color:#E9E4D8}
 .mk-post .mk-top{display:grid}
+.mk-post:not(.mk-ready) body>*:not(.mk-top){visibility:hidden}
 .mk-top b{justify-self:center;font:700 17px Inter,sans-serif;letter-spacing:0}
 .mk-top-b{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;background:none;border:0;border-radius:50%;color:#E9E4D8;cursor:pointer}
 .mk-top-b:hover{background:#1C1D20}.mk-top-b svg{width:22px;height:22px}
@@ -290,6 +292,7 @@ footer > div > div:first-child svg{width:64px!important}
 <script src="/js/i18n.js" defer></script>
 </head>
 <body>
+<div class="mk-top"><button type="button" class="mk-top-b" aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><b>Moment</b><button type="button" class="mk-top-b" data-mk-more aria-label="More"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg></button></div>
 <!--snapshot--><div data-dc-snapshot="">
 <div style="background: rgb(11, 11, 13); color: rgb(233, 228, 216); font-family: Inter, sans-serif; min-height: 100vh;">
 
