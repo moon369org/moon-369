@@ -221,6 +221,7 @@
 "{n} MOMENTOS",
 "1 MOMENTO"],
   site: {
+    "PROOF": "PRUEBA", "Checking the signature…": "Comprobando la firma…", "✓ Signed and verified on Moon": "✓ Firmado y verificado en Moon", "The signature does not check out": "La firma no es válida", "Signed on Moon": "Firmado en Moon", "THE SKY": "EL CIELO", "PERMANENT RECORD": "REGISTRO PERMANENTE", "Kept in the Tideline, anchored in Bitcoin": "Guardado en la Tideline, anclado en Bitcoin",
     "Moment": "Momento", "Back": "Atrás", "More": "Más", "Copy link": "Copiar enlace", "Copied": "Copiado", "Share": "Compartir", "Show QR code": "Mostrar código QR", "Mark this moment": "Marcar este momento", "Open the Moon app": "Abrir la app Moon", "Scan to open this Moonmark in your own local time.": "Escanea para abrir este Moonmark en tu hora local.",
   // header, footer, shared
   'YOUR MOON': 'TU LUNA', 'USES': 'USOS', 'TRUST': 'CONFIANZA', 'VERIFY': 'VERIFICAR', 'SIGN A FILE': 'FIRMAR UN ARCHIVO',

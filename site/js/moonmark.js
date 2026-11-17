@@ -385,6 +385,7 @@
       (rc || ev ? '' : '<div class="mk-note">This Moonmark is unsigned. A signed Moonmark from Moon proves when something happened.</div>') + '</div>' +
       '</div>';
     if (rc) { sigBox(root, rc); recordBox(root, rc); }
+    if (post) fold(root, rc, nm, il, ms);
     if (rc && linkedFile()) artBox(root, rc, linkedFile());
     if (post && rc && !linkedFile()) ownPhoto(root, rc);
     if (rc && coa) coaBox(root, rc, coa);
@@ -415,6 +416,32 @@
     root.querySelector('[data-mk-now]').onclick = markNow;
     if (post) postBar(url, qr, markNow);
   }
+  // Under a moment, the detail stays folded: a title and a one-line summary per part, open on tap.
+  function fold(root, rc, nm, il, ms) {
+    var main = root.querySelector('.mk-main'), ts = main.querySelector('.mk-ts'); if (!main || !ts) return;
+    var k = window.MoonPhase && window.MoonPhase.sky ? window.MoonPhase.sky(ms) : null;
+    var chev = '<svg class="mk-fd-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var at = ts;
+    var part = function (title, sub, nodes) {
+      nodes = nodes.filter(Boolean); if (!nodes.length) return null;
+      var d = document.createElement('details'); d.className = 'mk-fd';
+      d.innerHTML = '<summary><span class="mk-fd-t"><b>' + title + '</b><i data-fd-sub>' + sub + '</i></span>' + chev + '</summary><div class="mk-fd-b"></div>';
+      var body = d.querySelector('.mk-fd-b'); nodes.forEach(function (n) { body.appendChild(n); });
+      at.parentNode.insertBefore(d, at.nextSibling); at = d; return d;
+    };
+    var q = function (sel) { return main.querySelector(sel); };
+    if (rc) {
+      var pd = part('PROOF', 'Checking the signature…', [q('[data-mk-sig]')]);
+      verifyEarly(rc).then(function (v) { pd.querySelector('[data-fd-sub]').textContent = v && v.valid ? '✓ Signed and verified on Moon' : 'The signature does not check out'; }, function () { pd.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
+    }
+    part('THE MOON THAT NIGHT', esc(nm) + ' · ' + il + '% lit', [q('.mk-date'), q('.mk-mark'), q('.mk-main > .mk-rows')]);
+    var sky = q('.mk-skyw'); if (sky) { var sh = sky.querySelector('.mk-skyh'); if (sh) sh.remove(); }
+    part('THE SKY', k ? esc(k.tide.strength.charAt(0).toUpperCase() + k.tide.strength.slice(1)) + ' tide · ' + Math.round(k.distance.km).toLocaleString() + ' km away' : '', [sky]);
+    if (rc) {
+      var rb = q('[data-mk-rec]'), rd = part('PERMANENT RECORD', 'Kept in the Tideline, anchored in Bitcoin', [rb]);
+      if (rd && !rb.innerHTML.trim()) { rd.hidden = true; new MutationObserver(function () { if (rb.innerHTML.trim()) rd.hidden = false; }).observe(rb, { childList: true }); }
+    }
+  }
   // A photo marked in the Moon app stays on that phone. Opened there, show it at the top, if it is the signed photo.
   function ownPhoto(root, rc) {
     var box = root.querySelector('[data-mk-photo]'); if (!box || !window.indexedDB) return;
@@ -440,6 +467,7 @@
   // A moment opens like a post: a top bar with back, the title and a menu.
   function postBar(url, qr, markNow) {
     document.documentElement.classList.add('mk-post', 'mk-ready');
+    var ey = document.querySelector('.mk-ey'); if (ey && ey.parentNode) ey.parentNode.style.display = 'none';
     var old = document.querySelector('.mk-top'); if (old) old.remove();
     var bar = document.createElement('div'); bar.className = 'mk-top';
     bar.innerHTML = '<button type="button" class="mk-top-b" data-mk-back aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
