@@ -28,6 +28,7 @@
 
   function sign(item) {
     if (busy) return;
+    var lb = $('[data-sg-label]'); item.label = lb ? lb.value.replace(/\s+/g, ' ').trim().slice(0, 60) : '';
     busy = true; status(item.kind === 'text' ? 'Fingerprinting your text…' : 'Fingerprinting ' + item.name + '…');
     $('[data-sg-out]').hidden = true;
     var bytesP = item.file ? item.file.arrayBuffer() : Promise.resolve(new TextEncoder().encode(item.text).buffer);
@@ -52,7 +53,7 @@
     var L = last, rc = L.rc, ms = Number(BigInt(rc.unix_ns) / 1000000n), out = $('[data-sg-out]');
     var f = window.MoonPhase ? window.MoonPhase.fraction(ms) : 0.25;
     var qr = ''; try { qr = window.MoonQR.svg(L.url, f); } catch (e) {}
-    var what = L.item.kind === 'text' ? 'Text · ' + size(new TextEncoder().encode(L.item.text).length) : esc(L.item.name) + ' · ' + size(L.item.size);
+    var what = (L.item.label ? esc(L.item.label) + ' · ' : '') + (L.item.kind === 'text' ? 'Text · ' + size(new TextEncoder().encode(L.item.text).length) : esc(L.item.name) + ' · ' + size(L.item.size));
     out.innerHTML =
       '<div class="sg-card">' +
         '<div class="sg-cardl">' +
@@ -63,6 +64,7 @@
           '<div class="sg-link"><input type="text" readonly value="' + esc(L.url) + '" aria-label="Signed Moonmark link"><button type="button" class="sg-btn p" data-sg-a="copy">COPY LINK</button></div>' +
           '<div class="sg-acts">' +
             (navigator.share ? '<button type="button" class="sg-btn" data-sg-a="share">SHARE</button>' : '') +
+            '<a class="sg-btn" target="_blank" rel="noopener" href="https://x.com/intent/post?text=' + encodeURIComponent((L.item.label ? L.item.label + ': ' : '') + 'Signed on Moon at ' + L.rc.moonmark.slice(0, 19) + '. Anyone can check it.') + '&amp;url=' + encodeURIComponent(L.url) + '">POST TO X</a>' +
             '<button type="button" class="sg-btn" data-sg-a="card">SAVE CARD</button>' +
             '<button type="button" class="sg-btn" data-sg-a="receipt">SAVE RECEIPT</button>' +
             (L.item.kind === 'text' ? '<button type="button" class="sg-btn" data-sg-a="text">SAVE TEXT</button>' : '') +
@@ -105,6 +107,7 @@
       var title = L.item.kind === 'text' ? 'TEXT' : (L.item.name || 'FILE').toUpperCase();
       if (title.length > 22) title = title.slice(0, 21) + '…';
       c.fillText(title, 80, 230);
+      if (L.item.label) { c.fillStyle = '#A2A3A7'; c.font = '34px Inter, sans-serif'; c.fillText(L.item.label.length > 40 ? L.item.label.slice(0, 39) + '…' : L.item.label, 80, 290); }
       c.fillStyle = '#8A8B8F'; c.font = '24px "JetBrains Mono", monospace'; c.fillText(sp('MOONMARK'), 80, 470);
       c.fillStyle = '#E9E4D8'; c.font = '64px "JetBrains Mono", monospace'; c.fillText(rc.moonmark.slice(0, 19), 80, 550);
       c.fillStyle = '#8A8B8F'; c.font = '34px "JetBrains Mono", monospace'; c.fillText(rc.moonmark.slice(19), 80, 600);
@@ -130,7 +133,7 @@
       (navigator.clipboard ? navigator.clipboard.writeText(L.url) : Promise.reject()).catch(function () { document.execCommand('copy'); })
         .then(function () { var b = $('[data-sg-a="copy"]'); b.textContent = 'COPIED'; setTimeout(function () { b.textContent = 'COPY LINK'; }, 1600); });
     } else if (a === 'share') {
-      navigator.share({ title: 'Signed on Moon', text: 'Signed on Moon at ' + L.rc.moonmark.slice(0, 19) + '. Check it:', url: L.url }).catch(function () {});
+      navigator.share({ title: 'Signed on Moon', text: (L.item.label ? L.item.label + ': ' : '') + 'Signed on Moon at ' + L.rc.moonmark.slice(0, 19) + '. Check it:', url: L.url }).catch(function () {});
     } else if (a === 'receipt') {
       download(new Blob([JSON.stringify(L.rc, null, 2) + '\n'], { type: 'application/json' }), base + '.moonmark.json');
     } else if (a === 'photo') {
@@ -161,11 +164,25 @@
     ['dragenter', 'dragover'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('over'); }); });
     ['dragleave', 'drop'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove('over'); }); });
     zone.addEventListener('drop', function (e) { pick(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]); });
+    // Paste a screenshot or a copied image or file anywhere on the page to sign it. Text pastes into fields as usual.
+    document.addEventListener('paste', function (e) {
+      var t = e.target, typing = t && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT' || t.isContentEditable);
+      var items = (e.clipboardData && e.clipboardData.items) || [], f = null;
+      for (var i = 0; i < items.length && !f; i++) if (items[i].kind === 'file') f = items[i].getAsFile();
+      if (!f || (typing && !/^image\//.test(f.type))) return;
+      e.preventDefault(); setMode('file');
+      var d = new Date(), p2 = function (n) { return String(n).padStart(2, '0'); }, ext = (/\/(\w+)/.exec(f.type) || [, 'png'])[1].replace('jpeg', 'jpg');
+      var name = f.name && f.name !== 'image.png' ? f.name : 'pasted-' + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + '-' + p2(d.getHours()) + p2(d.getMinutes()) + p2(d.getSeconds()) + '.' + ext;
+      pick(new File([f], name, { type: f.type }));
+    });
     $('[data-sg-signtext]').onclick = function () {
       var t = ta.value; if (!t.trim()) { status('Paste or type the text to sign first.', true); ta.focus(); return; }
       sign({ kind: 'text', text: t });
     };
     ta.oninput = function () { $('[data-sg-count]').textContent = ta.value ? size(new TextEncoder().encode(ta.value).length) : ''; };
+    var lbl = $('[data-sg-label]');
+    document.querySelectorAll('[data-sg-chip]').forEach(function (b) { b.onclick = function () { lbl.value = lbl.value === b.textContent ? '' : b.textContent; document.querySelectorAll('[data-sg-chip]').forEach(function (x) { x.classList.toggle('on', x.textContent === lbl.value); }); }; });
+    lbl.oninput = function () { document.querySelectorAll('[data-sg-chip]').forEach(function (x) { x.classList.toggle('on', x.textContent === lbl.value); }); };
     $('[data-sg-out]').addEventListener('click', function (e) { var b = e.target.closest('[data-sg-a]'); if (b) act(b.dataset.sgA); });
     // Deep links: #text opens the text tab; #text=... prefills it (for tools that hand over AI output or a page's text).
     var h = location.hash;

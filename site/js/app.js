@@ -85,6 +85,7 @@
     if (navigator.share) navigator.share({ title: made.name || 'A moment on Moon', text: msg, url: made.url }).then(function () { toast('Shared. ' + AFTER); }, function () {});
     else copy();
   }
+  function xHref() { return made ? 'https://x.com/intent/post?text=' + encodeURIComponent((made.name ? made.name + ': ' : '') + 'Moonmark ' + made.mark + '. Opens in your own time.') + '&url=' + encodeURIComponent(made.url) : 'https://x.com'; }
   function copy() {
     if (!made) return;
     (navigator.clipboard ? navigator.clipboard.writeText(made.url) : Promise.reject()).then(function () { toast('Link copied. ' + AFTER); }, function () { prompt('Copy this link', made.url); });
@@ -175,6 +176,7 @@
     $('[data-app-sheet]').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeSheet(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
     $('[data-sheet-share]').onclick = share;
+    $('[data-sheet-x]').onclick = function () { this.href = xHref(); buzz(); };
     $('[data-sheet-copy]').onclick = function () { copy(); };
     $('[data-sheet-create]').onclick = create;
     $('[data-sheet-name]').addEventListener('keydown', function (e) { if (e.key === 'Enter') create(); });
