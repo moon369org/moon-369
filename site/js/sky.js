@@ -6,6 +6,8 @@
    few minutes, which is all a picture of the sky needs. */
 (function () {
   var PI = Math.PI, rad = PI / 180, E = rad * 23.4397;
+  // Words go through MoonT when a page has a translator (the app does); otherwise they stay English.
+  function T(s, v) { if (window.MoonT) return window.MoonT(s, v); return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; }) : s; }
   // Safari accepts ctx.filter but may ignore it, so test it by drawing (same check as the moons).
   var BLUR_OK = (function () {
     try { var c = document.createElement('canvas'); c.width = c.height = 20; var x = c.getContext('2d', { willReadFrequently: true });
@@ -130,13 +132,13 @@
       ticks += '<span style="left:' + pc.toFixed(2) + '%">' + lab + '</span>';
     }
     q('ticks').innerHTML = ticks;
-    var PLAY = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0L10 6L0 12Z" fill="currentColor"/></svg><span class="sk-pl">PLAY</span>',
-      PAUSE = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0h3.5v12H0zM6.5 0H10v12H6.5z" fill="currentColor"/></svg><span class="sk-pl">PAUSE</span>';
+    var PLAY = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0L10 6L0 12Z" fill="currentColor"/></svg><span class="sk-pl">' + T('PLAY') + '</span>',
+      PAUSE = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0h3.5v12H0zM6.5 0H10v12H6.5z" fill="currentColor"/></svg><span class="sk-pl">' + T('PAUSE') + '</span>';
     q('play').innerHTML = PLAY;
-    var setStat = function (i, ev, sub) { q('v' + i).textContent = ev ? clock(ev.t) : '—'; q('s' + i).textContent = ev ? sub : (i === 1 ? 'not up' : 'not that day'); };
-    setStat(0, sky.rise, sky.rise && 'in the ' + compass(sky.rise.az) + tag(sky.rise.t));
-    setStat(1, sky.top && sky.top.alt > 0 ? sky.top : null, sky.top && Math.round(sky.top.alt) + '° up, ' + compass(sky.top.az) + tag(sky.top.t));
-    setStat(2, sky.set, sky.set && 'in the ' + compass(sky.set.az) + tag(sky.set.t));
+    var setStat = function (i, ev, sub) { q('v' + i).textContent = ev ? clock(ev.t) : '—'; q('s' + i).textContent = ev ? sub : T(i === 1 ? 'not up' : 'not that day'); };
+    setStat(0, sky.rise, sky.rise && T('in the {dir}', { dir: T(compass(sky.rise.az)) }) + tag(sky.rise.t));
+    setStat(1, sky.top && sky.top.alt > 0 ? sky.top : null, sky.top && T('{deg}° up, {dir}', { deg: Math.round(sky.top.alt), dir: T(compass(sky.top.az)) }) + tag(sky.top.t));
+    setStat(2, sky.set, sky.set && T('in the {dir}', { dir: T(compass(sky.set.az)) }) + tag(sky.set.t));
     var cx = cv.getContext('2d');
     function X(az, W, pad) { var a = south ? az : (az + 180) % 360; a = Math.max(15, Math.min(345, a)); return pad + (a - 15) / 330 * (W - pad * 2); }
     function draw() {
@@ -183,7 +185,7 @@
         var rel = south ? c[0] : (c[0] + 180) % 360; if (rel < 15 || rel > 345) return;
         if (narrow && c[1].length > 1 && !/^(SE|SW|NE|NW)$/.test(c[1])) return;
         if (narrow && (rel < 60 || rel > 300)) return;
-        var x = X(c[0], W, pad); cx.fillRect(x - 0.5 * dpr, hz, dpr, 6 * dpr); cx.fillText(c[1], x, hz + 22 * dpr);
+        var x = X(c[0], W, pad); cx.fillRect(x - 0.5 * dpr, hz, dpr, 6 * dpr); cx.fillText(T(c[1]), x, hz + 22 * dpr);
       });
       function mark(ev, label, above) {
         if (!ev) return; var x = X(ev.az, W, pad), y = Y(Math.max(0, ev.alt || 0));
@@ -192,9 +194,9 @@
         cx.textAlign = x < W * 0.15 ? 'left' : x > W * 0.85 ? 'right' : 'center';
         cx.fillText(label, x, above ? y - 16 * dpr : hz + 44 * dpr);
       }
-      mark(sky.rise, 'RISE ' + (sky.rise ? clock(sky.rise.t) : ''));
+      mark(sky.rise, T('RISE {t}', { t: sky.rise ? clock(sky.rise.t) : '' }));
       if (sky.top && sky.top.alt > 0) mark(sky.top, clock(sky.top.t) + ' · ' + Math.round(sky.top.alt) + '°', true);
-      mark(sky.set, 'SET ' + (sky.set ? clock(sky.set.t) : ''));
+      mark(sky.set, T('SET {t}', { t: sky.set ? clock(sky.set.t) : '' }));
       var f = window.MoonPhase ? window.MoonPhase.fraction(at) : cfg.f;
       if (m.alt > RISE) {
         var mx = X(m.az, W, pad), my = Y(Math.max(0, m.alt)), r = (narrow ? 15 : 22) * dpr;
@@ -225,7 +227,7 @@
       }
       range.value = toV(at);
       // break only between the parts, so it wraps cleanly onto two lines on phones
-      q('now').innerHTML = [clock(at), tag(at).replace(' · ', '').toUpperCase(), m.alt > RISE ? 'MOON UP' : 'BELOW THE HORIZON']
+      q('now').innerHTML = [clock(at), tag(at).replace(' · ', '').toUpperCase(), T(m.alt > RISE ? 'MOON UP' : 'BELOW THE HORIZON')]
         .filter(Boolean).map(function (x, i, all) { return '<span>' + x + (i < all.length - 1 ? ' ·' : '') + '</span>'; }).join(' ');
       if (cfg.onTime) cfg.onTime(at, m);
     }

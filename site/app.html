@@ -186,6 +186,9 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .tide-str{border:1px solid #24262A;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
 .tide-str b{font:700 13px Syncopate,sans-serif;letter-spacing:.08em}.tide-str p{margin:0;font-size:12.5px;line-height:1.55;color:#A2A3A7}
 .tide-src{font-size:11px;line-height:1.5;color:#6A6C70;text-align:center}
+.langs{margin-top:26px;display:flex;justify-content:center;align-items:center;gap:10px;font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5E6064}
+.langs button{background:none;border:0;color:#8A8B8F;font:inherit;letter-spacing:inherit;min-height:40px;padding:0 4px;cursor:pointer}
+.langs button[aria-current="true"]{color:#E9E4D8;text-decoration:underline;text-underline-offset:4px}
 </style>
 </head>
 <body>
@@ -221,6 +224,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
     </div>
     <div class="recent" data-app-recent hidden></div>
     <div class="install" data-app-install hidden></div>
+    <div class="langs" data-langs aria-label="Language"><button type="button" data-lang="en">ENGLISH</button><span>·</span><button type="button" data-lang="es">ESPAÑOL</button></div>
   </section>
   <section class="scr" data-scr="nights" hidden>
     <div class="k" style="margin-top:6px">EXPLORE A NIGHT</div>
@@ -282,6 +286,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 </div>
 <div class="toast" data-app-toast hidden role="status"></div>
 
+<script src="/js/i18n.js" defer></script>
 <script src="/js/moon-phase.js" defer></script>
 <script src="/js/sky.js" defer></script>
 <script src="/js/moonglow.js" defer></script>

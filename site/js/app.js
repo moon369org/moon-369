@@ -10,6 +10,7 @@
   var $ = function (s) { return document.querySelector(s); }, $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
   var esc = function (x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var API = 'https://api.moon369.org';
+  var T = window.MoonT || function (x, v) { return v ? x.replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; }) : x; }, LANG = window.MoonI18n ? MoonI18n.lang : 'en', LOC = LANG === 'en' ? undefined : LANG;
 
   function moon(ms) {
     var t = ms - EPOCH, s = t / SEC, whole = Math.floor(s), frac = s - whole, da = Math.floor(whole / 86400), y = Math.floor(da / 369), dy = da - y * 369;
@@ -21,7 +22,7 @@
   // A moment's link: the Moonmark, to the second, with an optional name. It opens in each person's own time.
   // Events carry their name as e= (a title with a countdown); moments carry what's happening as n= (a note).
   function link(ms, name, kind) { return 'https://moon369.org/m/' + path(moon(Math.floor(ms / 1000) * 1000 + 1)) + (name ? (kind === 'moment' ? '?n=' : '?e=') + encodeURIComponent(name).replace(/%20/g, '+') : ''); }
-  function localStr(ms, opts) { try { return new Intl.DateTimeFormat(undefined, opts || { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(ms); } catch (e) { return new Date(ms).toString(); } }
+  function localStr(ms, opts) { try { return new Intl.DateTimeFormat(LOC, opts || { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(ms); } catch (e) { return new Date(ms).toString(); } }
   function buzz() { try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} }
   function toast(t) { var el = $('[data-app-toast]'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 2400); }
   function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || '[]'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return []; } }
@@ -34,7 +35,7 @@
     if (k.s !== lastSec) {
       lastSec = k.s;
       $('[data-app-date]').textContent = k.y + '.' + p(k.m) + '.' + p(k.d);
-      if (P) { var f = P.fraction(now); $('[data-app-meta]').innerHTML = esc(P.name(f)) + ' · ' + Math.round(P.illumination(now) * 100) + '% lit · Lune ' + k.d + '<span class="lt1">Your local time: ' + esc(localStr(now)) + '</span>'; }
+      if (P) { var f = P.fraction(now); $('[data-app-meta]').innerHTML = esc(T('{p} · {n}% lit', { p: T(P.name(f)), n: Math.round(P.illumination(now) * 100) })) + ' · ' + esc(T('Lune {n}', { n: k.d })) + '<span class="lt1">' + esc(T('Your local time: {t}', { t: localStr(now) })) + '</span>'; }
     }
     requestAnimationFrame(tick);
   }
@@ -183,7 +184,7 @@
     $('[data-sheet-name]').classList.toggle('short', kind === 'event'); $('[data-sheet-name]').maxLength = kind === 'event' ? 80 : 280;
     $('[data-sheet-name]').value = name || ''; $('[data-sheet-name]').placeholder = kind === 'event' ? 'Name the event' : "What's happening? (optional)";
     $('[data-sheet-mk]').textContent = 'Moonmark ' + text(moon(cur.ms + 1));
-    $('[data-sheet-lt]').textContent = localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) + ' your time.';
+    $('[data-sheet-lt]').textContent = T('{t} your time.', { t: localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) });
     $('[data-sheet-close]').textContent = 'CANCEL';
     clearPhoto(); $('[data-ready-photo]').hidden = true;
     step('name'); $('[data-app-sheet]').hidden = false; buzz();
@@ -221,7 +222,7 @@
     $('[data-ready-h]').textContent = cur.kind === 'event' ? 'YOUR EVENT IS READY' : 'YOUR MOMENT IS READY';
     $('[data-ready-name]').textContent = name;
     $('[data-ready-mk]').textContent = 'Moonmark ' + made.mark;
-    $('[data-ready-lt]').textContent = localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) + ' your time.';
+    $('[data-ready-lt]').textContent = T('{t} your time.', { t: localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) });
     $('[data-ready-link]').value = url;
     var box = $('[data-sheet-qrbox]'); try { box.innerHTML = window.MoonQR.svg(url, window.MoonPhase.fraction(cur.ms)); box.hidden = false; } catch (e) { box.hidden = true; }
     $('[data-sheet-embed]').hidden = cur.kind !== 'event';
@@ -231,7 +232,7 @@
   var AFTER = 'Anyone who opens it can find their own moon.';
   function share() {
     if (!made) return; buzz();
-    var msg = (made.name ? made.name + ': ' : '') + 'Moonmark ' + made.mark + '. Opens in your own time:';
+    var msg = made.name ? T('{name}: Moonmark {mark}. Opens in your own time:', { name: made.name, mark: made.mark }) : T('Moonmark {mark}. Opens in your own time:', { mark: made.mark });
     // With a photo, send the photo itself along with the signed link: friends see the picture, and anyone can
     // check it by dropping it on moon369.org/verify.
     if (made.photo && navigator.canShare && navigator.canShare({ files: [made.photo] })) {
@@ -241,7 +242,7 @@
     if (navigator.share) navigator.share({ title: made.name || 'A moment on Moon', text: msg, url: made.url }).then(function () { toast('Shared. ' + AFTER); }, function () {});
     else copy();
   }
-  function xHref() { return made ? 'https://x.com/intent/post?text=' + encodeURIComponent((made.name ? made.name + ': ' : '') + 'Moonmark ' + made.mark + '. Opens in your own time.') + '&url=' + encodeURIComponent(made.url) : 'https://x.com'; }
+  function xHref() { return made ? 'https://x.com/intent/post?text=' + encodeURIComponent(made.name ? T('{name}: Moonmark {mark}. Opens in your own time.', { name: made.name, mark: made.mark }) : T('Moonmark {mark}. Opens in your own time.', { mark: made.mark })) + '&url=' + encodeURIComponent(made.url) : 'https://x.com'; }
   function copy() {
     if (!made) return;
     (navigator.clipboard ? navigator.clipboard.writeText(made.url) : Promise.reject()).then(function () { toast('Link copied. ' + AFTER); }, function () { prompt('Copy this link', made.url); });
@@ -277,15 +278,15 @@
     var f = P.fraction(ms), k = moon(ms);
     $('[data-n-moon]').setAttribute('data-at', String(ms));
     $('[data-n-title]').textContent = TITLES[n.for];
-    $('[data-n-date-out]').textContent = +dm[2] + ' ' + MONTHS[+dm[1] - 1] + ' ' + dm[0];
-    $('[data-n-phase]').textContent = P.name(f) + ' · ' + Math.round(P.illumination(ms) * 100) + '% lit';
-    $('[data-n-facts]').textContent = n.t ? 'At ' + n.t + ' your time' : 'At midday';
+    $('[data-n-date-out]').textContent = LANG === 'en' ? +dm[2] + ' ' + MONTHS[+dm[1] - 1] + ' ' + dm[0] : new Date(Date.UTC(+dm[0], +dm[1] - 1, +dm[2], 12)).toLocaleDateString(LANG, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).toUpperCase();
+    $('[data-n-phase]').textContent = T('{p} · {n}% lit', { p: T(P.name(f)), n: Math.round(P.illumination(ms) * 100) });
+    $('[data-n-facts]').textContent = n.t ? T('At {t} your time', { t: n.t }) : T('At midday');
     $('[data-n-show]').hidden = true;     // one primary at a time: Share takes over until the inputs change
     $('[data-n-cells]').innerHTML = '<div><span>CYCLE</span><b>' + k.y + '</b></div><div><span>MOON</span><b>' + p(k.m) + '</b></div><div><span>LUNE</span><b>' + p(k.d) + '</b></div>';
     $('[data-n-open]').href = 'https://moon369.org/night/' + n.d + '?' + nightQuery(n).replace(/^d=[^&]*&/, '');
-    var ret = $('[data-n-returns]'); ret.textContent = n.returns ? 'This moon returns to this date in ' + n.returns + '.' : '';
+    var ret = $('[data-n-returns]'); ret.textContent = n.returns ? T('This moon returns to this date in {y}.', { y: n.returns }) : '';
     if (!n.returns && navigator.onLine !== false) fetch(API + '/v1/night?' + nightQuery(n)).then(function (r) { return r.json(); }).then(function (j) {
-      if (night === n && j.returns) { n.returns = j.returns; ret.textContent = 'This moon returns to this date in ' + j.returns + '.'; saveNight(n); }
+      if (night === n && j.returns) { n.returns = j.returns; ret.textContent = T('This moon returns to this date in {y}.', { y: j.returns }); saveNight(n); }
     }).catch(function () {});
     $('[data-n-res]').hidden = false;
     if (save) saveNight(n);
@@ -302,7 +303,7 @@
     });
   }
   function setWhen(ms) { var d = new Date(ms); $('[data-e-when]').value = d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); noteWhen(); }
-  function noteWhen() { var v = Date.parse($('[data-e-when]').value); $('[data-e-note]').textContent = isNaN(v) ? 'Everyone who opens the link sees it in their own time.' : 'Moonmark ' + text(moon(Math.floor(v / 1000) * 1000 + 1)) + '. Everyone who opens the link sees it in their own time.'; }
+  function noteWhen() { var v = Date.parse($('[data-e-when]').value); $('[data-e-note]').textContent = isNaN(v) ? 'Everyone who opens the link sees it in their own time.' : T('Moonmark {m}. Everyone who opens the link sees it in their own time.', { m: text(moon(Math.floor(v / 1000) * 1000 + 1)) }); }
 
   // ---------- screens ----------
   // ---------- MOON / SKY: the moon itself, or its path across your sky today ----------
@@ -327,20 +328,20 @@
     if (p) $('[data-sky-place]').textContent = (p.name ? p.name : 'YOUR LOCATION').toUpperCase();
     if (!p || !window.MoonSky) return;
     if (tide) { drawTide(p); return; }
-    var now = Date.now(), fmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
+    var now = Date.now(), fmt = new Intl.DateTimeFormat(LOC, { hour: 'numeric', minute: '2-digit' });
     var dayOf = function (t) { var d = new Date(t); return d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate(); }, today = dayOf(now);
-    $('[data-sky-k]').textContent = "THE MOON'S PATH · LOOKING " + (p.lat >= 0 ? 'SOUTH' : 'NORTH');
+    $('[data-sky-k]').textContent = T(p.lat >= 0 ? "THE MOON'S PATH · LOOKING SOUTH" : "THE MOON'S PATH · LOOKING NORTH");
     if (skyBox) skyBox.stop();
     skyBox = MoonSky.mount($('[data-sky-chart]'), {
       t0: now - 16 * 3600000, t1: now + 16 * 3600000, at: now, lat: p.lat, lng: p.lng,
       f: window.MoonPhase ? MoonPhase.fraction(now) : 0.5,
       clock: function (t) { return fmt.format(new Date(t)); },
-      dayTag: function (t) { var d = dayOf(t); return d < today ? ' · yesterday' : d > today ? ' · tomorrow' : ''; },
+      dayTag: function (t) { var d = dayOf(t); return d < today ? T(' · yesterday') : d > today ? T(' · tomorrow') : ''; },
       onTime: function (t, m) {
-        var nowish = Math.abs(t - Date.now()) < 90000, w = nowish ? 'is' : t > Date.now() ? 'will be' : 'was';
-        var when = nowish ? 'Right now' : 'At ' + fmt.format(new Date(t));
-        $('[data-sky-h]').textContent = m.alt > -0.27 ? when + ' the moon ' + w + ' ' + Math.max(0, Math.round(m.alt)) + '\u00b0 up in the ' + MoonSky.compass(m.az) + '.'
-          : when + ' the moon ' + w + ' below the horizon.';
+        var nowish = Math.abs(t - Date.now()) < 90000, w = T(nowish ? 'is' : t > Date.now() ? 'will be' : 'was');
+        var when = nowish ? T('Right now') : T('At {t}', { t: fmt.format(new Date(t)) });
+        $('[data-sky-h]').textContent = m.alt > -0.27 ? T('{when} the moon {verb} {deg}\u00b0 up in the {dir}.', { when: when, verb: w, deg: Math.max(0, Math.round(m.alt)), dir: T(MoonSky.compass(m.az)) })
+          : T('{when} the moon {verb} below the horizon.', { when: when, verb: w });
       },
     });
   }
@@ -358,7 +359,7 @@
   // ---------- TIDE: the ocean near you, and how hard the moon is pulling ----------
   var tideCache = {};
   function drawTide(p) {
-    var fmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }), dfmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+    var fmt = new Intl.DateTimeFormat(LOC, { hour: 'numeric', minute: '2-digit' }), dfmt = new Intl.DateTimeFormat(LOC, { weekday: 'short', hour: 'numeric', minute: '2-digit' });
     $('[data-sky-k]').textContent = 'TIDES';
     strength();
     var key = p.lat + ',' + p.lng, c = tideCache[key];
@@ -378,7 +379,7 @@
     var curve = d.curve.map(function (x) { return { t: Date.parse(x.utc), ft: x.ft }; });
     var level = null; for (var i = 1; i < curve.length; i++) if (curve[i].t >= now) { var a = curve[i - 1], b = curve[i]; level = a.ft + (b.ft - a.ft) * (now - a.t) / (b.t - a.t); break; }
     var n0 = next[0], ft = function (v) { return (Math.round(v * 10) / 10).toFixed(1) + ' ft'; };
-    $('[data-tide-h]').textContent = n0 ? (n0.type === 'high' ? 'Rising' : 'Falling') + (level != null ? ' · ' + ft(level) + ' now' : '') + '. ' + (n0.type === 'high' ? 'High' : 'Low') + ' tide ' + ft(n0.ft) + ' at ' + fmt.format(new Date(n0.t)) + '.' : '';
+    $('[data-tide-h]').textContent = n0 ? T('{dir} · {lvl} now.', { dir: T(n0.type === 'high' ? 'Rising' : 'Falling'), lvl: level != null ? ft(level) : '' }).replace(' ·  ', ' ') + ' ' + T('{kind} tide {ft} at {t}.', { kind: T(n0.type === 'high' ? 'High' : 'Low'), ft: ft(n0.ft), t: fmt.format(new Date(n0.t)) }) : '';
     // The next 24 hours, with highs and lows marked and a line at now.
     var t0 = now - 3 * 3600000, t1 = now + 21 * 3600000, pts = curve.filter(function (x) { return x.t >= t0 && x.t <= t1; });
     var svg = '';
@@ -392,11 +393,12 @@
       if (level != null) svg += '<circle cx="' + X(now).toFixed(1) + '" cy="' + Y(level).toFixed(1) + '" r="4.5" fill="#E9E4D8"/>';
     }
     $('[data-tide-chart]').innerHTML = svg;
-    $('[data-tide-ax]').innerHTML = '<span>' + esc(fmt.format(new Date(t0))) + '</span><span class="nw" style="left:' + ((now - t0) / (t1 - t0) * 100).toFixed(1) + '%">NOW</span><span>' + esc(fmt.format(new Date(t1))) + ' ' + esc(dfmt.format(new Date(t1)).split(' ')[0].replace(',', '')) + '</span>';
+    $('[data-tide-ax]').innerHTML = '<span>' + esc(fmt.format(new Date(t0))) + '</span><span class="nw" style="left:' + ((now - t0) / (t1 - t0) * 100).toFixed(1) + '%">' + T('NOW') + '</span><span>' + esc(fmt.format(new Date(t1))) + ' ' + esc(dfmt.format(new Date(t1)).split(' ')[0].replace(',', '')) + '</span>';
     $('[data-tide-list]').innerHTML = next.slice(0, 4).map(function (x) { return '<div><span>' + (x.type === 'high' ? 'HIGH' : 'LOW') + '</span><b>' + esc(fmt.format(new Date(x.t))) + '</b><i>' + esc(ft(x.ft)) + ' · ' + esc(dfmt.format(new Date(x.t)).split(' ')[0].replace(',', '')) + '</i></div>'; }).join('');
     var st = d.station, far = st.distance_km > 60;
-    $('[data-tide-src]').textContent = 'NOAA predictions for ' + st.name + (st.state ? ', ' + st.state : '') + ' · ' + (far ? st.distance_km.toLocaleString() + ' km away, the nearest station · ' : '') + 'heights above ' + d.datum + '.';
-    if (far) $('[data-tide-h]').textContent = 'Nearest coast: ' + st.name + (st.state ? ', ' + st.state : '') + '. ' + $('[data-tide-h]').textContent;
+    var where = st.name + (st.state ? ', ' + st.state : '');
+    $('[data-tide-src]').textContent = T('NOAA predictions for {place} · {far}heights above {datum}.', { place: where, far: far ? T('{km} km away, the nearest station · ', { km: st.distance_km.toLocaleString() }) : '', datum: d.datum });
+    if (far) $('[data-tide-h]').textContent = T('Nearest coast: {place}.', { place: where }) + ' ' + $('[data-tide-h]').textContent;
   }
   // How strong the tides are worldwide right now: spring tides near new and full moon, neap near the quarters,
   // a little stronger when the moon is close.
@@ -406,11 +408,12 @@
     var off = function (target) { var x = Math.abs(((f - target) % 1 + 1.5) % 1 - 0.5); return x; };
     var dSpring = Math.min(off(0), off(0.5)), dNeap = Math.min(off(0.25), off(0.75));
     var findNext = function (targets) { for (var h = 1; h < 24 * 16; h++) { var a = P.fraction(now + (h - 1) * 3600000), b = P.fraction(now + h * 3600000); for (var k = 0; k < targets.length; k++) { var tg = targets[k]; if ((a < tg && b >= tg) || (tg === 0 && b < a)) return now + h * 3600000; } } return null; };
-    var ns = findNext([0, 0.5]), nn = findNext([0.25, 0.75]), dd = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-    var kind = dSpring < 0.07 ? 'SPRING TIDES' : dNeap < 0.07 ? 'NEAP TIDES' : dSpring < dNeap ? 'TIDES GROWING' : 'TIDES EASING';
-    var why = dSpring < 0.07 ? 'Sun and moon pull in line, so highs run higher and lows lower.' : dNeap < 0.07 ? 'Sun and moon pull at right angles, so the range between high and low is smallest.' : dSpring < dNeap ? 'The range between high and low is growing toward spring tides.' : 'The range between high and low is shrinking toward neap tides.';
-    var close = dist ? (dist < 370000 ? ' The moon is close (' + Math.round(dist / 1000) + ',000 km), adding a little extra.' + (dSpring < 0.07 ? ' Expect king tides.' : '') : dist > 400000 ? ' The moon is far (' + Math.round(dist / 1000) + ',000 km), taking a little off.' : '') : '';
-    $('[data-tide-str]').innerHTML = '<b>' + kind + '</b><p>' + why + close + '</p><p>Next spring tides ' + (ns ? esc(dd.format(new Date(ns))) : '…') + ' · next neap tides ' + (nn ? esc(dd.format(new Date(nn))) : '…') + '.</p>';
+    var ns = findNext([0, 0.5]), nn = findNext([0.25, 0.75]), dd = new Intl.DateTimeFormat(LOC, { weekday: 'short', month: 'short', day: 'numeric' });
+    var kind = T(dSpring < 0.07 ? 'SPRING TIDES' : dNeap < 0.07 ? 'NEAP TIDES' : dSpring < dNeap ? 'TIDES GROWING' : 'TIDES EASING');
+    var why = T(dSpring < 0.07 ? 'Sun and moon pull in line, so highs run higher and lows lower.' : dNeap < 0.07 ? 'Sun and moon pull at right angles, so the range between high and low is smallest.' : dSpring < dNeap ? 'The range between high and low is growing toward spring tides.' : 'The range between high and low is shrinking toward neap tides.');
+    var km = dist ? Math.round(dist / 1000) + ',000' : '';
+    var close = dist ? (dist < 370000 ? T(' The moon is close ({km} km), adding a little extra.', { km: km }) + (dSpring < 0.07 ? T(' Expect king tides.') : '') : dist > 400000 ? T(' The moon is far ({km} km), taking a little off.', { km: km }) : '') : '';
+    $('[data-tide-str]').innerHTML = '<b>' + kind + '</b><p>' + why + close + '</p><p>' + esc(T('Next spring tides {a} · next neap tides {b}.', { a: ns ? dd.format(new Date(ns)) : '…', b: nn ? dd.format(new Date(nn)) : '…' })) + '</p>';
   }
   function askPlace() {
     if (!navigator.geolocation) { toast('Location is not available on this device'); return; }
@@ -447,6 +450,7 @@
     $$('[data-tab]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-tab')); }; });
     $$('[data-view]').forEach(function (b) { b.onclick = function () { setView(b.getAttribute('data-view'), true); }; });
     $('[data-sky-loc]').onclick = askPlace;
+    $$('[data-lang]').forEach(function (b) { b.setAttribute('aria-current', String(b.getAttribute('data-lang') === LANG)); b.onclick = function () { if (window.MoonI18n && b.getAttribute('data-lang') !== LANG) MoonI18n.set(b.getAttribute('data-lang')); }; });
     $('[data-sky-zip]').addEventListener('submit', zipPlace);
     $('[data-sky-change]').onclick = function () { try { localStorage.removeItem('moonPlace'); } catch (e) {} if (skyBox) skyBox.stop(); drawPath(); };
     setView(view, false);
