@@ -107,6 +107,17 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .nphase{font:500 17px 'JetBrains Mono',monospace;color:#E9E4D8;text-align:center;margin-top:2px}
 .nphase:empty{display:none}
 .nres .date{margin-top:4px}
+.pick{position:relative;display:flex;align-items:center;justify-content:center;min-height:52px;border:1px dashed #3A3B3F;color:#B9B6AE;font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;cursor:pointer}
+.pick input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.pick[hidden],.pv[hidden],.rph[hidden]{display:none}
+.pv{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;border:1px solid #24262A;padding:8px}
+.pv img{width:64px;height:64px;object-fit:cover;display:block;background:#08080A}.pv img:not([src]){visibility:hidden}
+.pv b{display:block;font:10px 'JetBrains Mono',monospace;letter-spacing:.22em;color:#8A8B8F}
+.pv span{display:block;margin-top:4px;font-size:12px;line-height:1.45;color:#A2A3A7}
+.pvx{width:44px;height:44px;background:none;border:1px solid #24262A;color:#E9E4D8;font-size:14px;cursor:pointer}
+.rph{width:100%;max-height:260px;object-fit:contain;background:#08080A;border:1px solid #24262A}
+.recent a.ph{align-items:center}.recent a.ph img{width:40px;height:40px;object-fit:cover;flex:none;margin-right:2px;background:#08080A}
+.recent a.ph .nm{flex:1;display:flex;align-items:center;gap:12px;min-width:0}
 </style>
 </head>
 <body>
@@ -165,10 +176,13 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
       <div class="mk" data-sheet-mk></div>
       <div class="lt" data-sheet-lt></div>
       <input type="text" maxlength="80" placeholder="What's happening? (optional)" data-sheet-name aria-label="Name this moment">
+      <label class="pick" data-sheet-pick><input type="file" accept="image/*,image/heic,image/heif" data-sheet-photo><span>+ ADD A PHOTO · OPTIONAL</span></label>
+      <div class="pv" data-sheet-pv hidden><img data-sheet-pv-img alt=""><div><b>PHOTO</b><span>Signed at this moment. It stays on your phone: only its fingerprint goes to Moon.</span></div><button type="button" class="pvx" data-sheet-pv-x aria-label="Remove the photo">✕</button></div>
       <button class="btn p" type="button" data-sheet-create>MARK IT</button>
     </div>
     <div class="step" data-step="ready" hidden>
       <div class="ok"><span aria-hidden="true">✓</span><b data-ready-h>YOUR MOMENT IS READY</b></div>
+      <img class="rph" data-ready-photo alt="The signed photo" hidden>
       <div class="rn" data-ready-name></div>
       <div class="mk" data-ready-mk></div>
       <div class="lt" data-ready-lt></div>

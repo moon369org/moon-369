@@ -42,8 +42,63 @@
     var r = store(key), box = $(el); if (!r.length) { box.hidden = true; return; }
     box.hidden = false; box.innerHTML = '<div class="k" style="text-align:left;margin-bottom:6px">' + title + '</div>' + r.map(row).join('');
   }
-  function remember(key, item, same) { var r = store(key).filter(function (x) { return !same(x); }); r.unshift(item); store(key, r.slice(0, 12)); }
-  function showMoments() { list('moonMoments', '[data-app-recent]', 'YOUR MOMENTS', function (x) { return '<a href="' + esc(x.url) + '"><span>' + esc(x.name || 'A moment') + '</span><span>' + esc(text(moon(x.ms + 1))) + '</span></a>'; }); }
+  function remember(key, item, same) { var r = store(key).filter(function (x) { return !same(x); }); r.unshift(item); store(key, r.slice(0, key === 'moonMoments' ? 500 : 12)); }
+  function showMoments() {
+    list('moonMoments', '[data-app-recent]', 'YOUR MOMENTS', function (x) {
+      return x.sha ? '<a class="ph" href="' + esc(x.url) + '"><span class="nm"><img alt="" data-thumb="' + esc(x.sha) + '"><span>' + esc(x.name || 'A photo') + '</span></span><span>' + esc(text(moon(x.ms + 1))) + '</span></a>'
+        : '<a href="' + esc(x.url) + '"><span>' + esc(x.name || 'A moment') + '</span><span>' + esc(text(moon(x.ms + 1))) + '</span></a>';
+    });
+    $$('[data-thumb]').forEach(function (im) { getThumb(im.getAttribute('data-thumb')).then(function (b) { if (b) im.src = URL.createObjectURL(b); }); });
+  }
+
+  // ---------- photos: kept on this phone only ----------
+  // A small preview of each photo lives in this app's own storage on the phone. The photo itself stays in
+  // the phone's library; Moon only ever gets its fingerprint (and its look-alike hash).
+  var DB = null;
+  function idb() {
+    return DB || (DB = new Promise(function (ok, no) {
+      if (!window.indexedDB) return no(); var r = indexedDB.open('moon-app', 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore('thumbs'); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); };
+    }));
+  }
+  function putThumb(k, b) { return idb().then(function (db) { return new Promise(function (ok) { var t = db.transaction('thumbs', 'readwrite'); t.objectStore('thumbs').put(b, k); t.oncomplete = ok; t.onerror = ok; }); }).catch(function () {}); }
+  function getThumb(k) { return idb().then(function (db) { return new Promise(function (ok) { var q = db.transaction('thumbs').objectStore('thumbs').get(k); q.onsuccess = function () { ok(q.result || null); }; q.onerror = function () { ok(null); }; }); }).catch(function () { return null; }); }
+  function thumbOf(file, size) {
+    return new Promise(function (ok) {
+      var im = new Image(), u = URL.createObjectURL(file);
+      im.onload = function () {
+        var k = Math.min(1, size / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(im.naturalWidth * k)); c.height = Math.max(1, Math.round(im.naturalHeight * k));
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
+        c.toBlob(function (b) { ok(b); }, 'image/jpeg', 0.82);
+      };
+      im.onerror = function () { URL.revokeObjectURL(u); ok(null); };
+      im.src = u;
+    });
+  }
+  var sealReady = null;
+  function lookAlike(file) {
+    sealReady = sealReady || new Promise(function (ok, no) { if (window.MoonSeal) return ok(); var sc = document.createElement('script'); sc.src = '/js/seal.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+    return sealReady.then(function () { return window.MoonSeal.dhash(file); }).catch(function () { return null; });
+  }
+  function pickPhoto(file) {
+    if (!file) return;
+    if (!/^image\//.test(file.type) && !/\.(heic|heif|jpe?g|png|webp|gif)$/i.test(file.name)) { toast('Pick a photo'); return; }
+    cur.photo = file;
+    thumbOf(file, 240).then(function (b) { cur.thumb = b; if (b) $('[data-sheet-pv-img]').src = URL.createObjectURL(b); });
+    $('[data-sheet-pv]').hidden = false; $('[data-sheet-pick]').hidden = true; buzz();
+  }
+  function clearPhoto() { if (cur) { cur.photo = null; cur.thumb = null; } $('[data-sheet-pv-img]').removeAttribute('src'); $('[data-sheet-pv]').hidden = true; $('[data-sheet-pick]').hidden = cur && cur.kind === 'event'; $('[data-sheet-photo]').value = ''; }
+  // Sign the photo: its fingerprint, at this moment. The signed link proves the photo existed by then.
+  function signPhoto(file) {
+    return file.arrayBuffer().then(function (buf) { return crypto.subtle.digest('SHA-256', buf); }).then(function (d) {
+      var sha = Array.from(new Uint8Array(d), function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+      return lookAlike(file).then(function (ph) {
+        var body = { sha256: sha }; if (ph) body.phash = ph;
+        return fetch(API + '/v1/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      }).then(function (r) { return r.json().then(function (b) { if (!r.ok || !b.signed_url) throw new Error((b.error && b.error.message) || 'Moon could not sign it'); return { sha: sha, url: b.signed_url, ms: Number(BigInt(b.receipt.unix_ns) / 1000000n) }; }); });
+    });
+  }
 
   // ---------- the share sheet: name it, create it, then it's ready to share ----------
   // Nothing is posted anywhere: the link itself carries the Moonmark and the name, so it works the moment it's made.
@@ -57,17 +112,39 @@
     $('[data-sheet-mk]').textContent = 'Moonmark ' + text(moon(cur.ms + 1));
     $('[data-sheet-lt]').textContent = localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) + ' your time.';
     $('[data-sheet-close]').textContent = 'CANCEL';
+    clearPhoto(); $('[data-ready-photo]').hidden = true;
     step('name'); $('[data-app-sheet]').hidden = false; buzz();
     if (kind === 'event' && name) create(); else setTimeout(function () { $('[data-sheet-name]').focus(); }, 60);
   }
   function closeSheet() { $('[data-app-sheet]').hidden = true; }
+  var signing = false;
   function create() {
     var name = $('[data-sheet-name]').value.replace(/\s+/g, ' ').trim().slice(0, 80);
     if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return; }
-    var url = link(cur.ms, name), it = { ms: cur.ms, name: name, url: url };
+    if (cur.kind !== 'event' && cur.photo) {
+      if (signing) return; signing = true;
+      var btn = $('[data-sheet-create]'); btn.textContent = 'SIGNING THE PHOTO…'; btn.disabled = true;
+      var c0 = cur;
+      signPhoto(cur.photo).then(function (s) {
+        if (cur !== c0) return;
+        cur.ms = Math.floor(s.ms / 1000) * 1000;
+        var url = s.url + (name ? '&e=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
+        if (cur.thumb) putThumb(s.sha, cur.thumb);
+        try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+        finish(name, url, { ms: s.ms, name: name, url: url, sha: s.sha });
+      }).catch(function (e) {
+        toast(navigator.onLine === false ? 'Signing a photo needs a connection' : (e && e.message) || 'Moon could not sign it. Try again.');
+      }).then(function () { signing = false; btn.disabled = false; btn.textContent = 'MARK IT'; });
+      return;
+    }
+    finish(name, link(cur.ms, name), null);
+  }
+  function finish(name, url, it) {
+    it = it || { ms: cur.ms, name: name, url: url };
     if (cur.kind === 'event') { remember('moonEvents', it, function (x) { return x.url === url; }); showEvents(); }
     else { remember('moonMoments', it, function (x) { return x.url === url; }); showMoments(); }
-    made = { url: url, name: name, mark: text(moon(cur.ms + 1)) };
+    made = { url: url, name: name, mark: text(moon(cur.ms + 1)), photo: it.sha ? cur.photo : null };
+    var rp = $('[data-ready-photo]'); if (made.photo && cur.thumb) { rp.src = URL.createObjectURL(cur.thumb); rp.hidden = false; } else rp.hidden = true;
     $('[data-ready-h]').textContent = cur.kind === 'event' ? 'YOUR EVENT IS READY' : 'YOUR MOMENT IS READY';
     $('[data-ready-name]').textContent = name;
     $('[data-ready-mk]').textContent = 'Moonmark ' + made.mark;
@@ -82,6 +159,12 @@
   function share() {
     if (!made) return; buzz();
     var msg = (made.name ? made.name + ': ' : '') + 'Moonmark ' + made.mark + '. Opens in your own time:';
+    // With a photo, send the photo itself along with the signed link: friends see the picture, and anyone can
+    // check it by dropping it on moon369.org/verify.
+    if (made.photo && navigator.canShare && navigator.canShare({ files: [made.photo] })) {
+      navigator.share({ files: [made.photo], title: made.name || 'A moment on Moon', text: msg + ' ' + made.url }).then(function () { toast('Shared. ' + AFTER); }, function () {});
+      return;
+    }
     if (navigator.share) navigator.share({ title: made.name || 'A moment on Moon', text: msg, url: made.url }).then(function () { toast('Shared. ' + AFTER); }, function () {});
     else copy();
   }
@@ -179,6 +262,8 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
     $('[data-sheet-share]').onclick = share;
     $('[data-sheet-x]').onclick = function () { this.href = xHref(); buzz(); };
+    $('[data-sheet-photo]').onchange = function () { pickPhoto(this.files && this.files[0]); };
+    $('[data-sheet-pv-x]').onclick = function () { clearPhoto(); buzz(); };
     $('[data-sheet-copy]').onclick = function () { copy(); };
     $('[data-sheet-create]').onclick = create;
     $('[data-sheet-name]').addEventListener('keydown', function (e) { if (e.key === 'Enter') create(); });
