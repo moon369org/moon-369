@@ -44,6 +44,12 @@
     e = e.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim();
     return e ? e.slice(0, 80) : '';
   }
+  // A moment can carry a note from whoever marked it: /m/<moonmark>?n=Sunset+at+the+lake (up to 280 characters).
+  function noteText() {
+    var n = new URLSearchParams(location.search).get('n') || '';
+    n = n.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim();
+    return n ? n.slice(0, 280) : '';
+  }
   function icsStamp(ms) { return new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''); }
   function icsText(x) { return String(x).replace(/\\/g, '\\\\').replace(/[,;]/g, '\\$&').replace(/\n/g, '\\n'); }
   function ics(name, ms, url, mark) {
@@ -325,7 +331,8 @@
   function render(root, mk, fresh, rc, ev) {
     var ms = toMs(mk), coa = rc ? coaFrom() : null;
     if (ev) ms = Math.round(ms / 1000) * 1000;   // events are set to the second; drop float dust below it
-    var url = 'https://moon369.org/m/' + path(mk) + (rc ? location.search : ev ? '?e=' + encodeURIComponent(ev).replace(/%20/g, '+') : '');
+    var note = noteText();
+    var url = 'https://moon369.org/m/' + path(mk) + (rc ? location.search : (ev ? '?e=' + encodeURIComponent(ev).replace(/%20/g, '+') : '') + (note ? (ev ? '&' : '?') + 'n=' + encodeURIComponent(note).replace(/%20/g, '+') : ''));
     var f = window.MoonPhase ? window.MoonPhase.fraction(ms) : 0;
     var il = window.MoonPhase ? (window.MoonPhase.illumination(ms) * 100).toFixed(1) : '0.0';
     var nm = window.MoonPhase ? window.MoonPhase.name(f) : '';
@@ -350,6 +357,7 @@
       '<div class="mk-grid">' +
       '<div class="mk-main">' +
       (fresh ? '<div class="mk-l">JUST MARKED</div>' : '') +
+      (note ? '<blockquote class="mk-q">' + esc(note) + '</blockquote>' : '') +
       (ev ? '<div class="mk-cd" data-mk-cd><div class="mk-l" data-mk-cd-l>STARTS IN</div><div class="mk-cd-c" data-mk-cd-c></div></div>' +
         '<div class="mk-when"><span>YOUR LOCAL TIME</span><b>' + esc(local) + ' ' + esc(abbr) + '</b></div>' : '') +
       (rc && coa ? '<div data-mk-coa></div>' : '') +

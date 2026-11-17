@@ -19,7 +19,8 @@
   var text = function (k) { return k.y + '.' + p(k.m) + '.' + p(k.d) + ' ' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s); };
   var path = function (k) { return k.y + '.' + p(k.m) + '.' + p(k.d) + '-' + p(k.h) + '.' + p(k.mi) + '.' + p(k.s); };
   // A moment's link: the Moonmark, to the second, with an optional name. It opens in each person's own time.
-  function link(ms, name) { return 'https://moon369.org/m/' + path(moon(Math.floor(ms / 1000) * 1000 + 1)) + (name ? '?e=' + encodeURIComponent(name).replace(/%20/g, '+') : ''); }
+  // Events carry their name as e= (a title with a countdown); moments carry what's happening as n= (a note).
+  function link(ms, name, kind) { return 'https://moon369.org/m/' + path(moon(Math.floor(ms / 1000) * 1000 + 1)) + (name ? (kind === 'moment' ? '?n=' : '?e=') + encodeURIComponent(name).replace(/%20/g, '+') : ''); }
   function localStr(ms, opts) { try { return new Intl.DateTimeFormat(undefined, opts || { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(ms); } catch (e) { return new Date(ms).toString(); } }
   function buzz() { try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} }
   function toast(t) { var el = $('[data-app-toast]'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 2400); }
@@ -144,7 +145,7 @@
       signPhoto(cur.photo).then(function (s) {
         if (cur !== c0) return;
         cur.ms = Math.floor(s.ms / 1000) * 1000;
-        var url = s.url + (name ? '&e=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
+        var url = s.url + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
         if (cur.thumb) putThumb(s.sha, cur.thumb);
         try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
         finish(name, url, { ms: s.ms, name: name, url: url, sha: s.sha });
@@ -153,7 +154,7 @@
       }).then(function () { signing = false; btn.disabled = false; btn.textContent = 'MARK IT'; });
       return;
     }
-    finish(name, link(cur.ms, name), null);
+    finish(name, link(cur.ms, name, cur.kind === 'event' ? 'event' : 'moment'), null);
   }
   function finish(name, url, it) {
     it = it || { ms: cur.ms, name: name, url: url };
