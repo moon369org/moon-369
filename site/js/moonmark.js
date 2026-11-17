@@ -1,6 +1,7 @@
 /* Moonmark page: open, show and share one exact moment on the Moon engine. */
 (function () {
   var EPOCH = -62165308562978.61, K = 1.0403730490216803, SEC = 1000 * K;
+  var MMK = '<svg class="mmk" viewBox="0 0 40 40" aria-hidden="true"><path d="M9 33V7l11 13L31 7v26M9 17l11 13 11-13" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="bevel"/></svg>';
   var p = function (n, w) { return String(n).padStart(w || 2, '0'); };
   var firstDay = function (m) { return Math.ceil(m * 369 / 13); };
   function fromMs(ms, nsExtra) {
@@ -363,7 +364,7 @@
       (post && rc && !linkedFile() ? '<button type="button" class="mk-photo" data-mk-photo hidden aria-label="View the photo"></button>' : '') +
       (fresh ? '<div class="mk-l">JUST MARKED</div>' : '') +
       (note ? '<blockquote class="mk-q">' + esc(note) + '</blockquote>' : '') +
-      (post ? '<div class="mk-ts" translate="no"><b>' + text(mk) + nsGroups(mk.ns) + '</b><span>' + esc(stamp) + '</span></div>' : '') +
+      (post ? '<div class="mk-ts" translate="no"><b>' + MMK + text(mk) + nsGroups(mk.ns) + '</b><span>' + esc(stamp) + '</span></div>' : '') +
       (ev ? '<div class="mk-cd" data-mk-cd><div class="mk-l" data-mk-cd-l>STARTS IN</div><div class="mk-cd-c" data-mk-cd-c></div></div>' +
         '<div class="mk-when"><span>YOUR LOCAL TIME</span><b>' + esc(local) + ' ' + esc(abbr) + '</b></div>' : '') +
       (rc && coa ? '<div data-mk-coa></div>' : '') +
@@ -371,7 +372,7 @@
       (rc ? '<div data-mk-sig></div><div class="mk-rec" data-mk-rec></div>' : '') +
       '<div class="mk-date"><svg viewBox="-11 -11 22 22" class="mk-ph" role="img" aria-label="' + nm + '"><defs><clipPath id="mk-disc"><circle r="10"/></clipPath><filter id="mk-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="0.8"/></filter></defs><circle r="10" fill="#24262A"/><g clip-path="url(#mk-disc)"><path d="' + ph + '" fill="#E9E4D8" filter="url(#mk-soft)"/></g></svg>' +
       '<div class="mk-cells"><div><i>CYCLE</i><b>' + mk.y + '</b></div><div><i>MOON</i><b>' + p(mk.m) + '</b></div><div><i>LUNE</i><b>' + p(mk.d) + '</b></div></div></div>' +
-      '<div class="mk-mark" aria-label="Moonmark ' + text(mk) + '.' + p(mk.ns, 9) + '"><span>' + mk.y + '.' + p(mk.m) + '.' + p(mk.d) + '</span> <span>' + p(mk.h) + ':' + p(mk.mi) + ':' + p(mk.s) + '<span class="mk-ns">' + nsGroups(mk.ns) + '</span></span></div>' +
+      '<div class="mk-mark" aria-label="Moonmark ' + text(mk) + '.' + p(mk.ns, 9) + '">' + MMK + '<span>' + mk.y + '.' + p(mk.m) + '.' + p(mk.d) + '</span> <span>' + p(mk.h) + ':' + p(mk.mi) + ':' + p(mk.s) + '<span class="mk-ns">' + nsGroups(mk.ns) + '</span></span></div>' +
       '<div class="mk-rows">' +
       (ev ? '' : '<div><span>YOUR LOCAL CLOCK</span><b>' + local + ' ' + abbr + '</b></div>') +
       '<div><span>THE MOON THAT NIGHT</span><b>' + nm + ' · ' + il + '% lit<span class="mi"><button type="button" class="mi-b" aria-label="What the lit percentage means" aria-expanded="false" aria-describedby="mi-t3">i</button><span role="tooltip" id="mi-t3" class="mi-t">Share of the moon&#39;s face lit by the sun at this moment, as seen from Earth. Moon calculates it from the moon&#39;s real position (Meeus, Astronomical Algorithms) and checks it against PyEphem, a standard astronomy library: they agree within 0.05 percentage&nbsp;points.</span></span></b></div>' +

@@ -7,6 +7,7 @@
   // Reopened from history (Back from a moment): reload, since iOS Home Screen apps restored that way can stop showing the keyboard.
   window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
   var EPOCH = -62165308562978.61, K = 1.0403730490216803, SEC = 1000 * K;
+  var MMK = '<svg class="mmk" viewBox="0 0 40 40" aria-hidden="true"><path d="M9 33V7l11 13L31 7v26M9 17l11 13 11-13" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="bevel"/></svg>';
   var p = function (n, w) { return String(n).padStart(w || 2, '0'); };
   var firstDay = function (m) { return Math.ceil(m * 369 / 13); };
   var $ = function (s) { return document.querySelector(s); }, $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
@@ -60,7 +61,7 @@
     box.innerHTML = '<div class="rh"><span class="k"><span translate="no">MOONLOG</span><i class="rh-n"> | ' + (r.length === 1 ? T('1 MOMENT') : T('{n} MOMENTS', { n: r.length.toLocaleString(LOC) })) + '</i></span><button type="button" class="ed" data-m-edit>' + (editing ? 'DONE' : 'EDIT') + '</button></div>' +
       (editing ? '<div class="enote2">Removing a moment only clears it from this phone. The proof stays on Moon and its link still works.</div>' : '') +
       r.map(function (x, i) {
-        var row = '<a class="' + (x.sha ? 'ph' : '') + '" href="' + esc(x.url) + '"><span class="nm">' + (x.sha ? '<img alt="" data-thumb="' + esc(x.sha) + '">' : '') + '<span>' + esc(x.name || (x.sha ? 'A photo' : 'A moment')) + '</span></span><span>' + esc(text(moon(x.ms + 1))) + '</span></a>';
+        var row = '<a class="' + (x.sha ? 'ph' : '') + '" href="' + esc(x.url) + '"><span class="nm">' + (x.sha ? '<img alt="" data-thumb="' + esc(x.sha) + '">' : '') + '<span>' + esc(x.name || (x.sha ? 'A photo' : 'A moment')) + '</span></span><span>' + MMK + esc(text(moon(x.ms + 1))) + '</span></a>';
         return editing ? '<div class="mrow">' + row + '<button type="button" class="rm" data-m-rm="' + i + '" aria-label="Remove from this phone">✕</button></div>' : row;
       }).join('');
     $$('[data-thumb]').forEach(function (im) { getThumb(im.getAttribute('data-thumb')).then(function (b) { if (b) im.src = URL.createObjectURL(b); }); });
@@ -199,7 +200,7 @@
     $('[data-sheet-name]').classList.toggle('short', kind === 'event'); $('[data-sheet-name]').maxLength = kind === 'event' ? 80 : 280;
     $('[data-sheet-name]').value = name || ''; $('[data-sheet-name]').placeholder = kind === 'event' ? 'Name the event' : "What's happening? (optional)";
     if (kind === 'event') {
-      $('[data-sheet-mk]').textContent = 'Moonmark ' + text(moon(cur.ms + 1));
+      $('[data-sheet-mk]').textContent = text(moon(cur.ms + 1));
       $('[data-sheet-lt]').textContent = T('{t} your time.', { t: localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) });
     } else runClock();
     $('[data-sheet-close]').textContent = 'CANCEL';
@@ -268,7 +269,7 @@
     var rp = $('[data-ready-photo]'); if (made.photo && cur.thumb) { rp.src = URL.createObjectURL(cur.thumb); rp.hidden = false; } else rp.hidden = true;
     $('[data-ready-h]').textContent = cur.kind === 'event' ? 'YOUR EVENT IS READY' : 'YOUR MOMENT IS READY';
     $('[data-ready-name]').textContent = name;
-    $('[data-ready-mk]').textContent = 'Moonmark ' + made.mark;
+    $('[data-ready-mk]').textContent = made.mark;
     $('[data-ready-lt]').textContent = T('{t} your time.', { t: localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) });
     $('[data-ready-link]').value = url;
     var box = $('[data-sheet-qrbox]'); try { box.innerHTML = window.MoonQR.svg(url, window.MoonPhase.fraction(cur.ms)); box.hidden = false; } catch (e) { box.hidden = true; }

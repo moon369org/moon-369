@@ -14,6 +14,8 @@ html,body{touch-action:pan-x pan-y}
 html,body,*{scrollbar-width:none}::-webkit-scrollbar{display:none;width:0;height:0}
 /* A solid black strip behind the clock and battery. */
 body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#000;z-index:2147483646;pointer-events:none}
+/* The Moonmark mark: a double M in front of every Moonmark. */
+.mmk{display:inline-block;width:.95em;height:.95em;vertical-align:-.12em;margin-right:.45em;flex:none}
 </style>
 <meta name="description" content="Moon time and the live moon in your pocket. Mark any moment with one tap and send a link that opens in everyone's own time.">
 <link rel="canonical" href="https://moon369.org/app">
@@ -301,7 +303,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sheet-h">
     <div class="step" data-step="name">
       <h2 id="sheet-h" data-sheet-h>MARK THIS MOMENT</h2>
-      <div class="mk" data-sheet-mk></div>
+      <div class="mk"><svg class="mmk" viewBox="0 0 40 40" aria-hidden="true"><path d="M9 33V7l11 13L31 7v26M9 17l11 13 11-13" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="bevel"/></svg><span data-sheet-mk></span></div>
       <div class="lt" data-sheet-lt></div>
       <textarea rows="5" maxlength="280" placeholder="What's happening? (optional)" data-sheet-name aria-label="What's happening"></textarea>
       <label class="pick" data-sheet-pick><input type="file" accept="image/*" capture="environment" data-sheet-photo><span>+ TAKE A PHOTO · OPTIONAL</span></label>
@@ -313,7 +315,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
       <div class="ok"><span aria-hidden="true">✓</span><b data-ready-h>YOUR MOMENT IS READY</b></div>
       <img class="rph" data-ready-photo alt="The signed photo" hidden>
       <div class="rn" data-ready-name></div>
-      <div class="mk" data-ready-mk></div>
+      <div class="mk"><svg class="mmk" viewBox="0 0 40 40" aria-hidden="true"><path d="M9 33V7l11 13L31 7v26M9 17l11 13 11-13" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="bevel"/></svg><span data-ready-mk></span></div>
       <div class="lt" data-ready-lt></div>
       <div class="qr" data-sheet-qrbox></div>
       <input type="text" readonly class="lk" data-ready-link aria-label="Link">
