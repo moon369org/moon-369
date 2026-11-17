@@ -165,14 +165,10 @@
     cur.photo = file;
     thumbOf(file, 240).then(function (b) { cur.thumb = b; if (b) $('[data-sheet-pv-img]').src = URL.createObjectURL(b); });
     $('[data-sheet-pv]').hidden = false; $('[data-sheet-pick]').hidden = true; buzz();
-    // A photo moment is the instant Moon signs the photo: sign it now, and stop the clock on that exact time.
+    // Sign the photo now, as it's taken. The moment itself is still the tap of Mark It; the clock keeps running.
     if (cur.kind !== 'event') {
-      var c0 = cur; stopClock();
-      $('[data-sheet-mk]').textContent = T('Signing the photo…'); $('[data-sheet-lt]').textContent = '';
-      cur.sig = signPhoto(file).then(function (sg) {
-        if (cur === c0 && cur.photo === file) { stopClock(sg.ms); $('[data-sheet-lt]').textContent = T('{t} your time. Signed with the photo.', { t: localStr(sg.ms, { dateStyle: 'full', timeStyle: 'medium' }) }); }
-        return sg;
-      });
+      var c0 = cur;
+      cur.sig = signPhoto(file);
       cur.sig.catch(function (e) {
         if (cur !== c0 || cur.photo !== file) return;
         toast(navigator.onLine === false ? 'Signing a photo needs a connection' : (e && e.message) || 'Moon could not sign it. Try again.');
@@ -237,19 +233,20 @@
   function create() {
     var name = $('[data-sheet-name]').value.replace(/\s+/g, ' ').trim().slice(0, cur.kind === 'event' ? 80 : 280);
     if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return; }
-    if (cur.kind !== 'event' && !cur.photo) { if (signing) return; cur.ms = nowMs(); stopClock(cur.ms); }   // no photo: the moment is the tap of Mark It
+    if (cur.kind !== 'event') { if (signing) return; cur.ms = nowMs(); stopClock(cur.ms); }   // the moment is the tap of Mark It
     if (cur.kind !== 'event' && cur.photo) {
       if (signing) return; signing = true;
       var btn = $('[data-sheet-create]'); btn.textContent = 'SIGNING THE PHOTO…'; btn.disabled = true;
       var c0 = cur;
       (cur.sig || signPhoto(cur.photo)).then(function (s) {
         if (cur !== c0) return;
-        cur.ms = s.ms;
-        var url = s.url + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
+        // The link is the moment you tapped; v= carries the instant Moon signed the photo, which the proof checks.
+        var su = new URL(s.url), signedPath = su.pathname.replace(/^\/m\//, '');
+        var url = link(cur.ms, '', 'moment') + su.search + '&v=' + signedPath + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
         try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
         // Save the photo before opening the moment, so its page can show it at the top.
         return Promise.all([cur.thumb ? putThumb(s.sha, cur.thumb) : null, thumbOf(cur.photo, 1600).then(function (big) { return big ? putThumb('full:' + s.sha, big) : null; })]).then(function () {
-          if (cur === c0) finish(name, url, { ms: s.ms, name: name, url: url, sha: s.sha });
+          if (cur === c0) finish(name, url, { ms: cur.ms, name: name, url: url, sha: s.sha });
         });
       }).catch(function (e) {
         toast(navigator.onLine === false ? 'Signing a photo needs a connection' : (e && e.message) || 'Moon could not sign it. Try again.');

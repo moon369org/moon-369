@@ -31,6 +31,7 @@
     var q = new URLSearchParams(location.search);
     var s = (q.get('s') || '').toLowerCase(), u = q.get('u'), k = q.get('k'), g = q.get('g'), rd = q.get('r'), bs = (q.get('b') || '').toLowerCase();
     if (!/^[0-9a-f]{64}$/.test(s) || !/^-?\d+$/.test(u || '') || !/^[0-9a-f]{16}$/.test(k || '') || !/^[A-Za-z0-9_-]{40,120}$/.test(g || '')) return null;
+    var sm = q.get('v') ? parse(q.get('v')) : null; if (sm) mk = sm;   // v=: the photo was signed at its own instant, before the moment
     var rc = { receipt: 'moonmark-receipt/1', sha256: s, moonmark: text(mk) + '.' + p(mk.ns, 9), unix_ns: u, key_id: k };
     var hasB = /^\d{1,12}$/.test(rd || '') && /^[0-9a-f]{96}$/.test(bs), pqk = (q.get('q') || '').toLowerCase();
     if (hasB) { rc.receipt = 'moonmark-receipt/2'; rc.beacon = { network: 'drand-quicknet', round: Number(rd), signature: bs }; }
@@ -424,6 +425,7 @@
     if (post) postBar(url, qr, markNow);
   }
   // Under a moment, the detail stays folded: a title and a one-line summary per part, open on tap.
+  var T2 = function (x, v) { x = window.MoonT ? window.MoonT(x, v) : x; return x.replace(/\{(\w+)\}/g, function (m, k) { return v[k]; }); };
   function fold(root, rc, nm, il, ms) {
     var main = root.querySelector('.mk-main'), ts = main.querySelector('.mk-ts'); if (!main || !ts) return;
     var k = window.MoonPhase && window.MoonPhase.sky ? window.MoonPhase.sky(ms) : null;
@@ -439,7 +441,7 @@
     var q = function (sel) { return main.querySelector(sel); };
     if (rc) {
       var pd = part('PROOF', 'Checking the signature…', [q('[data-mk-sig]')]);
-      verifyEarly(rc).then(function (v) { pd.querySelector('[data-fd-sub]').textContent = v && v.valid ? '✓ Signed and verified on Moon' : 'The signature does not check out'; }, function () { pd.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
+      verifyEarly(rc).then(function (v) { pd.querySelector('[data-fd-sub]').textContent = v && v.valid ? (new URLSearchParams(location.search).get('v') ? T2('✓ Photo signed on Moon {s} s before this moment', { s: Math.max(0, (ms - Number(BigInt(rc.unix_ns) / 1000000n)) / 1000).toFixed(1) }) : '✓ Signed and verified on Moon') : 'The signature does not check out'; }, function () { pd.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
     }
     // The same living moon as the app, as it was at this moment.
     var st = document.createElement('div'); st.className = 'mk-stage';
