@@ -47,7 +47,70 @@ export async function safeUrl(raw: string, lookup: Lookup = defaultLookup): Prom
   return u;
 }
 
-export interface FileCheck { match: boolean; sha256: string; bytes: number; content_type: string | null; image: boolean; final_url: string }
+/** Clues that a file existed before it was signed: dates written inside it, the host's own date, a public library. */
+export interface Provenance { created: { date: string; source: 'exif' | 'xmp' | 'png' } | null; last_modified: string | null; library: string | null }
+export interface FileCheck { match: boolean; sha256: string; bytes: number; content_type: string | null; image: boolean; final_url: string; provenance: Provenance }
+
+/** Public image libraries and archives: a file hosted there is very unlikely to be the signer's own original. */
+export const LIBRARIES: [RegExp, string][] = [
+  [/(^|\.)(wikimedia|wikipedia)\.org$/, 'Wikimedia Commons'], [/(^|\.)unsplash\.com$/, 'Unsplash'], [/(^|\.)pexels\.com$/, 'Pexels'],
+  [/(^|\.)pixabay\.com$/, 'Pixabay'], [/(^|\.)(flickr\.com|staticflickr\.com)$/, 'Flickr'], [/(^|\.)(gettyimages|istockphoto)\.[a-z.]+$/, 'Getty Images'],
+  [/(^|\.)shutterstock\.com$/, 'Shutterstock'], [/(^|\.)alamy\.com$/, 'Alamy'], [/(^|\.)adobestock\.com$|(^|\.)stock\.adobe\.com$|(^|\.)ftcdn\.net$/, 'Adobe Stock'],
+  [/(^|\.)nasa\.gov$/, 'NASA'], [/(^|\.)archive\.org$/, 'the Internet Archive'], [/(^|\.)(pinimg\.com|pinterest\.[a-z.]+)$/, 'Pinterest'],
+  [/(^|\.)(googleusercontent|gstatic)\.com$/, 'Google image search'], [/(^|\.)(dreamstime|depositphotos|123rf|freepik|vecteezy)\.com$/, 'a stock library'],
+];
+export const libraryOf = (host: string): string | null => { const h = host.toLowerCase(); for (const [re, name] of LIBRARIES) if (re.test(h)) return name; return null; };
+
+const exifDate = (s: string): string | null => {
+  const m = /^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/.exec(s.trim());
+  if (!m || +m[1] < 1826 || m[1] === '0000') return null;
+  const d = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+  return Number.isFinite(d) ? new Date(d).toISOString() : null;
+};
+/** Read DateTimeOriginal (or DateTime) from a TIFF/EXIF block. */
+function tiffDate(b: Uint8Array, base: number): string | null {
+  if (base + 8 > b.length) return null;
+  const le = b[base] === 0x49, u16 = (o: number) => le ? b[o] | (b[o + 1] << 8) : (b[o] << 8) | b[o + 1];
+  const u32 = (o: number) => (le ? (b[o] | (b[o + 1] << 8) | (b[o + 2] << 16) | (b[o + 3] << 24)) : ((b[o] << 24) | (b[o + 1] << 16) | (b[o + 2] << 8) | b[o + 3])) >>> 0;
+  const ascii = (o: number, n: number) => { const off = n > 4 ? base + u32(o) : o; return off + n <= b.length ? String.fromCharCode(...b.subarray(off, off + n)).replace(/\0+$/, '') : ''; };
+  const found: Record<number, string> = {};
+  const walk = (ifd: number, depth: number) => {
+    const at = base + ifd; if (depth > 2 || at + 2 > b.length) return;
+    const n = u16(at);
+    for (let i = 0; i < n && at + 2 + i * 12 + 12 <= b.length; i++) {
+      const e = at + 2 + i * 12, tag = u16(e), cnt = u32(e + 4);
+      if ((tag === 0x9003 || tag === 0x9004 || tag === 0x0132) && cnt < 64) found[tag] = ascii(e + 8, cnt);
+      if (tag === 0x8769) walk(u32(e + 8), depth + 1);
+    }
+  };
+  walk(u32(base + 4), 0);
+  return exifDate(found[0x9003] || found[0x9004] || found[0x0132] || '');
+}
+/** The creation date written inside an image, if any: EXIF (JPEG, PNG eXIf), XMP, or PNG tIME. */
+export function embeddedDate(b: Uint8Array): Provenance['created'] {
+  if (b[0] === 0xff && b[1] === 0xd8) {
+    for (let i = 2; i + 4 < b.length;) {
+      if (b[i] !== 0xff) break;
+      const mk = b[i + 1], len = (b[i + 2] << 8) | b[i + 3];
+      if (mk === 0xe1 && String.fromCharCode(...b.subarray(i + 4, i + 10)) === 'Exif\0\0') { const d = tiffDate(b, i + 10); if (d) return { date: d, source: 'exif' }; }
+      if (mk === 0xda) break;
+      i += 2 + len;
+    }
+  }
+  if (b[0] === 0x89 && b[1] === 0x50) {
+    for (let i = 8; i + 12 <= b.length;) {
+      const len = ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0, type = String.fromCharCode(...b.subarray(i + 4, i + 8));
+      if (type === 'eXIf') { const d = tiffDate(b, i + 8); if (d) return { date: d, source: 'exif' }; }
+      if (type === 'tIME' && len === 7) { const o = i + 8; return { date: new Date(Date.UTC((b[o] << 8) | b[o + 1], b[o + 2] - 1, b[o + 3], b[o + 4], b[o + 5], b[o + 6])).toISOString(), source: 'png' }; }
+      if (type === 'IEND') break;
+      i += 12 + len;
+    }
+  }
+  const text = new TextDecoder('latin1').decode(b.subarray(0, Math.min(b.length, 512 * 1024)));
+  const x = /(?:xmp:CreateDate|photoshop:DateCreated|exif:DateTimeOriginal)(?:="|>)(\d{4}-\d{2}-\d{2}(?:T[\d:.]+(?:Z|[+-]\d{2}:?\d{2})?)?)/.exec(text);
+  if (x) { const d = Date.parse(x[1]); if (Number.isFinite(d)) return { date: new Date(d).toISOString(), source: 'xmp' }; }
+  return null;
+}
 
 export async function checkLinkedFile(raw: string, want: string, opts: { fetch?: typeof fetch; lookup?: Lookup; timeoutMs?: number } = {}): Promise<FileCheck> {
   const f = opts.fetch ?? fetch, deadline = AbortSignal.timeout(opts.timeoutMs ?? 12_000);
@@ -65,15 +128,19 @@ export async function checkLinkedFile(raw: string, want: string, opts: { fetch?:
   if (!r || !r.ok || !r.body) throw new FileCheckError('unreachable', `The link answered ${r?.status ?? 'nothing'}`);
   const len = Number(r.headers.get('content-length') || 0);
   if (len > FILE_CHECK_MAX) throw new FileCheckError('too_large', 'Files over 25 MB are not checked');
-  const h = createHash('sha256'), reader = r.body.getReader();
-  let n = 0;
+  const h = createHash('sha256'), reader = r.body.getReader(), head: Uint8Array[] = [];
+  let n = 0, kept = 0;
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
     n += value.byteLength;
     if (n > FILE_CHECK_MAX) { await reader.cancel().catch(() => {}); throw new FileCheckError('too_large', 'Files over 25 MB are not checked'); }
     h.update(value);
+    if (kept < 1024 * 1024) { head.push(value); kept += value.byteLength; }
   }
+  const first = new Uint8Array(kept); { let o = 0; for (const c of head) { first.set(c, o); o += c.byteLength; } }
+  const lm = Date.parse(r.headers.get('last-modified') || '');
+  const provenance: Provenance = { created: embeddedDate(first), last_modified: Number.isFinite(lm) ? new Date(lm).toISOString() : null, library: libraryOf(new URL(raw).hostname) || libraryOf(u.hostname) };
   const sha = h.digest('hex'), ct = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase() || null;
-  return { match: sha === want, sha256: sha, bytes: n, content_type: ct, image: !!ct && /^image\/(png|jpeg|gif|webp|avif|svg\+xml)$/.test(ct), final_url: u.toString() };
+  return { match: sha === want, sha256: sha, bytes: n, content_type: ct, image: !!ct && /^image\/(png|jpeg|gif|webp|avif|svg\+xml)$/.test(ct), final_url: u.toString(), provenance };
 }

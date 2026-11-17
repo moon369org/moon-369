@@ -141,7 +141,19 @@
         .then(function (d) { return { match: mine(hex(d)) }; })
         .catch(function () { return fetch(API + '/v1/file-check?url=' + encodeURIComponent(v) + '&sha256=' + L.sha).then(function (r) { return r.json(); }); })
         .then(function (c) {
-          if (c && c.match) { L.fileUrl = v; L.url = L.base + '&f=' + encodeURIComponent(v); L.whereMsg = '<span class="ok">✓ That is the exact file. The link above now shows it on the Moonmark, verified.</span>'; show(); return; }
+          if (c && c.match) {
+            L.fileUrl = v; L.url = L.base + '&f=' + encodeURIComponent(v);
+            // Same clues the Moonmark uses: a public library, or dates more than 30 days before signing.
+            return fetch(API + '/v1/file-check?url=' + encodeURIComponent(v) + '&sha256=' + L.sha).then(function (r) { return r.json(); }).catch(function () { return {}; }).then(function (k) {
+              var pv = k.provenance || {}, cut = Number(BigInt(L.rc.unix_ns) / 1000000n) - 30 * 864e5, why = [];
+              if (pv.library) why.push('it is hosted on ' + pv.library);
+              if (pv.created && Date.parse(pv.created.date) < cut) why.push('the date inside the file is ' + pv.created.date.slice(0, 10));
+              if (pv.last_modified && Date.parse(pv.last_modified) < cut) why.push('the site has had it since ' + pv.last_modified.slice(0, 10));
+              L.whereMsg = why.length ? '<span class="warn">Added, but the Moonmark will say NOT PROVEN ORIGINAL: ' + esc(why.join(', and ')) + '. Moon proves when a file existed, not who made it.</span>'
+                : '<span class="ok">✓ That is the exact file. The link above now shows it on the Moonmark, verified.</span>';
+              show();
+            });
+          }
           m.className = 'sg-where-m bad';
           m.textContent = c && c.error ? c.error.message + '.' : 'The file at that link is not the exact file you signed. Sites like Instagram and X re-compress images, so link the original (your site, Dropbox, IPFS).';
         }).catch(function () { m.className = 'sg-where-m bad'; m.textContent = 'Could not check that link. Try again.'; });

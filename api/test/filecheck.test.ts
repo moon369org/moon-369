@@ -39,3 +39,24 @@ describe('linked file check', () => {
     expect(FILE_CHECK_MAX).toBe(25 * 1024 * 1024);
   });
 });
+
+import { readFileSync } from 'node:fs';
+import { embeddedDate, libraryOf } from '../src/filecheck';
+describe('provenance clues', () => {
+  it('reads the camera date inside a JPEG', () => {
+    expect(embeddedDate(new Uint8Array(readFileSync(new URL('./fixtures/exif-2010.jpg', import.meta.url))))).toEqual({ date: '2010-12-21T08:17:00.000Z', source: 'exif' });
+    expect(embeddedDate(new Uint8Array(readFileSync(new URL('./fixtures/no-exif.jpg', import.meta.url))))).toBeNull();
+  });
+  it('reads XMP dates and spots public libraries', () => {
+    expect(embeddedDate(new TextEncoder().encode('<x xmp:CreateDate="2019-05-04T10:00:00Z"/>'))?.date).toBe('2019-05-04T10:00:00.000Z');
+    expect(libraryOf('upload.wikimedia.org')).toBe('Wikimedia Commons');
+    expect(libraryOf('thumb.wikimedia.org')).toBe('Wikimedia Commons');
+    expect(libraryOf('images.unsplash.com')).toBe('Unsplash');
+    expect(libraryOf('my-portfolio.com')).toBeNull();
+  });
+  it('returns the host date and library with the check', async () => {
+    const f = serve({ 'https://upload.wikimedia.org/a.png': () => new Response(png, { headers: { 'content-type': 'image/png', 'last-modified': 'Tue, 21 Dec 2010 08:17:00 GMT' } }) });
+    const c = await checkLinkedFile('https://upload.wikimedia.org/a.png', sha(png), { fetch: f, lookup: pub });
+    expect(c.provenance).toEqual({ created: null, last_modified: '2010-12-21T08:17:00.000Z', library: 'Wikimedia Commons' });
+  });
+});

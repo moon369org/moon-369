@@ -222,48 +222,82 @@
   // proven to be the one Moon signed: checked in this browser when the site allows, otherwise by Moon.
   function linkedFile() { var f = new URLSearchParams(location.search).get('f') || ''; return /^https:\/\/\S+$/i.test(f) && f.length <= 1500 ? f : ''; }
   var MOON_ICON = '<svg viewBox="-80 -52 160 104" aria-hidden="true"><circle cx="-30" cy="0" r="46" fill="none" stroke="currentColor" stroke-width="10"/><circle cx="30" cy="0" r="46" fill="none" stroke="#0B0B0D" stroke-width="22"/><circle cx="30" cy="0" r="46" fill="none" stroke="currentColor" stroke-width="10"/><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.8" fill="none" stroke="#0B0B0D" stroke-width="22"/><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.8" fill="none" stroke="currentColor" stroke-width="10"/></svg>';
+  // Moon proves a file existed by a moment, not that it is new or the signer's own. So before calling a
+  // linked file original, look for clues it existed earlier: dates inside it, the host's own date, a public
+  // image library, or an earlier signing of it (or a look-alike) on Moon. Any clue more than 30 days before
+  // the signing turns the badge into a warning.
+  var EARLIER_MS = 30 * 864e5;
+  function day(iso) { try { return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); } catch (e) { return String(iso).slice(0, 10); } }
+  function yearsBefore(ms, signedMs) { var d = (signedMs - ms) / 864e5; return d >= 730 ? Math.floor(d / 365.25) + ' years' : d >= 60 ? Math.floor(d / 30.44) + ' months' : Math.floor(d) + ' days'; }
+  function priorOnMoon(rc) {
+    var api = 'https://api.moon369.org', mine = BigInt(rc.unix_ns);
+    return fetch(api + '/v1/lookup/' + rc.sha256).then(function (r) { return r.ok ? r.json() : null; }).then(function (l) {
+      var out = [], regs = (l && l.registrations) || [], self = regs.find(function (x) { return x.statement && x.statement.unix_ns === rc.unix_ns; });
+      var first = regs[0];
+      if (first && BigInt(first.statement.unix_ns) < mine) out.push({ ms: Date.parse(first.utc), text: 'This exact file was first signed on Moon on ' + day(first.utc) + (first.registrant_verified ? ' by ' + esc(first.registrant) : '') + '.' });
+      var ph = self && self.statement.phash;
+      if (!ph) return out;
+      return fetch(api + '/v1/lookup/similar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phash: ph }) }).then(function (r) { return r.ok ? r.json() : null; }).then(function (sm) {
+        var e = ((sm && sm.matches) || []).filter(function (m) { return m.sha256 !== rc.sha256 && BigInt(m.first.statement.unix_ns) < mine; })[0];
+        if (e) out.push({ ms: Date.parse(e.first.utc), text: 'A look-alike of this image was signed on Moon on ' + day(e.first.utc) + '.' });
+        return out;
+      });
+    }).catch(function () { return []; });
+  }
   function artBox(root, rc, f) {
     var box = root.querySelector('[data-mk-art]'); if (!box) return;
     var host = ''; try { host = new URL(f).hostname.replace(/^www\./, ''); } catch (e) {}
-    var mark = rc.moonmark.slice(0, 19);
+    var mark = rc.moonmark.slice(0, 19), signedMs = Number(BigInt(rc.unix_ns) / 1000000n);
     box.innerHTML = '<div class="mk-art-wait">Checking the linked file from ' + esc(host) + '…</div>';
     var hexOf = function (d) { return Array.from(new Uint8Array(d), function (x) { return x.toString(16).padStart(2, '0'); }).join(''); };
     var looksImage = /\.(png|jpe?g|gif|webp|avif|svg)(\?|#|$)/i.test(f);
-    fetch(f, { mode: 'cors' }).then(function (r) { if (!r.ok) throw 0; return r.blob(); }).then(function (b) {
-      return b.arrayBuffer().then(function (ab) { return crypto.subtle.digest('SHA-256', ab); }).then(function (d) {
+    var inBrowser = fetch(f, { mode: 'cors' }).then(function (r) {
+      if (!r.ok) throw 0; var lm = r.headers.get('last-modified');
+      return r.blob().then(function (b) { return b.arrayBuffer().then(function (ab) { return crypto.subtle.digest('SHA-256', ab); }).then(function (d) {
         // Checked here: show these exact bytes, so what you see is what was verified.
-        return { match: hexOf(d) === rc.sha256, image: /^image\//.test(b.type) || looksImage, src: URL.createObjectURL(b), by: 'your browser' };
-      });
-    }).catch(function () {
-      return fetch('https://api.moon369.org/v1/file-check?url=' + encodeURIComponent(f) + '&sha256=' + rc.sha256).then(function (r) { return r.json(); })
-        .then(function (c) { return { match: !!c.match, image: !!c.image || (c.match && looksImage), src: f, by: 'Moon', error: c.error }; });
-    }).then(function (c) {
-      // The badge also needs Moon's signature on this link to check out.
-      return verifyEarly(rc).then(function (v) { c.signed = !!(v && v.valid); return c; }, function () { c.signed = false; return c; });
-    }).then(function (c) {
-      if (c.match && !c.signed) { box.className = 'mk-art mk-art-bad'; box.innerHTML = '<div class="mk-sig-h">NOT VERIFIED</div><div class="mk-sig-p">The linked file matches the fingerprint in this link, but the signature below does not check out, so neither is proven.</div>'; return; }
+        return { match: hexOf(d) === rc.sha256, image: /^image\//.test(b.type) || looksImage, src: URL.createObjectURL(b), lm: lm };
+      }); });
+    }).catch(function () { return null; });
+    var byMoon = fetch('https://api.moon369.org/v1/file-check?url=' + encodeURIComponent(f) + '&sha256=' + rc.sha256).then(function (r) { return r.json(); }).catch(function () { return null; });
+    var signed = verifyEarly(rc).then(function (v) { return !!(v && v.valid); }, function () { return false; });
+    Promise.all([inBrowser, byMoon, signed, priorOnMoon(rc)]).then(function (a) {
+      var br = a[0], api = a[1] || {}, ok = a[2], prior = a[3];
+      var c = br ? { match: br.match, image: br.image, src: br.src, by: 'your browser' } : { match: !!api.match, image: !!api.image || (api.match && looksImage), src: f, by: 'Moon', error: api.error };
+      if (c.match && !ok) { box.className = 'mk-art mk-art-bad'; box.innerHTML = '<div class="mk-sig-h">NOT VERIFIED</div><div class="mk-sig-p">The linked file matches the fingerprint in this link, but the signature below does not check out, so neither is proven.</div>'; return; }
       if (!c.match) {
         box.className = 'mk-art mk-art-bad';
         box.innerHTML = '<div class="mk-sig-h">THE LINKED FILE DOES NOT MATCH</div><div class="mk-sig-p">This Moonmark links to a file on ' + esc(host) + ', but ' +
           (c.error ? 'it could not be checked (' + esc(c.error.message) + ').' : 'it is not the file Moon signed. It may have been changed or re-compressed.') + ' Only the signature below is proven.</div>';
         return;
       }
-      var badge = '<span class="mk-art-badge">' + MOON_ICON + '<b>VERIFIED</b></span>';
+      // Clues the file existed well before it was signed.
+      var pv = api.provenance || {}, clues = [];
+      if (pv.library) clues.push('It is hosted on ' + esc(pv.library) + ', a public image library, so it may not be the signer&#39;s own work.');
+      if (pv.created && Date.parse(pv.created.date) < signedMs - EARLIER_MS) clues.push('The ' + (pv.created.source === 'exif' ? 'camera' : 'creation') + ' date inside the file is ' + day(pv.created.date) + ', ' + yearsBefore(Date.parse(pv.created.date), signedMs) + ' before it was signed.');
+      var lm = pv.last_modified || (br && br.lm ? new Date(br.lm).toISOString() : null);
+      if (lm && Date.parse(lm) < signedMs - EARLIER_MS) clues.push(esc(host) + ' has had this file since at least ' + day(lm) + ', ' + yearsBefore(Date.parse(lm), signedMs) + ' before it was signed.');
+      prior.forEach(function (p) { if (p.ms < signedMs - 60000) clues.push(p.text); });
+      var warn = clues.length > 0;
+      var badge = '<span class="mk-art-badge' + (warn ? ' warn' : '') + '">' + MOON_ICON + '<b>' + (warn ? 'NOT PROVEN ORIGINAL' : 'VERIFIED') + '</b></span>';
+      var cap = warn
+        ? '<b>NOT PROVEN ORIGINAL</b><span>This is the exact file Moon signed at ' + esc(mark) + ', but it looks older than that, so Moon cannot verify it as the signer&#39;s original:</span><ul class="mk-art-clues">' + clues.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>'
+        : '<b>THE SIGNED FILE</b><span>This exact file existed by ' + esc(mark) + '. Fetched from ' + esc(host) + ' and checked by ' + c.by + '. Moon found no sign of it earlier, though a signature can&#39;t prove who made it.</span>';
+      box.className = 'mk-art' + (warn ? ' mk-art-warn' : '');
       box.innerHTML = (c.image
-        ? '<button type="button" class="mk-art-thumb" data-mk-art-open aria-label="View the verified file"><img src="' + esc(c.src) + '" alt="The signed file" referrerpolicy="no-referrer">' + badge + '</button>'
+        ? '<button type="button" class="mk-art-thumb" data-mk-art-open aria-label="View the signed file"><img src="' + esc(c.src) + '" alt="The signed file" referrerpolicy="no-referrer">' + badge + '</button>'
         : '<div class="mk-art-file">' + badge + '</div>') +
-        '<div class="mk-art-cap"><b>THE SIGNED FILE</b><span>Exactly the file Moon signed at ' + esc(mark) + ', fetched from ' + esc(host) + ' and checked by ' + c.by + '.</span>' +
-        '<a href="' + esc(f) + '" target="_blank" rel="noopener nofollow">OPEN ORIGINAL ↗</a></div>';
+        '<div class="mk-art-cap">' + cap + '<a href="' + esc(f) + '" target="_blank" rel="noopener nofollow">OPEN ORIGINAL ↗</a></div>';
       var open = box.querySelector('[data-mk-art-open]');
-      if (open) open.onclick = function () { lightbox(c.src, f, host, mark); };
+      if (open) open.onclick = function () { lightbox(c.src, f, host, mark, warn); };
     }).catch(function () { box.innerHTML = '<div class="mk-art-wait">Could not check the linked file. Try again in a moment.</div>'; });
   }
-  function lightbox(src, f, host, mark) {
+  function lightbox(src, f, host, mark, warn) {
     var lb = document.createElement('div'), prev = document.activeElement;
     lb.className = 'mk-lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'Verified file');
     lb.innerHTML = '<div class="mk-lb-top"><span class="mk-lb-moon">' + MOON_ICON + '</span><button type="button" class="mk-lb-x" aria-label="Close">✕</button></div>' +
       '<div class="mk-lb-img"><img src="' + esc(src) + '" alt="The signed file" referrerpolicy="no-referrer"></div>' +
-      '<div class="mk-lb-bar"><span class="mk-lb-v">' + TICK + 'SIGNED · VERIFIED</span><span class="mk-lb-t">The exact file Moon signed at ' + esc(mark) + '. From ' + esc(host) + '.</span>' +
+      '<div class="mk-lb-bar">' + (warn ? '<span class="mk-lb-v warn">SIGNED · NOT PROVEN ORIGINAL</span><span class="mk-lb-t">The exact file Moon signed at ' + esc(mark) + ', but it looks older than that. From ' + esc(host) + '.</span>'
+        : '<span class="mk-lb-v">' + TICK + 'SIGNED · VERIFIED</span><span class="mk-lb-t">This exact file existed by ' + esc(mark) + '. From ' + esc(host) + '.</span>') +
       '<a href="' + esc(f) + '" target="_blank" rel="noopener nofollow">OPEN ORIGINAL ↗</a></div>';
     var close = function () { document.removeEventListener('keydown', key); lb.remove(); document.documentElement.style.overflow = ''; if (prev && prev.focus) prev.focus(); };
     var key = function (e) { if (e.key === 'Escape') close(); };
