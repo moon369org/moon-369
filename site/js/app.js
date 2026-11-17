@@ -112,7 +112,7 @@
     var newest = STARS.list.reduce(function (m, s) { return s.ms > m.ms ? s : m; }, STARS.list[0]), age = (now - STARS.born) / 1000;
     STARS.list.forEach(function (s) {
       var x = s.x, y = s.y;
-      var tw = (still ? 0.85 : 0.72 + 0.28 * Math.sin(t * s.sp + s.ph)) * (s.lum || 1), size = s.size * dpr * 1.9;
+      var tw = (still ? 0.85 : 0.72 + 0.28 * Math.sin(t * s.sp + s.ph)) * (s.lum || 1), size = s.size * dpr * 1.15;
       if (s === newest && STARS.born && age < 2.5) { var k = 1 - age / 2.5; size *= 1 + 2.2 * k; tw = Math.min(1, tw + k); }
       var g = c.createRadialGradient(x, y, 0, x, y, size * 4);
       g.addColorStop(0, 'rgba(233,228,216,' + (0.9 * tw) + ')'); g.addColorStop(0.25, 'rgba(233,228,216,' + (0.35 * tw) + ')'); g.addColorStop(1, 'rgba(233,228,216,0)');
