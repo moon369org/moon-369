@@ -179,7 +179,7 @@
   function step(which) { $$('[data-step]').forEach(function (s) { s.hidden = s.getAttribute('data-step') !== which; }); }
   function openSheet(kind, ms, name) {
     cur = { ms: Math.floor(ms / 1000) * 1000, kind: kind }; made = null;
-    $('[data-sheet-h]').textContent = kind === 'event' ? 'NEW EVENT' : 'SHARE THIS MOMENT';
+    $('[data-sheet-h]').textContent = kind === 'event' ? 'NEW EVENT' : 'MARK THIS MOMENT';
     $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'MARK IT';
     $('[data-sheet-name]').classList.toggle('short', kind === 'event'); $('[data-sheet-name]').maxLength = kind === 'event' ? 80 : 280;
     $('[data-sheet-name]').value = name || ''; $('[data-sheet-name]').placeholder = kind === 'event' ? 'Name the event' : "What's happening? (optional)";
