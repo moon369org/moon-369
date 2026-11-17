@@ -52,7 +52,7 @@
   function openSheet(kind, ms, name) {
     cur = { ms: Math.floor(ms / 1000) * 1000, kind: kind }; made = null;
     $('[data-sheet-h]').textContent = kind === 'event' ? 'NEW EVENT' : 'SHARE THIS MOMENT';
-    $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'CREATE MOMENT';
+    $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'MARK IT';
     $('[data-sheet-name]').value = name || ''; $('[data-sheet-name]').placeholder = kind === 'event' ? 'Name the event' : "What's happening? (optional)";
     $('[data-sheet-mk]').textContent = 'Moonmark ' + text(moon(cur.ms + 1));
     $('[data-sheet-lt]').textContent = localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) + ' your time.';
