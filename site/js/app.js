@@ -76,7 +76,7 @@
     STARS.list = r.map(function (x) {
       // A spot in the band beside the moon (in moon widths from its centre), never on the moon or the words.
       var g = seeded((x.ms / 1000) | 0), px = 0, py = 0;
-      for (var i = 0; i < 40; i++) { px = (g() * 2 - 1) * 1.08; py = (g() * 2 - 1) * 0.56; if (Math.sqrt(px * px + py * py) > 0.6) break; }
+      for (var i = 0; i < 40; i++) { px = (g() * 2 - 1) * 1.08; py = (g() * 2 - 1) * 0.56; if (Math.sqrt(px * px + py * py) > 0.64) break; }
       return { px: px, py: py, size: (x.sha ? 1.25 : 1) * (0.7 + g() * 0.9), sp: 0.6 + g() * 1.4, ph: g() * 6.28, ms: x.ms };
     });
     if (STARS.list.length > prev && prev) STARS.born = performance.now();
