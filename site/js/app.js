@@ -189,7 +189,7 @@
     clearPhoto(); $('[data-ready-photo]').hidden = true;
     $('[data-first-star]').hidden = kind === 'event' || store('moonMoments').length > 0;
     step('name'); $('[data-app-sheet]').hidden = false; buzz();
-    if (kind === 'event' && name) create(); else setTimeout(function () { $('[data-sheet-name]').focus(); }, 60);
+    if (kind === 'event' && name) create(); else if (window.matchMedia && matchMedia('(pointer: fine)').matches) setTimeout(function () { $('[data-sheet-name]').focus(); }, 60);   // on phones, focus by script leaves iOS with no keyboard
   }
   function closeSheet() { $('[data-app-sheet]').hidden = true; }
   var signing = false;
