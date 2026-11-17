@@ -56,9 +56,11 @@ Field names to rely on: `moonmark`, `moonmark_url`, `moon_image`, `phase.name`, 
 
 ## Moments
 
-- The Moon app: https://moon369.org/app (installable, works offline). Live Moon time and moon, "Mark this moment" and event links.
+- The Moon app: https://moon369.org/app (installable, works offline). Now (live Moon time and moon, share this moment), Nights (the moon on any date, saved on the phone) and Events (one link for every time zone, QR, countdown embed).
 - A moment's link: `https://moon369.org/m/<moonmark>?e=<name>` opens in each person's own local time, with a countdown or time since, a QR code and Add to calendar. Its share image: `https://api.moon369.org/v1/card.png?moonmark=<moonmark>&event=<name>`.
 - Your Moon: https://moon369.org/night shows the moon on any date (a birthday, a wedding) with share cards and embed code.
+- Widgets (from https://moon369.org/embed/moon.js): `<div data-moon-night="1969-07-20" data-time="2017" data-for="born">` (that night's card, linked to Your Moon), `<moon-moment mark="1928.05.12-15.00.00" name="Launch">` (a small moon and Moonmark that opens the full card in the reader's time), `<moon-clock>` and `<moon-live>`. A countdown: `<div data-moon-countdown="<moonmark>" data-name="...">` with https://moon369.org/embed/countdown.js. Every widget links back to Moon.
+- `/v1/card.svg` options: `theme=light`, `mark=on` (show the Moonmark), `tz=<IANA zone>` (show that zone's local time). `/v1/card.png` with `event` or `qr=1` carries a QR code.
 
 ## Signing tools
 

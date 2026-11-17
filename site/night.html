@@ -136,6 +136,7 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 @media (max-width:720px){.nt-form{padding:22px;gap:22px}.nt-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.nt-row .nt-btn{grid-column:1/-1}.nt-chip{padding:0 14px;font-size:9.5px}.nt-grid>div{padding:14px 12px}.nt-share .nt-btn{flex:1 1 calc(50% - 5px)}
 [style*="padding: 100px 32px 56px"]{padding:56px 20px 32px!important}[style*="padding: 0 32px 120px"]{padding:0 20px 80px!important}}
 ::selection{background:#24262A}::-moz-selection{background:#24262A}
+.nt-cap{display:block;width:100%;max-width:560px;margin-top:14px;min-height:48px;box-sizing:border-box;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:14px Inter,sans-serif;padding:0 14px}.nt-cap:focus{outline:none;border-color:#8A8B8F}
 </style>
 
 <script src="js/preact.umd.js" defer></script>
@@ -235,7 +236,7 @@ footer > div > div:first-child svg{width:64px!important}
 <button type="button" class="nt-chip" data-for="wed" aria-pressed="false">OUR WEDDING</button>
 <button type="button" class="nt-chip" data-for="kid" aria-pressed="false">MY CHILD WAS BORN</button>
 <button type="button" class="nt-chip" data-for="day" aria-pressed="false">ANY DAY</button>
-</div></div>
+</div><input type="text" class="nt-cap" data-nt-caption="" maxlength="44" placeholder="Or your own words: The night it all began" aria-label="Your own headline (optional)"></div>
 <div class="nt-row">
 <label class="nt-field"><span class="nt-k">DATE</span><input class="nt-in" type="date" name="d" min="1000-01-01" max="2999-12-31"></label>
 <label class="nt-field"><span class="nt-k">TIME <span style="color: rgb(85, 86, 91);">· OPTIONAL</span></span><input class="nt-in" type="time" name="t"></label>
@@ -287,7 +288,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="nt-again" data-nt-again="" data-off="">
 <div class="nt-k">NOW TRY ANOTHER</div>
 <p class="nt-note" style="max-width: 560px;">Your parents' wedding. Your first kiss. The day your dog came home. Every moment had a moon.</p>
-<button type="button" class="nt-btn o" data-nt-reset="">PICK ANOTHER DATE</button>
+<div style="display: flex; flex-wrap: wrap; gap: 12px;"><button type="button" class="nt-btn o" data-nt-reset="">PICK ANOTHER DATE</button><a class="nt-btn o" href="/app#nights" style="text-decoration: none;">KEEP THEM IN THE MOON APP</a></div>
 </div>
 </div>
 </div>
@@ -353,7 +354,7 @@ footer > div > div:first-child svg{width:64px!important}
 <button type="button" class="nt-chip" data-for="wed" aria-pressed="false">OUR WEDDING</button>
 <button type="button" class="nt-chip" data-for="kid" aria-pressed="false">MY CHILD WAS BORN</button>
 <button type="button" class="nt-chip" data-for="day" aria-pressed="false">ANY DAY</button>
-</div></div>
+</div><input type="text" class="nt-cap" data-nt-caption maxlength="44" placeholder="Or your own words: The night it all began" aria-label="Your own headline (optional)"></div>
 <div class="nt-row">
 <label class="nt-field"><span class="nt-k">DATE</span><input class="nt-in" type="date" name="d" min="1000-01-01" max="2999-12-31" required></label>
 <label class="nt-field"><span class="nt-k">TIME <span style="color: #55565B">· OPTIONAL</span></span><input class="nt-in" type="time" name="t"></label>
@@ -405,7 +406,7 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="nt-again" data-nt-again data-off>
 <div class="nt-k">NOW TRY ANOTHER</div>
 <p class="nt-note" style="max-width: 560px">Your parents' wedding. Your first kiss. The day your dog came home. Every moment had a moon.</p>
-<button type="button" class="nt-btn o" data-nt-reset>PICK ANOTHER DATE</button>
+<div style="display:flex;flex-wrap:wrap;gap:12px"><button type="button" class="nt-btn o" data-nt-reset>PICK ANOTHER DATE</button><a class="nt-btn o" href="/app#nights" style="text-decoration:none">KEEP THEM IN THE MOON APP</a></div>
 </div>
 </div>
 </div>

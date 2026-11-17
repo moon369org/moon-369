@@ -29,7 +29,7 @@ export function eventLinks(name: string, unixNs: bigint, minutes = 60) {
     name, moonmark: mark, moonmark_full: `${mark}.${String(t.nanosecond).padStart(9, '0')}`,
     utc: unixNsToIso(unixNs), unix_ms: ms,
     event_url: url,
-    card_png: `https://api.moon369.org/v1/card.png?moonmark=${path}&event=${q(name)}&v=2`,
+    card_png: `https://api.moon369.org/v1/card.png?moonmark=${path}&event=${q(name)}&v=3`,
     ics_url: `https://api.moon369.org/v1/event.ics?moonmark=${path}&name=${q(name)}`,
     google_calendar_url: 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(name) +
       '&dates=' + icsStamp(ms) + '/' + icsStamp(ms + minutes * 60000) + '&details=' + encodeURIComponent(`Moonmark ${mark}\n${url}`),

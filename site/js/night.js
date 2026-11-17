@@ -112,11 +112,11 @@
   function parseZ(s) { var m = /^([+-])(\d{2}):?(\d{2})$/.exec((s || '').replace(' ', '+')); return m ? (m[1] === '-' ? -1 : 1) * (+m[2] * 60 + +m[3]) : null; }
 
   function ymd(n) { return n.y + '-' + p2(n.mo) + '-' + p2(n.d); }
-  function rest(n) { return (n.h != null ? 't=' + p2(n.h) + p2(n.mi) + '&' : '') + 'z=' + encodeURIComponent(fmtZ(n.z)) + '&for=' + n.occasion + (n.place ? '&in=' + n.place.slug : ''); }
+  function rest(n) { return (n.h != null ? 't=' + p2(n.h) + p2(n.mi) + '&' : '') + 'z=' + encodeURIComponent(fmtZ(n.z)) + '&for=' + n.occasion + (n.place ? '&in=' + n.place.slug : '') + (n.caption ? '&c=' + encodeURIComponent(n.caption) : ''); }
   function query(n) { return 'd=' + ymd(n) + '&' + rest(n); }
   function path(n) { return '/night/' + ymd(n) + '?' + rest(n); }
   function pageUrl(n) { return 'https://moon369.org' + path(n); }
-  function cardUrl(n) { return API + '/v1/night.png?' + query(n) + '&fmt=story&v=2'; }   // v: bump when the card art changes
+  function cardUrl(n) { return API + '/v1/night.png?' + query(n).replace(/&c=[^&]*/, '').replace(/&for=\w+/, n.caption ? '&for=none' : '&for=' + n.occasion) + '&fmt=story&v=2'; }   // v: bump when the card art changes
   function dateText(n) { return n.d + ' ' + MONTHS[n.mo - 1] + ' ' + n.y; }
 
   function postText(n, r) {
@@ -124,7 +124,7 @@
     var head = {
       born: 'The moon when I was born: ', met: 'The moon the day we met: ', wed: 'The moon on our wedding day: ',
       kid: 'The moon when my child was born: ', day: 'The moon on ' + dateText(n) + ': ',
-    }[n.occasion].replace(/: $/, n.place ? ' in ' + n.place.name + ': ' : ': ') + ph + ', ' + pct + '.';
+    }[n.occasion]; if (n.caption) head = n.caption + ': '; head = head.replace(/: $/, n.place ? ' in ' + n.place.name + ': ' : ': ') + ph + ', ' + pct + '.';
     var future = msOf(n) > Date.now();
     var back = r.eclipse ? '\nAnd there ' + (future ? 'will be ' : 'was ') + an(r.eclipse) + r.eclipse + ' solar eclipse that day.' : r.returns ? '\nIt comes back to ' + ANNIV[n.occasion] + ' in ' + r.returns + '.' : '';
     return head + back + '\n\nWhat did yours look like?';
@@ -139,7 +139,7 @@
     var res = $('[data-nt-res]');
     $('[data-nt-canvas]').setAttribute('data-at', String(ms));
     $('[data-nt-canvas]').setAttribute('aria-label', r.phase + ', ' + Math.round(lit * 100) + '% lit');
-    $('[data-nt-title]').textContent = TITLES[n.occasion];
+    $('[data-nt-title]').textContent = titleOf(n);
     $('[data-nt-date]').textContent = dateText(n).toUpperCase();
     drawSky(n, ms, f);
     var pl = $('[data-nt-place]'); if (pl) { pl.textContent = n.place ? 'IN ' + whereText(n.place).toUpperCase() : ''; vis(pl, !!n.place); }
@@ -151,11 +151,12 @@
       (r.returns ? ' The moon looks like this on ' + ANNIV[n.occasion] + ' again in <b style="color:#E9E4D8;font-weight:500">' + r.returns + '</b>.' : '') +
       (n.h == null ? ' No time given, so this is the moon at midday.' : '');
     $('[data-nt-x]').href = 'https://x.com/intent/post?text=' + encodeURIComponent(postText(n, r)) + '&url=' + encodeURIComponent(pageUrl(n));
-    var img = $('[data-nt-card]'); img.src = cardUrl(n); img.alt = TITLES[n.occasion].toLowerCase() + ', ' + dateText(n) + ': ' + r.phase + ', ' + Math.round(lit * 100) + '% lit';
+    var img = $('[data-nt-card]'); img.src = cardUrl(n);
+    if (n.caption) setTimeout(function () { getCard().then(function (b) { if (current && current.n === n) img.src = URL.createObjectURL(b); }).catch(function () {}); }, 0); img.alt = titleOf(n).toLowerCase() + ', ' + dateText(n) + ': ' + r.phase + ', ' + Math.round(lit * 100) + '% lit';
     vis($('[data-nt-cardwrap]'), true); vis($('[data-nt-again]'), true);
     vis(res, true);
     try { history.replaceState(null, '', path(n)); } catch (e) {}
-    document.title = TITLES[n.occasion].charAt(0) + TITLES[n.occasion].slice(1).toLowerCase() + ' · ' + dateText(n) + ' · Moon';
+    document.title = titleOf(n).charAt(0) + titleOf(n).slice(1).toLowerCase() + ' · ' + dateText(n) + ' · Moon';
     var ecl = $('[data-nt-eclipse]'), moonCv = $('[data-nt-canvas]'), ecCv = $('[data-nt-ecanvas]');
     if (ecCv) { vis(moonCv, true); vis(ecCv, false); }
     if (ecl) {
@@ -196,9 +197,10 @@
       pick(hit);
     }
     if (!wv) place = null;
-    return { y: y, mo: +m[2], d: +m[3], h: h, mi: mi, z: zOf(y, +m[2], +m[3], h, mi), occasion: occasion, place: place && place.slug ? place : null };
+    return { y: y, mo: +m[2], d: +m[3], h: h, mi: mi, z: zOf(y, +m[2], +m[3], h, mi), occasion: occasion, place: place && place.slug ? place : null, caption: cleanCap(($('[data-nt-caption]') || {}).value) };
   }
   function fill(n) {
+    var cap = $('[data-nt-caption]'); if (cap) cap.value = n.caption || '';
     $('input[name=d]').value = n.y + '-' + p2(n.mo) + '-' + p2(n.d);
     $('input[name=t]').value = n.h != null ? p2(n.h) + ':' + p2(n.mi) : '';
     setOccasion(n.occasion);
@@ -212,13 +214,31 @@
     var tm = /^(\d{2}):?(\d{2})$/.exec(q.get('t') || ''), z = parseZ(q.get('z'));
     var h = tm && +tm[1] < 24 && +tm[2] < 60 ? +tm[1] : null;
     var slug = /^[a-z0-9-]{1,120}$/.test(q.get('in') || '') ? q.get('in') : null;
-    return { y: +m[1], mo: +m[2], d: +m[3], h: h, mi: h != null ? +tm[2] : 0, z: z == null ? 0 : z, occasion: TITLES[q.get('for')] ? q.get('for') : 'day', slug: slug };
+    return { y: +m[1], mo: +m[2], d: +m[3], h: h, mi: h != null ? +tm[2] : 0, z: z == null ? 0 : z, occasion: TITLES[q.get('for')] ? q.get('for') : 'day', slug: slug, caption: cleanCap(q.get('c')) };
   }
 
+  function cleanCap(x) { x = String(x || '').replace(/[\u0000-\u001f\u007f<>]+/g, ' ').replace(/\s+/g, ' ').trim(); return x ? x.slice(0, 44) : ''; }
+  function titleOf(n) { return n.caption ? n.caption.toUpperCase() : TITLES[n.occasion]; }
+  // Your own words go on the card here, on this device: Moon's servers only ever draw the fixed headlines.
+  function withCaption(b, n) {
+    if (!n.caption) return Promise.resolve(b);
+    return (window.createImageBitmap ? createImageBitmap(b) : Promise.reject()).then(function (bmp) {
+      var cv = document.createElement('canvas'); cv.width = bmp.width; cv.height = bmp.height;
+      var c = cv.getContext('2d'); c.drawImage(bmp, 0, 0);
+      var k = bmp.width / 1080, txt = n.caption.toUpperCase(), fs = 24 * k;
+      c.fillStyle = '#8A8B8F'; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+      c.font = fs + 'px "JetBrains Mono", monospace';
+      try { c.letterSpacing = (6 * k) + 'px'; } catch (e) {}
+      while (c.measureText(txt).width > 960 * k && fs > 14 * k) { fs -= k; c.font = fs + 'px "JetBrains Mono", monospace'; }
+      c.fillText(txt, bmp.width / 2, 230 * k);
+      return new Promise(function (ok) { cv.toBlob(ok, 'image/png'); });
+    }).catch(function () { return b; });
+  }
   function getCard() {
     var u = cardUrl(current.n);
-    if (cardBlob && cardFor === u) return Promise.resolve(cardBlob);
-    return fetch(u).then(function (r) { if (!r.ok) throw new Error('card'); return r.blob(); }).then(function (b) { cardBlob = b; cardFor = u; return b; });
+    var n = current.n, key = u + '|' + (n.caption || '');
+    if (cardBlob && cardFor === key) return Promise.resolve(cardBlob);
+    return fetch(u).then(function (r) { if (!r.ok) throw new Error('card'); return r.blob(); }).then(function (b) { return withCaption(b, n); }).then(function (b) { cardBlob = b; cardFor = key; return b; });
   }
   function fileName() { var n = current.n; return 'moon-' + n.y + '-' + p2(n.mo) + '-' + p2(n.d) + '.png'; }
   function save() {

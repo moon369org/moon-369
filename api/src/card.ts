@@ -3,6 +3,7 @@
 import { SYNCOPATE_700_WOFF2, JETBRAINS_MONO_400_WOFF2 } from './card-fonts.js';
 import type { skyAt } from './moon.js';
 import { deflateSync } from 'node:zlib';
+import qrcode from 'qrcode-generator';
 
 export interface CardData {
   year: number; moon: number; lune: number; lunesInMoon: number;
@@ -153,7 +154,13 @@ export function moonOnlySvg(f: number, tilt: number, size: number, bg: 'none' | 
     (bg === 'dark' ? `<rect x="${-h}" y="${-h}" width="${size}" height="${size}" fill="${INK}"/>` : '') + moonSvg(f, r, 'mo', tilt) + '</svg>';
 }
 
-export function cardSvg(d: CardData, size = 600): string {
+/** Options for the Today on Moon card: light or dark, the Moonmark line, and a local-time line for one time zone. */
+export interface CardOpts { theme?: 'dark' | 'light'; mark?: string; local?: string }
+
+export function cardSvg(d: CardData, size = 600, o: CardOpts = {}): string {
+  const light = o.theme === 'light';
+  const BG = light ? '#F4F1EA' : INK, FG = light ? INK : PAPER, DIM = light ? '#5E6064' : ASH, RULE = light ? '#D9D4C7' : LINE, SOFTC = light ? '#3A3B3F' : '#B9B6AE';
+  const extra = (o.mark ? `<text x="300" y="${o.local ? 338 : 350}" class="m">${esc(o.mark)}</text>` : '') + (o.local ? `<text x="300" y="${o.mark ? 362 : 350}" class="l">${esc(o.local)}</text>` : '');
   const title = esc((d.title ?? 'TODAY ON MOON').toUpperCase());
   const foot = esc(`${d.name.toUpperCase()} · ${(d.illumination * 100).toFixed(1)}% LIT · LUNE ${d.lune} OF ${d.lunesInMoon}`);
   const label = esc(`Year ${d.year}, Moon ${pad2(d.moon)}, Lune ${pad2(d.lune)}. ${d.name}, ${(d.illumination * 100).toFixed(1)}% lit.`);
@@ -169,25 +176,36 @@ export function cardSvg(d: CardData, size = 600): string {
     `<defs><style>` +
     `@font-face{font-family:MoonSync;src:url(data:font/woff2;base64,${SYNCOPATE_700_WOFF2}) format('woff2');font-weight:700}` +
     `@font-face{font-family:MoonMono;src:url(data:font/woff2;base64,${JETBRAINS_MONO_400_WOFF2}) format('woff2')}` +
-    `.t{font-family:MoonMono,ui-monospace,monospace;font-size:17px;letter-spacing:6px;fill:${ASH};text-anchor:middle}` +
-    `.k{font-family:MoonMono,ui-monospace,monospace;font-size:13px;letter-spacing:4px;fill:${ASH};text-anchor:middle}` +
-    `.v{font-family:MoonSync,'Arial Black',sans-serif;font-weight:700;letter-spacing:2px;fill:${PAPER};text-anchor:middle}` +
-    `.f{font-family:MoonMono,ui-monospace,monospace;font-size:13px;letter-spacing:2.6px;fill:#B9B6AE;text-anchor:middle}` +
+    `.t{font-family:MoonMono,ui-monospace,monospace;font-size:17px;letter-spacing:6px;fill:${DIM};text-anchor:middle}` +
+    `.k{font-family:MoonMono,ui-monospace,monospace;font-size:13px;letter-spacing:4px;fill:${DIM};text-anchor:middle}` +
+    `.v{font-family:MoonSync,'Arial Black',sans-serif;font-weight:700;letter-spacing:2px;fill:${FG};text-anchor:middle}` +
+    `.f{font-family:MoonMono,ui-monospace,monospace;font-size:13px;letter-spacing:2.6px;fill:${SOFTC};text-anchor:middle}` +
+    `.m{font-family:MoonMono,ui-monospace,monospace;font-size:19px;letter-spacing:1px;fill:${FG};text-anchor:middle}` +
+    `.l{font-family:MoonMono,ui-monospace,monospace;font-size:13px;letter-spacing:1.5px;fill:${DIM};text-anchor:middle}` +
     `</style>` +
-    `<radialGradient id="g" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="${PAPER}" stop-opacity="0.07"/><stop offset="1" stop-color="${PAPER}" stop-opacity="0"/></radialGradient>` +
+    `<radialGradient id="g" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="${PAPER}" stop-opacity="${light ? 0 : 0.07}"/><stop offset="1" stop-color="${PAPER}" stop-opacity="0"/></radialGradient>` +
     `</defs>` +
-    `<rect width="600" height="600" rx="24" fill="${INK}"/>` +
-    `<rect x="0.5" y="0.5" width="599" height="599" rx="23.5" fill="none" stroke="${LINE}"/>` +
+    `<rect width="600" height="600" rx="24" fill="${BG}"/>` +
+    `<rect x="0.5" y="0.5" width="599" height="599" rx="23.5" fill="none" stroke="${RULE}"/>` +
     `<text x="300" y="84" class="t">${title}</text>` +
     `<circle cx="300" cy="226" r="118" fill="url(#g)"/>` +
     `<g transform="translate(300,226)">${moonSvg(d.fraction, 56, 'mc', d.tilt)}</g>` +
-    `<path d="M48 380H552M48 512H552M${48 + colW} 380V512M${48 + 2 * colW} 380V512" stroke="${LINE}" stroke-width="1.5" fill="none"/>` +
-    cells +
+    `<path d="M48 380H552M48 512H552M${48 + colW} 380V512M${48 + 2 * colW} 380V512" stroke="${RULE}" stroke-width="1.5" fill="none"/>` +
+    cells + extra +
     `<text x="300" y="560" class="f">${foot}</text>` +
     `</svg>`;
 }
 
-export interface ShareData extends CardData { time: string; ns: string; event?: string; sky?: ReturnType<typeof skyAt> }
+export interface ShareData extends CardData { time: string; ns: string; event?: string; sky?: ReturnType<typeof skyAt>; qr?: string }
+
+/** A QR code as SVG: paper squares with ink modules, sized to `size` at (x, y). Level M, with a quiet zone. */
+export function qrSvg(url: string, x: number, y: number, size: number): string {
+  const q = qrcode(0, 'M'); q.addData(url); q.make();
+  const n = q.getModuleCount(), quiet = 2, u = size / (n + quiet * 2);
+  let d = '';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${((c + quiet) * u).toFixed(2)} ${((r + quiet) * u).toFixed(2)}h${u.toFixed(2)}v${u.toFixed(2)}h-${u.toFixed(2)}z`;
+  return `<g transform="translate(${x},${y})"><rect width="${size}" height="${size}" rx="6" fill="${PAPER}"/><path d="${d}" fill="${INK}"/></g>`;
+}
 
 /** An event name over the Moonmark: up to two lines that fit the 528 px column, shrinking for long names. */
 function eventTitle(name: string): string {
@@ -246,6 +264,7 @@ export function shareSvg(d: ShareData): string {
     `<text x="560" y="362" font-family="JetBrains Mono" font-size="34" fill="${ASH}">${nsG}</text>` +
     `<path d="M560 412H1088M560 528H1088${lines}" stroke="${LINE}" stroke-width="2" fill="none"/>` +
     grid +
+    (d.qr ? qrSvg(d.qr, 66, 474, 124) + `<text x="204" y="590" font-family="JetBrains Mono" font-size="13" letter-spacing="3" fill="${ASH}">SCAN · YOUR TIME</text>` : '') +
     `<text x="560" y="584" font-family="JetBrains Mono" font-size="17" letter-spacing="3" fill="#B9B6AE">${esc(foot)}</text>` +
     `<text x="1088" y="584" font-family="JetBrains Mono" font-size="17" letter-spacing="3" fill="${ASH}" text-anchor="end">MOON369.ORG</text>` +
     `</svg>`;

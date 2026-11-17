@@ -82,3 +82,22 @@ describe('the moon on its own', () => {
     expect((await handleMoon(new Request('https://x/v1/moon.svg?size=5'))).status).toBe(400);
   });
 });
+
+describe('card options and moment QR', () => {
+  it('draws card.svg light, with the Moonmark and local time', async () => {
+    const r = await handleMoon(new Request('https://x/v1/card.svg?moonmark=1928.05.12-15.00.00.0&theme=light&mark=on&tz=America/Denver'));
+    const s = await r.text();
+    expect(r.status).toBe(200);
+    expect(s).toContain('#F4F1EA');
+    expect(s).toContain('1928.05.12 15:00:00');
+    expect(s).toMatch(/M[SD]T/);
+    expect((await handleMoon(new Request('https://x/v1/card.svg?tz=Not/AZone'))).status).toBe(400);
+    expect((await handleMoon(new Request('https://x/v1/card.svg?theme=pink'))).status).toBe(400);
+  });
+  it('puts a QR on event cards only', async () => {
+    const { shareSvg } = await import('../src/card');
+    const base = { year: 1928, moon: 5, lune: 12, lunesInMoon: 28, fraction: 0.4, tilt: 0, illumination: 0.9, name: 'Waxing gibbous', time: '15:00:00', ns: '000000000' };
+    expect(shareSvg({ ...base, event: 'Launch', qr: 'https://moon369.org/m/1928.05.12-15.00.00?e=Launch' })).toContain('SCAN · YOUR TIME');
+    expect(shareSvg(base)).not.toContain('SCAN');
+  });
+});

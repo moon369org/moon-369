@@ -22,6 +22,7 @@ export const OCCASIONS: Record<string, string> = {
   met: 'THE MOON WHEN WE MET',
   wed: 'THE MOON ON OUR WEDDING DAY',
   kid: 'THE MOON WHEN MY CHILD WAS BORN',
+  none: '',   // no headline: the site draws the person's own words there, on their device, never on Moon's servers
 };
 
 export interface NightInput { y: number; mo: number; d: number; h: number | null; mi: number; z: number; occasion: string; place?: string | null }
@@ -47,7 +48,7 @@ export function parseNight(q: URLSearchParams): NightInput {
     if (!zm || +zm[2] > 14 || +zm[3] > 59) throw new NightParamError('z must be a UTC offset like -0700');
     z = (zm[1] === '-' ? -1 : 1) * (+zm[2] * 60 + +zm[3]);
   }
-  const occasion = OCCASIONS[q.get('for') ?? ''] ? q.get('for')! : 'day';
+  const occasion = Object.prototype.hasOwnProperty.call(OCCASIONS, q.get('for') ?? '') ? q.get('for')! : 'day';
   // ?in= names a city from Moon's own list; anything else is ignored, so no one can put their own words on a card.
   const slug = q.get('in') ?? '';
   const place = Object.prototype.hasOwnProperty.call(PLACES, slug) ? PLACES[slug] : null;

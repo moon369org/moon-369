@@ -18,7 +18,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Moon">
-<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/assets/app-apple-touch.png">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/fonts/fonts.css">
 <style>
@@ -51,42 +51,84 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px
 .sheet{position:fixed;inset:0;background:rgba(5,5,6,.82);display:flex;align-items:flex-end;justify-content:center;z-index:9;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .sheet[hidden]{display:none}
 .panel{width:100%;max-width:520px;background:#0E0E11;border-top:1px solid #24262A;padding:24px 22px calc(24px + env(safe-area-inset-bottom));display:grid;gap:12px}
-.panel h2{margin:0;font:700 15px Syncopate,sans-serif;letter-spacing:.14em}
+.panel{max-height:92vh;overflow:auto}.panel h2{margin:0;font:700 15px Syncopate,sans-serif;letter-spacing:.14em}
 .panel .mk{font:18px 'JetBrains Mono',monospace}
 .panel .lt{font-size:13px;color:#8A8B8F;margin-top:-6px}
 .panel input{width:100%;min-height:52px;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:16px Inter,sans-serif;padding:0 14px;border-radius:0}
 .panel input:focus{outline:none;border-color:#8A8B8F}
 .panel .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .panel .x{background:none;border:0;color:#8A8B8F;font:12px 'JetBrains Mono',monospace;letter-spacing:.2em;cursor:pointer;padding:10px}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#E9E4D8;color:#0B0B0D;font:12px 'JetBrains Mono',monospace;padding:10px 16px;z-index:10}
+.toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));max-width:86vw;text-align:center;transform:translateX(-50%);background:#E9E4D8;color:#0B0B0D;font:12px 'JetBrains Mono',monospace;padding:10px 16px;z-index:10}
 .toast[hidden]{display:none}
 .foot{padding:16px 22px 22px;text-align:center;font:11px 'JetBrains Mono',monospace;letter-spacing:.16em;color:#5E6064}
 .foot a{color:#8A8B8F;text-decoration:none}
+.scr[hidden]{display:none}.scr{width:100%;display:flex;flex-direction:column;align-items:center}
+.stage.sm{width:min(44vw,170px)}
+.tabs{position:sticky;bottom:0;z-index:5;display:grid;grid-template-columns:1fr 1fr 1fr;background:#0B0B0D;border-top:1px solid #1C1D20;padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{background:none;border:0;color:#8A8B8F;font:11px 'JetBrains Mono',monospace;letter-spacing:.22em;min-height:56px;cursor:pointer}
+.tabs button[aria-current="page"]{color:#E9E4D8}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 12px;width:100%}
+.chips button{background:none;border:1px solid #24262A;color:#B9B6AE;font:10.5px 'JetBrains Mono',monospace;letter-spacing:.16em;padding:10px 12px;cursor:pointer}
+.chips button[aria-pressed="true"]{border-color:#E9E4D8;color:#E9E4D8}
+input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:16px Inter,sans-serif;padding:0 14px;border-radius:0;margin-bottom:10px;color-scheme:dark}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}.two .btn{min-height:48px;font-size:10.5px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.three .btn{min-height:48px;font-size:10.5px;letter-spacing:.16em}
+.nres{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:22px}
+.cells{display:grid;grid-template-columns:repeat(3,1fr);width:100%;border-top:1px solid #24262A;border-bottom:1px solid #24262A;margin:6px 0}
+.cells div{padding:12px 0;text-align:center}.cells div+div{border-left:1px solid #24262A}.cells span{display:block;font:10px 'JetBrains Mono',monospace;letter-spacing:.22em;color:#8A8B8F}.cells b{display:block;margin-top:6px;font:700 20px Syncopate,sans-serif}
+.dim{color:#8A8B8F!important;font-size:13px!important}
+.qr[hidden]{display:none}.qr svg{width:220px;height:220px;display:block;margin:4px auto}
+.clock small{color:#8A8B8F;font-size:.42em}
+.recent a small{color:#8A8B8F}
 </style>
 </head>
 <body>
 <div class="top">
   <a href="/" aria-label="Moon home"><svg viewBox="-10 -10 424 120" aria-hidden="true"><path d="M4,100 V4 L48,64 L92,4 V100" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/><circle cx="172" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/><circle cx="232" cy="50" r="46" fill="none" stroke="#0B0B0D" stroke-width="18"/><circle cx="232" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#0B0B0D" stroke-width="18"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#E9E4D8" stroke-width="8"/><path d="M312,100 V4 L400,96 V0" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/></svg></a>
-  <a href="/night">YOUR MOON →</a>
+  <a href="/">MOON369.ORG →</a>
 </div>
 <main>
-  <div class="stage"><canvas class="hm-moonglow" role="img" aria-label="The Moon right now" data-app-moon></canvas></div>
-  <div class="k">MOON TIME · THE SAME EVERYWHERE</div>
-  <div class="date" data-app-date>&nbsp;</div>
-  <div class="clock" data-app-clock>&nbsp;</div>
-  <div class="meta" data-app-meta>&nbsp;</div>
-  <div class="acts">
-    <button class="btn p" type="button" data-app-mark>MARK THIS MOMENT</button>
-    <div class="row">
-      <button class="btn" type="button" data-app-plan>PLAN</button>
-      <a class="btn" href="/night">BIRTHDAY</a>
-      <a class="btn" href="/sign">SIGN</a>
+  <section class="scr" data-scr="now">
+    <div class="stage"><canvas class="hm-moonglow" role="img" aria-label="The Moon right now" data-app-moon></canvas></div>
+    <div class="k">MOON TIME · THE SAME EVERYWHERE</div>
+    <div class="date" data-app-date>&nbsp;</div>
+    <div class="clock" data-app-clock>&nbsp;</div>
+    <div class="meta" data-app-meta>&nbsp;</div>
+    <div class="acts">
+      <button class="btn p" type="button" data-app-mark>SHARE THIS MOMENT</button>
+      <button class="btn" type="button" data-go="events">MAKE AN EVENT</button>
     </div>
-  </div>
-  <div class="recent" data-app-recent hidden></div>
-  <div class="install" data-app-install hidden></div>
+    <div class="recent" data-app-recent hidden></div>
+    <div class="install" data-app-install hidden></div>
+  </section>
+  <section class="scr" data-scr="nights" hidden>
+    <div class="k" style="margin-top:6px">EXPLORE A NIGHT</div>
+    <div class="chips" data-n-chips><button type="button" data-for="born" aria-pressed="true">I WAS BORN</button><button type="button" data-for="met">WE MET</button><button type="button" data-for="wed">OUR WEDDING</button><button type="button" data-for="kid">MY CHILD WAS BORN</button><button type="button" data-for="day">ANY DAY</button></div>
+    <div class="two f"><input type="date" data-n-date aria-label="Date"><input type="time" data-n-time aria-label="Time (optional)"></div>
+    <button class="btn p" type="button" data-n-show>SHOW ME THE MOON</button>
+    <div class="nres" data-n-res hidden>
+      <div class="stage sm"><canvas class="hm-moonglow" aria-hidden="true" data-n-moon></canvas></div>
+      <div class="k" data-n-title></div>
+      <div class="date" data-n-date-out></div>
+      <div class="meta" data-n-facts></div>
+      <div class="cells" data-n-cells></div>
+      <div class="meta dim" data-n-returns></div>
+      <button class="btn p" type="button" data-n-share>SHARE THIS MOON</button>
+      <div class="two"><button class="btn" type="button" data-n-card>SAVE CARD</button><a class="btn" data-n-open target="_blank" rel="noopener">FULL PAGE</a></div>
+    </div>
+    <div class="recent" data-n-saved hidden></div>
+  </section>
+  <section class="scr" data-scr="events" hidden>
+    <div class="k" style="margin-top:6px">EVENTS · ONE LINK, EVERY TIME ZONE</div>
+    <input type="text" maxlength="80" class="f" placeholder="Name the event" data-e-name aria-label="Event name">
+    <input type="datetime-local" class="f" data-e-when aria-label="Date and time, in your time">
+    <div class="chips" data-e-quick><button type="button" data-add="3600000">NOW + 1 HOUR</button><button type="button" data-add="86400000">+ 1 DAY</button><button type="button" data-add="604800000">+ 1 WEEK</button><button type="button" data-add="now">NOW</button></div>
+    <div class="meta dim" data-e-note>Everyone who opens the link sees it in their own time.</div>
+    <button class="btn p" type="button" data-e-make>MAKE THE LINK</button>
+    <div class="recent" data-e-list hidden></div>
+  </section>
 </main>
-<div class="foot"><a href="/">MOON369.ORG</a> · WORLDWIDE TIME, LOCKED TO THE MOON</div>
+<nav class="tabs" aria-label="App"><button type="button" data-tab="now" aria-current="page">NOW</button><button type="button" data-tab="nights">NIGHTS</button><button type="button" data-tab="events">EVENTS</button></nav>
 
 <div class="sheet" data-app-sheet hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sheet-h">
@@ -96,7 +138,9 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px
     <input type="datetime-local" data-sheet-when hidden aria-label="Date and time, in your time">
     <input type="text" maxlength="80" placeholder="What's happening? (optional)" data-sheet-name aria-label="Name this moment">
     <button class="btn p" type="button" data-sheet-share>SHARE THE LINK</button>
-    <div class="two"><button class="btn" type="button" data-sheet-copy>COPY LINK</button><button class="btn" type="button" data-sheet-card>SAVE CARD</button></div>
+    <div class="three"><button class="btn" type="button" data-sheet-copy>COPY LINK</button><button class="btn" type="button" data-sheet-qr>QR</button><button class="btn" type="button" data-sheet-card>CARD</button></div>
+    <div class="qr" data-sheet-qrbox hidden></div>
+    <button class="x" type="button" data-sheet-embed hidden>COPY COUNTDOWN EMBED</button>
     <button class="x" type="button" data-sheet-close>CLOSE</button>
   </div>
 </div>
@@ -104,6 +148,8 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px
 
 <script src="/js/moon-phase.js" defer></script>
 <script src="/js/moonglow.js" defer></script>
+<script src="/js/qrcode.js" defer></script>
+<script src="/js/moonqr.js" defer></script>
 <script src="/js/app.js" defer></script>
 </body>
 </html>

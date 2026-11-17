@@ -1,6 +1,8 @@
-/* Moon embed. One script, four tags:
+/* Moon embed. One script:
  *   <moon-badge sha256="…"></moon-badge>   a small badge that shows who registered a file and when
  *   <moon-check></moon-check>              a drop zone: drop any file, see if it is on Moon
+ *   <div data-moon-night="1969-07-20"></div>  the moon on any date as a card, linked to Your Moon (data-time="2017", data-for="born|met|wed|kid")
+ *   <moon-moment mark="1928.05.12-15.00.00" name="Launch"></moon-moment>  a small moon + Moonmark that opens the full card, in the reader's own time
  *   <moon-clock size="56"></moon-clock>    the live moon beside ticking Moon time, linked to moon369.org
  *   <moon-live size="160"></moon-live>     Moon's live moon: today's phase and tilt, glowing and animated (at="<unix ms>" for another moment)
  * Files never leave the browser. Only the fingerprint (and, for images, a 64-bit look-alike hash) is sent.
@@ -225,6 +227,57 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wantLive); else wantLive();
   if (window.MutationObserver) { var mo = new MutationObserver(function () { wantLive(); if (liveAsked) mo.disconnect(); }); mo.observe(document.documentElement, { childList: true, subtree: true }); }
+  // Powered by Moon: every widget links home, per Moon's attribution rules.
+  function powered(color) { return '<a href="https://moon369.org" target="_blank" rel="noopener" style="font:500 10px/1 ' + MONO + ';letter-spacing:.22em;color:' + (color || C.dim) + ';text-decoration:none">POWERED BY MOON</a>'; }
+
+  // <div data-moon-night="1969-07-20" data-time="2017" data-for="born">: that night's card, linked to the full explorer.
+  function mountNight(el) {
+    if (el.__moon) return; el.__moon = true;
+    var d = el.getAttribute('data-moon-night') || '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { el.textContent = 'data-moon-night needs a date like 1969-07-20'; return; }
+    var t = (el.getAttribute('data-time') || '').replace(':', ''), f = el.getAttribute('data-for') || 'day';
+    var z = el.getAttribute('data-z') || (function () { var o = -new Date(d + 'T12:00:00').getTimezoneOffset(), a = Math.abs(o); return (o < 0 ? '-' : '+') + String(Math.floor(a / 60)).padStart(2, '0') + String(a % 60).padStart(2, '0'); })();
+    var rest = (/^\d{4}$/.test(t) ? 't=' + t + '&' : '') + 'z=' + encodeURIComponent(z) + '&for=' + (/^(day|born|met|wed|kid)$/.test(f) ? f : 'day');
+    var w = Math.min(1200, parseInt(el.getAttribute('data-width'), 10) || 600);
+    el.innerHTML = '<a href="https://moon369.org/night/' + d + '?' + rest + '" target="_blank" rel="noopener" style="display:block;max-width:' + w + 'px">' +
+      '<img src="' + API + '/v1/night.png?d=' + d + '&' + rest + '&v=2" alt="The moon on ' + esc(d) + ', on Moon" width="' + w + '" height="' + Math.round(w * 0.525) + '" loading="lazy" style="display:block;width:100%;height:auto;border-radius:6px"></a>' +
+      '<div style="margin-top:6px;text-align:right;max-width:' + w + 'px">' + powered() + '</div>';
+  }
+  function scanNights() { Array.prototype.forEach.call(document.querySelectorAll('[data-moon-night]'), mountNight); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scanNights); else scanNights();
+  if (window.MutationObserver) new MutationObserver(scanNights).observe(document.documentElement, { childList: true, subtree: true });
+
+  // <moon-moment mark="1928.05.12-15.00.00" name="Launch party">: a small moon and the Moonmark inline; tap for the full card in your own time.
+  var EP = -62165308562978.61, MSEC = 1000 * 1.0403730490216803, MREX = /^(-?\d+)\.(\d{1,2})\.(\d{1,2})(?:[- T](\d{1,2})[.:](\d{2})(?:[.:](\d{2}))?)?/;
+  class MoonMoment extends HTMLElement {
+    connectedCallback() {
+      if (this.built) return; this.built = true;
+      var mark = (this.getAttribute('mark') || '').trim(), name = (this.getAttribute('name') || '').slice(0, 80), u = MREX.exec(mark);
+      if (!u) { this.textContent = mark; return; }
+      var p2 = function (n) { return String(n).padStart(2, '0'); }, fd = function (k) { return Math.ceil(k * 369 / 13); };
+      var ms = EP + ((+u[1] * 369 + fd(+u[2] - 1) + (+u[3]) - 1) * 86400 + (+u[4] || 0) * 3600 + (+u[5] || 0) * 60 + (+u[6] || 0)) * MSEC;
+      var text = u[1] + '.' + p2(u[2]) + '.' + p2(u[3]) + (u[4] ? ' ' + p2(u[4]) + ':' + u[5] + (u[6] ? ':' + u[6] : '') : '');
+      var path = u[1] + '.' + p2(u[2]) + '.' + p2(u[3]) + '-' + p2(u[4] || 0) + '.' + (u[5] || '00') + '.' + (u[6] || '00');
+      var url = 'https://moon369.org/m/' + path + (name ? '?e=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
+      var local = ''; try { local = new Intl.DateTimeFormat(undefined, { dateStyle: 'full', timeStyle: 'short' }).format(ms); } catch (e) { local = new Date(ms).toString(); }
+      var sh = this.attachShadow({ mode: 'open' });
+      sh.innerHTML = '<style>:host{display:inline-block;position:relative;vertical-align:middle}button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font:inherit}' +
+        'button span{font-family:' + MONO + ';font-size:.92em;border-bottom:1px dotted currentColor}img.i{width:1.4em;height:1.4em;display:block}' +
+        '.p{position:absolute;z-index:2147483000;left:0;top:calc(100% + 8px);width:min(420px,90vw);background:' + C.bg + ';color:' + C.fg + ';border:1px solid ' + C.line + ';padding:12px;box-shadow:0 18px 50px rgba(0,0,0,.45);font:13px/1.5 ' + FONT + '}' +
+        '.p[hidden]{display:none}.p img{width:100%;display:block}.l{margin:10px 0 8px}.r{display:flex;justify-content:space-between;align-items:center}.r a.o{color:' + C.fg + ';font:600 11px ' + MONO + ';letter-spacing:.16em;text-decoration:none}</style>' +
+        '<button type="button" aria-expanded="false"><img class="i" alt="" src="' + API + '/v1/moon.svg?size=64&unix=' + Math.round(ms) + '"><span>' + esc(name ? name + ' · ' + text : text) + '</span></button>' +
+        '<div class="p" hidden role="dialog" aria-label="' + esc(name || 'Moonmark ' + text) + '"><img alt="" loading="lazy" src="' + API + '/v1/card.png?moonmark=' + encodeURIComponent(path + '.000000000') + (name ? '&event=' + encodeURIComponent(name) : '&qr=1') + '&v=3">' +
+        '<div class="l">In your time: ' + esc(local) + '</div><div class="r"><a class="o" href="' + url + '" target="_blank" rel="noopener">OPEN →</a>' + powered() + '</div></div>';
+      var b = sh.querySelector('button'), pnl = sh.querySelector('.p');
+      var set = function (on) { pnl.hidden = !on; b.setAttribute('aria-expanded', String(on)); };
+      var hover = window.matchMedia && matchMedia('(hover:hover)').matches;
+      b.addEventListener('click', function (e) { e.stopPropagation(); set(pnl.hidden); });
+      if (hover) { this.addEventListener('mouseenter', function () { set(true); }); this.addEventListener('mouseleave', function () { set(false); }); }
+      document.addEventListener('click', function () { set(false); });
+    }
+  }
+  if (!customElements.get('moon-moment')) customElements.define('moon-moment', MoonMoment);
+
   if (!customElements.get('moon-badge')) customElements.define('moon-badge', MoonBadge);
   if (!customElements.get('moon-check')) customElements.define('moon-check', MoonCheck);
   window.MoonEmbed = { sha256: sha256, dhash: function (f) { return dhashes(f).then(function (h) { return h && h.v2; }); }, dhashes: dhashes, lookup: lookup, similar: similar, api: API };

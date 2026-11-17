@@ -53,7 +53,7 @@
       '<div class="k" data-l>STARTS IN</div>' + (name ? '<div class="n">' + esc(name) + '</div>' : '') +
       '<div class="g" data-g></div>' +
       (el.hasAttribute('data-compact') ? '' : '<div class="t">' + esc(local(ms)) + '</div>') +
-      '<div class="f"><a href="' + url + '" target="_blank" rel="noopener">Add to calendar</a><span>Moonmark ' + esc(mark.split('-')[0]) + ' \u00B7 moon369.org</span></div></div>';
+      '<div class="f"><a href="' + url + '" target="_blank" rel="noopener">Add to calendar</a><span>Moonmark ' + esc(mark.split('-')[0]) + ' \u00B7 <a href="https://moon369.org" target="_blank" rel="noopener">Powered by Moon</a></span></div></div>';
     live.push({ root: root, ms: ms });
     tick();
   }

@@ -603,7 +603,17 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const size = sizeRaw === null ? 600 : Number(sizeRaw);
         if (!Number.isInteger(size) || size < 120 || size > 2000) throw new HttpError(400, 'bad_param', 'size must be a whole number of pixels from 120 to 2000');
         const t = toMoon(ns), ph = truePhase(ns);
-        const svg = cardSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, tilt: moonTilt(ns), illumination: illumination(ns), name: phaseName(ph), title: fixed ? 'MOONMARK' : undefined }, size);
+        const theme = q.get('theme') ?? 'dark';
+        if (theme !== 'dark' && theme !== 'light') throw new HttpError(400, 'bad_param', 'theme must be dark or light');
+        const tz = q.get('tz');
+        let local: string | undefined;
+        if (tz) {
+          try { local = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(new Date(Number(ns / 1_000_000n))).toUpperCase(); }
+          catch { throw new HttpError(400, 'bad_param', 'tz must be a time zone name like America/Denver'); }
+        }
+        const showMark = q.get('mark') === 'on';
+        const svg = cardSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, tilt: moonTilt(ns), illumination: illumination(ns), name: phaseName(ph), title: fixed ? 'MOONMARK' : undefined }, size,
+          { theme, mark: showMark ? formatMoonmark(t).slice(0, 19) : undefined, local });
         return new Response(req.method === 'HEAD' ? null : svg, { status: 200, headers: {
           'Content-Type': 'image/svg+xml; charset=utf-8',
           'Content-Security-Policy': "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:",
@@ -622,9 +632,11 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         if (ns === null) ns = nowUnixNs();
         const t = toMoon(ns), ph = truePhase(ns);
         const p2 = (n: number) => String(n).padStart(2, '0');
+        const evt = (q.get('event') ?? '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || undefined;
+        // A moment's card (an event, or ?qr=1) carries a QR that opens it in the viewer's own time.
+        const qrUrl = fixed && (evt || q.get('qr') === '1') ? MARK_BASE + (evt ? moonmarkPath(formatMoonmark(t)).replace(/\.\d{9}$/, '') : moonmarkPath(formatMoonmark(t))) + (evt ? '?e=' + encodeURIComponent(evt).replace(/%20/g, '+') : '') : undefined;
         const svg = shareSvg({ year: t.year, moon: t.moon, lune: t.day, lunesInMoon: moonLength(t.moon), fraction: ph, tilt: moonTilt(ns), sky: skyAt(ns), illumination: illumination(ns), name: phaseName(ph),
-          time: `${p2(t.hour)}:${p2(t.minute)}:${p2(t.second)}`, ns: String(t.nanosecond).padStart(9, '0'), title: fixed ? 'MOONMARK' : 'TODAY ON MOON',
-          event: (q.get('event') ?? '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || undefined });
+          time: `${p2(t.hour)}:${p2(t.minute)}:${p2(t.second)}`, ns: String(t.nanosecond).padStart(9, '0'), title: fixed ? 'MOONMARK' : 'TODAY ON MOON', event: evt, qr: qrUrl });
         const png = svgToPng(svg, 1200);
         return new Response(req.method === 'HEAD' ? null : new Uint8Array(png), { status: 200, headers: {
           'Content-Type': 'image/png',

@@ -15,7 +15,7 @@
     { "src": "/assets/app-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Mark this moment", "url": "/app?mark=1", "icons": [{ "src": "/assets/app-icon-192.png", "sizes": "192x192" }] },
-    { "name": "Your Moon", "url": "/night", "icons": [{ "src": "/assets/app-icon-192.png", "sizes": "192x192" }] }
+    { "name": "Share this moment", "url": "/app?mark=1", "icons": [{ "src": "/assets/app-icon-192.png", "sizes": "192x192" }] },
+    { "name": "Your Moon", "url": "/app#nights", "icons": [{ "src": "/assets/app-icon-192.png", "sizes": "192x192" }] }
   ]
 }
