@@ -389,17 +389,41 @@
       var line = pts.map(function (x, i) { return (i ? 'L' : 'M') + X(x.t).toFixed(1) + ' ' + Y(x.ft).toFixed(1); }).join(' ');
       svg += '<path d="' + line + ' L360 170 L0 170 Z" fill="rgba(138,139,143,.16)"/><path d="' + line + '" fill="none" stroke="#E9E4D8" stroke-width="1.6" vector-effect="non-scaling-stroke"/>';
       ev.filter(function (x) { return x.t >= t0 && x.t <= t1; }).forEach(function (x) { svg += '<circle cx="' + X(x.t).toFixed(1) + '" cy="' + Y(x.ft).toFixed(1) + '" r="3" fill="' + (x.type === 'high' ? '#E9E4D8' : '#0B0B0D') + '" stroke="#E9E4D8" stroke-width="1.2" vector-effect="non-scaling-stroke"/>'; });
-      svg += '<line x1="' + X(now).toFixed(1) + '" x2="' + X(now).toFixed(1) + '" y1="0" y2="170" stroke="#E9E4D8" stroke-dasharray="3 3" stroke-width="1" vector-effect="non-scaling-stroke"/>';
-      if (level != null) svg += '<circle cx="' + X(now).toFixed(1) + '" cy="' + Y(level).toFixed(1) + '" r="4.5" fill="#E9E4D8"/>';
+      svg += '<line x1="' + X(now).toFixed(1) + '" x2="' + X(now).toFixed(1) + '" y1="0" y2="170" stroke="#8A8B8F" stroke-dasharray="3 3" stroke-width="1" vector-effect="non-scaling-stroke"/>';
     }
     $('[data-tide-chart]').innerHTML = svg;
-    $('[data-tide-ax]').innerHTML = '<span>' + esc(fmt.format(new Date(t0))) + '</span><span class="nw" style="left:' + ((now - t0) / (t1 - t0) * 100).toFixed(1) + '%">' + T('NOW') + '</span><span>' + esc(fmt.format(new Date(t1))) + ' ' + esc(dfmt.format(new Date(t1)).split(' ')[0].replace(',', '')) + '</span>';
+    $('[data-tide-ax]').innerHTML = '<span>' + esc(fmt.format(new Date(t0))) + '</span><span>' + esc(fmt.format(new Date(t1))) + ' ' + esc(dfmt.format(new Date(t1)).split(' ')[0].replace(',', '')) + '</span>';
+    // Drag along the curve to see the tide at any moment; it starts at now.
+    if (pts.length > 1) { TC = { t0: t0, t1: t1, lo: lo, hi: hi, pad: pad, curve: curve, fmt: fmt, ft: ft, headline: $('[data-tide-h]').textContent }; cursorAt(now, true); }
     $('[data-tide-list]').innerHTML = next.slice(0, 4).map(function (x) { return '<div><span>' + (x.type === 'high' ? 'HIGH' : 'LOW') + '</span><b>' + esc(fmt.format(new Date(x.t))) + '</b><i>' + esc(ft(x.ft)) + ' · ' + esc(dfmt.format(new Date(x.t)).split(' ')[0].replace(',', '')) + '</i></div>'; }).join('');
     var st = d.station, far = st.distance_km > 60;
     var where = st.name + (st.state ? ', ' + st.state : '');
     $('[data-tide-src]').textContent = T('NOAA predictions for {place} · {far}heights above {datum}.', { place: where, far: far ? T('{km} km away, the nearest station · ', { km: st.distance_km.toLocaleString() }) : '', datum: d.datum });
     if (far) $('[data-tide-h]').textContent = T('Nearest coast: {place}.', { place: where }) + ' ' + $('[data-tide-h]').textContent;
   }
+  var TC = null;
+  function levelAt(t) { var c = TC.curve; for (var i = 1; i < c.length; i++) if (c[i].t >= t) { var a = c[i - 1], b = c[i]; return { ft: a.ft + (b.ft - a.ft) * (t - a.t) / (b.t - a.t), up: b.ft > a.ft }; } return null; }
+  function cursorAt(t, isNow) {
+    if (!TC) return;
+    t = Math.max(TC.t0, Math.min(TC.t1, t));
+    var L = levelAt(t), cur = $('[data-tide-cur]'), x = (t - TC.t0) / (TC.t1 - TC.t0);
+    if (!L) return;
+    var y = 1 - (L.ft - TC.lo + TC.pad) / (TC.hi - TC.lo + TC.pad * 2);   // same scale as the curve: 150 of 170 tall, 10 from the bottom
+    cur.hidden = false; cur.style.left = (x * 100).toFixed(2) + '%'; cur.classList.toggle('flip', x > 0.62);
+    cur.querySelector('b').style.top = ((10 + y * 150) / 170 * 100).toFixed(2) + '%';
+    cur.querySelector('span').textContent = (isNow ? T('NOW') : TC.fmt.format(new Date(t))) + ' · ' + TC.ft(L.ft);
+    $('[data-tide-back]').hidden = !!isNow;
+    $('[data-tide-h]').textContent = isNow ? TC.headline : T('At {t}: {lvl}, {dir}.', { t: TC.fmt.format(new Date(t)), lvl: TC.ft(L.ft), dir: T(L.up ? 'rising' : 'falling') });
+  }
+  function bindTideDrag() {
+    var w = $('[data-tide-wrap]'), dragging = false;
+    var at = function (e) { var r = w.getBoundingClientRect(); return TC.t0 + Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (TC.t1 - TC.t0); };
+    w.addEventListener('pointerdown', function (e) { if (!TC) return; dragging = true; try { w.setPointerCapture(e.pointerId); } catch (x) {} var t = at(e); cursorAt(t, Math.abs(t - Date.now()) < 5 * 60000); buzz(); });
+    w.addEventListener('pointermove', function (e) { if (!dragging || !TC) return; var t = at(e); cursorAt(t, Math.abs(t - Date.now()) < 5 * 60000); });
+    var up = function () { dragging = false; }; w.addEventListener('pointerup', up); w.addEventListener('pointercancel', up);
+    $('[data-tide-back]').onclick = function () { cursorAt(Date.now(), true); buzz(); };
+  }
+
   // How strong the tides are worldwide right now: spring tides near new and full moon, neap near the quarters,
   // a little stronger when the moon is close.
   function strength() {
@@ -450,9 +474,10 @@
     $$('[data-tab]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-tab')); }; });
     $$('[data-view]').forEach(function (b) { b.onclick = function () { setView(b.getAttribute('data-view'), true); }; });
     $('[data-sky-loc]').onclick = askPlace;
+    bindTideDrag();
     // Language picker: the globe in the top bar. Automatic follows the phone.
     var chosen = null; try { chosen = localStorage.getItem('moonLang'); } catch (e) {}
-    var LANGS = [['auto', 'Automatic', T('PHONE SETTING')], ['en', 'English', 'ENGLISH'], ['es', 'Español', 'SPANISH']];
+    var LANGS = [['auto', 'Automatic', T('PHONE SETTING')]].concat(((window.MoonI18n && MoonI18n.languages) || [['en', 'English']]).map(function (l) { return [l[0], l[1], l[0].toUpperCase()]; }));
     $('[data-lang-list]').innerHTML = LANGS.map(function (l) { var on = l[0] === 'auto' ? !chosen : chosen === l[0]; return '<button type="button" data-lang="' + l[0] + '" aria-current="' + on + '">' + esc(l[0] === 'auto' ? T('Automatic') : l[1]) + ' <span>' + esc(l[2]) + '</span></button>'; }).join('');
     $('[data-lang-open]').onclick = function () { $('[data-lang-sheet]').hidden = false; buzz(); };
     $('[data-lang-close]').onclick = function () { $('[data-lang-sheet]').hidden = true; };
