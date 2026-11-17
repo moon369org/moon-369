@@ -379,7 +379,9 @@
       skyBox(ms) +
       (ev
         ? '<div class="mk-btns"><a class="mk-p" data-mk-ics href="#" download="">ADD TO CALENDAR</a><a href="' + esc(gcal(ev, ms, url, text(mk))) + '" target="_blank" rel="noopener">GOOGLE CALENDAR</a><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-embed>COPY EMBED CODE</button></div>'
-        : '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>') +
+        : post
+          ? (mine(mk) ? '<div class="mk-btns"><button type="button" data-mk-share class="mk-p">SHARE</button></div>' : '<div class="mk-btns"><a href="/app?mark=1" class="mk-p">MARK YOUR OWN MOMENT</a></div>')
+          : '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>') +
       '</div>' +
       '<div class="mk-side"><div class="mk-qr">' + qr + '</div><div class="mk-cap">Scan to open this ' + (ev ? 'event' : 'Moonmark') + ' in your own local time.</div>' +
       (rc || ev ? '' : '<div class="mk-note">This Moonmark is unsigned. A signed Moonmark from Moon proves when something happened.</div>') + '</div>' +
@@ -389,7 +391,12 @@
     if (rc && linkedFile()) artBox(root, rc, linkedFile());
     if (post && rc && !linkedFile()) ownPhoto(root, rc);
     if (rc && coa) coaBox(root, rc, coa);
-    root.querySelector('[data-mk-copy]').onclick = function (e) {
+    var sb = root.querySelector('[data-mk-share]');
+    if (sb) sb.onclick = function () {
+      if (navigator.share) navigator.share({ url: url }).catch(function () {});
+      else { try { navigator.clipboard.writeText(url); sb.textContent = 'LINK COPIED'; } catch (err) {} }
+    };
+    if (root.querySelector('[data-mk-copy]')) root.querySelector('[data-mk-copy]').onclick = function (e) {
       try { navigator.clipboard.writeText(url); e.target.textContent = 'COPIED'; } catch (err) { e.target.textContent = url; }
     };
     if (ev) {
@@ -413,7 +420,7 @@
       history.replaceState(null, '', '/m/' + path(mk2));
       render(root, mk2, true, null, '', post);
     };
-    root.querySelector('[data-mk-now]').onclick = markNow;
+    if (root.querySelector('[data-mk-now]')) root.querySelector('[data-mk-now]').onclick = markNow;
     if (post) postBar(url, qr, markNow);
   }
   // Under a moment, the detail stays folded: a title and a one-line summary per part, open on tap.
@@ -464,6 +471,10 @@
       });
     };
   }
+  // Is this one of the moments made on this device? The app keeps them, on this same site.
+  function mine(mk) {
+    try { var key = '/m/' + path(mk).slice(0, 19); /* to the second: app links may write fewer digits after it */ return JSON.parse(localStorage.getItem('moonMoments') || '[]').some(function (x) { return x && x.url && x.url.indexOf(key) >= 0; }); } catch (e) { return false; }
+  }
   // A moment opens like a post: a top bar with back, the title and a menu.
   function postBar(url, qr, markNow) {
     document.documentElement.classList.add('mk-post', 'mk-ready');
@@ -477,7 +488,6 @@
       '<button type="button" role="menuitem" data-mi="copy">Copy link</button>' +
       (navigator.share ? '<button type="button" role="menuitem" data-mi="share">Share</button>' : '') +
       '<button type="button" role="menuitem" data-mi="qr">Show QR code</button>' +
-      '<button type="button" role="menuitem" data-mi="now">Mark this moment</button>' +
       '<a role="menuitem" href="/app">Open the Moon app</a></div>';
     document.body.insertBefore(bar, document.body.firstChild);
     bar.querySelector('[data-mk-back]').onclick = function () {
