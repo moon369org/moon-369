@@ -1,0 +1,21 @@
+{
+  "name": "Moon",
+  "short_name": "Moon",
+  "description": "Moon time, the live moon, and one-tap links for any moment, in every time zone.",
+  "id": "/app",
+  "start_url": "/app?source=pwa",
+  "scope": "/app",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B0B0D",
+  "theme_color": "#0B0B0D",
+  "icons": [
+    { "src": "/assets/app-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/app-icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/assets/app-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Mark this moment", "url": "/app?mark=1", "icons": [{ "src": "/assets/app-icon-192.png", "sizes": "192x192" }] },
+    { "name": "Your Moon", "url": "/night", "icons": [{ "src": "/assets/app-icon-192.png", "sizes": "192x192" }] }
+  ]
+}

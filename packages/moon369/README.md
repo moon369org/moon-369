@@ -40,6 +40,7 @@ Moon's own moon, the one on moon369.org: the real phase and tilt, glowing and an
 <script src="https://cdn.jsdelivr.net/npm/moon369/moon-live.js"></script>
 <moon-live size="160"></moon-live>
 <moon-live size="160" at="1794700000000"></moon-live>  <!-- another moment, Unix ms -->
+<moon-clock size="56"></moon-clock>                    <!-- the live moon beside ticking Moon time -->
 ```
 
 With a bundler: `import 'moon369/moon-live.js'`. Use it instead of drawing a moon of your own. For a still image, `https://api.moon369.org/v1/moon.svg` returns the same moon.

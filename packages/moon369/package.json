@@ -1,6 +1,6 @@
 {
   "name": "moon369",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Moon time, offline: the worldwide timestamp locked to the moon. Moonmarks, Moon dates, moon phase, Moon's live moon (<moon-live>) and signed Moonmark verification.",
   "license": "MIT",
   "author": "Moon <moon369org@proton.me>",

@@ -245,6 +245,14 @@
     (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { toast('LINK COPIED'); }, function () { window.prompt('Copy this link', url); });
   }
 
+  // Embed: the card as an image that links back to this moon, for a blog, a wedding site or a newsletter.
+  function embed() {
+    if (window.moonTrack) window.moonTrack('Share', { page: 'night', via: 'embed' });
+    var n = current.n, url = pageUrl(n), img = API + '/v1/night.png?' + query(n) + '&v=2';
+    var code = '<a href="' + url + '" target="_blank" rel="noopener"><img src="' + img + '" width="600" height="315" alt="The moon that night, on Moon" loading="lazy" style="max-width:100%;height:auto"></a>';
+    (navigator.clipboard ? navigator.clipboard.writeText(code) : Promise.reject()).then(function () { toast('EMBED CODE COPIED'); }, function () { window.prompt('Copy this embed code', code); });
+  }
+
   // ---------- the moon's path across that local day ----------
   function localClock(tz) {
     var f = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
@@ -370,7 +378,7 @@
 
   document.addEventListener('click', function (e) {
     var xl = e.target.closest && e.target.closest('[data-nt-x]'); if (xl) if (window.moonTrack) window.moonTrack('Share', { page: 'night', via: 'x' });
-    var t = e.target.closest && e.target.closest('.nt-chip,[data-try],[data-nt-share],[data-nt-save],[data-nt-copy],[data-nt-reset]');
+    var t = e.target.closest && e.target.closest('.nt-chip,[data-try],[data-nt-share],[data-nt-save],[data-nt-copy],[data-nt-embed],[data-nt-reset]');
     if (!t) return;
     if (t.classList.contains('nt-chip')) { setOccasion(t.getAttribute('data-for')); if (current && $('input[name=d]').value) { var n0 = fromForm(); if (n0) show(n0, false); } return; }
     if (t.hasAttribute('data-try')) {
@@ -383,6 +391,7 @@
     if (t.hasAttribute('data-nt-share')) share();
     else if (t.hasAttribute('data-nt-save')) save();
     else if (t.hasAttribute('data-nt-copy')) copy();
+    else if (t.hasAttribute('data-nt-embed')) embed();
     else if (t.hasAttribute('data-nt-reset')) { $('input[name=d]').value = ''; $('input[name=t]').value = ''; $('[data-nt-form]').scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(function () { $('input[name=d]').focus({ preventScroll: true }); }, 400); }
   });
   document.addEventListener('submit', function (e) {

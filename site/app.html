@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Moon time and the live moon in your pocket. Mark any moment with one tap and send a link that opens in everyone's own time.">
+<link rel="canonical" href="https://moon369.org/app">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/app">
+<meta property="og:title" content="Moon · the app">
+<meta property="og:description" content="Moon time and the live moon in your pocket. Mark any moment with one tap.">
+<meta property="og:image" content="https://moon369.org/assets/og/home.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="/app.webmanifest">
+<meta name="theme-color" content="#0B0B0D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Moon">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;overflow-x:hidden;overflow-x:clip;background:#0B0B0D;color:#E9E4D8;font-family:Inter,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+::selection{background:#24262A}
+a{color:#E9E4D8}
+.top{display:flex;justify-content:space-between;align-items:center;padding:18px 22px}
+.top svg{width:96px;height:auto;display:block}
+.top a{font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8A8B8F;text-decoration:none}
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px 28px;max-width:520px;width:100%;margin:0 auto}
+.stage{position:relative;width:min(62vw,240px);aspect-ratio:1;margin:8px 0 18px}
+.stage canvas{position:absolute;left:-45%;top:-45%;width:190%;height:190%;pointer-events:none}
+.k{font:11px 'JetBrains Mono',monospace;letter-spacing:.26em;color:#8A8B8F;text-align:center}
+.date{margin-top:8px;font:700 clamp(26px,8vw,38px)/1.1 Syncopate,sans-serif;letter-spacing:.06em;text-align:center}
+.clock{margin-top:8px;font:400 clamp(30px,10vw,46px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;text-align:center}
+.clock span{color:#8A8B8F;font-size:.42em;letter-spacing:.04em}
+.meta{margin-top:12px;font-size:14px;color:#A2A3A7;text-align:center;line-height:1.6}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;border:1px solid #E9E4D8;background:none;color:#E9E4D8;font:700 12px Syncopate,sans-serif;letter-spacing:.2em;cursor:pointer;text-decoration:none;border-radius:0}
+.btn.p{background:#E9E4D8;color:#0B0B0D}
+.acts{display:grid;gap:10px;width:100%;margin-top:26px}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.row .btn{min-height:48px;font-size:10px;letter-spacing:.16em}
+.recent{width:100%;margin-top:28px}
+.recent a{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #1C1D20;text-decoration:none;font-size:14px}
+.recent a span:last-child{font:12px 'JetBrains Mono',monospace;color:#8A8B8F;white-space:nowrap}
+.install{margin-top:22px;font-size:13px;color:#8A8B8F;text-align:center}
+.install button{background:none;border:0;color:#E9E4D8;text-decoration:underline;text-underline-offset:3px;font:inherit;cursor:pointer}
+.sheet{position:fixed;inset:0;background:rgba(5,5,6,.82);display:flex;align-items:flex-end;justify-content:center;z-index:9;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.sheet[hidden]{display:none}
+.panel{width:100%;max-width:520px;background:#0E0E11;border-top:1px solid #24262A;padding:24px 22px calc(24px + env(safe-area-inset-bottom));display:grid;gap:12px}
+.panel h2{margin:0;font:700 15px Syncopate,sans-serif;letter-spacing:.14em}
+.panel .mk{font:18px 'JetBrains Mono',monospace}
+.panel .lt{font-size:13px;color:#8A8B8F;margin-top:-6px}
+.panel input{width:100%;min-height:52px;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:16px Inter,sans-serif;padding:0 14px;border-radius:0}
+.panel input:focus{outline:none;border-color:#8A8B8F}
+.panel .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.panel .x{background:none;border:0;color:#8A8B8F;font:12px 'JetBrains Mono',monospace;letter-spacing:.2em;cursor:pointer;padding:10px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#E9E4D8;color:#0B0B0D;font:12px 'JetBrains Mono',monospace;padding:10px 16px;z-index:10}
+.toast[hidden]{display:none}
+.foot{padding:16px 22px 22px;text-align:center;font:11px 'JetBrains Mono',monospace;letter-spacing:.16em;color:#5E6064}
+.foot a{color:#8A8B8F;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="top">
+  <a href="/" aria-label="Moon home"><svg viewBox="-10 -10 424 120" aria-hidden="true"><path d="M4,100 V4 L48,64 L92,4 V100" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/><circle cx="172" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/><circle cx="232" cy="50" r="46" fill="none" stroke="#0B0B0D" stroke-width="18"/><circle cx="232" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#0B0B0D" stroke-width="18"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#E9E4D8" stroke-width="8"/><path d="M312,100 V4 L400,96 V0" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/></svg></a>
+  <a href="/night">YOUR MOON →</a>
+</div>
+<main>
+  <div class="stage"><canvas class="hm-moonglow" role="img" aria-label="The Moon right now" data-app-moon></canvas></div>
+  <div class="k">MOON TIME · THE SAME EVERYWHERE</div>
+  <div class="date" data-app-date>&nbsp;</div>
+  <div class="clock" data-app-clock>&nbsp;</div>
+  <div class="meta" data-app-meta>&nbsp;</div>
+  <div class="acts">
+    <button class="btn p" type="button" data-app-mark>MARK THIS MOMENT</button>
+    <div class="row">
+      <button class="btn" type="button" data-app-plan>PLAN</button>
+      <a class="btn" href="/night">BIRTHDAY</a>
+      <a class="btn" href="/sign">SIGN</a>
+    </div>
+  </div>
+  <div class="recent" data-app-recent hidden></div>
+  <div class="install" data-app-install hidden></div>
+</main>
+<div class="foot"><a href="/">MOON369.ORG</a> · WORLDWIDE TIME, LOCKED TO THE MOON</div>
+
+<div class="sheet" data-app-sheet hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sheet-h">
+    <h2 id="sheet-h" data-sheet-h>MARK THIS MOMENT</h2>
+    <div class="mk" data-sheet-mk></div>
+    <div class="lt" data-sheet-lt></div>
+    <input type="datetime-local" data-sheet-when hidden aria-label="Date and time, in your time">
+    <input type="text" maxlength="80" placeholder="What's happening? (optional)" data-sheet-name aria-label="Name this moment">
+    <button class="btn p" type="button" data-sheet-share>SHARE THE LINK</button>
+    <div class="two"><button class="btn" type="button" data-sheet-copy>COPY LINK</button><button class="btn" type="button" data-sheet-card>SAVE CARD</button></div>
+    <button class="x" type="button" data-sheet-close>CLOSE</button>
+  </div>
+</div>
+<div class="toast" data-app-toast hidden role="status"></div>
+
+<script src="/js/moon-phase.js" defer></script>
+<script src="/js/moonglow.js" defer></script>
+<script src="/js/app.js" defer></script>
+</body>
+</html>

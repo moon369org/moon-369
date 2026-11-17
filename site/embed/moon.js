@@ -1,6 +1,7 @@
-/* Moon embed. One script, three tags:
+/* Moon embed. One script, four tags:
  *   <moon-badge sha256="…"></moon-badge>   a small badge that shows who registered a file and when
  *   <moon-check></moon-check>              a drop zone: drop any file, see if it is on Moon
+ *   <moon-clock size="56"></moon-clock>    the live moon beside ticking Moon time, linked to moon369.org
  *   <moon-live size="160"></moon-live>     Moon's live moon: today's phase and tilt, glowing and animated (at="<unix ms>" for another moment)
  * Files never leave the browser. Only the fingerprint (and, for images, a 64-bit look-alike hash) is sent.
  * <script src="https://moon369.org/embed/moon.js" defer></script>
@@ -219,7 +220,7 @@
   // <moon-live>: loaded only when a page uses it, from the same one-file script the moon369 npm package ships.
   var SITE = (document.currentScript && document.currentScript.getAttribute('data-site')) || API.replace('//api.', '//'), liveAsked = false;
   function wantLive() {
-    if (liveAsked || customElements.get('moon-live') || !document.querySelector('moon-live')) return;
+    if (liveAsked || customElements.get('moon-live') || !document.querySelector('moon-live,moon-clock')) return;
     liveAsked = true; var sc = document.createElement('script'); sc.src = SITE + '/js/moon-live.js'; sc.async = true; document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wantLive); else wantLive();
