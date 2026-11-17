@@ -25,6 +25,7 @@ function hoistHelmet(html) {
     html = html.replace(/<!--snapshot-->[\s\S]*?<!--\/snapshot-->\n?/, '');
     fs.writeFileSync(file, html);
     const pg = await b.newPage();
+    await pg.evaluateOnNewDocument(() => { try { localStorage.setItem('moonLang', 'en'); } catch (e) {} });
     await pg.setViewport({ width: 1440, height: 900 });
     await pg.goto(`${BASE}/${name}.html`, { waitUntil: 'domcontentloaded' });
     await new Promise((r) => setTimeout(r, 2500));
@@ -38,6 +39,7 @@ function hoistHelmet(html) {
       while (w.nextNode()) { if (a[i] !== b2[i]) live.push(w.currentNode); i++; }
       live.forEach((t) => { const s = document.createElement('span'); s.style.visibility = 'hidden'; t.replaceWith(s); s.appendChild(t); });
       clone.querySelectorAll('[data-mk-root]').forEach((e) => { e.innerHTML = ''; });   // filled from the URL
+      clone.querySelectorAll('.mlp-g,.mlp-f,.mlp-m').forEach((e) => e.remove());   // the language picker is added live
       clone.querySelectorAll('svg').forEach((v) => { if (v.outerHTML.length > 15000) v.innerHTML = ''; });   // big maps: keep the space, skip the weight
       clone.querySelectorAll('canvas').forEach((c) => { c.removeAttribute('width'); c.removeAttribute('height'); });
       clone.removeAttribute('data-dc-root');
