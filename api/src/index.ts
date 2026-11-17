@@ -20,6 +20,7 @@ import { makeRegistration, publicRegistration, isPhash, phashKind, hamming, band
 import { svgToPng } from './png.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
 import { QUICKNET, BEACON_NETWORK, roundTimeNs, type Beacon, type Chain } from './beacon.js';
+import { checkLinkedFile, FileCheckError } from './filecheck.js';
 import { TIDELINE, record, sealDue, sealIfDue, stats as tideStats, upgradeBitcoin, checkpointSoon, proofFor, parseLune, luneLabel, luneOf, luneEndNs, tideBytes, type TideStore, type Anchorer, type BitcoinStamper } from './tideline.js';
 
 /** max overrides the limiter's default requests per minute (used for per-key limits). */
@@ -525,7 +526,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   if (path.startsWith(`/${API_VERSION}/admin/`)) return adminRoute(req, env, path);
@@ -1059,6 +1060,20 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           ...(tsa.ok && ((tsa as { certificate: { days_left: number } }).certificate.days_left < 60) ? ['tsa_certificate_expiring'] : []),
         ];
         return json({ ok: problems.length === 0, problems, checked_utc: unixNsToIso(nowNs), took_ms: Date.now() - t0, signing, beacon, timestamps: tsa, tideline }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/file-check`: {
+        // A creator's link to their file: is it exactly the file Moon signed? Moon returns only the verdict, never the file.
+        const link = url.searchParams.get('url') || '', want = (url.searchParams.get('sha256') || '').toLowerCase();
+        if (!/^[0-9a-f]{64}$/.test(want)) throw new HttpError(400, 'bad_param', 'sha256 must be 64 hex characters');
+        if (!link || link.length > 2000) throw new HttpError(400, 'bad_param', 'Give the file\'s https link as url');
+        try {
+          const c = await checkLinkedFile(link, want);
+          return json({ url: link, ...c }, 200, { 'Cache-Control': c.match ? 'public, max-age=600, s-maxage=86400' : 'public, max-age=60, s-maxage=300' });
+        } catch (e) {
+          if (e instanceof FileCheckError) return json({ url: link, match: false, error: { code: e.code, message: e.message } }, e.code === 'bad_url' || e.code === 'blocked' ? 400 : 422, { 'Cache-Control': 'public, max-age=60' });
+          throw e;
+        }
       }
 
       case path === `/${API_VERSION}/stats`: {

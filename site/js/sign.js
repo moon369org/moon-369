@@ -40,7 +40,7 @@
         return fetch(API + '/v1/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       }).then(function (r) { return r.json().then(function (b) { return { ok: r.ok, status: r.status, b: b }; }); }).then(function (x) {
         if (!x.ok) throw new Error(x.status === 429 ? 'Too many requests right now. Try again in a minute.' : ((x.b && x.b.error && x.b.error.message) || 'Signing failed. Try again.'));
-        last = { item: item, sha: sha, rc: x.b.receipt, url: x.b.signed_url, page: x.b.moonmark_url };
+        last = { item: item, sha: sha, rc: x.b.receipt, url: x.b.signed_url, base: x.b.signed_url, page: x.b.moonmark_url };
         status(''); show();
         try { window.moonTrack && window.moonTrack('sign_page', { kind: item.kind }); } catch (e) {}
       });
@@ -71,6 +71,9 @@
             (/^photo-\d{8}-\d{6}\./.test(L.item.name || '') ? '<button type="button" class="sg-btn" data-sg-a="photo">SAVE PHOTO</button>' : '') +
             '<a class="sg-btn" href="' + esc(L.url) + '" target="_blank" rel="noopener">OPEN →</a>' +
           '</div>' +
+          (L.item.kind === 'file' ? '<div class="sg-where"><label for="sg-where">WHERE IS IT ONLINE? <span>Optional. Link your original file and it shows on the Moonmark, verified, in a viewer.</span></label>' +
+            '<div class="sg-link"><input id="sg-where" type="url" inputmode="url" placeholder="https://your-site.com/work/original.png" value="' + esc(L.fileUrl || '') + '" data-sg-where><button type="button" class="sg-btn" data-sg-a="where">' + (L.fileUrl ? 'UPDATE' : 'ADD TO LINK') + '</button></div>' +
+            '<div class="sg-where-m" data-sg-where-m>' + (L.whereMsg || '') + '</div></div>' : '') +
           '<p class="sg-note">' + (L.item.kind === 'text'
             ? 'To check it later, drop the saved text file on <a href="/verify">Verify</a>. It must match exactly, down to every space and line break.'
             : 'Anyone can drop this exact file on <a href="/verify">Verify</a> to see it was signed, and when.') + ' The receipt proves it on its own, even without Moon.</p>' +
@@ -127,6 +130,23 @@
 
   function act(a) {
     var L = last; if (!L) return;
+    if (a === 'where') {
+      var v = ($('[data-sg-where]').value || '').trim(), m = $('[data-sg-where-m]');
+      if (!v) { L.fileUrl = ''; L.url = L.base; L.whereMsg = ''; show(); return; }
+      if (!/^https:\/\/[^\s]+$/i.test(v) || v.length > 1500) { m.className = 'sg-where-m bad'; m.textContent = 'Use the full https link to the file itself.'; return; }
+      m.className = 'sg-where-m'; m.textContent = 'Checking the file at that link…';
+      var mine = function (h) { return h === L.sha; };
+      // Try the file straight from this browser first; if the site doesn't allow that, Moon checks it.
+      fetch(v, { mode: 'cors' }).then(function (r) { if (!r.ok) throw 0; return r.arrayBuffer(); }).then(function (b) { return crypto.subtle.digest('SHA-256', b); })
+        .then(function (d) { return { match: mine(hex(d)) }; })
+        .catch(function () { return fetch(API + '/v1/file-check?url=' + encodeURIComponent(v) + '&sha256=' + L.sha).then(function (r) { return r.json(); }); })
+        .then(function (c) {
+          if (c && c.match) { L.fileUrl = v; L.url = L.base + '&f=' + encodeURIComponent(v); L.whereMsg = '<span class="ok">✓ That is the exact file. The link above now shows it on the Moonmark, verified.</span>'; show(); return; }
+          m.className = 'sg-where-m bad';
+          m.textContent = c && c.error ? c.error.message + '.' : 'The file at that link is not the exact file you signed. Sites like Instagram and X re-compress images, so link the original (your site, Dropbox, IPFS).';
+        }).catch(function () { m.className = 'sg-where-m bad'; m.textContent = 'Could not check that link. Try again.'; });
+      return;
+    }
     var base = L.item.kind === 'text' ? 'moon-text-' + L.rc.moonmark.slice(0, 10) : safeName(L.item.name);
     if (a === 'copy') {
       var inp = $('.sg-link input'); inp.select();
@@ -184,6 +204,7 @@
     document.querySelectorAll('[data-sg-chip]').forEach(function (b) { b.onclick = function () { lbl.value = lbl.value === b.textContent ? '' : b.textContent; document.querySelectorAll('[data-sg-chip]').forEach(function (x) { x.classList.toggle('on', x.textContent === lbl.value); }); }; });
     lbl.oninput = function () { document.querySelectorAll('[data-sg-chip]').forEach(function (x) { x.classList.toggle('on', x.textContent === lbl.value); }); };
     $('[data-sg-out]').addEventListener('click', function (e) { var b = e.target.closest('[data-sg-a]'); if (b) act(b.dataset.sgA); });
+    $('[data-sg-out]').addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.matches('[data-sg-where]')) { e.preventDefault(); act('where'); } });
     // Deep links: #text opens the text tab; #text=... prefills it (for tools that hand over AI output or a page's text).
     var h = location.hash;
     if (/^#text/.test(h)) { setMode('text'); var m = /^#text=(.*)$/.exec(h); if (m) { try { ta.value = decodeURIComponent(m[1]); ta.oninput(); } catch (e) {} } }
