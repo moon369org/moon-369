@@ -362,7 +362,7 @@
       (post && rc && !linkedFile() ? '<button type="button" class="mk-photo" data-mk-photo hidden aria-label="View the photo"></button>' : '') +
       (fresh ? '<div class="mk-l">JUST MARKED</div>' : '') +
       (note ? '<blockquote class="mk-q">' + esc(note) + '</blockquote>' : '') +
-      (post ? '<div class="mk-ts" translate="no">' + esc(stamp) + '</div>' : '') +
+      (post ? '<div class="mk-ts" translate="no"><b>' + text(mk) + nsGroups(mk.ns) + '</b><span>' + esc(stamp) + '</span></div>' : '') +
       (ev ? '<div class="mk-cd" data-mk-cd><div class="mk-l" data-mk-cd-l>STARTS IN</div><div class="mk-cd-c" data-mk-cd-c></div></div>' +
         '<div class="mk-when"><span>YOUR LOCAL TIME</span><b>' + esc(local) + ' ' + esc(abbr) + '</b></div>' : '') +
       (rc && coa ? '<div data-mk-coa></div>' : '') +
