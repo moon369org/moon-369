@@ -209,6 +209,8 @@
 "Om {t}: {lvl}, {dir}.",
 "opkomend",
 "afgaand",
-"TERUG NAAR NU"],
+"TERUG NAAR NU",
+"{n} MOMENTEN",
+"1 MOMENT"],
   site: {}
 };

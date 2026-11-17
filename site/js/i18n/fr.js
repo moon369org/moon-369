@@ -211,6 +211,8 @@
 "À {t} : {lvl}, {dir}.",
 "montante",
 "descendante",
-"REVENIR À MAINTENANT"],
+"REVENIR À MAINTENANT",
+"{n} MOMENTS",
+"1 MOMENT"],
   site: {}
 };

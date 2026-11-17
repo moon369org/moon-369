@@ -216,4 +216,6 @@ window.MOON_I18N_APP_KEYS = ["NOW",
 "At {t}: {lvl}, {dir}.",
 "rising",
 "falling",
-"BACK TO NOW"];
+"BACK TO NOW",
+"{n} MOMENTS",
+"1 MOMENT"];

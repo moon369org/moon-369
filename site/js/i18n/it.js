@@ -211,6 +211,8 @@
 "Alle {t}: {lvl}, {dir}.",
 "in crescita",
 "in calo",
-"TORNA AD ADESSO"],
+"TORNA AD ADESSO",
+"{n} MOMENTI",
+"1 MOMENTO"],
   site: {}
 };

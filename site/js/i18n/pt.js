@@ -211,6 +211,8 @@
 "Às {t}: {lvl}, {dir}.",
 "subindo",
 "descendo",
-"VOLTAR PARA AGORA"],
+"VOLTAR PARA AGORA",
+"{n} MOMENTOS",
+"1 MOMENTO"],
   site: {}
 };

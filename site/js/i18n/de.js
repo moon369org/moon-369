@@ -203,6 +203,8 @@
 "Um {t}: {lvl}, {dir}.",
 "steigend",
 "fallend",
-"ZURÜCK ZU JETZT"],
+"ZURÜCK ZU JETZT",
+"{n} MOMENTE",
+"1 MOMENT"],
   site: {}
 };

@@ -52,7 +52,7 @@
     setStars();
     if (!r.length) { box.hidden = true; editing = false; return; }
     box.hidden = false;
-    box.innerHTML = '<div class="rh"><span class="k">YOUR MOMENTS</span><button type="button" class="ed" data-m-edit>' + (editing ? 'DONE' : 'EDIT') + '</button></div>' +
+    box.innerHTML = '<div class="rh"><span class="k"><span translate="no">MOONLOG</span><i class="rh-n"> | ' + (r.length === 1 ? T('1 MOMENT') : T('{n} MOMENTS', { n: r.length.toLocaleString(LOC) })) + '</i></span><button type="button" class="ed" data-m-edit>' + (editing ? 'DONE' : 'EDIT') + '</button></div>' +
       (editing ? '<div class="enote2">Removing a moment only clears it from this phone. The proof stays on Moon and its link still works.</div>' : '') +
       r.map(function (x, i) {
         var row = '<a class="' + (x.sha ? 'ph' : '') + '" href="' + esc(x.url) + '"><span class="nm">' + (x.sha ? '<img alt="" data-thumb="' + esc(x.sha) + '">' : '') + '<span>' + esc(x.name || (x.sha ? 'A photo' : 'A moment')) + '</span></span><span>' + esc(text(moon(x.ms + 1))) + '</span></a>';
