@@ -32,6 +32,7 @@ a{color:#E9E4D8}
 .top a{font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8A8B8F;text-decoration:none}
 main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px calc(96px + env(safe-area-inset-bottom));max-width:520px;width:100%;margin:0 auto}
 .stage{position:relative;width:min(62vw,240px);aspect-ratio:1;margin:8px 0 18px}
+.stage[hidden],[data-sky-chart][hidden],.sky-h[hidden]{display:none}
 .stage canvas{position:absolute;left:-45%;top:-45%;width:190%;height:190%;pointer-events:none}
 .k{font:11px 'JetBrains Mono',monospace;letter-spacing:.26em;color:#8A8B8F;text-align:center}
 .date{margin-top:8px;font:700 clamp(26px,8vw,38px)/1.1 Syncopate,sans-serif;letter-spacing:.06em;text-align:center}
@@ -130,16 +131,58 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .panel textarea:focus{outline:none;border-color:#8A8B8F}
 .panel textarea.short{min-height:52px;height:52px;padding:14px;overflow:hidden}
 .stage canvas.stars{left:-62%;top:-12%;width:224%;height:124%;rotate:0deg;z-index:1}
+.vsw{display:grid;grid-template-columns:1fr 1fr;border:1px solid #3A3B3F}
+.vsw button{background:none;border:0;color:#8A8B8F;font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;min-height:36px;padding:0 14px;cursor:pointer}
+.vsw button[aria-selected="true"]{background:#E9E4D8;color:#0B0B0D}
+.skyv[hidden]{display:none}.skyv{width:100%;display:flex;flex-direction:column;gap:12px;margin:4px 0 22px}
+.sky-h{font-size:15px;line-height:1.5;text-align:center;color:#E9E4D8;min-height:3em}
+.sky-h:empty{display:none}
+.sky-ask{display:flex;flex-direction:column;gap:14px;border:1px dashed #3A3B3F;padding:20px}
+.sky-ask[hidden]{display:none}.sky-ask p{margin:0;font-size:13px;line-height:1.55;color:#A2A3A7}
+.sk-sky{position:relative;width:100%;aspect-ratio:1000/440}
+.sk-sky canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sk-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #24262A}
+.sk-stats>div{padding:18px 24px;display:flex;flex-direction:column;gap:6px}.sk-stats>div+div{border-left:1px solid #24262A}
+.sk-k{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
+.sk-stats b{font-family:'Syncopate',sans-serif;font-size:clamp(18px,2vw,26px);letter-spacing:.04em}
+.sk-s{font-size:13px;color:#8A8B8F}
+.sk-scrub{padding:20px 32px 24px;border-top:1px solid #24262A;display:flex;flex-direction:column;gap:10px}
+.sk-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sk-now{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.14em}
+.sk-play{all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 16px;display:inline-flex;align-items:center;border:1px solid #2E3035;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9.5px;letter-spacing:.2em;white-space:nowrap}
+.sk-play:hover,.sk-play[aria-pressed="true"]{border-color:#E9E4D8}.sk-play:focus-visible{outline:2px solid #E9E4D8;outline-offset:3px}
+.sk-track{position:relative;height:44px}
+.sk-bar{position:absolute;left:0;right:0;top:20px;height:4px;background:#24262A}
+.sk-up{position:absolute;top:18px;height:8px;background:#E9E4D8;opacity:.85}
+.sk-track input{position:absolute;inset:0;width:100%;height:44px;margin:0;background:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+.sk-track input:focus{outline:none}
+.sk-track input::-webkit-slider-runnable-track{height:44px;background:none}
+.sk-track input::-moz-range-track{height:44px;background:none}
+.sk-track input::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;margin-top:6px;border-radius:50%;background:#0B0B0D;border:2px solid #E9E4D8;box-shadow:0 0 18px rgba(233,228,216,.5)}
+.sk-track input::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#0B0B0D;border:2px solid #E9E4D8;box-shadow:0 0 18px rgba(233,228,216,.5)}
+.sk-track input:focus-visible::-webkit-slider-thumb{outline:2px solid #E9E4D8;outline-offset:3px}
+.sk-ticks{position:relative;height:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#55565B;letter-spacing:.08em}.sk-ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.sk-play{gap:8px;flex:none;justify-content:center;min-width:104px}.sk-play svg{flex:none}.sk-now{flex:1 1 auto;min-width:0;line-height:1.5}.sk-now span{white-space:nowrap}
+.sk-track input{font-size:16px}
+.sk-sky{aspect-ratio:520/470}.sk-stats>div{padding:14px 10px}.sk-scrub{padding:16px 0 4px}.sk-play{padding:0 12px;font-size:9px}.sk-now{font-size:11px;letter-spacing:.08em;min-height:3em}
+@media (max-width:360px){.sk-now{font-size:10px;letter-spacing:.04em}.sk-row{gap:10px}.sk-play{min-width:0;width:48px;padding:0}.sk-play .sk-pl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
+.sk-stats b{font-size:16px}
 </style>
 </head>
 <body>
 <div class="top">
   <a href="/" aria-label="Moon home"><svg viewBox="-10 -10 424 120" aria-hidden="true"><path d="M4,100 V4 L48,64 L92,4 V100" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/><circle cx="172" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/><circle cx="232" cy="50" r="46" fill="none" stroke="#0B0B0D" stroke-width="18"/><circle cx="232" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#0B0B0D" stroke-width="18"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#E9E4D8" stroke-width="8"/><path d="M312,100 V4 L400,96 V0" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/></svg></a>
-  <a href="/">MOON369.ORG →</a>
+  <div class="vsw" role="tablist" aria-label="View"><button type="button" role="tab" aria-selected="true" data-view="moon">MOON</button><button type="button" role="tab" aria-selected="false" data-view="sky">SKY</button></div>
 </div>
 <main>
   <section class="scr" data-scr="now">
     <div class="stage"><canvas class="hm-moonglow" role="img" aria-label="The Moon right now" data-app-moon></canvas><canvas class="stars" aria-hidden="true" data-app-stars></canvas></div>
+    <div class="skyv" data-skyv hidden>
+      <div class="k" data-sky-k>THE MOON'S PATH TODAY</div>
+      <div class="sky-ask" data-sky-ask hidden><p>The moon's path depends on where you are. Your location stays on this phone.</p><button class="btn p" type="button" data-sky-loc>USE MY LOCATION</button></div>
+      <div class="sky-h" data-sky-h></div>
+      <div data-sky-chart></div>
+    </div>
     <div class="k">MOON TIME · THE SAME EVERYWHERE</div>
     <div class="date" data-app-date>&nbsp;</div>
     <div class="clock" data-app-clock>&nbsp;</div>
@@ -212,6 +255,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 <div class="toast" data-app-toast hidden role="status"></div>
 
 <script src="/js/moon-phase.js" defer></script>
+<script src="/js/sky.js" defer></script>
 <script src="/js/moonglow.js" defer></script>
 <script src="/js/qrcode.js" defer></script>
 <script src="/js/moonqr.js" defer></script>

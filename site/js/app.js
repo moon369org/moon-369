@@ -305,6 +305,49 @@
   function noteWhen() { var v = Date.parse($('[data-e-when]').value); $('[data-e-note]').textContent = isNaN(v) ? 'Everyone who opens the link sees it in their own time.' : 'Moonmark ' + text(moon(Math.floor(v / 1000) * 1000 + 1)) + '. Everyone who opens the link sees it in their own time.'; }
 
   // ---------- screens ----------
+  // ---------- MOON / SKY: the moon itself, or its path across your sky today ----------
+  var view = 'moon', skyBox = null;
+  try { view = localStorage.getItem('moonView') === 'sky' ? 'sky' : 'moon'; } catch (e) {}
+  function place() { try { var p = JSON.parse(localStorage.getItem('moonPlace') || 'null'); return p && isFinite(p.lat) && isFinite(p.lng) ? p : null; } catch (e) { return null; } }
+  function setView(v, fromTap) {
+    view = v; try { localStorage.setItem('moonView', v); } catch (e) {}
+    $$('[data-view]').forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-view') === v)); });
+    var sky = v === 'sky';
+    $('[data-scr="now"] .stage').hidden = sky; $('[data-skyv]').hidden = !sky;
+    if (sky) drawPath(); else if (skyBox) { skyBox.stop(); }
+    if (fromTap) { go('now'); buzz(); }
+  }
+  function drawPath() {
+    var p = place();
+    $('[data-sky-ask]').hidden = !!p; $('[data-sky-chart]').hidden = !p; $('[data-sky-h]').hidden = !p;
+    if (!p || !window.MoonSky) return;
+    var now = Date.now(), fmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
+    var dayOf = function (t) { var d = new Date(t); return d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate(); }, today = dayOf(now);
+    $('[data-sky-k]').textContent = "THE MOON'S PATH · LOOKING " + (p.lat >= 0 ? 'SOUTH' : 'NORTH');
+    if (skyBox) skyBox.stop();
+    skyBox = MoonSky.mount($('[data-sky-chart]'), {
+      t0: now - 16 * 3600000, t1: now + 16 * 3600000, at: now, lat: p.lat, lng: p.lng,
+      f: window.MoonPhase ? MoonPhase.fraction(now) : 0.5,
+      clock: function (t) { return fmt.format(new Date(t)); },
+      dayTag: function (t) { var d = dayOf(t); return d < today ? ' · yesterday' : d > today ? ' · tomorrow' : ''; },
+      onTime: function (t, m) {
+        var nowish = Math.abs(t - Date.now()) < 90000, w = nowish ? 'is' : t > Date.now() ? 'will be' : 'was';
+        var when = nowish ? 'Right now' : 'At ' + fmt.format(new Date(t));
+        $('[data-sky-h]').textContent = m.alt > -0.27 ? when + ' the moon ' + w + ' ' + Math.max(0, Math.round(m.alt)) + '\u00b0 up in the ' + MoonSky.compass(m.az) + '.'
+          : when + ' the moon ' + w + ' below the horizon.';
+      },
+    });
+  }
+  function askPlace() {
+    if (!navigator.geolocation) { toast('Location is not available on this device'); return; }
+    var b = $('[data-sky-loc]'); b.textContent = 'FINDING YOU…';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      // Rounded to about a kilometre: plenty for the sky, and it never leaves this phone.
+      try { localStorage.setItem('moonPlace', JSON.stringify({ lat: Math.round(pos.coords.latitude * 100) / 100, lng: Math.round(pos.coords.longitude * 100) / 100 })); } catch (e) {}
+      b.textContent = 'USE MY LOCATION'; drawPath(); buzz();
+    }, function () { b.textContent = 'USE MY LOCATION'; toast('Allow location for Moon in Settings to see the sky'); }, { maximumAge: 3600000, timeout: 15000 });
+  }
+
   function go(name) {
     $$('[data-scr]').forEach(function (s) { s.hidden = s.getAttribute('data-scr') !== name; });
     $$('[data-tab]').forEach(function (b) { if (b.getAttribute('data-tab') === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
@@ -328,6 +371,9 @@
     requestAnimationFrame(tick); showMoments(); showNights(); showEvents(); iosHint();
     setInterval(showEvents, 30000);
     $$('[data-tab]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-tab')); }; });
+    $$('[data-view]').forEach(function (b) { b.onclick = function () { setView(b.getAttribute('data-view'), true); }; });
+    $('[data-sky-loc]').onclick = askPlace;
+    setView(view, false);
     $$('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
     $('[data-app-mark]').onclick = function () { openSheet('moment', Date.now()); };
     $('[data-sheet-close]').onclick = closeSheet;
