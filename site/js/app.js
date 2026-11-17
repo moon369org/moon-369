@@ -77,7 +77,9 @@
       // A spot in the band beside the moon (in moon widths from its centre), never on the moon or the words.
       var g = seeded((x.ms / 1000) | 0), px = 0, py = 0;
       for (var i = 0; i < 40; i++) { px = (g() * 2 - 1) * 1.08; py = (g() * 2 - 1) * 0.56; if (Math.sqrt(px * px + py * py) > 0.64) break; }
-      return { px: px, py: py, size: (x.sha ? 1.25 : 1) * (0.7 + g() * 0.9), sp: 0.6 + g() * 1.4, ph: g() * 6.28, ms: x.ms };
+      // Weight: longer notes and photos make bigger, brighter stars; a quick few words, a small dim one.
+      var w = Math.min(1, (x.name ? x.name.length : 0) / 200 + (x.sha ? 0.6 : 0));
+      return { px: px, py: py, size: (0.5 + 1.7 * w) * (0.85 + g() * 0.3), lum: 0.35 + 0.65 * w, sp: 0.6 + g() * 1.4, ph: g() * 6.28, ms: x.ms };
     });
     if (STARS.list.length > prev && prev) STARS.born = performance.now();
     if (!STARS.raf) STARS.raf = requestAnimationFrame(drawStars);
@@ -94,7 +96,7 @@
     var newest = STARS.list.reduce(function (m, s) { return s.ms > m.ms ? s : m; }, STARS.list[0]), age = (now - STARS.born) / 1000;
     STARS.list.forEach(function (s) {
       var unit = W / 2.24, x = cx + s.px * unit, y = cy + s.py * unit;   // the canvas is 2.24 moon widths wide
-      var tw = still ? 0.8 : 0.55 + 0.45 * Math.sin(t * s.sp + s.ph), size = s.size * dpr * 1.3;
+      var tw = (still ? 0.8 : 0.55 + 0.45 * Math.sin(t * s.sp + s.ph)) * (s.lum || 1), size = s.size * dpr * 1.3;
       if (s === newest && STARS.born && age < 2.5) { var k = 1 - age / 2.5; size *= 1 + 2.2 * k; tw = Math.min(1, tw + k); }
       var g = c.createRadialGradient(x, y, 0, x, y, size * 4);
       g.addColorStop(0, 'rgba(233,228,216,' + (0.9 * tw) + ')'); g.addColorStop(0.25, 'rgba(233,228,216,' + (0.35 * tw) + ')'); g.addColorStop(1, 'rgba(233,228,216,0)');
