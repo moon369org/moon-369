@@ -90,7 +90,13 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .qr svg{width:170px;height:170px}
 .fld{display:flex;flex-direction:column;gap:7px;min-width:0}
 .fl{font:10px 'JetBrains Mono',monospace;letter-spacing:.22em;color:#8A8B8F}
-.fw{position:relative;display:block}
+.fw{position:relative;display:block;min-width:0}
+.two.f{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+/* iOS draws date and time fields at their own size; make them plain boxes that fill the column. */
+.fw input{-webkit-appearance:none;appearance:none;display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;height:52px;min-height:52px;margin:0;padding:0 14px;line-height:52px;text-align:left}
+.fw input::-webkit-date-and-time-value{text-align:left;margin:0;min-height:52px;line-height:52px}
+.fw input::-webkit-datetime-edit{padding:0;line-height:52px}
+.fw input::-webkit-calendar-picker-indicator{filter:invert(.85);opacity:.7}
 .fw .ph{position:absolute;left:14px;top:26px;transform:translateY(-50%);pointer-events:none;color:#5E6064;font-size:15px;white-space:nowrap}
 .fw input.empty::-webkit-datetime-edit{color:transparent}
 .fw input.empty:focus::-webkit-datetime-edit{color:inherit}
