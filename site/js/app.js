@@ -85,7 +85,7 @@
   // Every star goes where it can be seen: on screen, below the top bar, above the words, off the moon.
   // Each star tries spots from its own seed, so it lands in the same place every time on the same screen.
   function layoutStars(cv, dpr) {
-    var cr = cv.getBoundingClientRect(), top = $('.top'), lab = $('[data-scr="now"] .k'), st = $('[data-scr="now"] .stage');
+    var cr = cv.getBoundingClientRect(), top = $('.top'), lab = $('[data-scr="now"] > .k'), st = $('[data-scr="now"] .stage');
     var L = Math.max(cr.left, 12), Rt = Math.min(cr.right, document.documentElement.clientWidth - 12);
     var T = Math.max(cr.top, top ? top.getBoundingClientRect().bottom + 8 : cr.top), B = Math.min(cr.bottom, lab ? lab.getBoundingClientRect().top - 8 : cr.bottom);
     var sr = st.getBoundingClientRect(), mx = sr.left + sr.width / 2, my = sr.top + sr.height / 2, mr = sr.width / 2 + 12;
