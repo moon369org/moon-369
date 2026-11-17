@@ -450,7 +450,17 @@
     $$('[data-tab]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-tab')); }; });
     $$('[data-view]').forEach(function (b) { b.onclick = function () { setView(b.getAttribute('data-view'), true); }; });
     $('[data-sky-loc]').onclick = askPlace;
-    $$('[data-lang]').forEach(function (b) { b.setAttribute('aria-current', String(b.getAttribute('data-lang') === LANG)); b.onclick = function () { if (window.MoonI18n && b.getAttribute('data-lang') !== LANG) MoonI18n.set(b.getAttribute('data-lang')); }; });
+    // Language picker: the globe in the top bar. Automatic follows the phone.
+    var chosen = null; try { chosen = localStorage.getItem('moonLang'); } catch (e) {}
+    var LANGS = [['auto', 'Automatic', T('PHONE SETTING')], ['en', 'English', 'ENGLISH'], ['es', 'Español', 'SPANISH']];
+    $('[data-lang-list]').innerHTML = LANGS.map(function (l) { var on = l[0] === 'auto' ? !chosen : chosen === l[0]; return '<button type="button" data-lang="' + l[0] + '" aria-current="' + on + '">' + esc(l[0] === 'auto' ? T('Automatic') : l[1]) + ' <span>' + esc(l[2]) + '</span></button>'; }).join('');
+    $('[data-lang-open]').onclick = function () { $('[data-lang-sheet]').hidden = false; buzz(); };
+    $('[data-lang-close]').onclick = function () { $('[data-lang-sheet]').hidden = true; };
+    $('[data-lang-sheet]').addEventListener('click', function (e) {
+      if (e.target === this) { this.hidden = true; return; }
+      var b = e.target.closest('[data-lang]'); if (!b || !window.MoonI18n) return;
+      MoonI18n.set(b.getAttribute('data-lang'));
+    });
     $('[data-sky-zip]').addEventListener('submit', zipPlace);
     $('[data-sky-change]').onclick = function () { try { localStorage.removeItem('moonPlace'); } catch (e) {} if (skyBox) skyBox.stop(); drawPath(); };
     setView(view, false);

@@ -189,12 +189,20 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .langs{margin-top:26px;display:flex;justify-content:center;align-items:center;gap:10px;font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5E6064}
 .langs button{background:none;border:0;color:#8A8B8F;font:inherit;letter-spacing:inherit;min-height:40px;padding:0 4px;cursor:pointer}
 .langs button[aria-current="true"]{color:#E9E4D8;text-decoration:underline;text-underline-offset:4px}
+.tr{display:flex;align-items:center;gap:8px}
+@media (max-width:400px){.top{padding:18px 16px}.top svg{width:78px}.vsw button{padding:0 7px;letter-spacing:.1em;font-size:10.5px}.globe{width:36px;height:36px}}
+.globe{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid #3A3B3F;color:#B9B6AE;cursor:pointer;padding:0}
+.globe svg{width:20px;height:20px}
+.lgl{display:grid;border-top:1px solid #1C1D20}
+.lgl button{display:flex;justify-content:space-between;align-items:center;min-height:56px;background:none;border:0;border-bottom:1px solid #1C1D20;color:#E9E4D8;font:15px 'JetBrains Mono',monospace;text-align:left;padding:0 4px;cursor:pointer}
+.lgl button{gap:14px}.lgl button span{margin-left:auto;font-size:11px;letter-spacing:.18em;color:#8A8B8F}.lgl button[aria-current="true"]::after{min-width:14px}.lgl button:not([aria-current="true"])::after{content:'';min-width:14px}
+.lgl button[aria-current="true"]::after{content:'✓';font-size:16px}
 </style>
 </head>
 <body>
 <div class="top">
   <a href="/" aria-label="Moon home"><svg viewBox="-10 -10 424 120" aria-hidden="true"><path d="M4,100 V4 L48,64 L92,4 V100" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/><circle cx="172" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/><circle cx="232" cy="50" r="46" fill="none" stroke="#0B0B0D" stroke-width="18"/><circle cx="232" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#0B0B0D" stroke-width="18"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#E9E4D8" stroke-width="8"/><path d="M312,100 V4 L400,96 V0" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/></svg></a>
-  <div class="vsw" role="tablist" aria-label="View"><button type="button" role="tab" aria-selected="true" data-view="moon">MOON</button><button type="button" role="tab" aria-selected="false" data-view="sky">SKY</button><button type="button" role="tab" aria-selected="false" data-view="tide">TIDE</button></div>
+  <div class="tr"><div class="vsw" role="tablist" aria-label="View"><button type="button" role="tab" aria-selected="true" data-view="moon">MOON</button><button type="button" role="tab" aria-selected="false" data-view="sky">SKY</button><button type="button" role="tab" aria-selected="false" data-view="tide">TIDE</button></div><button type="button" class="globe" data-lang-open aria-label="Language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.4"/><ellipse cx="12" cy="12" rx="4.2" ry="9.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 12h18M4.6 7.2h14.8M4.6 16.8h14.8" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 </div>
 <main>
   <section class="scr" data-scr="now">
@@ -224,7 +232,6 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
     </div>
     <div class="recent" data-app-recent hidden></div>
     <div class="install" data-app-install hidden></div>
-    <div class="langs" data-langs aria-label="Language"><button type="button" data-lang="en">ENGLISH</button><span>·</span><button type="button" data-lang="es">ESPAÑOL</button></div>
   </section>
   <section class="scr" data-scr="nights" hidden>
     <div class="k" style="margin-top:6px">EXPLORE A NIGHT</div>
@@ -254,6 +261,11 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
     <div class="recent" data-e-list hidden></div>
   </section>
 </main>
+<div class="sheet" data-lang-sheet hidden role="dialog" aria-modal="true" aria-labelledby="lang-h"><div class="panel">
+  <h2 id="lang-h">LANGUAGE</h2>
+  <div class="lgl" data-lang-list></div>
+  <button class="x" type="button" data-lang-close>CLOSE</button>
+</div></div>
 <nav class="tabs" aria-label="App"><button type="button" data-tab="now" aria-current="page">NOW</button><button type="button" data-tab="nights">NIGHTS</button><button type="button" data-tab="events">EVENTS</button></nav>
 
 <div class="sheet" data-app-sheet hidden>

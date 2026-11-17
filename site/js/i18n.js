@@ -78,7 +78,7 @@
     'New moon': 'Luna nueva', 'Waxing crescent': 'Creciente', 'First quarter': 'Cuarto creciente', 'Waxing gibbous': 'Gibosa creciente', 'Full moon': 'Luna llena',
     'Waning gibbous': 'Gibosa menguante', 'Last quarter': 'Cuarto menguante', 'Waning crescent': 'Menguante',
     // language
-    'LANGUAGE': 'IDIOMA',
+    'LANGUAGE': 'IDIOMA', 'CLOSE': 'CERRAR', 'Automatic': 'Automático', 'PHONE SETTING': 'SEGÚN EL TELÉFONO', 'ENGLISH': 'INGLÉS', 'SPANISH': 'ESPAÑOL',
   };
   var DICTS = { es: ES };
   var lang = 'en';
