@@ -206,8 +206,8 @@
     clearPhoto(); $('[data-ready-photo]').hidden = true;
     $('[data-first-star]').hidden = kind === 'event' || store('moonMoments').length > 0;
     step('name'); $('[data-app-sheet]').hidden = false; buzz();
-    // Focus in the same tap that opened the sheet: that is what lets iPhone show the keyboard.
-    if (kind === 'event' && name) create(); else { try { $('[data-sheet-name]').focus({ preventScroll: true }); } catch (e) { $('[data-sheet-name]').focus(); } }
+    // No keyboard until the field is tapped.
+    if (kind === 'event' && name) create();
   }
   // A moment's time runs live in the sheet and stops on the tap of Mark It.
   var clockRaf = 0;
