@@ -218,4 +218,5 @@ window.MOON_I18N_APP_KEYS = ["NOW",
 "falling",
 "BACK TO NOW",
 "{n} MOMENTS",
-"1 MOMENT"];
+"1 MOMENT",
+"Each moment adds a star."];

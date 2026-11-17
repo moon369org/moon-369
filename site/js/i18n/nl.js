@@ -211,6 +211,7 @@
 "afgaand",
 "TERUG NAAR NU",
 "{n} MOMENTEN",
-"1 MOMENT"],
+"1 MOMENT",
+"Elk moment voegt een ster toe."],
   site: {}
 };

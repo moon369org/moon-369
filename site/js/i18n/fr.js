@@ -213,6 +213,7 @@
 "descendante",
 "REVENIR À MAINTENANT",
 "{n} MOMENTS",
-"1 MOMENT"],
+"1 MOMENT",
+"Chaque moment ajoute une étoile."],
   site: {}
 };

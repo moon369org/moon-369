@@ -205,6 +205,7 @@
 "fallend",
 "ZURÜCK ZU JETZT",
 "{n} MOMENTE",
-"1 MOMENT"],
+"1 MOMENT",
+"Jeder Moment fügt einen Stern hinzu."],
   site: {}
 };

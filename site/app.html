@@ -5,7 +5,8 @@
 <title>Moon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>(function(){var sa=(navigator.standalone===true)||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(!sa)return;var h=document.documentElement;h.classList.add('is-app');var m=document.querySelector('meta[name=viewport]');if(m)m.content+=', maximum-scale=1, user-scalable=no';['gesturestart','gesturechange','gestureend'].forEach(function(t){document.addEventListener(t,function(e){e.preventDefault()},{passive:false})});document.addEventListener('touchmove',function(e){if(e.scale&&e.scale!==1)e.preventDefault()},{passive:false});var last=0;document.addEventListener('touchend',function(e){var n=Date.now();if(n-last<300&&!e.target.closest('input,textarea,select'))e.preventDefault();last=n},{passive:false})})()</script>
-<style>.is-app,.is-app body{touch-action:manipulation;-webkit-text-size-adjust:100%}</style>
+<style>.is-app,.is-app body{touch-action:manipulation;-webkit-text-size-adjust:100%}.first-star{margin-top:12px;text-align:center;font-size:13px;color:#8A8B8F;letter-spacing:.02em}.first-star[hidden]{display:none}
+</style>
 <meta name="description" content="Moon time and the live moon in your pocket. Mark any moment with one tap and send a link that opens in everyone's own time.">
 <link rel="canonical" href="https://moon369.org/app">
 <meta property="og:type" content="website">
@@ -294,6 +295,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
       <label class="pick" data-sheet-pick><input type="file" accept="image/*,image/heic,image/heif" data-sheet-photo><span>+ ADD A PHOTO · OPTIONAL</span></label>
       <div class="pv" data-sheet-pv hidden><img data-sheet-pv-img alt=""><div><b>PHOTO</b><span>Signed at this moment. It stays on your phone: only its fingerprint goes to Moon.</span></div><button type="button" class="pvx" data-sheet-pv-x aria-label="Remove the photo">✕</button></div>
       <button class="btn p" type="button" data-sheet-create>MARK IT</button>
+      <div class="first-star" data-first-star hidden>Each moment adds a star.</div>
     </div>
     <div class="step" data-step="ready" hidden>
       <div class="ok"><span aria-hidden="true">✓</span><b data-ready-h>YOUR MOMENT IS READY</b></div>

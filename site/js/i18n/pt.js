@@ -213,6 +213,7 @@
 "descendo",
 "VOLTAR PARA AGORA",
 "{n} MOMENTOS",
-"1 MOMENTO"],
+"1 MOMENTO",
+"Cada momento acrescenta uma estrela."],
   site: {}
 };

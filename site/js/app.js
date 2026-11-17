@@ -187,6 +187,7 @@
     $('[data-sheet-lt]').textContent = T('{t} your time.', { t: localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) });
     $('[data-sheet-close]').textContent = 'CANCEL';
     clearPhoto(); $('[data-ready-photo]').hidden = true;
+    $('[data-first-star]').hidden = kind === 'event' || store('moonMoments').length > 0;
     step('name'); $('[data-app-sheet]').hidden = false; buzz();
     if (kind === 'event' && name) create(); else setTimeout(function () { $('[data-sheet-name]').focus(); }, 60);
   }

@@ -213,6 +213,7 @@
 "in calo",
 "TORNA AD ADESSO",
 "{n} MOMENTI",
-"1 MOMENTO"],
+"1 MOMENTO",
+"Ogni momento aggiunge una stella."],
   site: {}
 };
