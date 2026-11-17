@@ -123,6 +123,7 @@
     cur = { ms: Math.floor(ms / 1000) * 1000, kind: kind }; made = null;
     $('[data-sheet-h]').textContent = kind === 'event' ? 'NEW EVENT' : 'SHARE THIS MOMENT';
     $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'MARK IT';
+    $('[data-sheet-name]').classList.toggle('short', kind === 'event'); $('[data-sheet-name]').maxLength = kind === 'event' ? 80 : 280;
     $('[data-sheet-name]').value = name || ''; $('[data-sheet-name]').placeholder = kind === 'event' ? 'Name the event' : "What's happening? (optional)";
     $('[data-sheet-mk]').textContent = 'Moonmark ' + text(moon(cur.ms + 1));
     $('[data-sheet-lt]').textContent = localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) + ' your time.';
@@ -134,7 +135,7 @@
   function closeSheet() { $('[data-app-sheet]').hidden = true; }
   var signing = false;
   function create() {
-    var name = $('[data-sheet-name]').value.replace(/\s+/g, ' ').trim().slice(0, 80);
+    var name = $('[data-sheet-name]').value.replace(/\s+/g, ' ').trim().slice(0, cur.kind === 'event' ? 80 : 280);
     if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return; }
     if (cur.kind !== 'event' && cur.photo) {
       if (signing) return; signing = true;
@@ -289,7 +290,7 @@
     $('[data-sheet-pv-x]').onclick = function () { clearPhoto(); buzz(); };
     $('[data-sheet-copy]').onclick = function () { copy(); };
     $('[data-sheet-create]').onclick = create;
-    $('[data-sheet-name]').addEventListener('keydown', function (e) { if (e.key === 'Enter') create(); });
+    $('[data-sheet-name]').addEventListener('keydown', function (e) { if (e.key === 'Enter' && cur && cur.kind === 'event') { e.preventDefault(); create(); } });
     $('[data-ready-link]').onclick = function () { this.select(); };
     $('[data-sheet-card]').onclick = card;
     $('[data-sheet-embed]').onclick = embed;

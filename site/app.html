@@ -126,6 +126,9 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .mrow a{flex:1;min-width:0;border-top:0!important}
 .rm{flex:none;min-width:44px;height:40px;padding:0 10px;background:none;border:1px solid #3A3B3F;color:#E9E4D8;font:11px 'JetBrains Mono',monospace;letter-spacing:.14em;cursor:pointer}
 .rm.sure{background:#E0A49C;border-color:#E0A49C;color:#0B0B0D}
+.panel textarea{width:100%;min-height:208px;resize:none;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:16px/1.5 'JetBrains Mono',monospace;padding:14px;border-radius:0;-webkit-appearance:none}
+.panel textarea:focus{outline:none;border-color:#8A8B8F}
+.panel textarea.short{min-height:52px;height:52px;padding:14px;overflow:hidden}
 </style>
 </head>
 <body>
@@ -183,7 +186,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
       <h2 id="sheet-h" data-sheet-h>SHARE THIS MOMENT</h2>
       <div class="mk" data-sheet-mk></div>
       <div class="lt" data-sheet-lt></div>
-      <input type="text" maxlength="80" placeholder="What's happening? (optional)" data-sheet-name aria-label="Name this moment">
+      <textarea rows="5" maxlength="280" placeholder="What's happening? (optional)" data-sheet-name aria-label="What's happening"></textarea>
       <label class="pick" data-sheet-pick><input type="file" accept="image/*,image/heic,image/heif" data-sheet-photo><span>+ ADD A PHOTO · OPTIONAL</span></label>
       <div class="pv" data-sheet-pv hidden><img data-sheet-pv-img alt=""><div><b>PHOTO</b><span>Signed at this moment. It stays on your phone: only its fingerprint goes to Moon.</span></div><button type="button" class="pvx" data-sheet-pv-x aria-label="Remove the photo">✕</button></div>
       <button class="btn p" type="button" data-sheet-create>MARK IT</button>
