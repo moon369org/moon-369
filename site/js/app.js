@@ -43,12 +43,26 @@
     box.hidden = false; box.innerHTML = '<div class="k" style="text-align:left;margin-bottom:6px">' + title + '</div>' + r.map(row).join('');
   }
   function remember(key, item, same) { var r = store(key).filter(function (x) { return !same(x); }); r.unshift(item); store(key, r.slice(0, key === 'moonMoments' ? 500 : 12)); }
+  // Your moments, with an Edit mode: removing one only clears it from this phone. The proof stays on Moon.
+  var editing = false;
   function showMoments() {
-    list('moonMoments', '[data-app-recent]', 'YOUR MOMENTS', function (x) {
-      return x.sha ? '<a class="ph" href="' + esc(x.url) + '"><span class="nm"><img alt="" data-thumb="' + esc(x.sha) + '"><span>' + esc(x.name || 'A photo') + '</span></span><span>' + esc(text(moon(x.ms + 1))) + '</span></a>'
-        : '<a href="' + esc(x.url) + '"><span>' + esc(x.name || 'A moment') + '</span><span>' + esc(text(moon(x.ms + 1))) + '</span></a>';
-    });
+    var r = store('moonMoments'), box = $('[data-app-recent]');
+    if (!r.length) { box.hidden = true; editing = false; return; }
+    box.hidden = false;
+    box.innerHTML = '<div class="rh"><span class="k">YOUR MOMENTS</span><button type="button" class="ed" data-m-edit>' + (editing ? 'DONE' : 'EDIT') + '</button></div>' +
+      (editing ? '<div class="enote2">Removing a moment only clears it from this phone. The proof stays on Moon and its link still works.</div>' : '') +
+      r.map(function (x, i) {
+        var row = '<a class="' + (x.sha ? 'ph' : '') + '" href="' + esc(x.url) + '"><span class="nm">' + (x.sha ? '<img alt="" data-thumb="' + esc(x.sha) + '">' : '') + '<span>' + esc(x.name || (x.sha ? 'A photo' : 'A moment')) + '</span></span><span>' + esc(text(moon(x.ms + 1))) + '</span></a>';
+        return editing ? '<div class="mrow">' + row + '<button type="button" class="rm" data-m-rm="' + i + '" aria-label="Remove from this phone">✕</button></div>' : row;
+      }).join('');
     $$('[data-thumb]').forEach(function (im) { getThumb(im.getAttribute('data-thumb')).then(function (b) { if (b) im.src = URL.createObjectURL(b); }); });
+  }
+  function removeMoment(i) {
+    var r = store('moonMoments'), x = r[i]; if (!x) return;
+    r.splice(i, 1); store('moonMoments', r);
+    if (x.sha && !r.some(function (y) { return y.sha === x.sha; })) delThumb(x.sha);
+    if (!r.length) editing = false;
+    showMoments(); buzz(); toast('Removed from this phone. The proof stays on Moon.');
   }
 
   // ---------- photos: kept on this phone only ----------
@@ -62,6 +76,7 @@
     }));
   }
   function putThumb(k, b) { return idb().then(function (db) { return new Promise(function (ok) { var t = db.transaction('thumbs', 'readwrite'); t.objectStore('thumbs').put(b, k); t.oncomplete = ok; t.onerror = ok; }); }).catch(function () {}); }
+  function delThumb(k) { return idb().then(function (db) { db.transaction('thumbs', 'readwrite').objectStore('thumbs').delete(k); }).catch(function () {}); }
   function getThumb(k) { return idb().then(function (db) { return new Promise(function (ok) { var q = db.transaction('thumbs').objectStore('thumbs').get(k); q.onsuccess = function () { ok(q.result || null); }; q.onerror = function () { ok(null); }; }); }).catch(function () { return null; }); }
   function thumbOf(file, size) {
     return new Promise(function (ok) {
@@ -263,6 +278,14 @@
     $('[data-sheet-share]').onclick = share;
     $('[data-sheet-x]').onclick = function () { this.href = xHref(); buzz(); };
     $('[data-sheet-photo]').onchange = function () { pickPhoto(this.files && this.files[0]); };
+    $('[data-app-recent]').addEventListener('click', function (e) {
+      if (e.target.closest('[data-m-edit]')) { editing = !editing; showMoments(); buzz(); return; }
+      var b = e.target.closest('[data-m-rm]'); if (!b) return;
+      e.preventDefault();
+      // Two taps: the first asks, the second removes.
+      if (!b.classList.contains('sure')) { $$('[data-m-rm].sure').forEach(function (x) { x.classList.remove('sure'); x.textContent = '✕'; }); b.classList.add('sure'); b.textContent = 'REMOVE'; buzz(); return; }
+      removeMoment(+b.getAttribute('data-m-rm'));
+    });
     $('[data-sheet-pv-x]').onclick = function () { clearPhoto(); buzz(); };
     $('[data-sheet-copy]').onclick = function () { copy(); };
     $('[data-sheet-create]').onclick = create;
