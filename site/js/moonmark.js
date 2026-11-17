@@ -440,7 +440,7 @@
     };
     var q = function (sel) { return main.querySelector(sel); };
     if (rc) {
-      var PHOTO = '<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="M4 17l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+      var PHOTO = '<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
       var FILE = '<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v4h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
       // An image when it came from the app's camera (v=) or the linked file is a picture; any other signed file is a file.
       var isImg = !!new URLSearchParams(location.search).get('v') || /\.(png|jpe?g|gif|webp|avif|heic|heif|svg)(\?|#|$)/i.test(linkedFile());
