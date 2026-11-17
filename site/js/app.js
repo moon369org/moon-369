@@ -204,10 +204,11 @@
         if (cur !== c0) return;
         cur.ms = Math.floor(s.ms / 1000) * 1000;
         var url = s.url + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
-        if (cur.thumb) putThumb(s.sha, cur.thumb);
-        var ph0 = cur.photo; thumbOf(ph0, 1600).then(function (big) { if (big) putThumb('full:' + s.sha, big); });   // shown at the top of this moment's page on this phone
         try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
-        finish(name, url, { ms: s.ms, name: name, url: url, sha: s.sha });
+        // Save the photo before opening the moment, so its page can show it at the top.
+        return Promise.all([cur.thumb ? putThumb(s.sha, cur.thumb) : null, thumbOf(cur.photo, 1600).then(function (big) { return big ? putThumb('full:' + s.sha, big) : null; })]).then(function () {
+          if (cur === c0) finish(name, url, { ms: s.ms, name: name, url: url, sha: s.sha });
+        });
       }).catch(function (e) {
         toast(navigator.onLine === false ? 'Signing a photo needs a connection' : (e && e.message) || 'Moon could not sign it. Try again.');
       }).then(function () { signing = false; btn.disabled = false; btn.textContent = 'MARK IT'; });
@@ -218,7 +219,12 @@
   function finish(name, url, it) {
     it = it || { ms: cur.ms, name: name, url: url };
     if (cur.kind === 'event') { remember('moonEvents', it, function (x) { return x.url === url; }); showEvents(); }
-    else { remember('moonMoments', it, function (x) { return x.url === url; }); showMoments(); }
+    else {
+      remember('moonMoments', it, function (x) { return x.url === url; }); showMoments(); buzz();
+      // A new moment opens straight in its own page.
+      location.href = url.replace(/^https:\/\/moon369\.org/, '');
+      return;
+    }
     made = { url: url, name: name, mark: text(moon(cur.ms + 1)), photo: it.sha ? cur.photo : null };
     var rp = $('[data-ready-photo]'); if (made.photo && cur.thumb) { rp.src = URL.createObjectURL(cur.thumb); rp.hidden = false; } else rp.hidden = true;
     $('[data-ready-h]').textContent = cur.kind === 'event' ? 'YOUR EVENT IS READY' : 'YOUR MOMENT IS READY';
