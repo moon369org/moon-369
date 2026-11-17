@@ -212,6 +212,8 @@
 "TERUG NAAR NU",
 "{n} MOMENTEN",
 "1 MOMENT",
-"Elk moment voegt een ster toe."],
+"Elk moment voegt een ster toe.",
+"Foto wordt ondertekend…",
+"{t} jouw tijd. Ondertekend met de foto."],
   site: {}
 };

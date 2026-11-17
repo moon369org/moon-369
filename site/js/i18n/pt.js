@@ -214,6 +214,8 @@
 "VOLTAR PARA AGORA",
 "{n} MOMENTOS",
 "1 MOMENTO",
-"Cada momento acrescenta uma estrela."],
+"Cada momento acrescenta uma estrela.",
+"A assinar a foto…",
+"{t} sua hora. Assinado com a foto."],
   site: {}
 };

@@ -214,6 +214,8 @@
 "TORNA AD ADESSO",
 "{n} MOMENTI",
 "1 MOMENTO",
-"Ogni momento aggiunge una stella."],
+"Ogni momento aggiunge una stella.",
+"Firma della foto…",
+"{t} ora locale. Firmato con la foto."],
   site: {}
 };

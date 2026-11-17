@@ -219,4 +219,6 @@ window.MOON_I18N_APP_KEYS = ["NOW",
 "BACK TO NOW",
 "{n} MOMENTS",
 "1 MOMENT",
-"Each moment adds a star."];
+"Each moment adds a star.",
+"Signing the photo…",
+"{t} your time. Signed with the photo."];

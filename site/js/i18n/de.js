@@ -206,6 +206,8 @@
 "ZURÜCK ZU JETZT",
 "{n} MOMENTE",
 "1 MOMENT",
-"Jeder Moment fügt einen Stern hinzu."],
+"Jeder Moment fügt einen Stern hinzu.",
+"Foto wird signiert…",
+"{t} deine Zeit. Mit dem Foto signiert."],
   site: {}
 };

@@ -165,8 +165,22 @@
     cur.photo = file;
     thumbOf(file, 240).then(function (b) { cur.thumb = b; if (b) $('[data-sheet-pv-img]').src = URL.createObjectURL(b); });
     $('[data-sheet-pv]').hidden = false; $('[data-sheet-pick]').hidden = true; buzz();
+    // A photo moment is the instant Moon signs the photo: sign it now, and stop the clock on that exact time.
+    if (cur.kind !== 'event') {
+      var c0 = cur; stopClock();
+      $('[data-sheet-mk]').textContent = T('Signing the photo…'); $('[data-sheet-lt]').textContent = '';
+      cur.sig = signPhoto(file).then(function (sg) {
+        if (cur === c0 && cur.photo === file) { stopClock(sg.ms); $('[data-sheet-lt]').textContent = T('{t} your time. Signed with the photo.', { t: localStr(sg.ms, { dateStyle: 'full', timeStyle: 'medium' }) }); }
+        return sg;
+      });
+      cur.sig.catch(function (e) {
+        if (cur !== c0 || cur.photo !== file) return;
+        toast(navigator.onLine === false ? 'Signing a photo needs a connection' : (e && e.message) || 'Moon could not sign it. Try again.');
+        clearPhoto();
+      });
+    }
   }
-  function clearPhoto() { if (cur) { cur.photo = null; cur.thumb = null; } $('[data-sheet-pv-img]').removeAttribute('src'); $('[data-sheet-pv]').hidden = true; $('[data-sheet-pick]').hidden = cur && cur.kind === 'event'; $('[data-sheet-photo]').value = ''; }
+  function clearPhoto() { var had = cur && cur.photo; if (cur) { cur.photo = null; cur.thumb = null; cur.sig = null; } if (had && cur.kind !== 'event' && !$('[data-app-sheet]').hidden) runClock(); $('[data-sheet-pv-img]').removeAttribute('src'); $('[data-sheet-pv]').hidden = true; $('[data-sheet-pick]').hidden = cur && cur.kind === 'event'; $('[data-sheet-photo]').value = ''; }
   // Sign the photo: its fingerprint, at this moment. The signed link proves the photo existed by then.
   function signPhoto(file) {
     return file.arrayBuffer().then(function (buf) { return crypto.subtle.digest('SHA-256', buf); }).then(function (d) {
@@ -223,12 +237,12 @@
   function create() {
     var name = $('[data-sheet-name]').value.replace(/\s+/g, ' ').trim().slice(0, cur.kind === 'event' ? 80 : 280);
     if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return; }
-    if (cur.kind !== 'event') { if (signing) return; cur.ms = nowMs(); stopClock(cur.ms); }   // the moment is the tap of Mark It
+    if (cur.kind !== 'event' && !cur.photo) { if (signing) return; cur.ms = nowMs(); stopClock(cur.ms); }   // no photo: the moment is the tap of Mark It
     if (cur.kind !== 'event' && cur.photo) {
       if (signing) return; signing = true;
       var btn = $('[data-sheet-create]'); btn.textContent = 'SIGNING THE PHOTO…'; btn.disabled = true;
       var c0 = cur;
-      signPhoto(cur.photo).then(function (s) {
+      (cur.sig || signPhoto(cur.photo)).then(function (s) {
         if (cur !== c0) return;
         cur.ms = s.ms;
         var url = s.url + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
@@ -238,7 +252,6 @@
           if (cur === c0) finish(name, url, { ms: s.ms, name: name, url: url, sha: s.sha });
         });
       }).catch(function (e) {
-        if (cur === c0) runClock();
         toast(navigator.onLine === false ? 'Signing a photo needs a connection' : (e && e.message) || 'Moon could not sign it. Try again.');
       }).then(function () { signing = false; btn.disabled = false; btn.textContent = 'MARK IT'; });
       return;
