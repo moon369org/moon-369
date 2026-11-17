@@ -460,17 +460,6 @@
     r.onerror = function () {};
     r.onsuccess = function () {
       var db = r.result, get = function (k) { return new Promise(function (ok) { try { var q = db.transaction('thumbs').objectStore('thumbs').get(k); q.onsuccess = function () { ok(q.result || null); }; q.onerror = function () { ok(null); }; } catch (e) { ok(null); } }); };
-      // Test: the camera's own shutter time, read on this phone when the photo was taken.
-      get('shot:' + rc.sha256).then(function (x) {
-        var ts = root.querySelector('.mk-ts'); if (!x || !ts) return;
-        var el = document.createElement('div'); el.className = 'mk-shot';
-        var sec = function (a, b) { return ((b - a) / 1000).toFixed(3) + ' s'; };
-        if (x.lm && isFinite(x.lm)) {
-          var mk = fromMs(x.lm);
-          el.innerHTML = '<b>PHOTO FILE TIME · TEST</b><span>' + text(mk) + nsGroups(mk.ns).slice(0, 4) + '</span><i>File made ' + sec(x.lm, x.picked) + ' before it reached the app, ' + sec(x.lm, x.signed) + ' before signing</i>';
-        } else el.innerHTML = '<b>PHOTO FILE TIME · TEST</b><i>None: ' + esc(x.none || 'the phone gave no file time') + '</i>';
-        ts.parentNode.insertBefore(el, ts.nextSibling);
-      });
       get('full:' + rc.sha256).then(function (b) { return b || get(rc.sha256); }).then(function (b) {
         if (!b) return; var src = URL.createObjectURL(b), mark = rc.moonmark.slice(0, 19);
         box.innerHTML = '<img src="' + src + '" alt="The photo in this moment">';

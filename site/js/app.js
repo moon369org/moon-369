@@ -159,36 +159,11 @@
   function pickPhoto(file) {
     if (!file) return;
     if (!/^image\//.test(file.type) && !/\.(heic|heif|jpe?g|png|webp|gif)$/i.test(file.name)) { toast('Pick a photo'); return; }
-    cur.photo = file; cur.picked = Date.now();   // when the photo came back from the camera
+    cur.photo = file;
     thumbOf(file, 240).then(function (b) { cur.thumb = b; if (b) $('[data-sheet-pv-img]').src = URL.createObjectURL(b); });
     $('[data-sheet-pv]').hidden = false; $('[data-sheet-pick]').hidden = true; buzz();
   }
   function clearPhoto() { if (cur) { cur.photo = null; cur.thumb = null; } $('[data-sheet-pv-img]').removeAttribute('src'); $('[data-sheet-pv]').hidden = true; $('[data-sheet-pick]').hidden = cur && cur.kind === 'event'; $('[data-sheet-photo]').value = ''; }
-  // The shutter time the camera wrote inside a JPEG (Exif DateTimeOriginal, sub-seconds and offset). The phone's own clock.
-  function exifShot(file) {
-    return file.slice(0, 256 * 1024).arrayBuffer().then(function (buf) {
-      var v = new DataView(buf), n = buf.byteLength;
-      if (n < 4 || v.getUint16(0) !== 0xFFD8) return { none: 'not a JPEG (' + (file.type || 'unknown type') + ')' };
-      var o = 2;
-      while (o + 4 < n) {
-        var mk = v.getUint16(o), len = v.getUint16(o + 2);
-        if (mk === 0xFFE1 && v.getUint32(o + 4) === 0x45786966) {
-          var t = o + 10, le = v.getUint16(t) === 0x4949, u16 = function (x) { return v.getUint16(t + x, le); }, u32 = function (x) { return v.getUint32(t + x, le); };
-          var str = function (cnt, off) { var a = ''; for (var i = 0; i < cnt - 1; i++) { var c = v.getUint8(t + off + i); if (!c) break; a += String.fromCharCode(c); } return a; };
-          var read = function (ifd) { var out = {}, cnt = u16(ifd); for (var i = 0; i < cnt; i++) { var e = ifd + 2 + i * 12, tag = u16(e), c = u32(e + 4); out[tag] = tag === 0x8769 ? u32(e + 8) : (c <= 4 ? str(c, e + 8) : str(c, u32(e + 8))); } return out; };
-          var ifd0 = read(u32(4)); if (!ifd0[0x8769]) return { none: 'no camera data in the photo' };
-          var ex = read(ifd0[0x8769]), d = ex[0x9003];
-          if (!d) return { none: 'no shutter time in the photo' };
-          var m = /^(\d{4}):(\d\d):(\d\d) (\d\d):(\d\d):(\d\d)/.exec(d); if (!m) return { none: 'unreadable time ' + d };
-          var sub = (ex[0x9291] || '').trim(), off = (ex[0x9011] || '').trim();
-          var iso = m[1] + '-' + m[2] + '-' + m[3] + 'T' + m[4] + ':' + m[5] + ':' + m[6] + (sub ? '.' + (sub + '00').slice(0, 3) : '') + (/^[+-]\d\d:\d\d$/.test(off) ? off : '');
-          return { ms: new Date(iso).getTime(), raw: d + (sub ? '.' + sub : '') + (off ? ' ' + off : ''), sub: sub, off: off };
-        }
-        if ((mk & 0xFF00) !== 0xFF00 || mk === 0xFFDA) break; o += 2 + len;
-      }
-      return { none: 'no camera data in the photo' };
-    }).catch(function () { return { none: 'could not read the photo' }; });
-  }
   // Sign the photo: its fingerprint, at this moment. The signed link proves the photo existed by then.
   function signPhoto(file) {
     return file.arrayBuffer().then(function (buf) { return crypto.subtle.digest('SHA-256', buf); }).then(function (d) {
@@ -234,7 +209,7 @@
         var url = s.url + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
         try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
         // Save the photo before opening the moment, so its page can show it at the top.
-        return Promise.all([putThumb('shot:' + s.sha, { lm: cur.photo.lastModified, picked: cur.picked, signed: s.ms }), cur.thumb ? putThumb(s.sha, cur.thumb) : null, thumbOf(cur.photo, 1600).then(function (big) { return big ? putThumb('full:' + s.sha, big) : null; })]).then(function () {
+        return Promise.all([cur.thumb ? putThumb(s.sha, cur.thumb) : null, thumbOf(cur.photo, 1600).then(function (big) { return big ? putThumb('full:' + s.sha, big) : null; })]).then(function () {
           if (cur === c0) finish(name, url, { ms: s.ms, name: name, url: url, sha: s.sha });
         });
       }).catch(function (e) {
