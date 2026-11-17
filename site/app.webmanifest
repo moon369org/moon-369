@@ -4,7 +4,7 @@
   "description": "Moon time, the live moon, and one-tap links for any moment, in every time zone.",
   "id": "/app",
   "start_url": "/app?source=pwa",
-  "scope": "/app",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0B0B0D",

@@ -482,7 +482,9 @@
     document.body.insertBefore(bar, document.body.firstChild);
     bar.querySelector('[data-mk-back]').onclick = function () {
       var same = false; try { same = document.referrer && new URL(document.referrer).origin === location.origin; } catch (e) {}
-      if (same && history.length > 1) history.back(); else location.href = '/';
+      var fromApp = false; try { fromApp = same && /^\/app(\.html)?$/.test(new URL(document.referrer).pathname); } catch (e) {}
+      if (fromApp) location.replace('/app');   // a fresh load: iOS can lose the keyboard on a page restored from history
+      else if (same && history.length > 1) history.back(); else location.href = '/';
     };
     var menu = bar.querySelector('.mk-menu'), more = bar.querySelector('[data-mk-more]');
     var shut = function () { menu.hidden = true; more.setAttribute('aria-expanded', 'false'); };

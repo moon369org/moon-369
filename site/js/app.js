@@ -4,6 +4,8 @@
    EVENTS  One link for a future moment that opens in everyone's own time, with QR and a countdown embed.
    Nothing is sent anywhere except the share card images, fetched from Moon's API when online. */
 (function () {
+  // Reopened from history (Back from a moment): reload, since iOS Home Screen apps restored that way can stop showing the keyboard.
+  window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
   var EPOCH = -62165308562978.61, K = 1.0403730490216803, SEC = 1000 * K;
   var p = function (n, w) { return String(n).padStart(w || 2, '0'); };
   var firstDay = function (m) { return Math.ceil(m * 369 / 13); };
