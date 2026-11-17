@@ -33,7 +33,7 @@
     if (k.s !== lastSec) {
       lastSec = k.s;
       $('[data-app-date]').textContent = k.y + '.' + p(k.m) + '.' + p(k.d);
-      if (P) { var f = P.fraction(now); $('[data-app-meta]').innerHTML = esc(P.name(f)) + ' · ' + Math.round(P.illumination(now) * 100) + '% lit · Lune ' + k.d + '<br>Your local time: ' + esc(localStr(now)); }
+      if (P) { var f = P.fraction(now); $('[data-app-meta]').innerHTML = esc(P.name(f)) + ' · ' + Math.round(P.illumination(now) * 100) + '% lit · Lune ' + k.d + '<span class="lt1">Your local time: ' + esc(localStr(now)) + '</span>'; }
     }
     requestAnimationFrame(tick);
   }
