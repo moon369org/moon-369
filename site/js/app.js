@@ -319,7 +319,8 @@
   }
   function drawPath() {
     var p = place();
-    $('[data-sky-ask]').hidden = !!p; $('[data-sky-chart]').hidden = !p; $('[data-sky-h]').hidden = !p;
+    $('[data-sky-ask]').hidden = !!p; $('[data-sky-chart]').hidden = !p; $('[data-sky-h]').hidden = !p; $('[data-sky-where]').hidden = !p;
+    if (p) $('[data-sky-place]').textContent = (p.name ? p.name : 'YOUR LOCATION').toUpperCase();
     if (!p || !window.MoonSky) return;
     var now = Date.now(), fmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
     var dayOf = function (t) { var d = new Date(t); return d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate(); }, today = dayOf(now);
@@ -337,6 +338,17 @@
           : when + ' the moon ' + w + ' below the horizon.';
       },
     });
+  }
+  // A US ZIP code: looked up from Moon's own small files (one per first two digits), so nothing is sent anywhere.
+  function zipPlace(e) {
+    e.preventDefault();
+    var z = ($('[data-sky-zipin]').value || '').trim();
+    if (!/^\d{5}$/.test(z)) { toast('Enter a 5-digit ZIP code'); return; }
+    fetch('/data/zip/' + z.slice(0, 2) + '.json').then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) {
+      var x = d[z]; if (!x) { toast('That ZIP code was not found'); return; }
+      try { localStorage.setItem('moonPlace', JSON.stringify({ lat: x[0], lng: x[1], name: x[2] + ', ' + x[3] + ' ' + z })); } catch (e2) {}
+      $('[data-sky-zipin]').blur(); drawPath(); buzz();
+    }).catch(function () { toast(navigator.onLine === false ? 'Looking up a ZIP code needs a connection' : 'Could not look up that ZIP code'); });
   }
   function askPlace() {
     if (!navigator.geolocation) { toast('Location is not available on this device'); return; }
@@ -373,6 +385,8 @@
     $$('[data-tab]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-tab')); }; });
     $$('[data-view]').forEach(function (b) { b.onclick = function () { setView(b.getAttribute('data-view'), true); }; });
     $('[data-sky-loc]').onclick = askPlace;
+    $('[data-sky-zip]').addEventListener('submit', zipPlace);
+    $('[data-sky-change]').onclick = function () { try { localStorage.removeItem('moonPlace'); } catch (e) {} if (skyBox) skyBox.stop(); drawPath(); };
     setView(view, false);
     $$('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
     $('[data-app-mark]').onclick = function () { openSheet('moment', Date.now()); };

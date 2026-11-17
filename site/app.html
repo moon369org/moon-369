@@ -167,6 +167,12 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .sk-sky{aspect-ratio:520/470}.sk-stats>div{padding:14px 10px}.sk-scrub{padding:16px 0 4px}.sk-play{padding:0 12px;font-size:9px}.sk-now{font-size:11px;letter-spacing:.08em;min-height:3em}
 @media (max-width:360px){.sk-now{font-size:10px;letter-spacing:.04em}.sk-row{gap:10px}.sk-play{min-width:0;width:48px;padding:0}.sk-play .sk-pl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
 .sk-stats b{font-size:16px}
+.sky-or{font:10px 'JetBrains Mono',monospace;letter-spacing:.22em;color:#8A8B8F;text-align:center}
+.sky-zip{display:grid;grid-template-columns:1fr auto;gap:10px;margin:0}
+.sky-zip input{min-height:52px;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:16px 'JetBrains Mono',monospace;padding:0 14px;border-radius:0;width:100%;-webkit-appearance:none}
+.sky-zip input:focus{outline:none;border-color:#8A8B8F}.sky-zip .btn{min-height:52px;width:auto;padding:0 20px;font-size:11px}
+.sky-where{display:flex;justify-content:center;align-items:center;gap:12px;font:11px 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8A8B8F}
+.sky-where[hidden]{display:none}.sky-where button{background:none;border:0;color:#E9E4D8;font:inherit;letter-spacing:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:36px}
 </style>
 </head>
 <body>
@@ -179,7 +185,8 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
     <div class="stage"><canvas class="hm-moonglow" role="img" aria-label="The Moon right now" data-app-moon></canvas><canvas class="stars" aria-hidden="true" data-app-stars></canvas></div>
     <div class="skyv" data-skyv hidden>
       <div class="k" data-sky-k>THE MOON'S PATH TODAY</div>
-      <div class="sky-ask" data-sky-ask hidden><p>The moon's path depends on where you are. Your location stays on this phone.</p><button class="btn p" type="button" data-sky-loc>USE MY LOCATION</button></div>
+      <div class="sky-ask" data-sky-ask hidden><p>The moon's path depends on where you are. Your location stays on this phone.</p><button class="btn p" type="button" data-sky-loc>USE MY LOCATION</button><div class="sky-or">OR A US ZIP CODE</div><form class="sky-zip" data-sky-zip><input type="text" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" autocomplete="postal-code" placeholder="83422" aria-label="ZIP code" data-sky-zipin><button class="btn" type="submit">SHOW</button></form></div>
+      <div class="sky-where" data-sky-where hidden><span data-sky-place></span><button type="button" data-sky-change>CHANGE</button></div>
       <div class="sky-h" data-sky-h></div>
       <div data-sky-chart></div>
     </div>
