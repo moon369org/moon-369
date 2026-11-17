@@ -224,6 +224,7 @@
 "Firmando la foto…",
 "{t} tu hora. Firmado con la foto."],
   site: {
+    "PHOTO PROOF": "PRUEBA DE LA FOTO",
     "MOON STATUS": "ESTADO DE LA LUNA", "SKY & TIDE": "CIELO Y MAREA",
     "✓ Photo signed on Moon {s} s before this moment": "✓ Foto firmada en Moon {s} s antes de este momento",
     "SHARE": "COMPARTIR", "LINK COPIED": "ENLACE COPIADO", "MARK YOUR OWN MOMENT": "MARCA TU PROPIO MOMENTO",

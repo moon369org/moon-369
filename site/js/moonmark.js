@@ -440,7 +440,8 @@
     };
     var q = function (sel) { return main.querySelector(sel); };
     if (rc) {
-      var pd = part('PROOF', 'Checking the signature…', [q('[data-mk-sig]')]);
+      var PHOTO = '<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="M4 17l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+      var pd = part(PHOTO + 'PHOTO PROOF', 'Checking the signature…', [q('[data-mk-sig]')]);
       verifyEarly(rc).then(function (v) { pd.querySelector('[data-fd-sub]').textContent = v && v.valid ? (new URLSearchParams(location.search).get('v') ? T2('✓ Photo signed on Moon {s} s before this moment', { s: Math.max(0, (ms - Number(BigInt(rc.unix_ns) / 1000000n)) / 1000).toFixed(1) }) : '✓ Signed and verified on Moon') : 'The signature does not check out'; }, function () { pd.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
     }
     // The same living moon as the app, as it was at this moment.
