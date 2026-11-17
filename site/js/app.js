@@ -204,6 +204,7 @@
         cur.ms = Math.floor(s.ms / 1000) * 1000;
         var url = s.url + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
         if (cur.thumb) putThumb(s.sha, cur.thumb);
+        var ph0 = cur.photo; thumbOf(ph0, 1600).then(function (big) { if (big) putThumb('full:' + s.sha, big); });   // shown at the top of this moment's page on this phone
         try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
         finish(name, url, { ms: s.ms, name: name, url: url, sha: s.sha });
       }).catch(function (e) {

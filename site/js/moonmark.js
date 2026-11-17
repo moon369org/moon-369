@@ -359,6 +359,7 @@
       '<div class="mk-grid">' +
       '<div class="mk-main">' +
       (post && rc && linkedFile() ? '<div class="mk-art" data-mk-art></div>' : '') +
+      (post && rc && !linkedFile() ? '<button type="button" class="mk-photo" data-mk-photo hidden aria-label="View the photo"></button>' : '') +
       (fresh ? '<div class="mk-l">JUST MARKED</div>' : '') +
       (note ? '<blockquote class="mk-q">' + esc(note) + '</blockquote>' : '') +
       (post ? '<div class="mk-ts" translate="no">' + esc(stamp) + '</div>' : '') +
@@ -385,6 +386,7 @@
       '</div>';
     if (rc) { sigBox(root, rc); recordBox(root, rc); }
     if (rc && linkedFile()) artBox(root, rc, linkedFile());
+    if (post && rc && !linkedFile()) ownPhoto(root, rc);
     if (rc && coa) coaBox(root, rc, coa);
     root.querySelector('[data-mk-copy]').onclick = function (e) {
       try { navigator.clipboard.writeText(url); e.target.textContent = 'COPIED'; } catch (err) { e.target.textContent = url; }
@@ -412,6 +414,28 @@
     };
     root.querySelector('[data-mk-now]').onclick = markNow;
     if (post) postBar(url, qr, markNow);
+  }
+  // A photo marked in the Moon app stays on that phone. Opened there, show it at the top, if it is the signed photo.
+  function ownPhoto(root, rc) {
+    var box = root.querySelector('[data-mk-photo]'); if (!box || !window.indexedDB) return;
+    var r; try { r = indexedDB.open('moon-app', 1); } catch (e) { return; }
+    r.onupgradeneeded = function () { r.transaction.abort(); };   // no app data on this device: don't create any
+    r.onerror = function () {};
+    r.onsuccess = function () {
+      var db = r.result, get = function (k) { return new Promise(function (ok) { try { var q = db.transaction('thumbs').objectStore('thumbs').get(k); q.onsuccess = function () { ok(q.result || null); }; q.onerror = function () { ok(null); }; } catch (e) { ok(null); } }); };
+      get('full:' + rc.sha256).then(function (b) { return b || get(rc.sha256); }).then(function (b) {
+        if (!b) return; var src = URL.createObjectURL(b), mark = rc.moonmark.slice(0, 19);
+        box.innerHTML = '<img src="' + src + '" alt="The photo in this moment">';
+        box.hidden = false;
+        box.onclick = function () {
+          var lb = document.createElement('div'); lb.className = 'mk-lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'Photo');
+          lb.innerHTML = '<div class="mk-lb-top"><span class="mk-lb-moon">' + MOON_ICON + '</span><button type="button" class="mk-lb-x" aria-label="Close">✕</button></div><div class="mk-lb-img"><img src="' + src + '" alt="The photo in this moment"></div><div class="mk-lb-bar"><span class="mk-lb-t">Signed on Moon at ' + esc(mark) + '. Only this phone holds the photo.</span></div>';
+          var close = function () { lb.remove(); document.documentElement.style.overflow = ''; };
+          lb.addEventListener('click', function (e) { if (e.target === lb || e.target.classList.contains('mk-lb-img') || e.target.closest('.mk-lb-x')) close(); });
+          document.body.appendChild(lb); document.documentElement.style.overflow = 'hidden';
+        };
+      });
+    };
   }
   // A moment opens like a post: a top bar with back, the title and a menu.
   function postBar(url, qr, markNow) {
