@@ -159,7 +159,7 @@
   function pickPhoto(file) {
     if (!file) return;
     if (!/^image\//.test(file.type) && !/\.(heic|heif|jpe?g|png|webp|gif)$/i.test(file.name)) { toast('Pick a photo'); return; }
-    cur.photo = file;
+    cur.photo = file; cur.picked = Date.now();   // when the photo came back from the camera
     thumbOf(file, 240).then(function (b) { cur.thumb = b; if (b) $('[data-sheet-pv-img]').src = URL.createObjectURL(b); });
     $('[data-sheet-pv]').hidden = false; $('[data-sheet-pick]').hidden = true; buzz();
   }
@@ -234,7 +234,7 @@
         var url = s.url + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : '');
         try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
         // Save the photo before opening the moment, so its page can show it at the top.
-        return Promise.all([exifShot(cur.photo).then(function (x) { x.signed = s.ms; return putThumb('shot:' + s.sha, x); }), cur.thumb ? putThumb(s.sha, cur.thumb) : null, thumbOf(cur.photo, 1600).then(function (big) { return big ? putThumb('full:' + s.sha, big) : null; })]).then(function () {
+        return Promise.all([putThumb('shot:' + s.sha, { lm: cur.photo.lastModified, picked: cur.picked, signed: s.ms }), cur.thumb ? putThumb(s.sha, cur.thumb) : null, thumbOf(cur.photo, 1600).then(function (big) { return big ? putThumb('full:' + s.sha, big) : null; })]).then(function () {
           if (cur === c0) finish(name, url, { ms: s.ms, name: name, url: url, sha: s.sha });
         });
       }).catch(function (e) {

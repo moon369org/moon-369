@@ -464,10 +464,11 @@
       get('shot:' + rc.sha256).then(function (x) {
         var ts = root.querySelector('.mk-ts'); if (!x || !ts) return;
         var el = document.createElement('div'); el.className = 'mk-shot';
-        if (x.ms && isFinite(x.ms)) {
-          var mk = fromMs(x.ms), gap = ((x.signed || 0) - x.ms) / 1000;
-          el.innerHTML = '<b>CAMERA TIME · TEST</b><span>' + text(mk) + nsGroups(mk.ns).slice(0, 4) + '</span><i>' + esc(x.raw) + (x.signed ? ' · ' + Math.abs(gap).toFixed(2) + ' s ' + (gap >= 0 ? 'before' : 'after') + ' signing' : '') + (x.sub ? '' : ' · no sub-seconds') + (x.off ? '' : ' · no time zone') + '</i>';
-        } else el.innerHTML = '<b>CAMERA TIME · TEST</b><i>None: ' + esc(x.none || 'unknown') + '</i>';
+        var sec = function (a, b) { return ((b - a) / 1000).toFixed(3) + ' s'; };
+        if (x.lm && isFinite(x.lm)) {
+          var mk = fromMs(x.lm);
+          el.innerHTML = '<b>PHOTO FILE TIME · TEST</b><span>' + text(mk) + nsGroups(mk.ns).slice(0, 4) + '</span><i>File made ' + sec(x.lm, x.picked) + ' before it reached the app, ' + sec(x.lm, x.signed) + ' before signing</i>';
+        } else el.innerHTML = '<b>PHOTO FILE TIME · TEST</b><i>None: ' + esc(x.none || 'the phone gave no file time') + '</i>';
         ts.parentNode.insertBefore(el, ts.nextSibling);
       });
       get('full:' + rc.sha256).then(function (b) { return b || get(rc.sha256); }).then(function (b) {
