@@ -420,7 +420,7 @@
   function fold(root, rc, nm, il, ms) {
     var main = root.querySelector('.mk-main'), ts = main.querySelector('.mk-ts'); if (!main || !ts) return;
     var k = window.MoonPhase && window.MoonPhase.sky ? window.MoonPhase.sky(ms) : null;
-    var chev = '<svg class="mk-fd-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var chev = '<svg class="mk-fd-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     var at = ts;
     var part = function (title, sub, nodes) {
       nodes = nodes.filter(Boolean); if (!nodes.length) return null;
