@@ -224,6 +224,7 @@
 "Firmando la foto…",
 "{t} tu hora. Firmado con la foto."],
   site: {
+    "IMAGE PROOF": "PRUEBA DE LA IMAGEN", "FILE PROOF": "PRUEBA DEL ARCHIVO", "✓ Image signed on Moon {s} s before this moment": "✓ Imagen firmada en Moon {s} s antes de este momento",
     "PHOTO PROOF": "PRUEBA DE LA FOTO",
     "MOON STATUS": "ESTADO DE LA LUNA", "SKY & TIDE": "CIELO Y MAREA",
     "✓ Photo signed on Moon {s} s before this moment": "✓ Foto firmada en Moon {s} s antes de este momento",
