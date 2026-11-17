@@ -66,7 +66,7 @@
     var chosen = null; try { chosen = localStorage.getItem('moonLang'); } catch (e) {}
     if (!document.getElementById('mlp-css')) {
       var st = document.createElement('style'); st.id = 'mlp-css';
-      st.textContent = '.mlp-g{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;background:none;border:1px solid #2E3035;color:#B9B6AE;cursor:pointer;font:11px "JetBrains Mono",monospace;letter-spacing:.18em}.mlp-g:hover{border-color:#E9E4D8;color:#E9E4D8}.mlp-g svg{width:16px;height:16px}' +
+      st.textContent = '.mlp-g{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;padding:0;background:none;border:0;color:#8A8B8F;cursor:pointer;opacity:.85}.mlp-g:hover{color:#E9E4D8;opacity:1}.mlp-g svg{width:18px;height:18px}.mlp-g span{display:none}' +
         '.mlp-m{position:fixed;z-index:2147483000;min-width:220px;max-height:min(70vh,560px);overflow:auto;background:#0E0E11;border:1px solid #2E3035;box-shadow:0 18px 50px rgba(0,0,0,.6);padding:6px}.mlp-m button{display:flex;justify-content:space-between;gap:16px;width:100%;min-height:44px;padding:0 12px;background:none;border:0;color:#E9E4D8;font:14px "JetBrains Mono",monospace;text-align:left;cursor:pointer}.mlp-m button:hover{background:#17181B}.mlp-m button[aria-current="true"]::after{content:"\u2713"}' +
         '.mlp-f{display:flex;justify-content:center;padding:18px 0 6px}';
       document.head.appendChild(st);
