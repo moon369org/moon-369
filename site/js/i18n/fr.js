@@ -29,7 +29,7 @@
 "Que se passe-t-il ? (facultatif)",
 "Que se passe-t-il",
 "Nomme l’événement",
-"+ AJOUTER UNE PHOTO · FACULTATIF",
+"+ PRENDRE UNE PHOTO · FACULTATIF",
 "PHOTO",
 "Retirer la photo",
 "Signée à cet instant. Elle reste sur ton téléphone : seule son empreinte va à Moon.",

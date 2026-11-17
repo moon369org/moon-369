@@ -29,7 +29,7 @@
 "Cosa sta succedendo? (facoltativo)",
 "Cosa sta succedendo",
 "Dai un nome all’evento",
-"+ AGGIUNGI UNA FOTO · FACOLTATIVO",
+"+ SCATTA UNA FOTO · FACOLTATIVO",
 "FOTO",
 "Rimuovi la foto",
 "Firmata in questo momento. Resta sul tuo telefono: a Moon va solo la sua impronta.",

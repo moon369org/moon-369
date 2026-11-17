@@ -33,7 +33,7 @@
 "¿Qué está pasando? (opcional)",
 "Qué está pasando",
 "Ponle nombre al evento",
-"+ AÑADIR UNA FOTO · OPCIONAL",
+"+ HAZ UNA FOTO · OPCIONAL",
 "FOTO",
 "Quitar la foto",
 "Firmada en este momento. Se queda en tu teléfono: solo su huella va a Moon.",

@@ -29,7 +29,7 @@
 "Wat gebeurt er? (optioneel)",
 "Wat gebeurt er",
 "Geef het evenement een naam",
-"+ FOTO TOEVOEGEN · OPTIONEEL",
+"+ MAAK EEN FOTO · OPTIONEEL",
 "FOTO",
 "Foto verwijderen",
 "Op dit moment ondertekend. Hij blijft op je telefoon: alleen de vingerafdruk gaat naar Moon.",

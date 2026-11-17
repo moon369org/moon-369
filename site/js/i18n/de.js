@@ -29,7 +29,7 @@
 "Was passiert gerade? (optional)",
 "Was passiert gerade",
 "Benenne das Event",
-"+ FOTO HINZUFÜGEN · OPTIONAL",
+"+ FOTO AUFNEHMEN · OPTIONAL",
 "FOTO",
 "Foto entfernen",
 "In diesem Moment signiert. Es bleibt auf deinem Telefon: Nur sein Fingerabdruck geht an Moon.",

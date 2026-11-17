@@ -441,7 +441,10 @@
       var pd = part('PROOF', 'Checking the signature…', [q('[data-mk-sig]')]);
       verifyEarly(rc).then(function (v) { pd.querySelector('[data-fd-sub]').textContent = v && v.valid ? '✓ Signed and verified on Moon' : 'The signature does not check out'; }, function () { pd.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
     }
-    part('THE MOON THAT NIGHT', esc(nm) + ' · ' + il + '% lit', [q('.mk-date'), q('.mk-mark'), q('.mk-main > .mk-rows')]);
+    // The same living moon as the app, as it was at this moment.
+    var st = document.createElement('div'); st.className = 'mk-stage';
+    st.innerHTML = '<canvas class="hm-moonglow" role="img" aria-label="' + esc(nm) + '" data-at="' + Math.round(ms) + '"></canvas>';
+    part('THE MOON THAT NIGHT', esc(nm) + ' · ' + il + '% lit', [st, q('.mk-date'), q('.mk-mark'), q('.mk-main > .mk-rows')]);
     var sky = q('.mk-skyw'); if (sky) { var sh = sky.querySelector('.mk-skyh'); if (sh) sh.remove(); }
     part('THE SKY', k ? esc(k.tide.strength.charAt(0).toUpperCase() + k.tide.strength.slice(1)) + ' tide · ' + Math.round(k.distance.km).toLocaleString() + ' km away' : '', [sky]);
     if (rc) {

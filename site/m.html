@@ -199,7 +199,9 @@ footer > div > div:first-child svg{width:64px!important}
 .mk-fd-c{width:20px;height:20px;flex:none;color:#8A8B8F;transition:transform .2s}
 .mk-fd[open] .mk-fd-c{transform:rotate(180deg)}
 .mk-fd-b{display:flex;flex-direction:column;gap:22px;padding:4px 0 26px}
-.mk-post .mk-ts{border-bottom:1px solid #1C1D20}
+.mk-post .mk-stage{position:relative;width:min(56vw,220px);aspect-ratio:1;margin:28px auto 34px}.mk-stage canvas{position:absolute;left:-45%;top:-45%;width:190%;height:190%;pointer-events:none}
+.mk-post .mk-ph{display:none}
+.mk-ts{border-bottom:1px solid #1C1D20}
 .mk-ts{font-family:'JetBrains Mono',monospace;font-size:13px;color:#8A8B8F;padding-bottom:18px;border-bottom:1px solid #1C1D20}
 .mk-qr-lb{width:min(80vw,420px)}
 .mk-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:48px;align-items:start}

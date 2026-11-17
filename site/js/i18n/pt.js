@@ -29,7 +29,7 @@
 "O que está acontecendo? (opcional)",
 "O que está acontecendo",
 "Dê um nome ao evento",
-"+ ADICIONAR UMA FOTO · OPCIONAL",
+"+ TIRAR UMA FOTO · OPCIONAL",
 "FOTO",
 "Remover a foto",
 "Assinada neste momento. Fica no seu telefone: só a impressão digital vai para o Moon.",
