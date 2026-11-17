@@ -23,14 +23,14 @@
 <link rel="stylesheet" href="/assets/fonts/fonts.css">
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;overflow-x:hidden;overflow-x:clip;background:#0B0B0D;color:#E9E4D8;font-family:Inter,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;overflow-x:hidden;overflow-x:clip;background:#0B0B0D;color:#E9E4D8;font-family:'JetBrains Mono',ui-monospace,monospace;-webkit-tap-highlight-color:transparent}
 body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 ::selection{background:#24262A}
 a{color:#E9E4D8}
 .top{display:flex;justify-content:space-between;align-items:center;padding:18px 22px}
 .top svg{width:96px;height:auto;display:block}
 .top a{font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8A8B8F;text-decoration:none}
-main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px 28px;max-width:520px;width:100%;margin:0 auto}
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px calc(96px + env(safe-area-inset-bottom));max-width:520px;width:100%;margin:0 auto}
 .stage{position:relative;width:min(62vw,240px);aspect-ratio:1;margin:8px 0 18px}
 .stage canvas{position:absolute;left:-45%;top:-45%;width:190%;height:190%;pointer-events:none}
 .k{font:11px 'JetBrains Mono',monospace;letter-spacing:.26em;color:#8A8B8F;text-align:center}
@@ -39,7 +39,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px
 .clock span{color:#8A8B8F;font-size:.42em;letter-spacing:.04em}
 .meta{margin-top:12px;font-size:14px;color:#A2A3A7;text-align:center;line-height:1.6}
 .btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;border:1px solid #E9E4D8;background:none;color:#E9E4D8;font:700 12px Syncopate,sans-serif;letter-spacing:.2em;cursor:pointer;text-decoration:none;border-radius:0}
-.btn.p{background:#E9E4D8;color:#0B0B0D}
+.btn[hidden]{display:none}.btn.p{background:#E9E4D8;color:#0B0B0D}
 .acts{display:grid;gap:10px;width:100%;margin-top:26px}
 .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .row .btn{min-height:48px;font-size:10px;letter-spacing:.16em}
@@ -54,7 +54,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px
 .panel{max-height:92vh;overflow:auto}.panel h2{margin:0;font:700 15px Syncopate,sans-serif;letter-spacing:.14em}
 .panel .mk{font:18px 'JetBrains Mono',monospace}
 .panel .lt{font-size:13px;color:#8A8B8F;margin-top:-6px}
-.panel input{width:100%;min-height:52px;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:16px Inter,sans-serif;padding:0 14px;border-radius:0}
+.panel input{width:100%;min-height:52px;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:16px 'JetBrains Mono',monospace;padding:0 14px;border-radius:0}
 .panel input:focus{outline:none;border-color:#8A8B8F}
 .panel .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .panel .x{background:none;border:0;color:#8A8B8F;font:12px 'JetBrains Mono',monospace;letter-spacing:.2em;cursor:pointer;padding:10px}
@@ -64,16 +64,18 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px
 .foot a{color:#8A8B8F;text-decoration:none}
 .scr[hidden]{display:none}.scr{width:100%;display:flex;flex-direction:column;align-items:center}
 .stage.sm{width:min(44vw,170px)}
-.tabs{position:sticky;bottom:0;z-index:5;display:grid;grid-template-columns:1fr 1fr 1fr;background:#0B0B0D;border-top:1px solid #1C1D20;padding-bottom:env(safe-area-inset-bottom)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:1fr 1fr 1fr;background:#0B0B0D;border-top:1px solid #1C1D20;padding-bottom:env(safe-area-inset-bottom)}
 .tabs button{background:none;border:0;color:#8A8B8F;font:11px 'JetBrains Mono',monospace;letter-spacing:.22em;min-height:56px;cursor:pointer}
-.tabs button[aria-current="page"]{color:#E9E4D8}
+.tabs button{position:relative}.tabs button[aria-current="page"]{color:#E9E4D8}
+.tabs button[aria-current="page"]::after{content:'';position:absolute;left:50%;bottom:9px;width:18px;height:2px;background:#E9E4D8;transform:translateX(-50%)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 12px;width:100%}
+.chips.g{display:grid;grid-template-columns:1fr 1fr}.chips.g button:last-child:nth-child(odd){grid-column:1/-1}.chips button{min-height:44px}
 .chips button{background:none;border:1px solid #24262A;color:#B9B6AE;font:10.5px 'JetBrains Mono',monospace;letter-spacing:.16em;padding:10px 12px;cursor:pointer}
-.chips button[aria-pressed="true"]{border-color:#E9E4D8;color:#E9E4D8}
-input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:16px Inter,sans-serif;padding:0 14px;border-radius:0;margin-bottom:10px;color-scheme:dark}
+.chips button[aria-pressed="true"]{border-color:#E9E4D8;background:#E9E4D8;color:#0B0B0D}
+input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:16px 'JetBrains Mono',monospace;padding:0 14px;border-radius:0;margin-bottom:10px;color-scheme:dark}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}.two .btn{min-height:48px;font-size:10.5px}
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.three .btn{min-height:48px;font-size:10.5px;letter-spacing:.16em}
-.nres{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:22px}
+.nres[hidden]{display:none}.nres{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:22px}
 .cells{display:grid;grid-template-columns:repeat(3,1fr);width:100%;border-top:1px solid #24262A;border-bottom:1px solid #24262A;margin:6px 0}
 .cells div{padding:12px 0;text-align:center}.cells div+div{border-left:1px solid #24262A}.cells span{display:block;font:10px 'JetBrains Mono',monospace;letter-spacing:.22em;color:#8A8B8F}.cells b{display:block;margin-top:6px;font:700 20px Syncopate,sans-serif}
 .dim{color:#8A8B8F!important;font-size:13px!important}
@@ -81,10 +83,20 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .clock small{color:#8A8B8F;font-size:.42em}
 .recent a small{color:#8A8B8F}
 .step[hidden]{display:none}.step{display:grid;gap:12px}
-.ok{display:flex;align-items:center;gap:12px}.ok span{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#4CC38A;color:#0B0B0D;font:700 16px Inter,sans-serif}.ok b{font:700 14px Syncopate,sans-serif;letter-spacing:.14em}
+.ok{display:flex;align-items:center;gap:12px}.ok span{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#4CC38A;color:#0B0B0D;font:700 16px 'JetBrains Mono',monospace}.ok b{font:700 14px Syncopate,sans-serif;letter-spacing:.14em}
 .rn{font-size:18px;font-weight:500}.rn:empty{display:none}
 .lk{font:12px 'JetBrains Mono',monospace!important;color:#B9B6AE!important;min-height:44px!important}
 .qr svg{width:170px;height:170px}
+.fld{display:flex;flex-direction:column;gap:7px;min-width:0}
+.fl{font:10px 'JetBrains Mono',monospace;letter-spacing:.22em;color:#8A8B8F}
+.fw{position:relative;display:block}
+.fw .ph{position:absolute;left:14px;top:26px;transform:translateY(-50%);pointer-events:none;color:#5E6064;font-size:15px;white-space:nowrap}
+.fw input.empty::-webkit-datetime-edit{color:transparent}
+.fw input.empty:focus::-webkit-datetime-edit{color:inherit}
+.fw input:not(.empty)+.ph,.fw input:focus+.ph{display:none}
+.nphase{font:500 17px 'JetBrains Mono',monospace;color:#E9E4D8;text-align:center;margin-top:2px}
+.nphase:empty{display:none}
+.nres .date{margin-top:4px}
 </style>
 </head>
 <body>
@@ -94,7 +106,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 </div>
 <main>
   <section class="scr" data-scr="now">
-    <div class="stage"><canvas class="hm-moonglow" role="img" aria-label="The Moon right now" data-app-moon></canvas></div>
+    <div class="stage"><canvas class="hm-moonglow" role="img" aria-label="The Moon right now" data-detail data-app-moon></canvas></div>
     <div class="k">MOON TIME · THE SAME EVERYWHERE</div>
     <div class="date" data-app-date>&nbsp;</div>
     <div class="clock" data-app-clock>&nbsp;</div>
@@ -108,14 +120,15 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
   </section>
   <section class="scr" data-scr="nights" hidden>
     <div class="k" style="margin-top:6px">EXPLORE A NIGHT</div>
-    <div class="chips" data-n-chips><button type="button" data-for="born" aria-pressed="true">I WAS BORN</button><button type="button" data-for="met">WE MET</button><button type="button" data-for="wed">OUR WEDDING</button><button type="button" data-for="kid">MY CHILD WAS BORN</button><button type="button" data-for="day">ANY DAY</button></div>
-    <div class="two f"><input type="date" data-n-date aria-label="Date"><input type="time" data-n-time aria-label="Time (optional)"></div>
+    <div class="chips g" data-n-chips><button type="button" data-for="born" aria-pressed="true">I WAS BORN</button><button type="button" data-for="met">WE MET</button><button type="button" data-for="wed">OUR WEDDING</button><button type="button" data-for="kid">MY CHILD WAS BORN</button><button type="button" data-for="day">ANY DAY</button></div>
+    <div class="two f"><label class="fld"><span class="fl">DATE</span><span class="fw"><input type="date" class="empty" data-n-date><span class="ph">Mar 14, 1988</span></span></label><label class="fld"><span class="fl">TIME · OPTIONAL</span><span class="fw"><input type="time" class="empty" data-n-time><span class="ph">9:30 PM</span></span></label></div>
     <button class="btn p" type="button" data-n-show>SHOW ME THE MOON</button>
     <div class="nres" data-n-res hidden>
-      <div class="stage sm"><canvas class="hm-moonglow" aria-hidden="true" data-n-moon></canvas></div>
+      <div class="stage sm"><canvas class="hm-moonglow" aria-hidden="true" data-detail data-n-moon></canvas></div>
       <div class="k" data-n-title></div>
       <div class="date" data-n-date-out></div>
-      <div class="meta" data-n-facts></div>
+      <div class="nphase" data-n-phase></div>
+      <div class="meta dim" data-n-facts></div>
       <div class="cells" data-n-cells></div>
       <div class="meta dim" data-n-returns></div>
       <button class="btn p" type="button" data-n-share>SHARE THIS MOON</button>

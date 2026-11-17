@@ -122,10 +122,12 @@
     $('[data-n-moon]').setAttribute('data-at', String(ms));
     $('[data-n-title]').textContent = TITLES[n.for];
     $('[data-n-date-out]').textContent = +dm[2] + ' ' + MONTHS[+dm[1] - 1] + ' ' + dm[0];
-    $('[data-n-facts]').textContent = (n.t ? n.t + ' · ' : '') + P.name(f) + ' · ' + Math.round(P.illumination(ms) * 100) + '% lit';
+    $('[data-n-phase]').textContent = P.name(f) + ' · ' + Math.round(P.illumination(ms) * 100) + '% lit';
+    $('[data-n-facts]').textContent = n.t ? 'At ' + n.t + ' your time' : 'At midday';
+    $('[data-n-show]').hidden = true;     // one primary at a time: Share takes over until the inputs change
     $('[data-n-cells]').innerHTML = '<div><span>CYCLE</span><b>' + k.y + '</b></div><div><span>MOON</span><b>' + p(k.m) + '</b></div><div><span>LUNE</span><b>' + p(k.d) + '</b></div>';
     $('[data-n-open]').href = 'https://moon369.org/night/' + n.d + '?' + nightQuery(n).replace(/^d=[^&]*&/, '');
-    var ret = $('[data-n-returns]'); ret.textContent = n.returns ? 'This moon returns to this date in ' + n.returns + '.' : (n.t ? '' : 'No time given, so this is the moon at midday.');
+    var ret = $('[data-n-returns]'); ret.textContent = n.returns ? 'This moon returns to this date in ' + n.returns + '.' : '';
     if (!n.returns && navigator.onLine !== false) fetch(API + '/v1/night?' + nightQuery(n)).then(function (r) { return r.json(); }).then(function (j) {
       if (night === n && j.returns) { n.returns = j.returns; ret.textContent = 'This moon returns to this date in ' + j.returns + '.'; saveNight(n); }
     }).catch(function () {});
@@ -185,6 +187,10 @@
     $('[data-sheet-embed]').onclick = embed;
     // Nights
     $$('[data-n-chips] button').forEach(function (b) { b.onclick = function () { occasion = b.getAttribute('data-for'); $$('[data-n-chips] button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); }); }; });
+    // Empty date and time fields show an example; any change brings back the main button.
+    var again = function () { $('[data-n-show]').hidden = false; };
+    ['[data-n-date]', '[data-n-time]'].forEach(function (q) { var el = $(q), mark = function () { el.classList.toggle('empty', !el.value); }; el.addEventListener('input', function () { mark(); again(); }); el.addEventListener('change', mark); mark(); });
+    $$('[data-n-chips] button').forEach(function (b) { b.addEventListener('click', again); });
     $('[data-n-show]').onclick = function () {
       var d = $('[data-n-date]').value; if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { toast('Pick a date first'); return; }
       showNight({ d: d, t: $('[data-n-time]').value || '', for: occasion }, true); buzz();
@@ -193,12 +199,12 @@
     $('[data-n-saved]').addEventListener('click', function (e) {
       var a = e.target.closest('[data-n-i]'); if (!a) return; e.preventDefault();
       var x = store('moonNights')[+a.getAttribute('data-n-i')]; if (!x) return;
-      $('[data-n-date]').value = x.d; $('[data-n-time]').value = x.t || ''; showNight({ d: x.d, t: x.t, for: x.for, returns: x.returns }, false);
+      $('[data-n-date]').value = x.d; $('[data-n-time]').value = x.t || ''; $('[data-n-date]').classList.toggle('empty', !x.d); $('[data-n-time]').classList.toggle('empty', !x.t); showNight({ d: x.d, t: x.t, for: x.for, returns: x.returns }, false);
       $('[data-n-res]').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     $('[data-n-share]').onclick = function () {
       if (!night) return; buzz();
-      var url = $('[data-n-open]').href, msg = TITLES[night.for].charAt(0) + TITLES[night.for].slice(1).toLowerCase() + ': ' + $('[data-n-facts]').textContent + '.';
+      var url = $('[data-n-open]').href, msg = TITLES[night.for].charAt(0) + TITLES[night.for].slice(1).toLowerCase() + ': ' + (night.t ? night.t + ' · ' : '') + $('[data-n-phase]').textContent + '.';
       if (navigator.share) navigator.share({ title: 'Your Moon', text: msg, url: url }).then(function () { toast(AFTER); }, function () {});
       else (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { toast('Link copied. ' + AFTER); }, function () { prompt('Copy this link', url); });
     };

@@ -52,7 +52,28 @@
   // Sun direction seen from the Moon (x right, y down, z toward us): new moon behind it, full in
   // front, lit on the right while waxing. Brightness is a smoothstep of the sunlight's angle, so the
   // terminator is soft in proportion to the sphere, and the edge of the disc is antialiased.
-  function shade(W, cx, cy, R, f) {
+  // data-detail on a canvas: a sharper terminator and the Moon's surface (the dark maria and a fine grain),
+  // with the unlit side darkened toward the night and a faint earthshine rim.
+  var MARIA = [[-0.27, -0.38, 0.3, 1], [0.15, -0.32, 0.19, 0.95], [0.3, -0.06, 0.22, 0.9], [0.62, -0.24, 0.12, 0.85], [0.47, 0.16, 0.16, 0.7],
+    [-0.15, 0.36, 0.2, 0.6], [-0.55, -0.02, 0.38, 0.75], [-0.62, 0.32, 0.2, 0.55], [-0.36, 0.55, 0.14, 0.45]];
+  function grain(x, y) { var n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return n - Math.floor(n); }
+  function vnoise(x, y) {
+    var ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy; fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+    var a = grain(ix, iy), b = grain(ix + 1, iy), c = grain(ix, iy + 1), d = grain(ix + 1, iy + 1);
+    return (a + (b - a) * fx) * (1 - fy) + (c + (d - c) * fx) * fy;
+  }
+  function fbm(x, y) { return vnoise(x, y) * 0.55 + vnoise(x * 2.1, y * 2.1) * 0.3 + vnoise(x * 4.3, y * 4.3) * 0.15; }
+  // Each mare is a dark plain with a ragged but fairly crisp shore: distance warped by noise, then a short fade.
+  function surface(nx, ny) {
+    var m = 0, w = (fbm(nx * 4.5 + 7, ny * 4.5 + 3) - 0.5) * 1.1 + (fbm(nx * 11, ny * 11) - 0.5) * 0.35;
+    for (var i = 0; i < MARIA.length; i++) {
+      var q = MARIA[i], dx = (nx - q[0]) / q[2], dy = (ny - q[1]) / (q[2] * 0.82), dd = Math.sqrt(dx * dx + dy * dy) + w;
+      var g = dd < 0.6 ? 1 : dd > 1.15 ? 0 : 1 - (dd - 0.6) / 0.55; m = Math.max(m, g * g * (3 - 2 * g) * q[3]);
+    }
+    var tone = (fbm(nx * 9, ny * 9) - 0.5) * 0.07, fine = (grain(Math.floor(nx * 140), Math.floor(ny * 140)) - 0.5) * 0.03;
+    return 1 - 0.16 * m * (0.75 + 0.5 * fbm(nx * 7 + 1, ny * 7)) + tone + fine;
+  }
+  function shade(W, cx, cy, R, f, detail) {
     var cvs = document.createElement('canvas'); cvs.width = cvs.height = W;
     var c = cvs.getContext('2d'), img = c.createImageData(W, W), d = img.data;
     var e = 2 * Math.PI * f, sx = Math.sin(e), sz = -Math.cos(e);
@@ -68,11 +89,11 @@
         var nz = Math.sqrt(Math.max(0, 1 - rr)), dot = nx * sx + nz * sz;
         // The fade is widest across the middle of the face and tightens toward the rim, so the
         // terminator stays soft but meets the edge cleanly (no lit horns, no dark notches).
-        var A = -0.03 - 0.22 * nz, B = 0.03 + 0.42 * nz;
+        var A = detail ? -0.008 - 0.04 * nz : -0.03 - 0.22 * nz, B = detail ? 0.008 + 0.1 * nz : 0.03 + 0.42 * nz;
         var tt = Math.min(1, Math.max(0, (dot - A) / (B - A))), a = tt * tt * (3 - 2 * tt) * edge;
         if (a <= 0) continue;
-        var o = (y * W + x) * 4;
-        d[o] = ink[0]; d[o + 1] = ink[1]; d[o + 2] = ink[2]; d[o + 3] = Math.round(a * 255);
+        var o = (y * W + x) * 4, k = detail ? surface(nx, ny) * (0.9 + 0.1 * nz) : 1;
+        d[o] = Math.min(255, ink[0] * k); d[o + 1] = Math.min(255, ink[1] * k); d[o + 2] = Math.min(255, ink[2] * k); d[o + 3] = Math.round(a * 255);
       }
     }
     c.putImageData(img, 0, 0);
@@ -99,7 +120,8 @@
     ctx.clearRect(0, 0, W, W);
 
     // The glow and the moon only change with the phase, so draw them once and reuse them.
-    var sk = W + '|' + f.toFixed(4) + '|' + strength.toFixed(3);
+    var detail = cv.hasAttribute('data-detail');
+    var sk = W + '|' + f.toFixed(4) + '|' + strength.toFixed(3) + (detail ? '|d' : '');
     var st = cv.__moonStatic || (cv.__moonStatic = document.createElement('canvas'));
     if (cv.__moonKey !== sk) {
       cv.__moonKey = sk; st.width = W; st.height = W;
@@ -109,7 +131,7 @@
         // Sun hits it there, fading to dark across the terminator. Near the poles the sunlight only
         // grazes, so the lit edge fades out before it gets there: the shadow side meets the edge in
         // one smooth curve, with no thin horns running along the rim.
-        var lit = shade(W, cx, cy, R, f);
+        var lit = shade(W, cx, cy, R, f, detail);
 
         // Rule 1 + 2: glow made from the lit face itself, blurred at three radii.
         var layers = [[160, 0.4], [70, 0.2], [34, 0.12]];
@@ -117,7 +139,13 @@
         for (var i = 0; i < layers.length; i++) blurDraw(ctx, W, W, Math.max(1, Math.round(W / layers[i][0])), layers[i][1] * strength, 'lighter', paintLit);
 
         // The moon: the shadow disc, then the lit face on top.
-        ctx.fillStyle = '#24262A'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+        if (detail) {
+          // Unlit side close to the night sky, lit only by a faint earthshine toward its rim.
+          var es = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R);
+          es.addColorStop(0, '#111215'); es.addColorStop(0.86, '#15161A'); es.addColorStop(1, '#2A2C31');
+          ctx.fillStyle = es; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = 'rgba(' + INK + ',0.10)'; ctx.lineWidth = Math.max(1, W / 400); ctx.beginPath(); ctx.arc(cx, cy, R - ctx.lineWidth / 2, 0, Math.PI * 2); ctx.stroke();
+        } else { ctx.fillStyle = '#24262A'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill(); }
         ctx.drawImage(lit, 0, 0);
       })(st.getContext('2d'));
     }
