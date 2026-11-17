@@ -312,16 +312,21 @@
   function setView(v, fromTap) {
     view = v; try { localStorage.setItem('moonView', v); } catch (e) {}
     $$('[data-view]').forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-view') === v)); });
-    var sky = v === 'sky';
-    $('[data-scr="now"] .stage').hidden = sky; $('[data-skyv]').hidden = !sky;
-    if (sky) drawPath(); else if (skyBox) { skyBox.stop(); }
+    var away = v !== 'moon';
+    $('[data-scr="now"] .stage').hidden = away; $('[data-skyv]').hidden = !away;
+    if (skyBox) skyBox.stop();
+    if (away) drawPath();
     if (fromTap) { go('now'); buzz(); }
   }
   function drawPath() {
     var p = place();
-    $('[data-sky-ask]').hidden = !!p; $('[data-sky-chart]').hidden = !p; $('[data-sky-h]').hidden = !p; $('[data-sky-where]').hidden = !p;
+    var tide = view === 'tide';
+    $('[data-sky-ask]').hidden = !!p; $('[data-sky-chart]').hidden = !p || tide; $('[data-sky-h]').hidden = !p || tide; $('[data-sky-where]').hidden = !p;
+    $('[data-tide]').hidden = !p || !tide;
+    $('[data-sky-k]').textContent = tide ? 'TIDES' : "THE MOON'S PATH TODAY";
     if (p) $('[data-sky-place]').textContent = (p.name ? p.name : 'YOUR LOCATION').toUpperCase();
     if (!p || !window.MoonSky) return;
+    if (tide) { drawTide(p); return; }
     var now = Date.now(), fmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
     var dayOf = function (t) { var d = new Date(t); return d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate(); }, today = dayOf(now);
     $('[data-sky-k]').textContent = "THE MOON'S PATH · LOOKING " + (p.lat >= 0 ? 'SOUTH' : 'NORTH');
@@ -349,6 +354,62 @@
       try { localStorage.setItem('moonPlace', JSON.stringify({ lat: x[0], lng: x[1], name: x[2] + ', ' + x[3] + ' ' + z })); } catch (e2) {}
       $('[data-sky-zipin]').blur(); drawPath(); buzz();
     }).catch(function () { toast(navigator.onLine === false ? 'Looking up a ZIP code needs a connection' : 'Could not look up that ZIP code'); });
+  }
+  // ---------- TIDE: the ocean near you, and how hard the moon is pulling ----------
+  var tideCache = {};
+  function drawTide(p) {
+    var fmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }), dfmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+    $('[data-sky-k]').textContent = 'TIDES';
+    strength();
+    var key = p.lat + ',' + p.lng, c = tideCache[key];
+    if (c && Date.now() - c.at < 15 * 60000) return showTide(c.d, fmt, dfmt);
+    $('[data-tide-h]').textContent = 'Finding the nearest tide station…';
+    fetch(API + '/v1/tides?lat=' + p.lat + '&lng=' + p.lng).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || !d.hilo) throw 0; tideCache[key] = { at: Date.now(), d: d }; if (view === 'tide') showTide(d, fmt, dfmt);
+    }).catch(function () {
+      $('[data-tide-h]').textContent = navigator.onLine === false ? 'Tides need a connection.' : 'Tide times are not available right now.';
+      $('[data-tide-chart]').innerHTML = ''; $('[data-tide-list]').innerHTML = ''; $('[data-tide-ax]').innerHTML = ''; $('[data-tide-src]').textContent = '';
+    });
+  }
+  function showTide(d, fmt, dfmt) {
+    var now = Date.now(), ev = d.hilo.map(function (x) { return { t: Date.parse(x.utc), ft: x.ft, type: x.type }; });
+    var next = ev.filter(function (x) { return x.t > now; }), prev = ev.filter(function (x) { return x.t <= now; }).pop();
+    var curve = d.curve.map(function (x) { return { t: Date.parse(x.utc), ft: x.ft }; });
+    var level = null; for (var i = 1; i < curve.length; i++) if (curve[i].t >= now) { var a = curve[i - 1], b = curve[i]; level = a.ft + (b.ft - a.ft) * (now - a.t) / (b.t - a.t); break; }
+    var n0 = next[0], ft = function (v) { return (Math.round(v * 10) / 10).toFixed(1) + ' ft'; };
+    $('[data-tide-h]').textContent = n0 ? (n0.type === 'high' ? 'Rising' : 'Falling') + (level != null ? ' · ' + ft(level) + ' now' : '') + '. ' + (n0.type === 'high' ? 'High' : 'Low') + ' tide ' + ft(n0.ft) + ' at ' + fmt.format(new Date(n0.t)) + '.' : '';
+    // The next 24 hours, with highs and lows marked and a line at now.
+    var t0 = now - 3 * 3600000, t1 = now + 21 * 3600000, pts = curve.filter(function (x) { return x.t >= t0 && x.t <= t1; });
+    var svg = '';
+    if (pts.length > 1) {
+      var lo = Math.min.apply(null, pts.map(function (x) { return x.ft; })), hi = Math.max.apply(null, pts.map(function (x) { return x.ft; })), pad = (hi - lo) * 0.18 || 1;
+      var X = function (t) { return (t - t0) / (t1 - t0) * 360; }, Y = function (v) { return 160 - (v - lo + pad) / (hi - lo + pad * 2) * 150; };
+      var line = pts.map(function (x, i) { return (i ? 'L' : 'M') + X(x.t).toFixed(1) + ' ' + Y(x.ft).toFixed(1); }).join(' ');
+      svg += '<path d="' + line + ' L360 170 L0 170 Z" fill="rgba(138,139,143,.16)"/><path d="' + line + '" fill="none" stroke="#E9E4D8" stroke-width="1.6" vector-effect="non-scaling-stroke"/>';
+      ev.filter(function (x) { return x.t >= t0 && x.t <= t1; }).forEach(function (x) { svg += '<circle cx="' + X(x.t).toFixed(1) + '" cy="' + Y(x.ft).toFixed(1) + '" r="3" fill="' + (x.type === 'high' ? '#E9E4D8' : '#0B0B0D') + '" stroke="#E9E4D8" stroke-width="1.2" vector-effect="non-scaling-stroke"/>'; });
+      svg += '<line x1="' + X(now).toFixed(1) + '" x2="' + X(now).toFixed(1) + '" y1="0" y2="170" stroke="#E9E4D8" stroke-dasharray="3 3" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+      if (level != null) svg += '<circle cx="' + X(now).toFixed(1) + '" cy="' + Y(level).toFixed(1) + '" r="4.5" fill="#E9E4D8"/>';
+    }
+    $('[data-tide-chart]').innerHTML = svg;
+    $('[data-tide-ax]').innerHTML = '<span>' + esc(fmt.format(new Date(t0))) + '</span><span class="nw" style="left:' + ((now - t0) / (t1 - t0) * 100).toFixed(1) + '%">NOW</span><span>' + esc(fmt.format(new Date(t1))) + ' ' + esc(dfmt.format(new Date(t1)).split(' ')[0].replace(',', '')) + '</span>';
+    $('[data-tide-list]').innerHTML = next.slice(0, 4).map(function (x) { return '<div><span>' + (x.type === 'high' ? 'HIGH' : 'LOW') + '</span><b>' + esc(fmt.format(new Date(x.t))) + '</b><i>' + esc(ft(x.ft)) + ' · ' + esc(dfmt.format(new Date(x.t)).split(' ')[0].replace(',', '')) + '</i></div>'; }).join('');
+    var st = d.station, far = st.distance_km > 60;
+    $('[data-tide-src]').textContent = 'NOAA predictions for ' + st.name + (st.state ? ', ' + st.state : '') + ' · ' + (far ? st.distance_km.toLocaleString() + ' km away, the nearest station · ' : '') + 'heights above ' + d.datum + '.';
+    if (far) $('[data-tide-h]').textContent = 'Nearest coast: ' + st.name + (st.state ? ', ' + st.state : '') + '. ' + $('[data-tide-h]').textContent;
+  }
+  // How strong the tides are worldwide right now: spring tides near new and full moon, neap near the quarters,
+  // a little stronger when the moon is close.
+  function strength() {
+    var P = window.MoonPhase; if (!P) return;
+    var now = Date.now(), f = P.fraction(now), dist = window.MoonSky && MoonSky.distanceKm ? MoonSky.distanceKm(now) : null;
+    var off = function (target) { var x = Math.abs(((f - target) % 1 + 1.5) % 1 - 0.5); return x; };
+    var dSpring = Math.min(off(0), off(0.5)), dNeap = Math.min(off(0.25), off(0.75));
+    var findNext = function (targets) { for (var h = 1; h < 24 * 16; h++) { var a = P.fraction(now + (h - 1) * 3600000), b = P.fraction(now + h * 3600000); for (var k = 0; k < targets.length; k++) { var tg = targets[k]; if ((a < tg && b >= tg) || (tg === 0 && b < a)) return now + h * 3600000; } } return null; };
+    var ns = findNext([0, 0.5]), nn = findNext([0.25, 0.75]), dd = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    var kind = dSpring < 0.07 ? 'SPRING TIDES' : dNeap < 0.07 ? 'NEAP TIDES' : dSpring < dNeap ? 'TIDES GROWING' : 'TIDES EASING';
+    var why = dSpring < 0.07 ? 'Sun and moon pull in line, so highs run higher and lows lower.' : dNeap < 0.07 ? 'Sun and moon pull at right angles, so the range between high and low is smallest.' : dSpring < dNeap ? 'The range between high and low is growing toward spring tides.' : 'The range between high and low is shrinking toward neap tides.';
+    var close = dist ? (dist < 370000 ? ' The moon is close (' + Math.round(dist / 1000) + ',000 km), adding a little extra.' + (dSpring < 0.07 ? ' Expect king tides.' : '') : dist > 400000 ? ' The moon is far (' + Math.round(dist / 1000) + ',000 km), taking a little off.' : '') : '';
+    $('[data-tide-str]').innerHTML = '<b>' + kind + '</b><p>' + why + close + '</p><p>Next spring tides ' + (ns ? esc(dd.format(new Date(ns))) : '…') + ' · next neap tides ' + (nn ? esc(dd.format(new Date(nn))) : '…') + '.</p>';
   }
   function askPlace() {
     if (!navigator.geolocation) { toast('Location is not available on this device'); return; }

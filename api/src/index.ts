@@ -21,6 +21,7 @@ import { svgToPng } from './png.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
 import { QUICKNET, BEACON_NETWORK, roundTimeNs, type Beacon, type Chain } from './beacon.js';
 import { checkLinkedFile, FileCheckError } from './filecheck.js';
+import { tidesNear } from './tides.js';
 import { TIDELINE, record, sealDue, sealIfDue, stats as tideStats, upgradeBitcoin, checkpointSoon, proofFor, parseLune, luneLabel, luneOf, luneEndNs, tideBytes, type TideStore, type Anchorer, type BitcoinStamper } from './tideline.js';
 
 /** max overrides the limiter's default requests per minute (used for per-key limits). */
@@ -1060,6 +1061,18 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           ...(tsa.ok && ((tsa as { certificate: { days_left: number } }).certificate.days_left < 60) ? ['tsa_certificate_expiring'] : []),
         ];
         return json({ ok: problems.length === 0, problems, checked_utc: unixNsToIso(nowNs), took_ms: Date.now() - t0, signing, beacon, timestamps: tsa, tideline }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      case path === `/${API_VERSION}/tides`: {
+        // Ocean tides near a place, from NOAA's predictions (US coasts). Rounded so nearby phones share a cache.
+        const lat = Number(url.searchParams.get('lat')), lng = Number(url.searchParams.get('lng'));
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) throw new HttpError(400, 'bad_param', 'Give lat and lng in degrees');
+        try {
+          const t = await tidesNear(Math.round(lat * 10) / 10, Math.round(lng * 10) / 10, Date.now());
+          return json(t, 200, { 'Cache-Control': 'public, max-age=900, s-maxage=1800' });
+        } catch (e) {
+          return json({ error: { code: 'tides_unavailable', message: 'Tide predictions are not available right now' } }, 502, { 'Cache-Control': 'no-store' });
+        }
       }
 
       case path === `/${API_VERSION}/file-check`: {

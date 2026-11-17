@@ -250,5 +250,5 @@
     return { stop: stop };
   }
 
-  window.MoonSky = { day: day, pass: pass, moonAt: moonAt, sunAlt: sunAlt, compass: compass, mount: mount };
+  window.MoonSky = { day: day, pass: pass, moonAt: moonAt, sunAlt: sunAlt, compass: compass, mount: mount, distanceKm: function (ms) { return moonCoords(days(ms)).dist; } };
 })();

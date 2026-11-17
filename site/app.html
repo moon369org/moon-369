@@ -131,8 +131,8 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .panel textarea:focus{outline:none;border-color:#8A8B8F}
 .panel textarea.short{min-height:52px;height:52px;padding:14px;overflow:hidden}
 .stage canvas.stars{left:-62%;top:-12%;width:224%;height:124%;rotate:0deg;z-index:1}
-.vsw{display:grid;grid-template-columns:1fr 1fr;border:1px solid #3A3B3F}
-.vsw button{background:none;border:0;color:#8A8B8F;font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;min-height:36px;padding:0 14px;cursor:pointer}
+.vsw{display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #3A3B3F}
+.vsw button{background:none;border:0;color:#8A8B8F;font:11px 'JetBrains Mono',monospace;letter-spacing:.16em;min-height:36px;padding:0 10px;cursor:pointer}
 .vsw button[aria-selected="true"]{background:#E9E4D8;color:#0B0B0D}
 .skyv[hidden]{display:none}.skyv{width:100%;display:flex;flex-direction:column;gap:12px;margin:4px 0 22px}
 .sky-h{font-size:15px;line-height:1.5;text-align:center;color:#E9E4D8;min-height:3em}
@@ -173,12 +173,25 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .sky-zip input:focus{outline:none;border-color:#8A8B8F}.sky-zip .btn{min-height:52px;width:auto;padding:0 20px;font-size:11px}
 .sky-where{display:flex;justify-content:center;align-items:center;gap:12px;font:11px 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8A8B8F}
 .sky-where[hidden]{display:none}.sky-where button{background:none;border:0;color:#E9E4D8;font:inherit;letter-spacing:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:36px}
+.tide[hidden]{display:none}.tide{display:flex;flex-direction:column;gap:14px}
+.tide-ch{width:100%;height:170px;display:block;border-top:1px solid #24262A;border-bottom:1px solid #24262A;background:linear-gradient(#0B0B0D,#101114)}
+.tide-ax{position:relative;display:flex;justify-content:space-between;font:10px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#8A8B8F;margin-top:-6px}
+.tide-ax .nw{position:absolute;top:0;transform:translateX(-50%);color:#E9E4D8}
+.tide-list{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #24262A}
+.tide-list>div{padding:12px 8px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid #1C1D20}
+.tide-list>div:nth-child(odd){border-right:1px solid #1C1D20}
+.tide-list span{font:10px 'JetBrains Mono',monospace;letter-spacing:.22em;color:#8A8B8F}
+.tide-list b{font:700 min(15px,3.4vw) Syncopate,sans-serif;white-space:nowrap}
+.tide-list i{font-style:normal;font-size:12px;color:#A2A3A7}
+.tide-str{border:1px solid #24262A;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.tide-str b{font:700 13px Syncopate,sans-serif;letter-spacing:.08em}.tide-str p{margin:0;font-size:12.5px;line-height:1.55;color:#A2A3A7}
+.tide-src{font-size:11px;line-height:1.5;color:#6A6C70;text-align:center}
 </style>
 </head>
 <body>
 <div class="top">
   <a href="/" aria-label="Moon home"><svg viewBox="-10 -10 424 120" aria-hidden="true"><path d="M4,100 V4 L48,64 L92,4 V100" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/><circle cx="172" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/><circle cx="232" cy="50" r="46" fill="none" stroke="#0B0B0D" stroke-width="18"/><circle cx="232" cy="50" r="46" fill="none" stroke="#E9E4D8" stroke-width="8"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#0B0B0D" stroke-width="18"/><path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" fill="none" stroke="#E9E4D8" stroke-width="8"/><path d="M312,100 V4 L400,96 V0" fill="none" stroke="#E9E4D8" stroke-width="8" stroke-linejoin="bevel"/></svg></a>
-  <div class="vsw" role="tablist" aria-label="View"><button type="button" role="tab" aria-selected="true" data-view="moon">MOON</button><button type="button" role="tab" aria-selected="false" data-view="sky">SKY</button></div>
+  <div class="vsw" role="tablist" aria-label="View"><button type="button" role="tab" aria-selected="true" data-view="moon">MOON</button><button type="button" role="tab" aria-selected="false" data-view="sky">SKY</button><button type="button" role="tab" aria-selected="false" data-view="tide">TIDE</button></div>
 </div>
 <main>
   <section class="scr" data-scr="now">
@@ -189,6 +202,14 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
       <div class="sky-where" data-sky-where hidden><span data-sky-place></span><button type="button" data-sky-change>CHANGE</button></div>
       <div class="sky-h" data-sky-h></div>
       <div data-sky-chart></div>
+      <div class="tide" data-tide hidden>
+        <div class="sky-h" data-tide-h></div>
+        <svg class="tide-ch" data-tide-chart viewBox="0 0 360 170" preserveAspectRatio="none" role="img" aria-label="The tide over the next day"></svg>
+        <div class="tide-ax" data-tide-ax></div>
+        <div class="tide-list" data-tide-list></div>
+        <div class="tide-str" data-tide-str></div>
+        <div class="tide-src" data-tide-src></div>
+      </div>
     </div>
     <div class="k">MOON TIME · THE SAME EVERYWHERE</div>
     <div class="date" data-app-date>&nbsp;</div>

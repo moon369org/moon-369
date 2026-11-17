@@ -51,6 +51,7 @@ All are GET, need no key and return JSON unless noted. Base: `https://api.moon36
 - `POST /v1/sign` with `{"sha256": "<hex>"}`: a signed Moonmark for a file. Send only the fingerprint, never the file.
 - `POST /v1/verify`, `/v1/lookup/{sha256}`: check a receipt, or see who registered a file and when.
 - `/v1/file-check?url=<https link>&sha256=<hex>`: is the file at that link exactly the one signed? Returns only the verdict, plus provenance clues: a date inside the file, the host's own date, and what kind of site hosts it (public library, anonymous image host or social site). A signed Moonmark link can carry `&f=<https link>` to show the creator's original on the Moonmark, marked "Existed by" its moment, or "Origin not proven" when the clues say it came from somewhere else. A signature proves when a file existed, never who made it.
+- `/v1/tides?lat=&lng=`: ocean tides near a place from NOAA's predictions (US coasts): the nearest station, its highs and lows and a half-hourly curve for three days, in UTC.
 - `/v1/stats`: public numbers: receipts signed this lune and every lune since the first, tides sealed, Bitcoin proofs. Counts only.
 - `/v1/tideline`, `/v1/tideline/{lune}`: the public log. Audit all of it with `npx moon369 audit` (add `--mirror <dir>` to keep a copy).
 - Full reference: https://moon369.org/api · machine-readable spec: https://api.moon369.org/v1/spec
