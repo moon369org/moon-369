@@ -91,6 +91,9 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .fld{display:flex;flex-direction:column;gap:7px;min-width:0}
 .fl{font:10px 'JetBrains Mono',monospace;letter-spacing:.22em;color:#8A8B8F}
 .fw{position:relative;display:block;min-width:0}
+.fld.wide{width:100%;margin-bottom:14px}.fld.wide input.f{margin-bottom:0}
+.chips.ev{margin:2px 0 16px}
+.enote{margin:0 0 18px;font-size:13px!important}
 .two.f{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 /* iOS draws date and time fields at their own size; make them plain boxes that fill the column. */
 .fw input{-webkit-appearance:none;appearance:none;display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;height:52px;min-height:52px;margin:0;padding:0 14px;line-height:52px;text-align:left}
@@ -144,11 +147,11 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
     <div class="recent" data-n-saved hidden></div>
   </section>
   <section class="scr" data-scr="events" hidden>
-    <div class="k" style="margin-top:6px">EVENTS · ONE LINK, EVERY TIME ZONE</div>
-    <input type="text" maxlength="80" class="f" placeholder="Name the event" data-e-name aria-label="Event name">
-    <input type="datetime-local" class="f" data-e-when aria-label="Date and time, in your time">
-    <div class="chips" data-e-quick><button type="button" data-add="3600000">NOW + 1 HOUR</button><button type="button" data-add="86400000">+ 1 DAY</button><button type="button" data-add="604800000">+ 1 WEEK</button><button type="button" data-add="now">NOW</button></div>
-    <div class="meta dim" data-e-note>Everyone who opens the link sees it in their own time.</div>
+    <div class="k" style="margin:6px 0 18px">EVENTS · ONE LINK, EVERY TIME ZONE</div>
+    <label class="fld wide"><span class="fl">NAME</span><input type="text" maxlength="80" class="f" placeholder="Party, launch, call…" data-e-name></label>
+    <label class="fld wide"><span class="fl">DATE &amp; TIME · YOUR TIME</span><span class="fw"><input type="datetime-local" class="f" data-e-when></span></label>
+    <div class="chips g ev" data-e-quick><button type="button" data-add="now">NOW</button><button type="button" data-add="3600000">+ 1 HOUR</button><button type="button" data-add="86400000">+ 1 DAY</button><button type="button" data-add="604800000">+ 1 WEEK</button></div>
+    <div class="meta dim enote" data-e-note>Everyone who opens the link sees it in their own time.</div>
     <button class="btn p" type="button" data-e-make>MAKE THE LINK</button>
     <div class="recent" data-e-list hidden></div>
   </section>
