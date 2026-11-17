@@ -1,0 +1,28 @@
+[package]
+name = "moon369"
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.87"
+description = "Moon time and signed Moonmarks: the worldwide timestamp locked to the moon, with offline verification (Ed25519, ML-DSA-65, drand)."
+license = "MIT"
+repository = "https://github.com/moon369org/moon-369"
+homepage = "https://moon369.org"
+documentation = "https://moon369.org/api"
+readme = "README.md"
+keywords = ["moon", "timestamp", "moonmark", "post-quantum", "provenance"]
+categories = ["date-and-time", "cryptography"]
+exclude = ["tests"]   # the conformance tests read ../vectors.json, which lives in the repo
+
+[dependencies]
+ed25519-dalek = "2"
+ml-dsa = "0.1"
+bls12_381 = { version = "0.8", features = ["experimental", "pairings"] }
+sha2 = "0.10"
+sha2_09 = { package = "sha2", version = "0.9" }
+num-bigint = "0.4"
+num-integer = "0.1"
+num-traits = "0.2"
+base64 = "0.22"
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

@@ -71,6 +71,16 @@ Field names to rely on: `moonmark`, `moonmark_url`, `moon_image`, `phase.name`, 
 - Command line: `npx moon369 sign <files>` and `npx moon369 verify <file>`.
 - Ready-made examples in the repo's `examples/` folder: `ai-outputs` (sign generated files or text with the model and prompt fingerprint), `contract-snapshot` (save and sign a page or document), `art-certificate`.
 
+## SDKs
+
+Same Moon time and offline receipt verification (Ed25519, ML-DSA-65, drand beacon), tested against shared vectors:
+- JavaScript/TypeScript: `npm install moon369`
+- Python: `pip install moon369` (source: repo `sdk/python`)
+- Go: `go get github.com/moon369org/moon-369/sdk/go`
+- Rust: `cargo add moon369` (source: repo `sdk/rust`)
+
+All the widgets with live previews and copy-paste code, the Powered by Moon patterns, and example integrations: https://moon369.org/widgets
+
 ## Offline: the moon369 npm package
 
 `npm install moon369` gives the same answers as the API with no network calls:

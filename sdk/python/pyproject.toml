@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moon369"
+version = "1.0.0"
+description = "Moon time and signed Moonmarks for Python: the worldwide timestamp locked to the moon, with offline verification."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [{ name = "Moon", email = "moon369org@proton.me" }]
+dependencies = ["cryptography>=46", "py_ecc>=7"]
+keywords = ["moon", "time", "timestamp", "moonmark", "ed25519", "ml-dsa", "post-quantum", "provenance"]
+
+[project.urls]
+Homepage = "https://moon369.org"
+Documentation = "https://moon369.org/api"
+Source = "https://github.com/moon369org/moon-369/tree/main/sdk/python"
+
+[tool.setuptools]
+packages = ["moon369"]

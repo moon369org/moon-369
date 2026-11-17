@@ -1,0 +1,58 @@
+name: Publish SDKs
+# Publishes the Python and Rust SDKs whenever their version is new. No tokens: both registries trust this
+# workflow through GitHub's identity (OIDC).
+#   PyPI:      pypi.org > Your account > Publishing > add a pending publisher: project moon369, owner moon369org,
+#              repository moon-369, workflow publish-sdks.yml, environment pypi.
+#   crates.io: publish moon369 once by hand (cargo publish), then crates.io > moon369 > Settings > Trusted Publishing:
+#              owner moon369org, repository moon-369, workflow publish-sdks.yml.
+# Go needs nothing: go get fetches straight from GitHub (tag sdk/go/vX.Y.Z for a release version).
+on:
+  push:
+    branches: [main]
+    paths: ['sdk/python/pyproject.toml', 'sdk/rust/Cargo.toml', '.github/workflows/publish-sdks.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  pypi:
+    runs-on: ubuntu-latest
+    environment: pypi
+    defaults: { run: { working-directory: sdk/python } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - id: v
+        run: |
+          V=$(python -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          if curl -sf "https://pypi.org/pypi/moon369/$V/json" >/dev/null; then echo "moon369 $V is already on PyPI"; echo "new=false" >> $GITHUB_OUTPUT; else echo "new=true" >> $GITHUB_OUTPUT; fi
+      - if: steps.v.outputs.new == 'true'
+        run: pip install build && python -m unittest discover -s tests && python -m build
+      - if: steps.v.outputs.new == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with: { packages-dir: sdk/python/dist }
+
+  crates:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: sdk/rust } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - id: v
+        run: |
+          V=$(cargo metadata --no-deps --format-version 1 | python3 -c "import sys,json;print(json.load(sys.stdin)['packages'][0]['version'])")
+          if ! curl -sf -A "moon369-ci" https://crates.io/api/v1/crates/moon369 >/dev/null; then
+            echo "::warning::moon369 isn't on crates.io yet. Publish it once by hand (cargo publish), then turn on Trusted Publishing."; echo "go=false" >> $GITHUB_OUTPUT
+          elif curl -sf -A "moon369-ci" "https://crates.io/api/v1/crates/moon369/$V" >/dev/null; then echo "moon369 $V is already on crates.io"; echo "go=false" >> $GITHUB_OUTPUT
+          else echo "go=true" >> $GITHUB_OUTPUT; fi
+      - if: steps.v.outputs.go == 'true'
+        run: cargo test --release
+      - if: steps.v.outputs.go == 'true'
+        uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+      - if: steps.v.outputs.go == 'true'
+        run: cargo publish
+        env: { CARGO_REGISTRY_TOKEN: '${{ steps.auth.outputs.token }}' }

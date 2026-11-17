@@ -16,3 +16,38 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+
+  # Every SDK must pass the same conformance vectors (sdk/vectors.json).
+  sdk-typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci && npm run build
+        working-directory: packages/moon369
+      - run: node sdk/check-vectors-ts.mjs
+  sdk-python:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: sdk/python } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install -e .
+      - run: python -m unittest discover -s tests -v
+  sdk-go:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: sdk/go } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.24' }
+      - run: go mod tidy && go vet ./... && go test ./...
+  sdk-rust:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: sdk/rust } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --release

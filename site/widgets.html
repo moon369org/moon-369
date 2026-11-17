@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};window.moonTrack=function(n,d){try{window.va('event',{name:n,data:d||{}})}catch(e){}};</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="preload" href="/assets/fonts/syncopate-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<script>document.documentElement.classList.add('mm-js')</script>
+<title>Widgets · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Moon's official widgets: the live moon, Moon time, cards, countdowns and moments. One line of HTML each, no cookies. Plus how to show Powered by Moon, and example integrations.">
+<link rel="canonical" href="https://moon369.org/widgets">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/widgets">
+<meta property="og:title" content="Widgets · Moon">
+<meta property="og:description" content="Moon's official widgets: the live moon, Moon time, cards, countdowns and moments. One line of HTML each, no cookies. Plus how to show Powered by Moon, and example integrations.">
+<meta property="og:image" content="https://moon369.org/assets/og/home.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Moon, over a photograph of the moon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Widgets · Moon">
+<meta name="twitter:description" content="Moon's official widgets: the live moon, Moon time, cards, countdowns and moments. One line of HTML each, no cookies. Plus how to show Powered by Moon, and example integrations.">
+<meta name="twitter:image" content="https://moon369.org/assets/og/home.jpg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0B0B0D">
+<meta name="apple-mobile-web-app-title" content="Moon">
+<meta name="application-name" content="Moon">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<style>x-dc{display:none}html,body{background:#0B0B0D}html{scrollbar-width:thin;scrollbar-color:#2E3035 #0B0B0D}
+*{scrollbar-width:thin;scrollbar-color:#2E3035 transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#24262A;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#3A3B3F;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
+.wg-eye{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;color:#8A8B8F}
+.wg-p{margin:0;max-width:760px;font-size:18px;line-height:1.65;color:#B9B6AE}
+.wg-h2{margin:0;font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(20px,2.6vw,30px);letter-spacing:.08em}
+.wg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:20px}
+.wg-card{border:1px solid #24262A;background:#08080A;display:flex;flex-direction:column;min-width:0}
+.wg-prev{min-height:220px;display:flex;align-items:center;justify-content:center;padding:28px;border-bottom:1px solid #24262A;overflow:hidden}
+.wg-prev.light{background:#F4F1EA;color:#0B0B0D}
+.wg-body{padding:20px 22px;display:flex;flex-direction:column;gap:10px}
+.wg-body b{font-family:'Syncopate',sans-serif;font-weight:700;font-size:13px;letter-spacing:.14em}
+.wg-body p{margin:0;font-size:14.5px;line-height:1.6;color:#A2A3A7}
+.wg-code{position:relative;margin:0;padding:16px 18px;background:#0B0B0D;border:1px solid #1C1D20;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;color:#E9E4D8;overflow-x:auto;white-space:pre}
+.wg-copy{align-self:flex-start;background:none;border:1px solid #3A3B3F;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;padding:8px 12px;cursor:pointer}
+.wg-copy:hover{border-color:#E9E4D8}
+.wg-pat{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.wg-pat .wg-card .wg-prev{min-height:160px}
+.wg-rules{margin:0;padding-left:18px;color:#A2A3A7;font-size:15px;line-height:1.8;max-width:820px}
+.wg-ex{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,560px),1fr));gap:24px}
+.wg-site{border:1px solid #24262A;border-radius:10px;overflow:hidden;background:#fff;color:#1b1b1b}
+.wg-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#EDEAE3;border-bottom:1px solid #DDD8CC;font:12px Inter,sans-serif;color:#6B6B6B}
+.wg-bar i{width:10px;height:10px;border-radius:50%;background:#D3CEC2;display:inline-block}
+.wg-bar span{margin-left:10px;background:#fff;border-radius:6px;padding:3px 10px;flex:1;max-width:320px}
+.wg-page{padding:26px 28px 30px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6}
+.wg-page h3{margin:0 0 8px;font-size:26px;font-weight:400}
+.wg-page .sm{font:13px Inter,sans-serif;color:#777}
+.wg-site.dark{background:#111214;color:#EDEDED}.wg-site.dark .wg-bar{background:#1B1C1F;border-color:#2A2B2F;color:#999}.wg-site.dark .wg-bar span{background:#0E0F11}.wg-site.dark .wg-page{font-family:Inter,sans-serif}
+.wg-note{font-size:13px;color:#8A8B8F;margin:0}
+.wg-tbl{width:100%;border-collapse:collapse;font:13px 'JetBrains Mono',monospace}.wg-tbl td,.wg-tbl th{border-bottom:1px solid #2A2B2F;padding:8px 6px;text-align:left}.wg-tbl th{color:#999;font-weight:400}
+</style>
+
+<script src="js/preact.umd.js" defer></script>
+<script src="js/moon-phase.js" defer></script>
+<script src="js/moonglow.js" defer></script>
+<script src="/embed/moon.js" data-site="https://moon369.org" defer></script>
+<script src="/embed/countdown.js" defer></script>
+<script src="js/widgets.js" defer></script>
+<script src="js/header.js" defer></script>
+<script src="js/dc-lite.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+<!-- page styles -->
+<style>
+body{margin:0;background:#0B0B0D}
+a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
+.pk-a,.pk-b,.pk-f{animation-duration:3.2s;animation-iteration-count:infinite;animation-fill-mode:both}
+.pk-a{animation-name:pkA}.pk-b{animation-name:pkB}.pk-f{animation-name:pkF}
+@keyframes pkA{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(-30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkB{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkF{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.6,1)}36%,54%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.6,1)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pk-a,.pk-b,.pk-f{animation:none}}
+@media (max-width: 720px){
+header > div{padding:16px 20px!important;gap:12px 16px!important}
+nav[aria-label="Main"]{gap:10px 18px!important;font-size:10px!important;letter-spacing:.18em!important}
+nav[aria-label="Main"] a{min-height:44px;display:inline-flex!important;align-items:center}
+nav[aria-label="Main"] a[style*="padding: 14px 22px"]{padding:0 14px!important}
+[style*="padding: 140px 32px"],[style*="padding: 160px 32px"],[style*="padding: 120px 32px"]{padding:72px 20px!important}
+[style*="padding: 120px 32px 140px"]{padding:56px 20px 80px!important}
+[style*="padding: 100px 32px 90px"]{padding:56px 20px 48px!important}
+[style*="padding: 64px 32px 120px"],[style*="padding: 80px 32px 120px"]{padding:40px 20px 80px!important}
+[style*="padding: 40px 32px"]{padding:32px 20px!important}
+[style*="padding: 40px 48px"]{padding:28px 22px!important}
+[style*="padding: 40px; display: flex"]{padding:24px!important;gap:24px!important}
+[style*="gap: 104px"]{gap:72px!important}
+[style*="gap: 80px"]{gap:48px!important}
+[style*="gap: 64px"]{gap:40px!important}
+[style*="gap: 56px"]{gap:36px!important}
+pre{font-size:12.5px!important}
+.mw-hint{display:block!important}
+}
+@media (max-width: 720px){
+footer > div{flex-direction:column!important;align-items:center!important;text-align:center;gap:28px!important}
+footer > div > div:first-child{align-items:center!important}
+footer > div > div:last-child{justify-content:center!important;gap:22px!important}
+footer > div > div:first-child svg{width:64px!important}
+}
+</style>
+<style id="ft-css">::selection{background:#24262A}::-moz-selection{background:#24262A}.ft{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:64px 32px 32px;display:grid;grid-template-columns:2.6fr minmax(220px,1fr);gap:48px 64px;font-family:Inter,sans-serif;box-sizing:border-box}.ft-brand{order:2;justify-self:end;display:flex;flex-direction:column;align-items:flex-end;text-align:right}.ft-cols{order:1}.ft-base{order:3}.ft-brand p{margin:18px 0 0;font-size:14px;line-height:1.65;color:#8A8B8F;white-space:nowrap}.ft-cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px}.ft-h{margin:0 0 14px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;color:#5E6064}.ft-col a{display:block;width:fit-content;font-size:14px;line-height:1.4;color:#A2A3A7;padding:7px 0;text-decoration:none}.ft-col a:hover{color:#E9E4D8}.ft-base{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;border-top:1px solid #1C1D20;padding-top:24px;font-size:13px;color:#5E6064}@media (max-width:860px){.ft{grid-template-columns:1fr;gap:40px;padding:48px 20px 28px}.ft-brand{order:0;justify-self:center;align-items:center;text-align:center}.ft-base{flex-direction:column;align-items:center;text-align:center}.ft-brand p{white-space:normal}.ft-cols{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 20px}.ft-col a{padding:10px 0}}</style>
+</head>
+<body>
+<!--snapshot--><div data-dc-snapshot="">
+<div style="background: rgb(11, 11, 13); color: rgb(233, 228, 216); font-family: Inter, sans-serif; min-height: 100vh;">
+
+<header style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+<a href="/" aria-label="Moon home" style="display: block;">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block;">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+</svg>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;" id="mm-nav">
+<a href="/night">YOUR MOON</a>
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/verify">VERIFY</a>
+<a href="/sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
+</nav>
+<button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
+</header>
+
+<section style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 100px 32px 56px; display: flex; flex-direction: column; gap: 24px;">
+<div class="wg-eye">WIDGETS · ONE LINE OF HTML · NO COOKIES</div>
+<h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(30px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1; max-width: 1000px;">PUT MOON ON ANY PAGE</h1>
+<p class="wg-p">The live moon, Moon time, cards, countdowns and moments: Moon's own components, ready to paste. They track nothing, need no account, and every one links back to Moon. Building with an AI assistant? Point it at <a href="/llms.txt" style="color: rgb(233, 228, 216);">moon369.org/llms.txt</a>.</p>
+</div>
+</section>
+<section style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 64px 32px; display: flex; flex-direction: column; gap: 28px;">
+<h2 class="wg-h2">THE WIDGETS</h2>
+<div class="wg-grid"><div class="wg-card"><div class="wg-prev"><moon-live size="150"></moon-live></div><div class="wg-body"><b>THE LIVE MOON</b><p>Moon's own moon, with its moving light, turned to the real tilt. Draws in the browser.</p><pre class="wg-code">&lt;script src="https://cdn.jsdelivr.net/npm/moon369/moon-live.js"&gt;&lt;/script&gt;
+&lt;moon-live size="150"&gt;&lt;/moon-live&gt;</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div><div class="wg-card"><div class="wg-prev"><moon-clock size="60"></moon-clock></div><div class="wg-body"><b>MOON TIME</b><p>The live moon beside ticking Moon time, linked to Moon. Takes the page's text color.</p><pre class="wg-code">&lt;script src="https://cdn.jsdelivr.net/npm/moon369/moon-live.js"&gt;&lt;/script&gt;
+&lt;moon-clock size="60"&gt;&lt;/moon-clock&gt;</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div><div class="wg-card"><div class="wg-prev"><img src="https://api.moon369.org/v1/card.svg?size=220&amp;mark=on" width="220" height="220" alt="Today on Moon" loading="lazy"><img src="https://api.moon369.org/v1/card.svg?size=220&amp;theme=light&amp;mark=on&amp;tz=America/New_York" width="220" height="220" alt="Today on Moon, light" loading="lazy" style="margin-left: 14px;"></div><div class="wg-body"><b>PHASE CARD</b><p>Today on Moon as an image: any site, app, README or email. Light or dark, with the Moonmark and a local time.</p><pre class="wg-code">&lt;img src="https://api.moon369.org/v1/card.svg?size=300&amp;mark=on" alt="Today on Moon"&gt;
+&lt;img src="https://api.moon369.org/v1/card.svg?theme=light&amp;tz=America/New_York"&gt;</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div><div class="wg-card"><div class="wg-prev"><div data-moon-night="1969-07-20" data-time="2017" data-width="420" style="width: 100%; max-width: 420px;"><a href="https://moon369.org/night/1969-07-20?t=2017&amp;z=%2B0000&amp;for=day" target="_blank" rel="noopener" style="display:block;max-width:420px"><img src="https://api.moon369.org/v1/night.png?d=1969-07-20&amp;t=2017&amp;z=%2B0000&amp;for=day&amp;v=2" alt="The moon on 1969-07-20, on Moon" width="420" height="221" loading="lazy" style="display:block;width:100%;height:auto;border-radius:6px"></a><div style="margin-top:6px;text-align:right;max-width:420px"><a href="https://moon369.org" target="_blank" rel="noopener" style="font:500 10px/1 'JetBrains Mono', ui-monospace, monospace;letter-spacing:.22em;color:#8A8B8F;text-decoration:none">POWERED BY MOON</a></div></div></div><div class="wg-body"><b>A NIGHT</b><p>The moon on any date as a card that links to Your Moon. For wedding sites, birth announcements and anniversaries.</p><pre class="wg-code">&lt;script src="https://moon369.org/embed/moon.js" defer&gt;&lt;/script&gt;
+&lt;div data-moon-night="1969-07-20" data-time="2017"&gt;&lt;/div&gt;</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div><div class="wg-card"><div class="wg-prev"><p style="margin: 0px; font-size: 17px; color: rgb(233, 228, 216);">The launch is <moon-moment mark="1928.05.12-15.00.00" name="Launch party"></moon-moment>. See you there.</p></div><div class="wg-body"><b>A MOMENT</b><p>A small moon and Moonmark inline in your text. Tap it for the full card in the reader's own time.</p><pre class="wg-code">&lt;script src="https://moon369.org/embed/moon.js" defer&gt;&lt;/script&gt;
+The launch is &lt;moon-moment mark="1928.05.12-15.00.00" name="Launch party"&gt;&lt;/moon-moment&gt;.</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div><div class="wg-card"><div class="wg-prev"><div data-moon-countdown="1928.05.24-17.31.02.640327453" data-name="Moon launch party" style="width: 100%; max-width: 460px;"></div></div><div class="wg-body"><b>COUNTDOWN</b><p>A live countdown to any Moonmark, shown in each reader's own time, with Add to calendar.</p><pre class="wg-code">&lt;div data-moon-countdown="1928.05.24-17.31.02.640327453" data-name="Moon launch party"&gt;&lt;/div&gt;
+&lt;script src="https://moon369.org/embed/countdown.js" async&gt;&lt;/script&gt;</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div><div class="wg-card"><div class="wg-prev"><moon-badge sha256="4979da7d50a722cccfccc4645936003133c751241dc2f192aa6846f32a0ef5e4"></moon-badge></div><div class="wg-body"><b>REGISTERED BADGE</b><p>Shows who registered a file on Moon, and when. For galleries, newsrooms and shops.</p><pre class="wg-code">&lt;script src="https://moon369.org/embed/moon.js" defer&gt;&lt;/script&gt;
+&lt;moon-badge sha256="&lt;the file's SHA-256&gt;"&gt;&lt;/moon-badge&gt;</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div><div class="wg-card"><div class="wg-prev"><div style="width: 100%; max-width: 460px;"><moon-check></moon-check></div></div><div class="wg-body"><b>VERIFY ANY FILE</b><p>A drop zone: anyone drops a file and sees if it is on Moon. The file never leaves their device.</p><pre class="wg-code">&lt;script src="https://moon369.org/embed/moon.js" defer&gt;&lt;/script&gt;
+&lt;moon-check&gt;&lt;/moon-check&gt;</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div></div>
+</div>
+</section>
+<section id="powered-by" style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 64px 32px; display: flex; flex-direction: column; gap: 24px;">
+<h2 class="wg-h2">POWERED BY MOON</h2>
+<p class="wg-p">Your product keeps its own name and brand. Moon shows up once: the badge, linked home.</p>
+<div class="wg-pat"><div class="wg-card"><div class="wg-prev"><a href="https://moon369.org"><img src="/assets/badge-dark.svg" alt="Powered by Moon" width="162" height="48"></a></div><div class="wg-body"><b>THE BADGE</b><p>Every screen that shows Moon time from the API. At least 32 px tall, linked to moon369.org.</p><pre class="wg-code">&lt;a href="https://moon369.org" rel="noopener"&gt;
+  &lt;img src="https://moon369.org/assets/badge-dark.svg"
+       alt="Powered by Moon" width="162" height="48"&gt;
+&lt;/a&gt;</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div><div class="wg-card"><div class="wg-prev light"><a href="https://moon369.org"><img src="/assets/badge-light.svg" alt="Powered by Moon" width="162" height="48"></a></div><div class="wg-body"><b>ON LIGHT</b><p>The same badge for light pages.</p><pre class="wg-code">&lt;img src="https://moon369.org/assets/badge-light.svg" alt="Powered by Moon" width="162" height="48"&gt;</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div><div class="wg-card"><div class="wg-prev"><div style="text-align: center; font: 13px Inter, sans-serif; color: rgb(162, 163, 167);"><img src="/assets/badge-dark.svg" alt="Powered by Moon" width="140" height="41"><div style="margin-top: 8px;">Moon time by Moon · moon369.org</div></div></div><div class="wg-body"><b>IN AN APP</b><p>Apps without links: the badge on your About or Settings screen, with the address in text.</p><pre class="wg-code">About
+  Moon time by Moon · moon369.org
+  [Powered by Moon badge]</pre><button type="button" class="wg-copy" data-copy="">COPY</button></div></div></div>
+<ul class="wg-rules"><li>Required on every screen that shows Moon time from the hosted API. Asked for, not required, with the open-source SDKs.</li><li>At least 32 px tall, with clear space around it equal to its height. The link stays crawlable (no nofollow).</li><li>Say "Built on Moon time" if you like. Don't imply a partnership, alter the mark, or use "Moon" as your product's name. <a href="/api#brand" style="color: rgb(233, 228, 216);">All the rules</a>.</li></ul>
+</div>
+</section>
+<section>
+<div id="examples" style="max-width: 1280px; margin: 0px auto; padding: 64px 32px 110px; display: flex; flex-direction: column; gap: 24px;">
+<h2 class="wg-h2">EXAMPLES</h2>
+<p class="wg-p">What it looks like in real products. These are illustrations with made-up names, built from the widgets above, not customers.</p>
+<div class="wg-ex"><div style="display: flex; flex-direction: column; gap: 12px;"><div><b style="font-family: Syncopate, sans-serif; font-size: 13px; letter-spacing: 0.14em;">A WEDDING SITE</b><p class="wg-note" style="margin-top: 6px;">The night they met, as a card that links to the full moon. One line of HTML.</p></div><div class="wg-site"><div class="wg-bar"><i></i><i></i><i></i><span>annaandleo.example</span></div><div class="wg-page"><h3>Anna &amp; Leo</h3><p class="sm">SEPTEMBER 12 · CAPE ELIZABETH, MAINE</p><p>We met on a summer night in 2016. This was the moon:</p><div data-moon-night="2016-07-23" data-time="2230" data-for="met" data-width="480"><a href="https://moon369.org/night/2016-07-23?t=2230&amp;z=%2B0000&amp;for=met" target="_blank" rel="noopener" style="display:block;max-width:480px"><img src="https://api.moon369.org/v1/night.png?d=2016-07-23&amp;t=2230&amp;z=%2B0000&amp;for=met&amp;v=2" alt="The moon on 2016-07-23, on Moon" width="480" height="252" loading="lazy" style="display:block;width:100%;height:auto;border-radius:6px"></a><div style="margin-top:6px;text-align:right;max-width:480px"><a href="https://moon369.org" target="_blank" rel="noopener" style="font:500 10px/1 'JetBrains Mono', ui-monospace, monospace;letter-spacing:.22em;color:#8A8B8F;text-decoration:none">POWERED BY MOON</a></div></div></div></div></div><div style="display: flex; flex-direction: column; gap: 12px;"><div><b style="font-family: Syncopate, sans-serif; font-size: 13px; letter-spacing: 0.14em;">A PRODUCT LAUNCH</b><p class="wg-note" style="margin-top: 6px;">One time for every country, a live countdown, and the moment inline in the copy.</p></div><div class="wg-site dark"><div class="wg-bar"><i></i><i></i><i></i><span>northwind.example/launch</span></div><div class="wg-page"><h3 style="font-family: Inter, sans-serif; font-weight: 700;">Northwind 2 goes live <moon-moment mark="1928.05.24-17.31.02" name="Northwind 2 launch"></moon-moment></h3><p class="sm" style="color: rgb(153, 153, 153);">Same moment everywhere. Your local time is on the card.</p><div data-moon-countdown="1928.05.24-17.31.02.640327453" data-name="Northwind 2 launch"></div></div></div></div><div style="display: flex; flex-direction: column; gap: 12px;"><div><b style="font-family: Syncopate, sans-serif; font-size: 13px; letter-spacing: 0.14em;">A NEWSROOM</b><p class="wg-note" style="margin-top: 6px;">Every photo shows when it was registered, and by whom. Readers can check the original.</p></div><div class="wg-site"><div class="wg-bar"><i></i><i></i><i></i><span>dailyledger.example/harbor-fire</span></div><div class="wg-page"><p class="sm">PHOTO · HARBOR FIRE, 4:12 AM</p><div style="height: 150px; background: linear-gradient(135deg, rgb(59, 63, 69), rgb(125, 106, 85)); border-radius: 4px; margin: 8px 0px;"></div><p class="sm" style="margin: 0px;">● Registered on Moon by Daily Ledger, 1928.05.07 04:12 · <u>check this photo</u></p><p style="margin-top: 12px;">Crews arrived within minutes, the fire department said.</p></div></div></div><div style="display: flex; flex-direction: column; gap: 12px;"><div><b style="font-family: Syncopate, sans-serif; font-size: 13px; letter-spacing: 0.14em;">A RELEASE PAGE</b><p class="wg-note" style="margin-top: 6px;">The GitHub Action signs each file and the commit, and adds this table to the notes.</p></div><div class="wg-site dark"><div class="wg-bar"><i></i><i></i><i></i><span>github.com/acme/tool/releases/v2.4.0</span></div><div class="wg-page"><h3 style="font-family: Inter, sans-serif; font-weight: 700; font-size: 20px;">v2.4.0</h3><p class="sm" style="color: rgb(153, 153, 153);">Signed on Moon</p><table class="wg-tbl"><tbody><tr><th></th><th>Moonmark</th><th>Proof</th></tr><tr><td>commit:9f2c1e4</td><td>1928.05.07 11:48:26</td><td><u>check</u></td></tr><tr><td>tool-linux.tar.gz</td><td>1928.05.07 11:48:27</td><td><u>check</u></td></tr><tr><td>tool-macos.zip</td><td>1928.05.07 11:48:27</td><td><u>check</u></td></tr></tbody></table></div></div></div></div>
+<div class="wg-eye" style="margin-top: 20px;">SDKS</div>
+<p class="wg-p">Same Moon time and offline receipt checks in <a href="https://www.npmjs.com/package/moon369" style="color: rgb(233, 228, 216);">JavaScript</a>, <a href="https://github.com/moon369org/moon-369/tree/main/sdk/python" style="color: rgb(233, 228, 216);">Python</a>, <a href="https://github.com/moon369org/moon-369/tree/main/sdk/go" style="color: rgb(233, 228, 216);">Go</a> and <a href="https://github.com/moon369org/moon-369/tree/main/sdk/rust" style="color: rgb(233, 228, 216);">Rust</a>, all tested against the same vectors.</p>
+</div>
+</section>
+<footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<nav class="ft" aria-label="Footer">
+<div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/app">Moon app</a><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/sign">Sign a file</a><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/widgets">Widgets</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-base"><span>Moon · The new standard for time</span><span>Open source under the MIT license</span></div>
+</nav>
+</footer>
+
+</div>
+</div><!--/snapshot-->
+<template data-dc>
+<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="/" aria-label="Moon home" style="display: block">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+</svg>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: 'Syncopate', sans-serif; font-size: 11px; letter-spacing: 0.28em">
+<a href="/night">YOUR MOON</a>
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/verify">VERIFY</a>
+<a href="/sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
+</nav>
+</div>
+</header>
+
+<section style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 56px; display: flex; flex-direction: column; gap: 24px">
+<div class="wg-eye">WIDGETS · ONE LINE OF HTML · NO COOKIES</div>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(30px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1; max-width: 1000px">PUT MOON ON ANY PAGE</h1>
+<p class="wg-p">The live moon, Moon time, cards, countdowns and moments: Moon&#39;s own components, ready to paste. They track nothing, need no account, and every one links back to Moon. Building with an AI assistant? Point it at <a href="/llms.txt" style="color:#E9E4D8">moon369.org/llms.txt</a>.</p>
+</div>
+</section>
+<section style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 64px 32px; display: flex; flex-direction: column; gap: 28px">
+<h2 class="wg-h2">THE WIDGETS</h2>
+<div class="wg-grid"><div class="wg-card"><div class="wg-prev"><moon-live size="150"></moon-live></div><div class="wg-body"><b>THE LIVE MOON</b><p>Moon&#39;s own moon, with its moving light, turned to the real tilt. Draws in the browser.</p><pre class="wg-code">&lt;script src="https://cdn.jsdelivr.net/npm/moon369/moon-live.js"&gt;&lt;/script&gt;
+&lt;moon-live size="150"&gt;&lt;/moon-live&gt;</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div><div class="wg-card"><div class="wg-prev"><moon-clock size="60"></moon-clock></div><div class="wg-body"><b>MOON TIME</b><p>The live moon beside ticking Moon time, linked to Moon. Takes the page&#39;s text color.</p><pre class="wg-code">&lt;script src="https://cdn.jsdelivr.net/npm/moon369/moon-live.js"&gt;&lt;/script&gt;
+&lt;moon-clock size="60"&gt;&lt;/moon-clock&gt;</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div><div class="wg-card"><div class="wg-prev"><img src="https://api.moon369.org/v1/card.svg?size=220&amp;mark=on" width="220" height="220" alt="Today on Moon" loading="lazy"><img src="https://api.moon369.org/v1/card.svg?size=220&amp;theme=light&amp;mark=on&amp;tz=America/New_York" width="220" height="220" alt="Today on Moon, light" loading="lazy" style="margin-left:14px"></div><div class="wg-body"><b>PHASE CARD</b><p>Today on Moon as an image: any site, app, README or email. Light or dark, with the Moonmark and a local time.</p><pre class="wg-code">&lt;img src="https://api.moon369.org/v1/card.svg?size=300&amp;mark=on" alt="Today on Moon"&gt;
+&lt;img src="https://api.moon369.org/v1/card.svg?theme=light&amp;tz=America/New_York"&gt;</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div><div class="wg-card"><div class="wg-prev"><div data-moon-night="1969-07-20" data-time="2017" data-width="420" style="width:100%;max-width:420px"></div></div><div class="wg-body"><b>A NIGHT</b><p>The moon on any date as a card that links to Your Moon. For wedding sites, birth announcements and anniversaries.</p><pre class="wg-code">&lt;script src="https://moon369.org/embed/moon.js" defer&gt;&lt;/script&gt;
+&lt;div data-moon-night="1969-07-20" data-time="2017"&gt;&lt;/div&gt;</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div><div class="wg-card"><div class="wg-prev"><p style="margin:0;font-size:17px;color:#E9E4D8">The launch is <moon-moment mark="1928.05.12-15.00.00" name="Launch party"></moon-moment>. See you there.</p></div><div class="wg-body"><b>A MOMENT</b><p>A small moon and Moonmark inline in your text. Tap it for the full card in the reader&#39;s own time.</p><pre class="wg-code">&lt;script src="https://moon369.org/embed/moon.js" defer&gt;&lt;/script&gt;
+The launch is &lt;moon-moment mark="1928.05.12-15.00.00" name="Launch party"&gt;&lt;/moon-moment&gt;.</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div><div class="wg-card"><div class="wg-prev"><div data-moon-countdown="1928.05.24-17.31.02.640327453" data-name="Moon launch party" style="width:100%;max-width:460px"></div></div><div class="wg-body"><b>COUNTDOWN</b><p>A live countdown to any Moonmark, shown in each reader&#39;s own time, with Add to calendar.</p><pre class="wg-code">&lt;div data-moon-countdown="1928.05.24-17.31.02.640327453" data-name="Moon launch party"&gt;&lt;/div&gt;
+&lt;script src="https://moon369.org/embed/countdown.js" async&gt;&lt;/script&gt;</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div><div class="wg-card"><div class="wg-prev"><moon-badge sha256="4979da7d50a722cccfccc4645936003133c751241dc2f192aa6846f32a0ef5e4"></moon-badge></div><div class="wg-body"><b>REGISTERED BADGE</b><p>Shows who registered a file on Moon, and when. For galleries, newsrooms and shops.</p><pre class="wg-code">&lt;script src="https://moon369.org/embed/moon.js" defer&gt;&lt;/script&gt;
+&lt;moon-badge sha256="&lt;the file's SHA-256&gt;"&gt;&lt;/moon-badge&gt;</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div><div class="wg-card"><div class="wg-prev"><div style="width:100%;max-width:460px"><moon-check></moon-check></div></div><div class="wg-body"><b>VERIFY ANY FILE</b><p>A drop zone: anyone drops a file and sees if it is on Moon. The file never leaves their device.</p><pre class="wg-code">&lt;script src="https://moon369.org/embed/moon.js" defer&gt;&lt;/script&gt;
+&lt;moon-check&gt;&lt;/moon-check&gt;</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div></div>
+</div>
+</section>
+<section style="border-bottom: 1px solid #1C1D20" id="powered-by">
+<div style="max-width: 1280px; margin: 0 auto; padding: 64px 32px; display: flex; flex-direction: column; gap: 24px">
+<h2 class="wg-h2">POWERED BY MOON</h2>
+<p class="wg-p">Your product keeps its own name and brand. Moon shows up once: the badge, linked home.</p>
+<div class="wg-pat"><div class="wg-card"><div class="wg-prev"><a href="https://moon369.org"><img src="/assets/badge-dark.svg" alt="Powered by Moon" width="162" height="48"></a></div><div class="wg-body"><b>THE BADGE</b><p>Every screen that shows Moon time from the API. At least 32 px tall, linked to moon369.org.</p><pre class="wg-code">&lt;a href="https://moon369.org" rel="noopener"&gt;
+  &lt;img src="https://moon369.org/assets/badge-dark.svg"
+       alt="Powered by Moon" width="162" height="48"&gt;
+&lt;/a&gt;</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div><div class="wg-card"><div class="wg-prev light"><a href="https://moon369.org"><img src="/assets/badge-light.svg" alt="Powered by Moon" width="162" height="48"></a></div><div class="wg-body"><b>ON LIGHT</b><p>The same badge for light pages.</p><pre class="wg-code">&lt;img src="https://moon369.org/assets/badge-light.svg" alt="Powered by Moon" width="162" height="48"&gt;</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div><div class="wg-card"><div class="wg-prev"><div style="text-align:center;font:13px Inter,sans-serif;color:#A2A3A7"><img src="/assets/badge-dark.svg" alt="Powered by Moon" width="140" height="41"><div style="margin-top:8px">Moon time by Moon · moon369.org</div></div></div><div class="wg-body"><b>IN AN APP</b><p>Apps without links: the badge on your About or Settings screen, with the address in text.</p><pre class="wg-code">About
+  Moon time by Moon · moon369.org
+  [Powered by Moon badge]</pre><button type="button" class="wg-copy" data-copy>COPY</button></div></div></div>
+<ul class="wg-rules"><li>Required on every screen that shows Moon time from the hosted API. Asked for, not required, with the open-source SDKs.</li><li>At least 32 px tall, with clear space around it equal to its height. The link stays crawlable (no nofollow).</li><li>Say &quot;Built on Moon time&quot; if you like. Don&#39;t imply a partnership, alter the mark, or use &quot;Moon&quot; as your product&#39;s name. <a href="/api#brand" style="color:#E9E4D8">All the rules</a>.</li></ul>
+</div>
+</section>
+<section>
+<div style="max-width: 1280px; margin: 0 auto; padding: 64px 32px 110px; display: flex; flex-direction: column; gap: 24px" id="examples">
+<h2 class="wg-h2">EXAMPLES</h2>
+<p class="wg-p">What it looks like in real products. These are illustrations with made-up names, built from the widgets above, not customers.</p>
+<div class="wg-ex"><div style="display:flex;flex-direction:column;gap:12px"><div><b style="font-family:Syncopate,sans-serif;font-size:13px;letter-spacing:.14em">A WEDDING SITE</b><p class="wg-note" style="margin-top:6px">The night they met, as a card that links to the full moon. One line of HTML.</p></div><div class="wg-site"><div class="wg-bar"><i></i><i></i><i></i><span>annaandleo.example</span></div><div class="wg-page"><h3>Anna &amp; Leo</h3><p class="sm">SEPTEMBER 12 · CAPE ELIZABETH, MAINE</p><p>We met on a summer night in 2016. This was the moon:</p><div data-moon-night="2016-07-23" data-time="2230" data-for="met" data-width="480"></div></div></div></div><div style="display:flex;flex-direction:column;gap:12px"><div><b style="font-family:Syncopate,sans-serif;font-size:13px;letter-spacing:.14em">A PRODUCT LAUNCH</b><p class="wg-note" style="margin-top:6px">One time for every country, a live countdown, and the moment inline in the copy.</p></div><div class="wg-site dark"><div class="wg-bar"><i></i><i></i><i></i><span>northwind.example/launch</span></div><div class="wg-page"><h3 style="font-family:Inter,sans-serif;font-weight:700">Northwind 2 goes live <moon-moment mark="1928.05.24-17.31.02" name="Northwind 2 launch"></moon-moment></h3><p class="sm" style="color:#999">Same moment everywhere. Your local time is on the card.</p><div data-moon-countdown="1928.05.24-17.31.02.640327453" data-name="Northwind 2 launch"></div></div></div></div><div style="display:flex;flex-direction:column;gap:12px"><div><b style="font-family:Syncopate,sans-serif;font-size:13px;letter-spacing:.14em">A NEWSROOM</b><p class="wg-note" style="margin-top:6px">Every photo shows when it was registered, and by whom. Readers can check the original.</p></div><div class="wg-site"><div class="wg-bar"><i></i><i></i><i></i><span>dailyledger.example/harbor-fire</span></div><div class="wg-page"><p class="sm">PHOTO · HARBOR FIRE, 4:12 AM</p><div style="height:150px;background:linear-gradient(135deg,#3b3f45,#7d6a55);border-radius:4px;margin:8px 0"></div><p class="sm" style="margin:0">&#9679; Registered on Moon by Daily Ledger, 1928.05.07 04:12 · <u>check this photo</u></p><p style="margin-top:12px">Crews arrived within minutes, the fire department said.</p></div></div></div><div style="display:flex;flex-direction:column;gap:12px"><div><b style="font-family:Syncopate,sans-serif;font-size:13px;letter-spacing:.14em">A RELEASE PAGE</b><p class="wg-note" style="margin-top:6px">The GitHub Action signs each file and the commit, and adds this table to the notes.</p></div><div class="wg-site dark"><div class="wg-bar"><i></i><i></i><i></i><span>github.com/acme/tool/releases/v2.4.0</span></div><div class="wg-page"><h3 style="font-family:Inter,sans-serif;font-weight:700;font-size:20px">v2.4.0</h3><p class="sm" style="color:#999">Signed on Moon</p><table class="wg-tbl"><tr><th></th><th>Moonmark</th><th>Proof</th></tr><tr><td>commit:9f2c1e4</td><td>1928.05.07 11:48:26</td><td><u>check</u></td></tr><tr><td>tool-linux.tar.gz</td><td>1928.05.07 11:48:27</td><td><u>check</u></td></tr><tr><td>tool-macos.zip</td><td>1928.05.07 11:48:27</td><td><u>check</u></td></tr></table></div></div></div></div>
+<div class="wg-eye" style="margin-top:20px">SDKS</div>
+<p class="wg-p">Same Moon time and offline receipt checks in <a href="https://www.npmjs.com/package/moon369" style="color:#E9E4D8">JavaScript</a>, <a href="https://github.com/moon369org/moon-369/tree/main/sdk/python" style="color:#E9E4D8">Python</a>, <a href="https://github.com/moon369org/moon-369/tree/main/sdk/go" style="color:#E9E4D8">Go</a> and <a href="https://github.com/moon369org/moon-369/tree/main/sdk/rust" style="color:#E9E4D8">Rust</a>, all tested against the same vectors.</p>
+</div>
+</section>
+<footer style="border-top: 1px solid #1C1D20"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<nav class="ft" aria-label="Footer">
+<div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #3A3C41; stroke-width: 9"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/app">Moon app</a><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/sign">Sign a file</a><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/widgets">Widgets</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-base"><span>Moon · The new standard for time</span><span>Open source under the MIT license</span></div>
+</nav>
+</footer>
+
+</div>
+</template>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2000}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+<script src="js/footglow.js" defer></script>
+</body>
+</html>
