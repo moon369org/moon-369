@@ -153,3 +153,20 @@ describe('checkpoints (the open lune, locked about once a minute)', () => {
     expect(await store.checkpoints(l)).toEqual([]);
   });
 });
+
+import { stats } from '../src/tideline';
+describe('public stats', () => {
+  it('counts receipts per lune, seals and totals', async () => {
+    const store = memoryStore();
+    const l0 = luneOf(1_794_682_325_000_000_000n);
+    for (let i = 0; i < 3; i++) await record(store, signAt(luneStartNs(l0) + BigInt(i) * 1_000_000_000n, i));
+    await record(store, signAt(luneStartNs(l0 + 2) + 5n, 9));
+    await sealDue(store, signer, luneEndNs(l0 + 1) + 1n);
+    const s = await stats(store, luneStartNs(l0 + 2) + 10n);
+    expect(s.total_receipts).toBe(4);
+    expect(s.this_lune).toBe(1);
+    expect(s.tides_sealed).toBe(2);
+    expect(s.history.map((h) => h.receipts)).toEqual([3, 0, 1]);
+    expect(s.lunes_with_receipts).toBe(2);
+  });
+});

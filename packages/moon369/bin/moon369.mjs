@@ -4,18 +4,20 @@
 //   npx moon369 sign <files...>               sign files; writes <file>.moonmark.json and prints each proof link
 //   npx moon369 sign --text "any text"        sign text exactly as given
 //   npx moon369 verify <file> [receipt]       check a file against its receipt (default <file>.moonmark.json)
+//   npx moon369 audit [--mirror dir] [--from lune]  check the whole Tideline yourself; optionally keep a copy
 // Options: --key <api key> (or MOON_KEY), --label <text>, --json. MOON_API changes the API base.
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { readFile, writeFile, stat } from 'node:fs/promises';
-import { basename } from 'node:path';
-import { moonmark, verify, fetchKeys } from '../dist/index.js';
+import { readFile, writeFile, stat, mkdir } from 'node:fs/promises';
+import { basename, join } from 'node:path';
+import { moonmark, verify, fetchKeys, auditTideline, tideBytes } from '../dist/index.js';
 
 const API = (process.env.MOON_API || 'https://api.moon369.org').replace(/\/$/, '');
 const argv = process.argv.slice(2);
 const flag = (k) => { const i = argv.indexOf('--' + k); if (i < 0) return undefined; const v = argv[i + 1]; argv.splice(i, 2); return v; };
 const bool = (k) => { const i = argv.indexOf('--' + k); if (i < 0) return false; argv.splice(i, 1); return true; };
 const cmd = argv.shift();
+const mirror = flag('mirror'), from = flag('from');
 const key = flag('key') || process.env.MOON_KEY, label = flag('label'), text = flag('text'), asJson = bool('json');
 const die = (m, code = 1) => { console.error(m); process.exit(code); };
 
@@ -59,7 +61,26 @@ if (cmd === 'now') {
   else if (res.valid) console.log(`VALID: ${basename(f)} existed at Moonmark ${res.moonmark}. The file matches and Moon's signatures check out.`);
   else console.log(`INVALID: ${res.reason.replace(/_/g, ' ')}`);
   process.exit(res.valid ? 0 : 1);
+} else if (cmd === 'audit') {
+  // Trust nothing but the public keys: re-hash every tide's entries, check its signatures and the chain.
+  const keys = await fetchKeys(API + '/v1/keys');
+  if (mirror) await mkdir(mirror, { recursive: true });
+  if (!asJson) console.log(`Auditing the Tideline at ${API}${from ? ' from ' + from : ''}…`);
+  const rep = await auditTideline({ api: API, keys, from, onTide: async (t) => {
+    if (!asJson) console.log(`${t.ok ? 'OK ' : 'BAD'}  ${t.lune}  ${t.status.padEnd(7)}  ${String(t.size).padStart(6)} receipts${t.bitcoin ? '  bitcoin ' + t.bitcoin : ''}${t.ok ? '' : '\n     ' + t.problems.join('\n     ')}`);
+  } });
+  if (mirror) for (const t of rep.tides) if (t.tide) {
+    await writeFile(join(mirror, `tide-${t.lune}.json`), JSON.stringify(t.tide, null, 2) + '\n');
+    await writeFile(join(mirror, `tide-${t.lune}.txt`), tideBytes(t.tide));
+    if (t.bitcoin) { const r = await fetch(`${API}/v1/tideline/${t.lune}.ots`); if (r.ok) await writeFile(join(mirror, `tide-${t.lune}.txt.ots`), new Uint8Array(await r.arrayBuffer())); }
+  }
+  if (asJson) console.log(JSON.stringify({ ...rep, tides: rep.tides.map(({ tide, ...x }) => x) }, null, 2));
+  else {
+    console.log(rep.ok ? `\nALL GOOD: ${rep.checked} lunes, ${rep.sealed} sealed tides, ${rep.receipts} receipts. Every root, signature and link checks out.` : `\nPROBLEMS FOUND (${rep.problems.length}):\n  ${rep.problems.join('\n  ')}`);
+    if (mirror) console.log(`Mirror written to ${mirror}. Check a Bitcoin proof with: ots verify ${join(mirror, 'tide-<lune>.txt.ots')}`);
+  }
+  process.exit(rep.ok ? 0 : 1);
 } else {
-  console.log('moon369: Moon time and signed Moonmarks\n  moon369 now\n  moon369 sign <files...>  |  moon369 sign --text "..."\n  moon369 verify <file> [receipt.json]\nOptions: --key <api key> (or MOON_KEY), --label <text>, --json   Docs: https://moon369.org/api');
+  console.log('moon369: Moon time and signed Moonmarks\n  moon369 now\n  moon369 sign <files...>  |  moon369 sign --text "..."\n  moon369 verify <file> [receipt.json]\n  moon369 audit [--mirror <dir>] [--from <lune>]\nOptions: --key <api key> (or MOON_KEY), --label <text>, --json   Docs: https://moon369.org/api');
   process.exit(cmd ? 2 : 0);
 }

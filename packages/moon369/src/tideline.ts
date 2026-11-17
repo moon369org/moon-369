@@ -53,3 +53,58 @@ export async function verifyTide(t: Tide, keys: KeySet): Promise<boolean> {
   const ppk = keys[t.pq.key_id]; if (!ppk) return false;
   try { return ml_dsa65.verify(b64urlToBytes(t.pq.signature), bytes, b64urlToBytes(ppk)); } catch { return false; }
 }
+
+/** Merkle root (RFC 9162) of a list of leaf hashes. Empty list: SHA-256 of nothing. */
+export function merkleRoot(leaves: string[]): string {
+  const node = (l: Uint8Array, r: Uint8Array) => sha256(cat(new Uint8Array([1]), l, r));
+  const rootOf = (a: Uint8Array[]): Uint8Array => {
+    if (a.length === 0) return sha256(new Uint8Array(0));
+    if (a.length === 1) return a[0];
+    let k = 1; while (k * 2 < a.length) k *= 2;
+    return node(rootOf(a.slice(0, k)), rootOf(a.slice(k)));
+  };
+  return hexOf(rootOf(leaves.map(bytesOf)));
+}
+
+export interface AuditTide { lune: string; status: 'sealed' | 'pending' | 'missing'; size: number; ok: boolean; problems: string[]; bitcoin: string | null; tide?: Tide & { entries?: { index: number; leaf: string }[] } }
+export interface AuditReport { ok: boolean; checked: number; sealed: number; receipts: number; head: string | null; tides: AuditTide[]; problems: string[] }
+
+/**
+ * Audit the whole Tideline from scratch, trusting nothing but Moon's public keys:
+ * every finished lune must have a sealed tide whose entries hash to its root, whose hash and signatures
+ * check out, and which chains to the tide before it. Runs anywhere `fetch` does.
+ */
+export async function auditTideline(opts: { api?: string; keys: KeySet; from?: string; onTide?: (t: AuditTide) => void; fetch?: typeof fetch }): Promise<AuditReport> {
+  const api = (opts.api ?? 'https://api.moon369.org').replace(/\/$/, ''), f = opts.fetch ?? fetch;
+  const get = async (p: string) => { const r = await f(api + p); if (!r.ok && r.status !== 404) throw new Error(`${p}: ${r.status}`); return r.status === 404 ? null : r.json(); };
+  const stats = await get('/v1/stats') as { open_lune: string; history: { lune: string; receipts: number; ends_utc: string }[] };
+  const now = Date.now(), out: AuditTide[] = [], problems: string[] = [];
+  let prev: string | null = null, havePrev = false, started = !opts.from, receipts = 0, head: string | null = null;
+  for (const h of stats.history) {
+    if (!started && h.lune === opts.from) started = true;
+    if (!started) continue;
+    if (Date.parse(h.ends_utc) > now) break;                       // the open lune isn't sealed yet
+    const b = await get('/v1/tideline/' + h.lune) as (Tide & { status: string; entries?: { index: number; leaf: string }[]; entries_truncated?: boolean; bitcoin?: { status: string } | null }) | null;
+    const a: AuditTide = { lune: h.lune, status: !b ? 'missing' : b.status === 'sealed' ? 'sealed' : 'pending', size: b?.size ?? h.receipts, ok: true, problems: [], bitcoin: b?.bitcoin?.status ?? null };
+    const bad = (m: string) => { a.ok = false; a.problems.push(m); };
+    if (a.status === 'sealed' && b) {
+      a.tide = b;
+      if (!(await verifyTide(b, opts.keys))) bad('hash or signature does not check out');
+      if (havePrev && b.prev !== prev) bad(`does not chain to the tide before it (expected ${prev?.slice(0, 12)}, got ${b.prev?.slice(0, 12)})`);
+      if (!havePrev && !opts.from && b.prev !== null) bad('the first tide should chain to nothing');
+      if (b.entries && !b.entries_truncated) {
+        if (b.entries.length !== b.size) bad(`lists ${b.entries.length} entries but says ${b.size}`);
+        else if (merkleRoot(b.entries.map((e) => e.leaf)) !== b.root) bad('its entries do not hash to its root');
+      }
+      if (b.size !== h.receipts) bad(`the log holds ${h.receipts} receipts but the tide sealed ${b.size}`);
+      prev = b.hash; havePrev = true; head = b.lune; receipts += b.size;
+    } else if (a.status === 'pending') {
+      // Sealing runs within minutes of a lune ending; only flag it once it is clearly late.
+      if (now - Date.parse(h.ends_utc) > 6 * 3600_000) bad('ended over 6 hours ago and is still not sealed');
+    } else bad('no tide found');
+    if (!a.ok) problems.push(`${a.lune}: ${a.problems.join('; ')}`);
+    out.push(a); opts.onTide?.(a);
+  }
+  const sealed = out.filter((t) => t.status === 'sealed').length;
+  return { ok: problems.length === 0, checked: out.length, sealed, receipts, head, tides: out, problems };
+}

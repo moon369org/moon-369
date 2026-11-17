@@ -50,6 +50,8 @@ All are GET, need no key and return JSON unless noted. Base: `https://api.moon36
 - `/v1/night?d=1990-06-14`: the Moon on any night. `/v1/eclipses/next`: the next solar eclipse.
 - `POST /v1/sign` with `{"sha256": "<hex>"}`: a signed Moonmark for a file. Send only the fingerprint, never the file.
 - `POST /v1/verify`, `/v1/lookup/{sha256}`: check a receipt, or see who registered a file and when.
+- `/v1/stats`: public numbers: receipts signed this lune and every lune since the first, tides sealed, Bitcoin proofs. Counts only.
+- `/v1/tideline`, `/v1/tideline/{lune}`: the public log. Audit all of it with `npx moon369 audit` (add `--mirror <dir>` to keep a copy).
 - Full reference: https://moon369.org/api · machine-readable spec: https://api.moon369.org/v1/spec
 
 Field names to rely on: `moonmark`, `moonmark_url`, `moon_image`, `phase.name`, `phase.illumination` (share of the face lit, 0 to 1), `sky.tilt.rotate_deg`, `utc`, `unix_ns`.
@@ -121,4 +123,5 @@ When you show Moon time or the Moon, these keep it looking like Moon. Your app k
 - [Guides](https://moon369.org/guides)
 - [Trust](https://moon369.org/trust): how signing, the Tideline and Bitcoin anchoring keep Moonmarks honest.
 - [Sky Check](https://moon369.org/sky-check): check Moon time against the real Moon in a photo.
+- [Audit](https://moon369.org/audit): check the whole Tideline yourself, keep a mirror, and how Moon's keys were made and are kept.
 - [Status](https://moon369.org/status)

@@ -28,9 +28,11 @@ npx moon369 now                         # the current Moonmark
 npx moon369 sign dist/app.zip model.bin   # sign files: writes <file>.moonmark.json, prints each proof link
 npx moon369 sign --text "We agree to the terms."
 npx moon369 verify dist/app.zip           # VALID: app.zip existed at Moonmark ...
+npx moon369 audit                         # re-check every tide in the Tideline from scratch
+npx moon369 audit --mirror ./tideline     # ...and keep your own copy, with Bitcoin proofs
 ```
 
-Only SHA-256 fingerprints are sent. `--key` (or `MOON_KEY`) registers under your verified name and lifts the rate limit; `--label` adds a label; `--json` prints machine-readable output. `verify` also reads the GitHub Action's `moon-receipts.json`.
+Only SHA-256 fingerprints are sent. `--key` (or `MOON_KEY`) registers under your verified name and lifts the rate limit; `--label` adds a label; `--json` prints machine-readable output. `verify` also reads the GitHub Action's `moon-receipts.json`. `audit` trusts nothing but Moon's public keys: it rebuilds each tide's Merkle root, checks both signatures and the chain, and exits 1 on any problem. In code: `auditTideline({ keys: await fetchKeys() })`. More: https://moon369.org/audit
 
 ## The live moon
 

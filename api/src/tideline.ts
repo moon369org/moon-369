@@ -45,6 +45,8 @@ export interface TideStore {
   first(): Promise<number | null>;
   markFirst(lune: number): Promise<void>;
   recent(n: number): Promise<number[]>;
+  /** How many receipts each lune from `from` to `to` holds, in one round trip. */
+  counts(from: number, to: number): Promise<number[]>;
   /** Replace a tide (only its anchors ever change after sealing). */
   updateTide(tide: Tide): Promise<void>;
   /** The tide's OpenTimestamps proof (.ots bytes). */
@@ -66,6 +68,7 @@ export function memoryStore(): TideStore {
     async head() { return h; }, async setHead(l) { h = l; },
     async first() { return f; }, async markFirst(l) { if (f === null) f = l; },
     async recent(n) { return [...T.keys()].sort((a, b) => b - a).slice(0, n); },
+    async counts(a, b) { const out: number[] = []; for (let l = a; l <= b; l++) out.push((L.get(l) ?? []).length); return out; },
     async updateTide(t) { T.set(t.lune_index, t); },
     async getOts(l) { return O.get(l) ?? null; },
     async putOts(l, f) { O.set(l, f); },
@@ -94,6 +97,7 @@ export function upstashStore(url: string, token: string): TideStore {
     async first() { const [v] = await call([['GET', 'tl:first']]); return v === null || v === undefined ? null : Number(v); },
     async markFirst(l) { await call([['SET', 'tl:first', l, 'NX']]); },
     async recent(n) { const [a] = await call([['ZRANGE', 'tl:tides', 0, n - 1, 'REV']]); return ((a as string[]) ?? []).map(Number); },
+    async counts(a, b) { if (b < a) return []; const cmds: (string | number)[][] = []; for (let l = a; l <= b; l++) cmds.push(['LLEN', `tl:leaves:${l}`]); return (await call(cmds)).map((x) => Number(x) || 0); },
     async updateTide(t) { await call([['SET', `tl:tide:${t.lune_index}`, JSON.stringify(t)]]); },
     async getOts(l) { const [v] = await call([['GET', `tl:ots:${l}`]]); return v ? Buffer.from(v as string, 'base64') : null; },
     async putOts(l, f) { await call([['SET', `tl:ots:${l}`, f.toString('base64')]]); },
@@ -284,3 +288,29 @@ export async function upgradeBitcoin(store: TideStore, btc: BitcoinStamper, rece
   }
   return done;
 }
+
+/** Public numbers: receipts per lune, totals, sealing and Bitcoin. Counts only, never content. */
+export async function stats(store: TideStore, nowNs: bigint, historyLunes = 4000) {
+  const open = luneOf(nowNs), first = await store.first(), head = await store.head();
+  const counts = first === null ? [] : await store.counts(first, open);
+  const recentIdx = await store.recent(60);
+  const tides = (await Promise.all(recentIdx.map((i) => store.getTide(i)))).filter((t): t is Tide => !!t);
+  const btc = tides.filter((t) => t.bitcoin?.status === 'confirmed').length, pending = tides.filter((t) => t.bitcoin?.status === 'pending').length;
+  const per = counts.map((n, i) => ({ lune: luneLabel((first ?? open) + i), index: (first ?? open) + i, receipts: n, ends_utc: unixNsToIsoLocal(luneEndNs((first ?? open) + i)) }));
+  const total = counts.reduce((a, b) => a + b, 0);
+  return {
+    tideline: TIDELINE,
+    open_lune: luneLabel(open),
+    this_lune: counts.length ? counts[counts.length - 1] : 0,
+    last_lune: counts.length > 1 ? counts[counts.length - 2] : 0,
+    total_receipts: total,
+    lunes_with_receipts: counts.filter((n) => n > 0).length,
+    first_lune: first === null ? null : luneLabel(first),
+    tides_sealed: head === null || first === null ? 0 : head - first + 1,
+    last_sealed: tides[0] ? { lune: tides[0].lune, size: tides[0].size, sealed_utc: unixNsToIsoLocal(BigInt(tides[0].sealed_unix_ns)), bitcoin: tides[0].bitcoin?.status ?? null } : null,
+    bitcoin: { confirmed: btc, pending, of_recent: tides.length },
+    history: per.slice(-historyLunes),
+    note: 'A lune is a Moon day, about 25 hours. history lists every lune since the first receipt, oldest first. Counts are receipts in the public Tideline; nothing about the files is shown.',
+  };
+}
+const unixNsToIsoLocal = (ns: bigint) => new Date(Number(ns / 1_000_000n)).toISOString();

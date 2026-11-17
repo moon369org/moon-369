@@ -62,4 +62,4 @@ export function moonPhase(m?: Moment): { phase: number; illumination: number; na
   return { phase: f, illumination: illum(ns), name: phaseName(f) };
 }
 
-export { receiptLeaf, verifyInclusion, verifyTide, tideBytes, type Tide } from './tideline.js';
+export { receiptLeaf, verifyInclusion, verifyTide, tideBytes, merkleRoot, auditTideline, type Tide, type AuditTide, type AuditReport } from './tideline.js';

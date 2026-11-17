@@ -14,6 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm, cache-dependency-path: api/package-lock.json }
       - run: npm ci
+      - run: npm ci && npm run build   # the audit test checks the published package against this API
+        working-directory: packages/moon369
       - run: npm run typecheck
       - run: npm test
 
