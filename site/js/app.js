@@ -48,6 +48,7 @@
   var editing = false;
   function showMoments() {
     var r = store('moonMoments'), box = $('[data-app-recent]');
+    setStars();
     if (!r.length) { box.hidden = true; editing = false; return; }
     box.hidden = false;
     box.innerHTML = '<div class="rh"><span class="k">YOUR MOMENTS</span><button type="button" class="ed" data-m-edit>' + (editing ? 'DONE' : 'EDIT') + '</button></div>' +
@@ -64,6 +65,43 @@
     if (x.sha && !r.some(function (y) { return y.sha === x.sha; })) delThumb(x.sha);
     if (!r.length) editing = false;
     showMoments(); buzz(); toast('Removed from this phone. The proof stays on Moon.');
+  }
+
+  // ---------- your stars: one around the moon for every moment you've marked ----------
+  // Each star's place, size and twinkle come from its own moment, so it never moves. The newest is born bright.
+  var STARS = { list: [], born: 0, raf: 0 };
+  function seeded(n) { return function () { n = (n + 0x6D2B79F5) | 0; var t = Math.imul(n ^ (n >>> 15), 1 | n); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function setStars() {
+    var r = store('moonMoments'), prev = STARS.list.length;
+    STARS.list = r.map(function (x) {
+      // A spot in the band beside the moon (in moon widths from its centre), never on the moon or the words.
+      var g = seeded((x.ms / 1000) | 0), px = 0, py = 0;
+      for (var i = 0; i < 40; i++) { px = (g() * 2 - 1) * 1.08; py = (g() * 2 - 1) * 0.56; if (Math.sqrt(px * px + py * py) > 0.6) break; }
+      return { px: px, py: py, size: (x.sha ? 1.25 : 1) * (0.7 + g() * 0.9), sp: 0.6 + g() * 1.4, ph: g() * 6.28, ms: x.ms };
+    });
+    if (STARS.list.length > prev && prev) STARS.born = performance.now();
+    if (!STARS.raf) STARS.raf = requestAnimationFrame(drawStars);
+  }
+  function drawStars(now) {
+    STARS.raf = 0;
+    var cv = $('[data-app-stars]'); if (!cv || !STARS.list.length) { if (cv) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); return; }
+    var dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(cv.clientWidth * dpr), H = Math.round(cv.clientHeight * dpr);
+    if (!W || !H) { STARS.raf = requestAnimationFrame(drawStars); return; }
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    var c = cv.getContext('2d'), cx = W / 2, cy = H / 2, R = Math.min(W / 2, H / 2), t = now / 1000;
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    c.clearRect(0, 0, W, H);
+    var newest = STARS.list.reduce(function (m, s) { return s.ms > m.ms ? s : m; }, STARS.list[0]), age = (now - STARS.born) / 1000;
+    STARS.list.forEach(function (s) {
+      var unit = W / 2.24, x = cx + s.px * unit, y = cy + s.py * unit;   // the canvas is 2.24 moon widths wide
+      var tw = still ? 0.8 : 0.55 + 0.45 * Math.sin(t * s.sp + s.ph), size = s.size * dpr * 1.3;
+      if (s === newest && STARS.born && age < 2.5) { var k = 1 - age / 2.5; size *= 1 + 2.2 * k; tw = Math.min(1, tw + k); }
+      var g = c.createRadialGradient(x, y, 0, x, y, size * 4);
+      g.addColorStop(0, 'rgba(233,228,216,' + (0.9 * tw) + ')'); g.addColorStop(0.25, 'rgba(233,228,216,' + (0.35 * tw) + ')'); g.addColorStop(1, 'rgba(233,228,216,0)');
+      c.fillStyle = g; c.beginPath(); c.arc(x, y, size * 4, 0, Math.PI * 2); c.fill();
+      c.fillStyle = 'rgba(255,252,244,' + tw + ')'; c.beginPath(); c.arc(x, y, size * 0.7, 0, Math.PI * 2); c.fill();
+    });
+    if (!still || (STARS.born && age < 2.5)) STARS.raf = requestAnimationFrame(drawStars);
   }
 
   // ---------- photos: kept on this phone only ----------

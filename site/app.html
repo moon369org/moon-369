@@ -129,6 +129,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .panel textarea{width:100%;min-height:208px;resize:none;background:#08080A;border:1px solid #24262A;color:#E9E4D8;font:16px/1.5 'JetBrains Mono',monospace;padding:14px;border-radius:0;-webkit-appearance:none}
 .panel textarea:focus{outline:none;border-color:#8A8B8F}
 .panel textarea.short{min-height:52px;height:52px;padding:14px;overflow:hidden}
+.stage canvas.stars{left:-62%;top:-10%;width:224%;height:120%;rotate:0deg}
 </style>
 </head>
 <body>
@@ -138,7 +139,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 </div>
 <main>
   <section class="scr" data-scr="now">
-    <div class="stage"><canvas class="hm-moonglow" role="img" aria-label="The Moon right now" data-app-moon></canvas></div>
+    <div class="stage"><canvas class="stars" aria-hidden="true" data-app-stars></canvas><canvas class="hm-moonglow" role="img" aria-label="The Moon right now" data-app-moon></canvas></div>
     <div class="k">MOON TIME · THE SAME EVERYWHERE</div>
     <div class="date" data-app-date>&nbsp;</div>
     <div class="clock" data-app-clock>&nbsp;</div>
