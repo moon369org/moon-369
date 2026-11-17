@@ -12,6 +12,8 @@ html,body{touch-action:pan-x pan-y}
 @media (orientation:landscape) and (max-height:500px) and (pointer:coarse){.turn{display:flex;position:fixed;inset:0;z-index:2147483647;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0B0B0D;color:#8A8B8F;font:12px 'JetBrains Mono',monospace;letter-spacing:.2em;text-transform:uppercase}.turn svg{width:48px;height:48px}}
 /* An app shows no scroll bars. */
 html,body,*{scrollbar-width:none}::-webkit-scrollbar{display:none;width:0;height:0}
+/* A solid black strip behind the clock and battery. */
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#000;z-index:2147483646;pointer-events:none}
 </style>
 <meta name="description" content="Moon time and the live moon in your pocket. Mark any moment with one tap and send a link that opens in everyone's own time.">
 <link rel="canonical" href="https://moon369.org/app">

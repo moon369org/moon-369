@@ -20,6 +20,8 @@
 @media (display-mode: standalone) and (orientation:landscape) and (max-height:500px) and (pointer:coarse){.turn{display:flex;position:fixed;inset:0;z-index:2147483647;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0B0B0D;color:#8A8B8F;font:12px 'JetBrains Mono',monospace;letter-spacing:.2em;text-transform:uppercase}.turn svg{width:48px;height:48px}}
 /* An app shows no scroll bars. */
 .mk-post,.mk-post body,.mk-post *{scrollbar-width:none}.mk-post ::-webkit-scrollbar,.mk-post::-webkit-scrollbar{display:none;width:0;height:0}
+/* A solid black strip behind the clock and battery. */
+.mk-post body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#000;z-index:2147483646;pointer-events:none}
 </style>
 <meta name="description" content="A Moonmark is one exact moment, the same everywhere on Earth. Open it anywhere.">
 <link rel="canonical" href="https://moon369.org/m">
