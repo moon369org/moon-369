@@ -254,7 +254,22 @@
       }).then(function () { signing = false; btn.disabled = false; btn.textContent = 'MARK IT'; });
       return;
     }
-    finish(name, link(cur.ms, name, cur.kind === 'event' ? 'event' : 'moment'), null);
+    if (cur.kind === 'event') { finish(name, link(cur.ms, name, 'event'), null); return; }
+    // A moment without a photo: Moon signs the moment itself, its exact Moonmark and its words, into the Tideline.
+    // Only a fingerprint is sent; the words stay in the link. Offline, it's still made, just without the proof.
+    if (signing) return; signing = true;
+    var b2 = $('[data-sheet-create]'); b2.textContent = 'SIGNING…'; b2.disabled = true;
+    var c1 = cur, k = moon(cur.ms), plain = link(cur.ms, name, 'moment');
+    var stmt = 'moon-moment/1\n' + text(k) + '.' + ns9(k) + '\n' + name;
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(stmt)).then(function (d) {
+      var sha = Array.from(new Uint8Array(d), function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+      return fetch(API + '/v1/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sha256: sha }) });
+    }).then(function (r) { return r.json().then(function (b) { if (!r.ok || !b.signed_url) throw 0; return b.signed_url; }); }).then(function (su) {
+      if (cur !== c1) return;
+      var u = new URL(su);
+      finish(name, link(c1.ms, '', 'moment') + u.search + '&v=' + u.pathname.replace(/^\/m\//, '') + '&t=1' + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : ''), null);
+    }).catch(function () { if (cur === c1) finish(name, plain, null); })
+      .then(function () { signing = false; b2.disabled = false; b2.textContent = 'MARK IT'; });
   }
   function finish(name, url, it) {
     it = it || { ms: cur.ms, name: name, url: url };

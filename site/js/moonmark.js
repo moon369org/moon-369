@@ -389,7 +389,7 @@
       (rc || ev ? '' : '<div class="mk-note">This Moonmark is unsigned. A signed Moonmark from Moon proves when something happened.</div>') + '</div>' +
       '</div>';
     if (rc) { sigBox(root, rc); recordBox(root, rc); }
-    if (post) fold(root, rc, nm, il, ms);
+    if (post) fold(root, rc, nm, il, ms, mk);
     if (rc && linkedFile()) artBox(root, rc, linkedFile());
     if (post && rc && !linkedFile()) ownPhoto(root, rc);
     if (rc && coa) coaBox(root, rc, coa);
@@ -427,7 +427,7 @@
   }
   // Under a moment, the detail stays folded: a title and a one-line summary per part, open on tap.
   var T2 = function (x, v) { x = window.MoonT ? window.MoonT(x, v) : x; return x.replace(/\{(\w+)\}/g, function (m, k) { return v[k]; }); };
-  function fold(root, rc, nm, il, ms) {
+  function fold(root, rc, nm, il, ms, mkOf) {
     var main = root.querySelector('.mk-main'), ts = main.querySelector('.mk-ts'); if (!main || !ts) return;
     var k = window.MoonPhase && window.MoonPhase.sky ? window.MoonPhase.sky(ms) : null;
     var chev = '<svg class="mk-fd-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -440,7 +440,15 @@
       at.parentNode.insertBefore(d, at.nextSibling); at = d; return d;
     };
     var q = function (sel) { return main.querySelector(sel); };
-    if (rc) {
+    if (rc && new URLSearchParams(location.search).get('t') === '1') {
+      // A signed moment: Moon signed its exact Moonmark and its words. Check the words in the link are those words.
+      var pd2 = part(MMK + 'MOMENT PROOF', 'Checking the signature…', [q('[data-mk-sig]')]), q2 = new URLSearchParams(location.search);
+      var stmt = 'moon-moment/1\n' + text(mkOf) + '.' + p(mkOf.ns, 9) + '\n' + (q2.get('n') || '');
+      Promise.all([verifyEarly(rc), crypto.subtle.digest('SHA-256', new TextEncoder().encode(stmt))]).then(function (a) {
+        var h = Array.from(new Uint8Array(a[1]), function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+        pd2.querySelector('[data-fd-sub]').textContent = !(a[0] && a[0].valid) ? 'The signature does not check out' : h === rc.sha256 ? T2('✓ This moment and its words, signed on Moon') : T2('The words were changed after Moon signed them');
+      }, function () { pd2.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
+    } else if (rc) {
       var PHOTO = '<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
       var FILE = '<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v4h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
       // An image when it came from the app's camera (v=) or the linked file is a picture; any other signed file is a file.
