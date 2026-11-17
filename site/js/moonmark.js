@@ -446,9 +446,9 @@
     // The same living moon as the app, as it was at this moment.
     var st = document.createElement('div'); st.className = 'mk-stage';
     st.innerHTML = '<canvas class="hm-moonglow" role="img" aria-label="' + esc(nm) + '" data-at="' + Math.round(ms) + '"></canvas>';
-    part('THE MOON THAT NIGHT', esc(nm) + ' · ' + il + '% lit', [st, q('.mk-date'), q('.mk-mark'), q('.mk-main > .mk-rows')]);
+    part('MOON STATUS', esc(nm) + ' · ' + il + '% lit', [st, q('.mk-date'), q('.mk-mark'), q('.mk-main > .mk-rows')]);
     var sky = q('.mk-skyw'); if (sky) { var sh = sky.querySelector('.mk-skyh'); if (sh) sh.remove(); }
-    part('THE SKY', k ? esc(k.tide.strength.charAt(0).toUpperCase() + k.tide.strength.slice(1)) + ' tide · ' + Math.round(k.distance.km).toLocaleString() + ' km away' : '', [sky]);
+    part('SKY &amp; TIDE', k ? esc(k.tide.strength.charAt(0).toUpperCase() + k.tide.strength.slice(1)) + ' tide · ' + Math.round(k.distance.km).toLocaleString() + ' km away' : '', [sky]);
     if (rc) {
       var rb = q('[data-mk-rec]'), rd = part('PERMANENT RECORD', 'Kept in the Tideline, anchored in Bitcoin', [rb]);
       if (rd && !rb.innerHTML.trim()) { rd.hidden = true; new MutationObserver(function () { if (rb.innerHTML.trim()) rd.hidden = false; }).observe(rb, { childList: true }); }

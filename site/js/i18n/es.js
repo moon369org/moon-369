@@ -224,6 +224,7 @@
 "Firmando la foto…",
 "{t} tu hora. Firmado con la foto."],
   site: {
+    "MOON STATUS": "ESTADO DE LA LUNA", "SKY & TIDE": "CIELO Y MAREA",
     "✓ Photo signed on Moon {s} s before this moment": "✓ Foto firmada en Moon {s} s antes de este momento",
     "SHARE": "COMPARTIR", "LINK COPIED": "ENLACE COPIADO", "MARK YOUR OWN MOMENT": "MARCA TU PROPIO MOMENTO",
     "PROOF": "PRUEBA", "Checking the signature…": "Comprobando la firma…", "✓ Signed and verified on Moon": "✓ Firmado y verificado en Moon", "The signature does not check out": "La firma no es válida", "Signed on Moon": "Firmado en Moon", "THE SKY": "EL CIELO", "PERMANENT RECORD": "REGISTRO PERMANENTE", "Kept in the Tideline, anchored in Bitcoin": "Guardado en la Tideline, anclado en Bitcoin",
