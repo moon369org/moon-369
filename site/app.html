@@ -80,6 +80,11 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .qr[hidden]{display:none}.qr svg{width:220px;height:220px;display:block;margin:4px auto}
 .clock small{color:#8A8B8F;font-size:.42em}
 .recent a small{color:#8A8B8F}
+.step[hidden]{display:none}.step{display:grid;gap:12px}
+.ok{display:flex;align-items:center;gap:12px}.ok span{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#4CC38A;color:#0B0B0D;font:700 16px Inter,sans-serif}.ok b{font:700 14px Syncopate,sans-serif;letter-spacing:.14em}
+.rn{font-size:18px;font-weight:500}.rn:empty{display:none}
+.lk{font:12px 'JetBrains Mono',monospace!important;color:#B9B6AE!important;min-height:44px!important}
+.qr svg{width:170px;height:170px}
 </style>
 </head>
 <body>
@@ -132,16 +137,26 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 
 <div class="sheet" data-app-sheet hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sheet-h">
-    <h2 id="sheet-h" data-sheet-h>MARK THIS MOMENT</h2>
-    <div class="mk" data-sheet-mk></div>
-    <div class="lt" data-sheet-lt></div>
-    <input type="datetime-local" data-sheet-when hidden aria-label="Date and time, in your time">
-    <input type="text" maxlength="80" placeholder="What's happening? (optional)" data-sheet-name aria-label="Name this moment">
-    <button class="btn p" type="button" data-sheet-share>SHARE THE LINK</button>
-    <div class="three"><button class="btn" type="button" data-sheet-copy>COPY LINK</button><button class="btn" type="button" data-sheet-qr>QR</button><button class="btn" type="button" data-sheet-card>CARD</button></div>
-    <div class="qr" data-sheet-qrbox hidden></div>
-    <button class="x" type="button" data-sheet-embed hidden>COPY COUNTDOWN EMBED</button>
-    <button class="x" type="button" data-sheet-close>CLOSE</button>
+    <div class="step" data-step="name">
+      <h2 id="sheet-h" data-sheet-h>SHARE THIS MOMENT</h2>
+      <div class="mk" data-sheet-mk></div>
+      <div class="lt" data-sheet-lt></div>
+      <input type="text" maxlength="80" placeholder="What's happening? (optional)" data-sheet-name aria-label="Name this moment">
+      <button class="btn p" type="button" data-sheet-create>CREATE MOMENT</button>
+    </div>
+    <div class="step" data-step="ready" hidden>
+      <div class="ok"><span aria-hidden="true">✓</span><b data-ready-h>YOUR MOMENT IS READY</b></div>
+      <div class="rn" data-ready-name></div>
+      <div class="mk" data-ready-mk></div>
+      <div class="lt" data-ready-lt></div>
+      <div class="qr" data-sheet-qrbox></div>
+      <input type="text" readonly class="lk" data-ready-link aria-label="Link">
+      <button class="btn p" type="button" data-sheet-share>SHARE</button>
+      <div class="two"><button class="btn" type="button" data-sheet-copy>COPY LINK</button><button class="btn" type="button" data-sheet-card>SAVE CARD</button></div>
+      <button class="x" type="button" data-sheet-embed hidden>COPY COUNTDOWN EMBED</button>
+      <div class="lt" style="text-align:center">It works right away. Anyone who opens it sees it in their own time.</div>
+    </div>
+    <button class="x" type="button" data-sheet-close>DONE</button>
   </div>
 </div>
 <div class="toast" data-app-toast hidden role="status"></div>

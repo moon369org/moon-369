@@ -45,52 +45,58 @@
   function remember(key, item, same) { var r = store(key).filter(function (x) { return !same(x); }); r.unshift(item); store(key, r.slice(0, 12)); }
   function showMoments() { list('moonMoments', '[data-app-recent]', 'YOUR MOMENTS', function (x) { return '<a href="' + esc(x.url) + '"><span>' + esc(x.name || 'A moment') + '</span><span>' + esc(text(moon(x.ms + 1))) + '</span></a>'; }); }
 
-  // ---------- the share sheet (moments and events) ----------
-  var cur = null;   // { ms, kind: 'moment' | 'event' }
+  // ---------- the share sheet: name it, create it, then it's ready to share ----------
+  // Nothing is posted anywhere: the link itself carries the Moonmark and the name, so it works the moment it's made.
+  var cur = null, made = null;   // cur: { ms, kind }; made: { url, name, mark }
+  function step(which) { $$('[data-step]').forEach(function (s) { s.hidden = s.getAttribute('data-step') !== which; }); }
   function openSheet(kind, ms, name) {
-    cur = { ms: Math.floor(ms / 1000) * 1000, kind: kind };
-    $('[data-sheet-h]').textContent = kind === 'event' ? 'YOUR EVENT' : 'SHARE THIS MOMENT';
-    $('[data-sheet-when]').hidden = true;
+    cur = { ms: Math.floor(ms / 1000) * 1000, kind: kind }; made = null;
+    $('[data-sheet-h]').textContent = kind === 'event' ? 'NEW EVENT' : 'SHARE THIS MOMENT';
+    $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'CREATE MOMENT';
     $('[data-sheet-name]').value = name || ''; $('[data-sheet-name]').placeholder = kind === 'event' ? 'Name the event' : "What's happening? (optional)";
-    $('[data-sheet-qrbox]').hidden = true; $('[data-sheet-embed]').hidden = kind !== 'event';
     $('[data-sheet-mk]').textContent = 'Moonmark ' + text(moon(cur.ms + 1));
-    $('[data-sheet-lt]').textContent = localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) + ' your time. Everyone else sees their own.';
-    $('[data-app-sheet]').hidden = false; buzz();
-    if (kind !== 'event') setTimeout(function () { $('[data-sheet-name]').focus(); }, 60);
+    $('[data-sheet-lt]').textContent = localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) + ' your time.';
+    $('[data-sheet-close]').textContent = 'CANCEL';
+    step('name'); $('[data-app-sheet]').hidden = false; buzz();
+    if (kind === 'event' && name) create(); else setTimeout(function () { $('[data-sheet-name]').focus(); }, 60);
   }
   function closeSheet() { $('[data-app-sheet]').hidden = true; }
-  function current() {
+  function create() {
     var name = $('[data-sheet-name]').value.replace(/\s+/g, ' ').trim().slice(0, 80);
-    if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return null; }
+    if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return; }
     var url = link(cur.ms, name), it = { ms: cur.ms, name: name, url: url };
     if (cur.kind === 'event') { remember('moonEvents', it, function (x) { return x.url === url; }); showEvents(); }
     else { remember('moonMoments', it, function (x) { return x.url === url; }); showMoments(); }
-    return { url: url, name: name, mark: text(moon(cur.ms + 1)) };
+    made = { url: url, name: name, mark: text(moon(cur.ms + 1)) };
+    $('[data-ready-h]').textContent = cur.kind === 'event' ? 'YOUR EVENT IS READY' : 'YOUR MOMENT IS READY';
+    $('[data-ready-name]').textContent = name;
+    $('[data-ready-mk]').textContent = 'Moonmark ' + made.mark;
+    $('[data-ready-lt]').textContent = localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) + ' your time.';
+    $('[data-ready-link]').value = url;
+    var box = $('[data-sheet-qrbox]'); try { box.innerHTML = window.MoonQR.svg(url, window.MoonPhase.fraction(cur.ms)); box.hidden = false; } catch (e) { box.hidden = true; }
+    $('[data-sheet-embed]').hidden = cur.kind !== 'event';
+    $('[data-sheet-close]').textContent = 'DONE';
+    step('ready'); buzz();
   }
   var AFTER = 'Anyone who opens it can find their own moon.';
   function share() {
-    var c = current(); if (!c) return; buzz();
-    var msg = (c.name ? c.name + ': ' : '') + 'Moonmark ' + c.mark + '. Opens in your own time:';
-    if (navigator.share) navigator.share({ title: c.name || 'A moment on Moon', text: msg, url: c.url }).then(function () { toast(AFTER); }, function () {});
-    else copy(c);
+    if (!made) return; buzz();
+    var msg = (made.name ? made.name + ': ' : '') + 'Moonmark ' + made.mark + '. Opens in your own time:';
+    if (navigator.share) navigator.share({ title: made.name || 'A moment on Moon', text: msg, url: made.url }).then(function () { toast('Shared. ' + AFTER); }, function () {});
+    else copy();
   }
-  function copy(c) {
-    c = c || current(); if (!c) return;
-    (navigator.clipboard ? navigator.clipboard.writeText(c.url) : Promise.reject()).then(function () { toast('Link copied. ' + AFTER); }, function () { prompt('Copy this link', c.url); });
-  }
-  function qr() {
-    var c = current(); if (!c) return;
-    var box = $('[data-sheet-qrbox]'); if (!box.hidden) { box.hidden = true; return; }
-    try { box.innerHTML = window.MoonQR.svg(c.url, window.MoonPhase.fraction(cur.ms)); box.hidden = false; buzz(); } catch (e) { toast('QR needs a moment to load'); }
+  function copy() {
+    if (!made) return;
+    (navigator.clipboard ? navigator.clipboard.writeText(made.url) : Promise.reject()).then(function () { toast('Link copied. ' + AFTER); }, function () { prompt('Copy this link', made.url); });
   }
   function card() {
-    var c = current(); if (!c) return;
-    var q = 'moonmark=' + encodeURIComponent(path(moon(cur.ms + 1)) + '.000000000') + (c.name ? '&event=' + encodeURIComponent(c.name) : '&qr=1') + '&v=3';
-    shareImage(API + '/v1/card.png?' + q, 'moon-' + path(moon(cur.ms + 1)) + '.png', c.url);
+    if (!made) return;
+    var q = 'moonmark=' + encodeURIComponent(path(moon(cur.ms + 1)) + '.000000000') + (made.name ? '&event=' + encodeURIComponent(made.name) : '&qr=1') + '&v=3';
+    shareImage(API + '/v1/card.png?' + q, 'moon-' + path(moon(cur.ms + 1)) + '.png', made.url);
   }
   function embed() {
-    var c = current(); if (!c) return;
-    var code = '<div data-moon-countdown="' + path(moon(cur.ms + 1)) + '.000000000" data-name="' + esc(c.name) + '"></div>\n<script src="https://moon369.org/embed/countdown.js" async></script>';
+    if (!made) return;
+    var code = '<div data-moon-countdown="' + path(moon(cur.ms + 1)) + '.000000000" data-name="' + esc(made.name) + '"></div>\n<script src="https://moon369.org/embed/countdown.js" async></script>';
     (navigator.clipboard ? navigator.clipboard.writeText(code) : Promise.reject()).then(function () { toast('Countdown embed copied'); }, function () { prompt('Copy this embed code', code); });
   }
   function shareImage(url, name, link) {
@@ -170,7 +176,9 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
     $('[data-sheet-share]').onclick = share;
     $('[data-sheet-copy]').onclick = function () { copy(); };
-    $('[data-sheet-qr]').onclick = qr;
+    $('[data-sheet-create]').onclick = create;
+    $('[data-sheet-name]').addEventListener('keydown', function (e) { if (e.key === 'Enter') create(); });
+    $('[data-ready-link]').onclick = function () { this.select(); };
     $('[data-sheet-card]').onclick = card;
     $('[data-sheet-embed]').onclick = embed;
     // Nights
