@@ -476,18 +476,18 @@
       if (rd && !rb.innerHTML.trim()) { rd.hidden = true; new MutationObserver(function () { if (rb.innerHTML.trim()) rd.hidden = false; }).observe(rb, { childList: true }); }
     }
   }
-  // Little white stars travel the two rings of the Moon mark: clockwise on the left ring, counterclockwise on the right, nine on each,
+  // Little white stars travel the two rings of the Moon mark: clockwise on the left ring, counterclockwise on the right, eighteen on each,
   // each at its own speed. A faster star that catches the one ahead bumps it, and they trade speeds. It loops forever.
   function ringStars(svg) {
     if (!svg || svg.__stars) return; svg.__stars = 1;
     var NS = 'http://www.w3.org/2000/svg', RING = 46, still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     var g = document.createElementNS(NS, 'g'); svg.appendChild(g);
-    var shape = 'M0,-5 L1.2,-1.2 L5,0 L1.2,1.2 L0,5 L-1.2,1.2 L-5,0 L-1.2,-1.2 Z', GAP = 0.24;   // gap: how close (in radians) two stars get before they bump
+    var shape = 'M0,-5 L1.2,-1.2 L5,0 L1.2,1.2 L0,5 L-1.2,1.2 L-5,0 L-1.2,-1.2 Z', GAP = 0.18;   // gap: how close (in radians) two stars get before they bump
     var rings = [{ cx: -30, dir: 1, ps: [] }, { cx: 30, dir: -1, ps: [] }];
     rings.forEach(function (rg) {
-      for (var k = 0; k < 9; k++) {
+      for (var k = 0; k < 18; k++) {
         var el = document.createElementNS(NS, 'path'); el.setAttribute('d', shape); el.setAttribute('fill', '#E9E4D8'); g.appendChild(el);
-        rg.ps.push({ a: k * 0.698 + Math.random() * 0.3, w: 0.35 + Math.random() * 0.9, rot: Math.random() * 90, tw: Math.random() * 6.283, el: el });
+        rg.ps.push({ a: k * 0.349 + Math.random() * 0.15, w: 0.35 + Math.random() * 0.9, rot: Math.random() * 90, tw: Math.random() * 6.283, el: el });
       }
     });
     var last = performance.now();
