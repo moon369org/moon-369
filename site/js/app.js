@@ -335,6 +335,18 @@
   // Nothing is posted anywhere: the link itself carries the Moonmark and the name, so it works the moment it's made.
   var cur = null, made = null;   // cur: { ms, kind }; made: { url, name, mark }
   function step(which) { $$('[data-step]').forEach(function (s) { s.hidden = s.getAttribute('data-step') !== which; }); }
+  // Marking a moment lands with weight: a flash from the button, the captured time large over everything, then it fades.
+  function markFlash(ms, e) {
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+    var k = moon(ms), n = String(Math.min(999999999, Math.floor(k.f * 1e9))).padStart(9, '0');
+    var bx = e && e.clientX ? e.clientX : innerWidth / 2, by = e && e.clientY ? e.clientY : innerHeight / 2;
+    var o = document.createElement('div'); o.className = 'mflash'; o.setAttribute('aria-hidden', 'true');
+    o.style.setProperty('--x', bx + 'px'); o.style.setProperty('--y', by + 'px');
+    o.innerHTML = '<i class="mf-burst"></i><i class="mf-ring"></i><div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
+    document.body.appendChild(o); buzz();
+    setTimeout(function () { o.remove(); }, 1500);
+    return true;
+  }
   function openSheet(kind, ms, name) {
     cur = { ms: kind === 'event' ? Math.floor(ms / 1000) * 1000 : ms, kind: kind }; made = null;   // a moment is the instant passed in: the touch on Mark This Moment
     $('[data-sheet-h]').textContent = kind === 'event' ? 'NEW EVENT' : 'MARK THIS MOMENT';
@@ -716,7 +728,7 @@
     setView(view, false);
     $$('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
     // The moment is the tap of Mark This Moment, on the same clock the screen shows.
-    $('[data-app-mark]').onclick = function () { openSheet('moment', nowMs()); };
+    $('[data-app-mark]').onclick = function (e) { var t = nowMs(), fl = markFlash(t, e); setTimeout(function () { openSheet('moment', t); }, fl ? 720 : 0); };   // the time is taken on the tap; the sheet follows the flash
     $('[data-sheet-close]').onclick = closeSheet;
     $('[data-app-sheet]').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeSheet(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
