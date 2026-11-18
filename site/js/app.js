@@ -391,7 +391,7 @@
     var bx = e && e.clientX ? e.clientX : innerWidth / 2, by = e && e.clientY ? e.clientY : innerHeight / 2;
     var o = document.createElement('div'); o.className = 'mflash'; o.setAttribute('aria-hidden', 'true');
     o.style.setProperty('--x', bx + 'px'); o.style.setProperty('--y', by + 'px');
-    o.innerHTML = '<canvas class="mf-spark"></canvas><i class="mf-ring"></i><div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
+    o.innerHTML = '<canvas class="mf-spark"></canvas><i class="mf-ring"></i><div class="mf-t"><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
     document.body.appendChild(o); buzz(); spark(o.querySelector('.mf-spark'));
     setTimeout(function () { o.remove(); }, 1500);
     return true;
