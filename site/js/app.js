@@ -62,7 +62,8 @@
       (editing ? '<div class="enote2">Removing a moment only clears it from this phone. The proof stays on Moon and its link still works.</div>' : '') +
       r.map(function (x, i) {
         var row = '<a class="ph" href="' + esc(x.url) + '"><span class="nm">' + (x.sha ? '<img alt="" data-thumb="' + esc(x.sha) + '">' : '<span class="noph" aria-hidden="true"><svg viewBox="-80 -52 160 104"><circle cx="-30" cy="0" r="46" fill="none" stroke="currentColor" stroke-width="9"/><circle cx="30" cy="0" r="46" fill="none" stroke="currentColor" stroke-width="9"/></svg></span>') + '<span>' + esc(x.name || (x.sha ? 'A photo' : 'A moment')) + '</span></span><span>' + MMK + esc(text(moon(x.ms + 1))) + '</span></a>';
-        return editing ? '<div class="mrow">' + row + '<button type="button" class="rm" data-m-rm="' + i + '" aria-label="Remove from this phone">✕</button></div>' : row;
+        return editing ? '<div class="mrow">' + row + '<button type="button" class="rm" data-m-rm="' + i + '" aria-label="Remove from this phone">✕</button></div>'
+          : '<div class="sw"><button type="button" class="sw-del" data-sw-del="' + i + '" tabindex="-1">REMOVE</button>' + row + '</div>';   // swipe left to reveal Remove
       }).join('') +
       '<div class="mlb"><span>Your Moonlog lives on this phone.</span><button type="button" data-m-export>EXPORT</button><button type="button" data-m-import>IMPORT</button></div>';
     $$('[data-thumb]').forEach(function (im) { getThumb(im.getAttribute('data-thumb')).then(function (b) { if (b) im.src = URL.createObjectURL(b); }); });
@@ -105,6 +106,35 @@
       }).catch(function () { toast(T('That file is not a Moonlog backup.')); });
     };
     inp.click();
+  }
+  // Swipe a Moonlog row left to reveal Remove; tap it to remove. Swiping right, or tapping the row, closes it.
+  var SW_OPEN = 92;
+  function bindSwipe() {
+    var box = $('[data-app-recent]'), cur = null, sx = 0, sy = 0, dx = 0, dragging = false, decided = false;
+    var close = function (a) { if (a) { a.style.transform = ''; a.classList.remove('open'); } };
+    box.addEventListener('touchstart', function (e) {
+      var a = e.target.closest('.sw > a'); if (!a) return;
+      $$('.sw > a.open').forEach(function (o) { if (o !== a) close(o); });
+      cur = a; sx = e.touches[0].clientX; sy = e.touches[0].clientY; dx = 0; dragging = false; decided = false; a.style.transition = 'none';
+    }, { passive: true });
+    box.addEventListener('touchmove', function (e) {
+      if (!cur) return;
+      var x = e.touches[0].clientX - sx, y = e.touches[0].clientY - sy;
+      if (!decided) { if (Math.abs(x) < 8 && Math.abs(y) < 8) return; decided = true; dragging = Math.abs(x) > Math.abs(y); }
+      if (!dragging) return;
+      e.preventDefault();
+      var base = cur.classList.contains('open') ? -SW_OPEN : 0; dx = Math.max(-SW_OPEN - 30, Math.min(0, base + x));
+      cur.style.transform = 'translateX(' + dx + 'px)';
+    }, { passive: false });
+    box.addEventListener('touchend', function () {
+      if (!cur) return; cur.style.transition = '';
+      if (dragging) { if (dx < -SW_OPEN / 2) { cur.style.transform = 'translateX(' + -SW_OPEN + 'px)'; cur.classList.add('open'); buzz(); } else close(cur); cur.__swiped = Date.now(); }
+      cur = null;
+    });
+    box.addEventListener('click', function (e) {
+      var a = e.target.closest('.sw > a'); if (!a) return;
+      if (a.classList.contains('open') || (a.__swiped && Date.now() - a.__swiped < 400)) { e.preventDefault(); e.stopPropagation(); close(a); }
+    }, true);
   }
   function removeMoment(i) {
     var r = store('moonMoments'), x = r[i]; if (!x) return;
@@ -662,6 +692,7 @@
     var LANGS = [['auto', 'Automatic', T('PHONE SETTING')]].concat(((window.MoonI18n && MoonI18n.languages) || [['en', 'English']]).map(function (l) { return [l[0], l[1], l[0].toUpperCase()]; }));
     $('[data-lang-list]').innerHTML = LANGS.map(function (l) { var on = l[0] === 'auto' ? !chosen : chosen === l[0]; return '<button type="button" data-lang="' + l[0] + '" aria-current="' + on + '">' + esc(l[0] === 'auto' ? T('Automatic') : l[1]) + ' <span>' + esc(l[2]) + '</span></button>'; }).join('');
     $('[data-lang-open]').onclick = function () { $('[data-lang-sheet]').hidden = false; buzz(); };
+    bindSwipe();
     // More: a drawer from the bottom with the rest of Moon.
     $('[data-more-open]').onclick = function () { $('[data-more-sheet]').hidden = false; buzz(); };
     $('[data-more-close]').onclick = function () { $('[data-more-sheet]').hidden = true; };
@@ -692,6 +723,7 @@
       if (e.target.closest('[data-m-export]')) { exportLog(); return; }
       if (e.target.closest('[data-m-import]')) { importLog(); return; }
       if (e.target.closest('[data-m-edit]')) { editing = !editing; showMoments(); buzz(); return; }
+      var sd = e.target.closest('[data-sw-del]'); if (sd) { removeMoment(+sd.getAttribute('data-sw-del')); return; }
       var b = e.target.closest('[data-m-rm]'); if (!b) return;
       e.preventDefault();
       // Two taps: the first asks, the second removes.
