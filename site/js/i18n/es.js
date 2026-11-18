@@ -232,7 +232,8 @@
 "RESTAURAR UN MOONLOG",
 "Tu Moonlog vive en este teléfono.",
 "EXPORTAR",
-"IMPORTAR"],
+"IMPORTAR",
+"GUARDAR MOMENTO"],
   site: {
     "✓ Words and time signed": "✓ Palabras y hora firmadas", "Words changed since signing": "Palabras cambiadas tras firmar", "✓ Image signed {s} s after": "✓ Imagen firmada {s} s después", "✓ Image signed {s} s before": "✓ Imagen firmada {s} s antes", "✓ Verified on Moon": "✓ Verificado en Moon", "In the Tideline and Bitcoin": "En la Tideline y Bitcoin", "Signature does not check out": "La firma no es válida",
     "MOMENT PROOF": "PRUEBA DEL MOMENTO", "✓ This moment and its words, signed on Moon": "✓ Este momento y sus palabras, firmados en Moon", "The words were changed after Moon signed them": "Las palabras cambiaron después de que Moon las firmara",

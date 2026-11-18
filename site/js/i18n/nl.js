@@ -224,6 +224,7 @@
 "EEN MOONLOG HERSTELLEN",
 "Je Moonlog staat op deze telefoon.",
 "EXPORTEREN",
-"IMPORTEREN"],
+"IMPORTEREN",
+"MOMENT BEWAREN"],
   site: {}
 };

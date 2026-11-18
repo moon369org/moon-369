@@ -463,7 +463,7 @@
       // An image when it came from the app's camera (v=) or the linked file is a picture; any other signed file is a file.
       var isImg = !!new URLSearchParams(location.search).get('v') || /\.(png|jpe?g|gif|webp|avif|heic|heif|svg)(\?|#|$)/i.test(linkedFile());
       var pd = part(isImg ? PHOTO + 'IMAGE PROOF' : FILE + 'FILE PROOF', 'Checking the signature…', [q('[data-mk-sig]')]);
-      verifyEarly(rc).then(function (v) { pd.querySelector('[data-fd-sub]').textContent = v && v.valid ? (new URLSearchParams(location.search).get('v') ? T2('✓ Image signed {s} s before', { s: Math.max(0, (ms - Number(BigInt(rc.unix_ns) / 1000000n)) / 1000).toFixed(1) }) : '✓ Verified on Moon') : 'Signature does not check out'; }, function () { pd.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
+      verifyEarly(rc).then(function (v) { pd.querySelector('[data-fd-sub]').textContent = v && v.valid ? (new URLSearchParams(location.search).get('v') ? (function (d) { return d >= 0 ? T2('✓ Image signed {s} s after', { s: (d / 1000).toFixed(1) }) : T2('✓ Image signed {s} s before', { s: (-d / 1000).toFixed(1) }); })(Number(BigInt(rc.unix_ns) / 1000000n) - ms) : '✓ Verified on Moon') : 'Signature does not check out'; }, function () { pd.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
     }
     // The same living moon as the app, as it was at this moment.
     var st = document.createElement('div'); st.className = 'mk-stage';

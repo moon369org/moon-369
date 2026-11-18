@@ -226,6 +226,7 @@
 "RESTAURAR UM MOONLOG",
 "O teu Moonlog vive neste telemóvel.",
 "EXPORTAR",
-"IMPORTAR"],
+"IMPORTAR",
+"GUARDAR MOMENTO"],
   site: {}
 };

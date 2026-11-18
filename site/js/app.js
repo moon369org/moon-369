@@ -318,7 +318,7 @@
       });
     }
   }
-  function clearPhoto() { var had = cur && cur.photo; if (cur) { cur.photo = null; cur.thumb = null; cur.sig = null; } if (had && cur.kind !== 'event' && !$('[data-app-sheet]').hidden) runClock(); $('[data-sheet-pv-img]').removeAttribute('src'); $('[data-sheet-pv]').hidden = true; $('[data-sheet-pick]').hidden = cur && cur.kind === 'event'; $('[data-sheet-photo]').value = ''; }
+  function clearPhoto() { var had = cur && cur.photo; if (cur) { cur.photo = null; cur.thumb = null; cur.sig = null; } $('[data-sheet-pv-img]').removeAttribute('src'); $('[data-sheet-pv]').hidden = true; $('[data-sheet-pick]').hidden = cur && cur.kind === 'event'; $('[data-sheet-photo]').value = ''; }
   // Sign the photo: its fingerprint, at this moment. The signed link proves the photo existed by then.
   function signPhoto(file) {
     return file.arrayBuffer().then(function (buf) { return crypto.subtle.digest('SHA-256', buf); }).then(function (d) {
@@ -335,15 +335,18 @@
   var cur = null, made = null;   // cur: { ms, kind }; made: { url, name, mark }
   function step(which) { $$('[data-step]').forEach(function (s) { s.hidden = s.getAttribute('data-step') !== which; }); }
   function openSheet(kind, ms, name) {
-    cur = { ms: Math.floor(ms / 1000) * 1000, kind: kind }; made = null;
+    cur = { ms: kind === 'event' ? Math.floor(ms / 1000) * 1000 : nowMs(), kind: kind }; made = null;   // a moment is the tap that opened the sheet
     $('[data-sheet-h]').textContent = kind === 'event' ? 'NEW EVENT' : 'MARK THIS MOMENT';
-    $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'MARK IT';
+    $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'SAVE MOMENT';
     $('[data-sheet-name]').classList.toggle('short', kind === 'event'); $('[data-sheet-name]').maxLength = kind === 'event' ? 80 : 280;
     $('[data-sheet-name]').value = name || ''; $('[data-sheet-name]').placeholder = kind === 'event' ? 'Name the event' : "What's happening? (optional)";
     if (kind === 'event') {
       $('[data-sheet-mk]').textContent = text(moon(cur.ms + 1));
       $('[data-sheet-lt]').textContent = T('{t} your time.', { t: localStr(cur.ms, { dateStyle: 'full', timeStyle: 'short' }) });
-    } else runClock();
+    } else {   // the clock stops on the tap of Mark This Moment
+      stopClock(cur.ms);
+      $('[data-sheet-lt]').textContent = T('{t} your time.', { t: localStr(cur.ms, { dateStyle: 'full', timeStyle: 'medium' }) });
+    }
     $('[data-sheet-close]').textContent = 'CANCEL';
     clearPhoto(); $('[data-ready-photo]').hidden = true;
     $('[data-first-star]').hidden = kind === 'event' || store('moonMoments').length > 0;
@@ -375,7 +378,6 @@
   function create() {
     var name = $('[data-sheet-name]').value.replace(/\s+/g, ' ').trim().slice(0, cur.kind === 'event' ? 80 : 280);
     if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return; }
-    if (cur.kind !== 'event') { if (signing) return; cur.ms = nowMs(); stopClock(cur.ms); }   // the moment is the tap of Mark It
     if (cur.kind !== 'event' && cur.photo) {
       if (signing) return; signing = true;
       var btn = $('[data-sheet-create]'); btn.textContent = 'SIGNING THE PHOTO…'; btn.disabled = true;
@@ -392,7 +394,7 @@
         });
       }).catch(function (e) {
         toast(navigator.onLine === false ? 'Signing a photo needs a connection' : (e && e.message) || 'Moon could not sign it. Try again.');
-      }).then(function () { signing = false; btn.disabled = false; btn.textContent = 'MARK IT'; });
+      }).then(function () { signing = false; btn.disabled = false; btn.textContent = 'SAVE MOMENT'; });
       return;
     }
     if (cur.kind === 'event') { finish(name, link(cur.ms, name, 'event'), null); return; }
@@ -410,7 +412,7 @@
       var u = new URL(su);
       finish(name, link(c1.ms, '', 'moment') + u.search + '&v=' + u.pathname.replace(/^\/m\//, '') + '&t=1' + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : ''), null);
     }).catch(function () { if (cur === c1) finish(name, plain, null); })
-      .then(function () { signing = false; b2.disabled = false; b2.textContent = 'MARK IT'; });
+      .then(function () { signing = false; b2.disabled = false; b2.textContent = 'SAVE MOMENT'; });
   }
   function finish(name, url, it) {
     it = it || { ms: cur.ms, name: name, url: url };

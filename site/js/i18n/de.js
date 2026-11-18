@@ -218,6 +218,7 @@
 "MOONLOG WIEDERHERSTELLEN",
 "Dein Moonlog lebt auf diesem Telefon.",
 "EXPORTIEREN",
-"IMPORTIEREN"],
+"IMPORTIEREN",
+"MOMENT SPEICHERN"],
   site: {}
 };

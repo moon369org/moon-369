@@ -226,6 +226,7 @@
 "RIPRISTINA UN MOONLOG",
 "Il tuo Moonlog vive su questo telefono.",
 "ESPORTA",
-"IMPORTA"],
+"IMPORTA",
+"SALVA MOMENTO"],
   site: {}
 };

@@ -231,4 +231,5 @@ window.MOON_I18N_APP_KEYS = ["NOW",
 "RESTORE A MOONLOG",
 "Your Moonlog lives on this phone.",
 "EXPORT",
-"IMPORT"];
+"IMPORT",
+"SAVE MOMENT"];

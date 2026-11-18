@@ -226,6 +226,7 @@
 "RESTAURER UN MOONLOG",
 "Ton Moonlog vit sur ce téléphone.",
 "EXPORTER",
-"IMPORTER"],
+"IMPORTER",
+"ENREGISTRER LE MOMENT"],
   site: {}
 };
