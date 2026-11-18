@@ -391,7 +391,11 @@
     var bx = e && e.clientX ? e.clientX : innerWidth / 2, by = e && e.clientY ? e.clientY : innerHeight / 2;
     var o = document.createElement('div'); o.className = 'mflash'; o.setAttribute('aria-hidden', 'true');
     o.style.setProperty('--x', bx + 'px'); o.style.setProperty('--y', by + 'px');
-    o.innerHTML = '<canvas class="mf-spark"></canvas><i class="mf-ring"></i><div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
+    // Tonight's moon, as it is at this moment, flares at its lit edge like the sun catching it.
+    var MP = window.MoonPhase, f = MP ? MP.fraction(ms) : 0.25, tl = MP && MP.tilt ? MP.tilt(ms) : 0, lit = MP ? MP.path(f, 10, tl) : '';
+    var side = (f < 0.5 ? 0 : 180) + tl, fx = 50 + 46 * Math.cos(side * Math.PI / 180), fy = 50 + 46 * Math.sin(side * Math.PI / 180);
+    var moonEl = '<div class="mf-moon" style="--fx:' + fx.toFixed(1) + '%;--fy:' + fy.toFixed(1) + '%"><svg viewBox="-11 -11 22 22"><circle r="10" fill="#16171A"/><path d="' + lit + '" fill="#E9E4D8"/></svg><i class="mf-glow"></i><i class="mf-flare"></i><i class="mf-streak"></i></div>';
+    o.innerHTML = '<canvas class="mf-spark"></canvas>' + moonEl + '<div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
     document.body.appendChild(o); buzz(); spark(o.querySelector('.mf-spark'));
     setTimeout(function () { o.remove(); }, 1500);
     return true;
