@@ -369,6 +369,7 @@
       '<div class="mk-main">' +
       (post && rc && linkedFile() ? '<div class="mk-art" data-mk-art></div>' : '') +
       (post && rc && !linkedFile() ? '<button type="button" class="mk-photo" data-mk-photo hidden aria-label="View the photo"></button>' : '') +
+      (post && !linkedFile() && (!rc || new URLSearchParams(location.search).get('t') === '1') ? '<div class="mk-noph" aria-hidden="true">' + MMK + '</div>' : '') +   // no photo: the Void circle, like the Moonlog
       (fresh ? '<div class="mk-l">JUST MARKED</div>' : '') +
       (note ? '<blockquote class="mk-q">' + esc(note) + '</blockquote>' : '') +
       (post ? '<div class="mk-ts" translate="no"><b>' + MMK + text(mk) + nsGroups(mk.ns) + '</b><span>' + esc(stamp) + '</span></div>' : '') +
