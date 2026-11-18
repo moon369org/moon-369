@@ -163,15 +163,15 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="max-width: 1280px; margin: 0px auto; padding: 64px 32px 120px; display: flex; flex-direction: column; gap: 56px;">
 
 <section class="mc-now" aria-label="Current Moon date and time" style="border: 1px solid rgb(36, 38, 42); background: rgb(22, 23, 26); padding: 40px; display: flex; flex-wrap: wrap; align-items: center; gap: 40px;">
-<canvas class="mc-ph-big hm-moonglow" aria-hidden="true" style="width: 228px; height: 228px; margin: -54px; display: block; flex: 0 0 auto; pointer-events: none; rotate: 20.3deg;"></canvas>
+<canvas class="mc-ph-big hm-moonglow" aria-hidden="true" style="width: 228px; height: 228px; margin: -54px; display: block; flex: 0 0 auto; pointer-events: none; rotate: 21deg;"></canvas>
 <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 12px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">TODAY ON MOON</div>
 <h1 class="mc-date" style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: 0.14em;"><span class="mc-seg">CYCLE 1928</span><span class="mc-dot"> · </span><span class="mc-seg">MOON 05</span><span class="mc-dot"> · </span><span class="mc-seg">LUNE 08</span></h1>
-<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: clamp(40px, 6vw, 72px); line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="mc-ph-sm hm-moonglow" aria-hidden="true" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: none; flex: 0 0 auto; pointer-events: none;"></canvas><div><span style="visibility: hidden;">02:40:55</span></div></div>
-<div class="mi-host" style="font-size: 14px; color: rgb(138, 139, 143);">First quarter · 53.073% lit · Moonmark 1928.05.08 02:40<span class="mi"><button type="button" class="mi-b" aria-label="What the lit percentage means" aria-expanded="false" aria-describedby="mi-t2">i</button><span role="tooltip" id="mi-t2" class="mi-t">Share of the moon's face lit by the sun at this moment, as seen from Earth. Moon calculates it from the moon's real position (Meeus, Astronomical Algorithms) and checks it against PyEphem, a standard astronomy library: they agree within 0.05 percentage points. Shown live to 0.001 so you can watch it&nbsp;change.</span></span></div>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: clamp(40px, 6vw, 72px); line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="mc-ph-sm hm-moonglow" aria-hidden="true" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: none; flex: 0 0 auto; pointer-events: none;"></canvas><div><span style="visibility: hidden;">11:11:52</span></div></div>
+<div class="mi-host" style="font-size: 14px; color: rgb(138, 139, 143);">First quarter · 56.697% lit · Moonmark 1928.05.08 11:11<span class="mi"><button type="button" class="mi-b" aria-label="What the lit percentage means" aria-expanded="false" aria-describedby="mi-t2">i</button><span role="tooltip" id="mi-t2" class="mi-t">Share of the moon's face lit by the sun at this moment, as seen from Earth. Moon calculates it from the moon's real position (Meeus, Astronomical Algorithms) and checks it against PyEphem, a standard astronomy library: they agree within 0.05 percentage points. Shown live to 0.001 so you can watch it&nbsp;change.</span></span></div>
 <div class="s2" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgb(36, 38, 42); padding: 6px 14px; font-size: 13px;">
 <span aria-hidden="true" style="width: 9px; height: 9px; border-radius: 50%; background: var(--season);"></span>
-<span class="mc-hide-m">Autumn · Winter solstice in 32.8 lunes</span><span class="mc-show-m">Autumn · Solstice in 33 lunes</span>
+<span class="mc-hide-m">Autumn · Winter solstice in 32.4 lunes</span><span class="mc-show-m">Autumn · Solstice in 32 lunes</span>
 </div>
 </div>
 </section>
@@ -198,10 +198,10 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 1</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">29 days · Jul 14</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s1" aria-label="Moon 1, lune 1, Summer">
@@ -383,10 +383,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 2</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">28 days · Aug 13</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s1" aria-label="Moon 2, lune 1, Summer">
@@ -562,10 +562,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 3</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">29 days · Sep 12</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s1" aria-label="Moon 3, lune 1, Summer">
@@ -753,10 +753,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 4</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">28 days · Oct 12</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s2" aria-label="Moon 4, lune 1, Autumn">
@@ -932,10 +932,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon current">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 5</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">28 days · Nov 10</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s2" aria-label="Moon 5, lune 1, Autumn">
@@ -1111,10 +1111,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 6</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">29 days · Dec 9</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s2" aria-label="Moon 6, lune 1, Autumn">
@@ -1302,10 +1302,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 7</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">28 days · Jan 8</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s3" aria-label="Moon 7, lune 1, Winter">
@@ -1481,10 +1481,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 8</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">29 days · Feb 6</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s3" aria-label="Moon 8, lune 1, Winter">
@@ -1666,10 +1666,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 9</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">28 days · Mar 8</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s3" aria-label="Moon 9, lune 1, Winter">
@@ -1851,10 +1851,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 10</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">28 days · Apr 7</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s0" aria-label="Moon 10, lune 1, Spring">
@@ -2030,10 +2030,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 11</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">29 days · May 6</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s0" aria-label="Moon 11, lune 1, Spring">
@@ -2215,10 +2215,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 12</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">28 days · Jun 5</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s0" aria-label="Moon 12, lune 1, Spring">
@@ -2400,10 +2400,10 @@ footer > div > div:first-child svg{width:64px!important}
 </article>
 
 <article class="mc-moon">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
 <h3 style="margin: 0px; font-family: Syncopate, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em;">MOON 13</h3>
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">28 days · Jul 4</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0px, 1fr)); gap: 4px;">
 
 <button type="button" class="mc-day s1" aria-label="Moon 13, lune 1, Summer">
@@ -2608,7 +2608,7 @@ footer > div > div:first-child svg{width:64px!important}
 
 <dt style="color: rgb(138, 139, 143);">Moon date</dt><dd style="margin: 0px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px;">Cycle 1928, Moon 5, Lune 8</dd>
 
-<dt style="color: rgb(138, 139, 143);">Moon time</dt><dd style="margin: 0px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px;">02:40:50</dd>
+<dt style="color: rgb(138, 139, 143);">Moon time</dt><dd style="margin: 0px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px;">11:11:48</dd>
 
 <dt style="color: rgb(138, 139, 143);">Phase</dt><dd style="margin: 0px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px;">First quarter</dd>
 
@@ -2716,10 +2716,10 @@ footer > div > div:first-child svg{width:64px!important}
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px">
 <sc-for list="{{moons}}" as="mo" hint-placeholder-count="13">
 <article class="{{mo.cls}}">
-<header style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+<div class="mc-mh" style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
 <h3 style="margin: 0; font-family: 'Syncopate', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.18em">{{mo.title}}</h3>
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">{{mo.sub}}</span>
-</header>
+</div>
 <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
 <sc-for list="{{mo.days}}" as="d" hint-placeholder-count="28">
 <button type="button" class="{{d.cls}}" aria-label="{{d.label}}" onClick="{{d.pick}}">

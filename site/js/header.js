@@ -46,7 +46,8 @@
     st.textContent = 'body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#000;z-index:2147482001;pointer-events:none}' + '.apb{position:sticky;top:0;z-index:2147482000;display:grid;grid-template-columns:52px 1fr 52px;align-items:center;height:calc(52px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 8px 0;background:#0B0B0D;border-bottom:1px solid #1C1D20;color:#E9E4D8;box-sizing:border-box}' +
       '.apb b{justify-self:center;font:700 16px Inter,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}' +
       '.apb button,.apb a{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;background:none;border:0;color:#E9E4D8;padding:0}.apb a{justify-self:end}.apb svg{width:22px;height:22px}' +
-      '.apb~* header,body>header,body>div>header{position:static!important}';
+      'html.apb-on header{position:static!important;transform:none!important;transition:none!important}';
+    html.classList.add('apb-on');   // the site's own sliding header stays put under the app bar
     document.head.appendChild(st);
     var el = document.createElement('div'); el.className = 'apb';
     var name = (document.title || 'Moon').replace(/\s*·\s*Moon\s*$/, '') || 'Moon';
