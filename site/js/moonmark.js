@@ -389,7 +389,7 @@
       (ev
         ? '<div class="mk-btns"><a class="mk-p" data-mk-ics href="#" download="">ADD TO CALENDAR</a><a href="' + esc(gcal(ev, ms, url, text(mk))) + '" target="_blank" rel="noopener">GOOGLE CALENDAR</a><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-embed>COPY EMBED CODE</button></div>'
         : post
-          ? (mine(mk) ? '<div class="mk-btns"><button type="button" data-mk-share class="mk-p">SHARE</button></div>' : '<div class="mk-btns"><a href="/app?mark=1" class="mk-p">MARK YOUR OWN MOMENT</a></div>')
+          ? (mine(mk) ? '' : '<div class="mk-btns"><a href="/app?mark=1" class="mk-p">MARK YOUR OWN MOMENT</a></div>')   /* a moment is kept, not shared: no Share for your own */
           : '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>') +
       '</div>' +
       '<div class="mk-side"><div class="mk-qr">' + qr + '</div><div class="mk-cap">Scan to open this ' + (ev ? 'event' : 'Moonmark') + ' in your own local time.</div>' +
@@ -511,7 +511,6 @@
       '<button type="button" class="mk-top-b" data-mk-more aria-label="More" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg></button>' +
       '<div class="mk-menu" role="menu" hidden>' +
       '<button type="button" role="menuitem" data-mi="copy">Copy link</button>' +
-      (navigator.share ? '<button type="button" role="menuitem" data-mi="share">Share</button>' : '') +
       '<button type="button" role="menuitem" data-mi="qr">Show QR code</button>' +
       '<a role="menuitem" href="/app">Open the Moon app</a></div>';
     document.body.insertBefore(bar, document.body.firstChild);
