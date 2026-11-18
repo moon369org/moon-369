@@ -112,7 +112,7 @@
     var st = STARS.list.filter(function (s) { return s.ms === x.ms; })[0], cv = $('[data-app-stars]');
     if (st && cv && st.x != null) {
       var far = window.scrollY > 80, W = cv.width, H = cv.height;
-      STARS.fall = { x: st.x, y: st.y, size: st.size, lum: st.lum, dx: (st.x < W / 2 ? -1 : 1) * 110 * (window.devicePixelRatio > 1 ? Math.min(2, window.devicePixelRatio) : 1), dy: 80 * (window.devicePixelRatio > 1 ? Math.min(2, window.devicePixelRatio) : 1), t0: performance.now() + (far ? 650 : 120) };
+      STARS.fall = { x: st.x, y: st.y, size: st.size, lum: st.lum, dx: (st.x < W / 2 ? 1 : -1) * 150 * (window.devicePixelRatio > 1 ? Math.min(2, window.devicePixelRatio) : 1), dy: 110 * (window.devicePixelRatio > 1 ? Math.min(2, window.devicePixelRatio) : 1), t0: performance.now() + (far ? 650 : 120) };
       if (far) window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     r.splice(i, 1); store('moonMoments', r);
@@ -191,10 +191,13 @@
     }
     var u = (t - 0.4) / 1.8, e = u * u * (3 - 2 * u);   // the fall, easing in and out
     var hx = f.x + f.dx * e, hy = f.y + f.dy * e, tail = 0.35 + 0.65 * Math.sin(Math.PI * Math.min(1, u * 1.2)), fade = 1 - Math.max(0, (u - 0.55) / 0.45);
-    var tx = hx - f.dx * 0.32 * tail, ty = hy - f.dy * 0.32 * tail;
+    var tb = Math.max(0, e - 0.8 * tail), tx = f.x + f.dx * tb, ty = f.y + f.dy * tb;   // a long tail, reaching most of the way back
     var lg = c.createLinearGradient(tx, ty, hx, hy);
     lg.addColorStop(0, 'rgba(233,228,216,0)'); lg.addColorStop(1, 'rgba(255,252,244,' + (0.9 * fade) + ')');
-    c.strokeStyle = lg; c.lineWidth = size * 1.3; c.lineCap = 'round'; c.beginPath(); c.moveTo(tx, ty); c.lineTo(hx, hy); c.stroke();
+    lg.addColorStop(0.55, 'rgba(233,228,216,' + (0.25 * fade) + ')');
+    c.lineCap = 'round';
+    c.strokeStyle = lg; c.lineWidth = size * 1.6; c.beginPath(); c.moveTo(tx, ty); c.lineTo(hx, hy); c.stroke();
+    c.lineWidth = size * 4; c.globalAlpha = 0.18; c.beginPath(); c.moveTo(hx - (hx - tx) * 0.5, hy - (hy - ty) * 0.5); c.lineTo(hx, hy); c.stroke(); c.globalAlpha = 1;   // a soft glow near the head
     dot(c, hx, hy, size * 1.2, fade);
   }
   function dot(c, x, y, size, a) {
