@@ -536,6 +536,12 @@
     setInterval(showEvents, 30000);
     $$('[data-tab]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-tab')); }; });
     $$('[data-view]').forEach(function (b) { b.onclick = function () { setView(b.getAttribute('data-view'), true); }; });
+    // Links to other sites open over the app, with Done to come back, instead of replacing it.
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+      var u; try { u = new URL(a.href, location.href); } catch (x) { return; }
+      if (/^https?:$/.test(u.protocol) && u.origin !== location.origin) { e.preventDefault(); window.open(u.href, '_blank', 'noopener'); }
+    }, true);
     $('[data-home]').onclick = function (e) { e.preventDefault(); go('now'); buzz(); };   // the logo goes to Now, inside the app
     $('[data-sky-loc]').onclick = askPlace;
     bindTideDrag();
