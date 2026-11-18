@@ -32,11 +32,11 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 .mf-ring{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:radial-gradient(circle closest-side,rgba(233,228,216,0) 0,rgba(233,228,216,.05) 40%,rgba(233,228,216,.3) 72%,rgba(255,252,244,.68) 94%,rgba(255,252,244,0) 100%);animation:mfr .8s cubic-bezier(.2,.8,.2,1) forwards}
 @keyframes mfr{0%{transform:scale(1);opacity:.9}100%{transform:scale(40);opacity:0}}
 @keyframes mfs{0%{background:rgba(5,5,6,0)}12%{background:rgba(5,5,6,.93)}60%{background:rgba(5,5,6,.93)}100%{background:rgba(5,5,6,0)}}
-.mf-t{position:relative;margin:auto;text-align:center;transform-origin:50% 50%;display:flex;align-items:baseline;justify-content:center;gap:.4em;white-space:nowrap;max-width:94vw;font:400 min(7.4vw,72px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:#FFFCF4;text-shadow:0 0 28px rgba(233,228,216,.55);animation:mft 1.25s cubic-bezier(.2,.8,.2,1) .3s both}
+.mf-t{position:relative;margin:auto;text-align:center;transform-origin:50% 50%;display:flex;align-items:baseline;justify-content:center;gap:.4em;white-space:nowrap;max-width:94vw;font:400 min(7.4vw,72px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:#FFFCF4;text-shadow:0 0 28px rgba(233,228,216,.55);animation:mft 2.6s cubic-bezier(.2,.8,.2,1) .3s both}
 .mf-t b{font-weight:400}
 .mf-t span{white-space:nowrap}
 .mf-t small{font-size:1em;color:inherit;margin-left:0}
-@keyframes mft{0%{transform:scale(.86);opacity:0;filter:blur(6px)}14%{transform:scale(1.04);opacity:1;filter:blur(0)}30%{transform:scale(1)}62%{opacity:1}100%{transform:scale(1.02);opacity:0}}
+@keyframes mft{0%{transform:scale(.86);opacity:0;filter:blur(6px)}7%{transform:scale(1.04);opacity:1;filter:blur(0)}14%{transform:scale(1)}30%{opacity:1}100%{transform:scale(1.02);opacity:0}}
 .cam{position:fixed;inset:0;z-index:2147482500;background:#000;display:flex;flex-direction:column}
 .cam video{flex:1;min-height:0;width:100%;object-fit:cover;background:#000}
 .cam.front video{transform:scaleX(-1)}

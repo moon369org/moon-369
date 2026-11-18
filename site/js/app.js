@@ -393,7 +393,7 @@
     o.style.setProperty('--x', bx + 'px'); o.style.setProperty('--y', by + 'px');
     o.innerHTML = '<canvas class="mf-spark"></canvas><i class="mf-ring"></i><div class="mf-t"><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
     document.body.appendChild(o); buzz(); spark(o.querySelector('.mf-spark'));
-    setTimeout(function () { o.remove(); }, 1500);
+    setTimeout(function () { o.remove(); }, 3000);   // the time fades out slowly
     return true;
   }
   // A spark from the middle of the screen: hot streaks flying out, thinning and dimming, with embers drifting after.
