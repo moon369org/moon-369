@@ -349,3 +349,12 @@ html.sl-lock { overflow: hidden; }
 @media (min-width: 721px) and (max-width: 1000px) {
   :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] { font-size: 10px !important; letter-spacing: 0.2em !important; }
 }
+
+/* Narrow desktop (721 to 900px): tighter links and button, so nothing in the header is cut off. */
+@media (min-width: 721px) and (max-width: 900px) {
+  :is([data-dc-root],[data-dc-snapshot]) header > div { padding-left: 20px !important; padding-right: 20px !important; gap: 14px !important; }
+  :is([data-dc-root],[data-dc-snapshot]) header a[aria-label="Moon home"] svg { width: 100px !important; height: auto !important; }
+  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] { gap: 13px !important; font-size: 9.5px !important; letter-spacing: 0.13em !important; }
+  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] a[style*="border"] { padding: 10px 12px !important; min-height: 40px !important; }
+  :is([data-dc-root],[data-dc-snapshot]) header .mlp-g { width: 32px !important; }
+}

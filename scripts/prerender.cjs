@@ -6,7 +6,7 @@
 const fs = require('fs'), path = require('path');
 const puppeteer = require('puppeteer-core');
 const SITE = path.join(__dirname, '..', 'site');
-const PAGES = ['index', 'audit', 'calendar', 'api', 'm', 'uses', 'see', 'trust', 'quantum', 'tideline', 'evidence', 'verify', 'night', 'eclipses', 'eclipse', 'press', 'by', 'notarize', 'certificate', 'tide', 'guides', 'status', 'sky-check', 'sign', 'widgets'];
+const PAGES = ['index', 'audit', 'calendar', 'api', 'm', 'uses', 'see', 'trust', 'quantum', 'evidence', 'verify', 'night', 'eclipses', 'eclipse', 'press', 'by', 'notarize', 'certificate', 'tide', 'guides', 'status', 'sky-check', 'sign', 'widgets'];
 const BASE = process.env.BASE || 'http://localhost:8765';
 
 function hoistHelmet(html) {

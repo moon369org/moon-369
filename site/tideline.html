@@ -11,20 +11,20 @@
 <script>document.documentElement.classList.add('mm-js')</script>
 <title>Tideline · Moon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="The Tideline: Moon's public ledger. Every Moonmark is listed the moment it's signed, and every lune is sealed into one signed tide, chained to the last. Search it by file, moment or verified name.">
+<meta name="description" content="The Tideline: Moon's public ledger. A permanent, public list of everything signed on Moon. Each item is listed the moment it's signed, and every lune is sealed and chained to every lune before it.">
 <link rel="canonical" href="https://moon369.org/tideline">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Moon">
 <meta property="og:url" content="https://moon369.org/tideline">
 <meta property="og:title" content="The Tideline · Moon">
-<meta property="og:description" content="The Tideline: Moon's public ledger. Every Moonmark is listed the moment it's signed, and every lune is sealed into one signed tide, chained to the last. Search it by file, moment or verified name.">
+<meta property="og:description" content="The Tideline: Moon's public ledger. A permanent, public list of everything signed on Moon. Each item is listed the moment it's signed, and every lune is sealed and chained to every lune before it.">
 <meta property="og:image" content="https://moon369.org/assets/og/tideline.jpg?v=1">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Moon Tideline, over a photograph of the moon">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Tideline · Moon">
-<meta name="twitter:description" content="The Tideline: Moon's public ledger. Every Moonmark is listed the moment it's signed, and every lune is sealed into one signed tide, chained to the last. Search it by file, moment or verified name.">
+<meta name="twitter:description" content="The Tideline: Moon's public ledger. A permanent, public list of everything signed on Moon. Each item is listed the moment it's signed, and every lune is sealed and chained to every lune before it.">
 <meta name="twitter:image" content="https://moon369.org/assets/og/tideline.jpg?v=1">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <meta name="theme-color" content="#0B0B0D">
@@ -45,23 +45,117 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 @media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
 
 
-/* Tideline hero: no glow, and a moonlit sea along the bottom that reacts to the pointer. */
+
 #top.tl-hero::before{display:none!important}
 #top.tl-hero{background-image:linear-gradient(to top,rgba(138,139,143,.32) 0,rgba(138,139,143,0) 360px)}
-#top.tl-hero .moon-stars{-webkit-mask-image:none;mask-image:none}
 .tl-sea{position:absolute;left:0;right:0;bottom:0;width:100%;height:220px;display:block;z-index:0}
-@media (max-width:720px){.tl-sea{height:170px}#top.tl-hero > div{padding-bottom:180px!important}}
-::selection{background:#24262A}::-moz-selection{background:#24262A}
+.tl-hero .tl-sea{height:100%;top:0}
+.tl-wrap{max-width:1280px;margin:0 auto;padding:0 32px;box-sizing:border-box}
+.tl-k{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;color:#8A8B8F}
+.tl-h1{margin:0;font-family:Syncopate,sans-serif;font-weight:700;font-size:clamp(32px,5vw,64px);letter-spacing:.08em;line-height:1.1}
+.tl-h2{margin:0;text-transform:uppercase;font-family:Syncopate,sans-serif;font-weight:700;font-size:clamp(22px,2.6vw,32px);letter-spacing:.08em;line-height:1.25}
+.tl-p{margin:0;max-width:720px;font-size:17px;line-height:1.65;color:#B9B6AE}
+.tl-hero-in{position:relative;z-index:1;padding:100px 32px 250px;display:flex;flex-direction:column;gap:24px}
+.tl-nums{display:flex;flex-wrap:wrap;gap:20px 56px;margin-top:8px}
+.tl-num b{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(26px,3vw,38px);font-variant-numeric:tabular-nums}
+.tl-num span{display:block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:#8A8B8F}
+.tl-btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.tl-btn{all:unset;box-sizing:border-box;cursor:pointer;min-height:48px;padding:0 24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #E9E4D8;border-radius:2px;font-family:Syncopate,sans-serif;font-weight:700;font-size:11px;letter-spacing:.22em;color:#E9E4D8;white-space:nowrap}
+.tl-btn.solid{background:#E9E4D8;color:#0B0B0D}.tl-btn.solid:hover{background:#FFFFFF;color:#0B0B0D}
+.tl-btn:focus-visible{outline:2px solid #E9E4D8;outline-offset:3px}
+.tl-sec{border-top:1px solid #1C1D20}
+.tl-sec-in{padding:80px 32px;display:flex;flex-direction:column;gap:22px}
+/* the shore */
+.tl-shore-h{display:flex;justify-content:space-between;align-items:center;gap:10px 24px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.2em}
+.tl-live{display:inline-flex;align-items:center;gap:10px}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:#7FBF8E;box-shadow:0 0 0 0 rgba(127,191,142,.5);animation:tlPulse 2s ease-out infinite}
+@keyframes tlPulse{0%{box-shadow:0 0 0 0 rgba(127,191,142,.5)}100%{box-shadow:0 0 0 10px rgba(127,191,142,0)}}
+.tl-turn{color:#8A8B8F;letter-spacing:.14em}.tl-turn b{font-weight:400;color:#E9E4D8;font-variant-numeric:tabular-nums}
+.tl-basin-sec{position:relative;height:420px;border:1px solid #1C1D20;border-radius:4px;overflow:hidden;background:linear-gradient(#121215,#1B1A18);--px:60px;touch-action:pan-y}
+.tl-basin{height:100%;top:0}
+.tl-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.tl-lines g{transition:transform 1.4s cubic-bezier(.45,0,.25,1),opacity 1.4s ease}
+.tl-lines path{fill:none;stroke:#E9E4D8;vector-effect:non-scaling-stroke;stroke-linecap:round}
+.tl-lines path.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:tlDraw 1.4s cubic-bezier(.45,0,.25,1) forwards}
+@keyframes tlDraw{to{stroke-dashoffset:0}}
+.tl-labs{position:absolute;inset:0;pointer-events:none}
+.tl-lab{position:absolute;right:16px;transform:translateY(-100%);padding-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:#8A8B8F;white-space:nowrap;transition:top 1.4s cubic-bezier(.45,0,.25,1),opacity 1.4s ease}
+.tl-lab.new{color:#E9E4D8}
+.tl-flecks{position:absolute;inset:0;pointer-events:none}
+.tl-fl{position:absolute;top:calc(420px - var(--px) - 4px);width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#E9E4D8;box-shadow:0 0 8px 2px rgba(233,228,216,.55);animation:tlBob 3.2s ease-in-out infinite;transition:opacity 1s ease}
+.tl-fl.in{animation:tlIn .9s cubic-bezier(.2,.8,.2,1) both,tlBob 3.2s ease-in-out .9s infinite}
+@keyframes tlBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes tlIn{from{transform:translateY(-40px) scale(.4);opacity:0}to{transform:none;opacity:1}}
+.tl-flecks.gone .tl-fl{opacity:0}
+.tl-cnt{position:absolute;left:22px;bottom:18px;z-index:2;display:flex;align-items:baseline;gap:12px;pointer-events:none}
+.tl-cnt b{font-family:Syncopate,sans-serif;font-weight:700;font-size:clamp(28px,4vw,44px);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.tl-cnt span{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;color:#B9B6AE}
+.tl-cap{margin:0;max-width:760px;font-size:15px;line-height:1.65;color:#A2A3A7}
+.tl-feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid #1C1D20}
+.tl-feed li{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #1C1D20;font-family:'JetBrains Mono',monospace;font-size:13px;color:#A2A3A7}
+.tl-feed li span:last-child{color:#8A8B8F;white-space:nowrap}
+.tl-shore-f{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.tl-ghost{all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 18px;display:inline-flex;align-items:center;border:1px solid #2E3035;border-radius:2px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;color:#E9E4D8}
+.tl-ghost:hover{border-color:#8A8B8F}.tl-ghost:focus-visible{outline:2px solid #E9E4D8;outline-offset:3px}.tl-ghost[disabled]{opacity:.45;cursor:default}
+/* check */
+.tl-drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:240px;padding:28px;border:1px dashed #2E3035;border-radius:4px;background:#0E0E10;text-align:center;transition:border-color .2s,background .2s}
+.tl-drop.over{border-color:#E9E4D8;background:#141416}
+.tl-drop-t{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.06em;color:#A2A3A7}
+.tl-drop textarea{box-sizing:border-box;width:100%;max-width:640px;min-height:76px;resize:vertical;background:#08080A;color:#E9E4D8;border:1px solid #24262A;border-radius:2px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5}
+.tl-drop textarea:focus{outline:none;border-color:#8A8B8F}
+.tl-drop-b{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.tl-file{position:relative;overflow:hidden}.tl-file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.tl-res{display:none;border:1px solid;border-radius:4px;padding:20px 22px;gap:14px;flex-direction:column}
+.tl-res.on{display:flex}
+.tl-res.ok{border-color:#3E6B4A;background:#0F1A13}.tl-res.ok .tl-res-h{color:#7FBF8E}
+.tl-res.warn{border-color:#6B5A33;background:#1A160D}.tl-res.warn .tl-res-h{color:#D9B26A}
+.tl-res.wait{border-color:#2E3035;background:#111214}.tl-res.wait .tl-res-h{color:#E9E4D8}
+.tl-res-h{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.14em}
+.tl-res p{margin:0;font-size:15px;line-height:1.6;color:#D6D2C8}
+/* uses + steps */
+.tl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:20px}
+.tl-card{border:1px solid #1C1D20;border-radius:4px;padding:26px;display:flex;flex-direction:column;gap:12px}
+.tl-card svg{width:28px;height:28px;stroke:#E9E4D8;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.tl-card h3{margin:4px 0 0;text-transform:uppercase;font-family:Syncopate,sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;line-height:1.5}
+.tl-card p,.tl-step p{margin:0;font-size:15px;line-height:1.65;color:#A2A3A7}
+.tl-step{display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid #24262A}
+.tl-step b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:12px;letter-spacing:.24em;color:#8A8B8F}
+.tl-step h3{margin:0;text-transform:uppercase;font-family:Syncopate,sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em}
+/* search + table */
+.tl-sform{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:end}
+.tl-sl{display:flex;flex-direction:column;gap:8px;min-width:0}
+.tl-si{box-sizing:border-box;width:100%;min-height:52px;padding:0 14px;background:#111214;border:1px solid #2E3035;border-radius:2px;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:16px;-webkit-appearance:none;appearance:none}.tl-si:focus{outline:none;border-color:#E9E4D8}
+.tl-shead{font-family:'JetBrains Mono',monospace;font-size:13px;color:#8A8B8F}
+.tl-slist{list-style:none;margin:0;padding:0;border-top:1px solid #24262A;max-height:480px;overflow-y:auto}
+.tl-slist li{display:grid;grid-template-columns:200px 240px minmax(0,1fr);gap:20px;padding:11px 0;border-bottom:1px solid #1C1D20;font-family:'JetBrains Mono',monospace;font-size:13px;color:#A2A3A7}
+.tl-slist li > *{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px}
+.tl-table th{text-align:left;font-weight:400;font-size:11px;letter-spacing:.2em;color:#8A8B8F;padding:0 12px 12px 0;border-bottom:1px solid #24262A}
+.tl-table td{padding:14px 12px 14px 0;border-bottom:1px solid #1C1D20;vertical-align:middle;font-variant-numeric:tabular-nums}
+.tl-table td a{text-decoration:underline;text-underline-offset:4px;text-decoration-color:#3A3C41}
+.tl-st{display:inline-flex;align-items:center;gap:8px}.tl-st svg{width:14px;height:14px;stroke:#7FBF8E;fill:none;stroke-width:2}
+.tl-btc{color:#8A8B8F}
+.tl-aud summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:10px;min-height:44px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;color:#E9E4D8}
+.tl-aud summary::-webkit-details-marker{display:none}
+.tl-aud summary::after{content:'';width:7px;height:7px;border-right:1.5px solid #8A8B8F;border-bottom:1.5px solid #8A8B8F;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.tl-aud[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+.tl-aud-in{display:flex;flex-direction:column;gap:18px;padding-top:14px}
+.tl-aud-in p{margin:0;max-width:820px;font-size:14px;line-height:1.65;color:#A2A3A7}
+.tl-aud-in code{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#E9E4D8}
+.tl-empty{font-family:'JetBrains Mono',monospace;font-size:13px;color:#8A8B8F;padding:16px 0}
+.tl-pv{background:#1A160D;border-bottom:1px solid #6B5A33;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;color:#D9B26A}
+.tl-pv .tl-wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:14px;padding-bottom:14px}.tl-pv a{color:#D9B26A;text-decoration:underline}
+@media (max-width:720px){
+ .tl-wrap{padding:0 20px}.tl-hero-in{padding:56px 20px 190px}.tl-sec-in{padding:56px 20px}
+ .tl-nums{gap:18px 32px}.tl-sform{grid-template-columns:minmax(0,1fr)}
+ .tl-slist li{grid-template-columns:minmax(0,1fr);gap:4px}
+ .tl-table .tl-hide{display:none}
+ .tl-lab{right:10px;font-size:10px}
+ .tl-feed li{flex-direction:column;gap:4px}
+}
+@media (prefers-reduced-motion:reduce){.tl-fl,.tl-fl.in{animation:none}.tl-dot{animation:none}.tl-lines path.draw{animation:none;stroke-dashoffset:0}.tl-lines g,.tl-lab{transition:none}}
 </style>
-<script src="js/preact.umd.js" defer></script>
-<script src="js/header.js" defer></script>
-<script src="js/dc-lite.js" defer></script>
-<link rel="stylesheet" href="assets/moon-motion.css">
-<script src="js/moon-motion.js" defer></script>
-<script src="js/ocean.js" defer></script>
-<script src="js/tide-seal.js" defer></script>
-<script src="js/tide-stats.js" defer></script>
-<!-- page styles -->
+<style id="ft-css">.ft{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:64px 32px 32px;display:grid;grid-template-columns:2.6fr minmax(220px,1fr);gap:48px 64px;font-family:Inter,sans-serif;box-sizing:border-box}.ft-brand{order:2;justify-self:end;display:flex;flex-direction:column;align-items:flex-end;text-align:right}.ft-cols{order:1}.ft-base{order:3}.ft-brand p{margin:18px 0 0;font-size:14px;line-height:1.65;color:#8A8B8F;white-space:nowrap}.ft-cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px}.ft-h{margin:0 0 14px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;color:#5E6064}.ft-col a{display:block;width:fit-content;font-size:14px;line-height:1.4;color:#A2A3A7;padding:7px 0;text-decoration:none}.ft-col a:hover{color:#E9E4D8}.ft-base{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;border-top:1px solid #1C1D20;padding-top:24px;font-size:13px;color:#5E6064}@media (max-width:860px){.ft{grid-template-columns:1fr;gap:40px;padding:48px 20px 28px}.ft-brand{order:0;justify-self:center;align-items:center;text-align:center}.ft-base{flex-direction:column;align-items:center;text-align:center}.ft-brand p{white-space:normal}.ft-cols{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 20px}.ft-col a{padding:10px 0}}</style>
 <style>
 body{margin:0;background:#0B0B0D}
 a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
@@ -97,192 +191,16 @@ footer > div > div:last-child{justify-content:center!important;gap:22px!importan
 footer > div > div:first-child svg{width:64px!important}
 }
 </style>
-<style>
-.tl-list{list-style:none;margin:0;padding:0;border-top:1px solid #24262A;max-height:560px;overflow-y:auto}
-.tl-list li{display:grid;grid-template-columns:80px 300px minmax(0,1fr);gap:20px;align-items:center;padding:11px 0;border-bottom:1px solid #1C1D20;font-family:'JetBrains Mono',monospace;font-size:13px}
-.tl-n{color:#8A8B8F;font-variant-numeric:tabular-nums}a.tl-leaf:hover{color:#E9E4D8;text-decoration:underline}.tl-leaf{color:#A2A3A7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tl-what{color:#8A8B8F;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tl-moon .tl-what a{color:#E9E4D8}.tl-moon .tl-n{color:#7FBF8E}
-@media (max-width:720px){.tl-list li{grid-template-columns:56px minmax(0,1fr);gap:4px 12px}.tl-what{grid-column:2;white-space:normal;overflow-wrap:anywhere}}
-</style>
-<style>
-.tl-sform{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:end}
-.tl-sl{display:flex;flex-direction:column;gap:8px;min-width:0}.tl-sk{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
-.tl-si{box-sizing:border-box;width:100%;min-height:52px;padding:0 14px;background:#111214;border:1px solid #2E3035;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:16px;border-radius:0;-webkit-appearance:none;appearance:none}.tl-si:focus{outline:none;border-color:#E9E4D8}
-.tl-sb{all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;padding:0 22px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #E9E4D8;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10px;letter-spacing:.22em;color:#E9E4D8;white-space:nowrap;position:relative;overflow:hidden}
-.tl-sb:first-of-type{background:#E9E4D8;color:#0B0B0D}.tl-sb:focus-visible,.tl-sf:focus-within{outline:2px solid #E9E4D8;outline-offset:3px}
-.tl-sf input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.tl-res li{grid-template-columns:200px 240px minmax(0,1fr)}.tl-res .tl-n{color:#E9E4D8}.tl-res .tl-what a{color:#E9E4D8}
-@media (max-width:720px){.tl-sform{grid-template-columns:minmax(0,1fr)}.tl-res li{grid-template-columns:minmax(0,1fr)}}
-</style>
-<style id="ft-css">.ft{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:64px 32px 32px;display:grid;grid-template-columns:2.6fr minmax(220px,1fr);gap:48px 64px;font-family:Inter,sans-serif;box-sizing:border-box}.ft-brand{order:2;justify-self:end;display:flex;flex-direction:column;align-items:flex-end;text-align:right}.ft-cols{order:1}.ft-base{order:3}.ft-brand p{margin:18px 0 0;font-size:14px;line-height:1.65;color:#8A8B8F;white-space:nowrap}.ft-cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px}.ft-h{margin:0 0 14px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;color:#5E6064}.ft-col a{display:block;width:fit-content;font-size:14px;line-height:1.4;color:#A2A3A7;padding:7px 0;text-decoration:none}.ft-col a:hover{color:#E9E4D8}.ft-base{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;border-top:1px solid #1C1D20;padding-top:24px;font-size:13px;color:#5E6064}@media (max-width:860px){.ft{grid-template-columns:1fr;gap:40px;padding:48px 20px 28px}.ft-brand{order:0;justify-self:center;align-items:center;text-align:center}.ft-base{flex-direction:column;align-items:center;text-align:center}.ft-brand p{white-space:normal}.ft-cols{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 20px}.ft-col a{padding:10px 0}}</style>
-<style id="tl-stats-css">
-.tl-stats{margin:-24px 0 56px;border:1px solid #24262A;border-top:0;padding:28px 36px 30px}
-.tl-stats:empty{display:none}
-.tl-st-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
-.tl-st-k{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.24em;color:#8A8B8F}
-.tl-st-k a{color:#8A8B8F}
-.tl-st-ns{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:22px}
-.tl-st-n b{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(24px,2.8vw,36px);font-variant-numeric:tabular-nums}
-.tl-st-n span{display:block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:#8A8B8F}
-.tl-st-ch{margin-top:26px;display:flex;align-items:flex-end;gap:3px;height:84px;border-bottom:1px solid #24262A}
-.tl-st-ch i{flex:1;min-width:2px;background:#8A8B8F;min-height:1px;position:relative}
-.tl-st-ch i.now{background:#E9E4D8}
-.tl-st-ch i:hover{background:#E9E4D8}
-.tl-st-ax{display:flex;justify-content:space-between;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8A8B8F}
-@media (max-width:760px){.tl-stats{padding:22px}.tl-st-ns{grid-template-columns:1fr 1fr}}
-</style>
-<style id="tl-seal-css">
-.tl-seal{display:grid;grid-template-columns:auto 1fr auto;gap:28px 40px;align-items:center;border:1px solid #24262A;background:#08080A;padding:32px 36px;margin-bottom:56px}
-.tl-seal:empty{display:none}
-.tl-seal img{width:96px;height:auto;display:block}
-.tl-seal-k{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.24em;color:#8A8B8F}
-.tl-seal-h{margin:10px 0 0;font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(20px,2.4vw,30px);letter-spacing:.08em;line-height:1.25}
-.tl-seal-p{margin:12px 0 0;font-size:15px;line-height:1.6;color:#A2A3A7;max-width:560px}
-.tl-seal-ns{display:flex;gap:44px;justify-content:flex-end}.tl-seal-n{text-align:right}
-.tl-seal-n b{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(30px,3.6vw,46px);font-variant-numeric:tabular-nums;letter-spacing:.02em}
-.tl-seal-n span{display:block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
-.tl-seal-bar{grid-column:1/-1;height:2px;background:#1C1D20;position:relative;overflow:hidden}
-.tl-seal-bar i{position:absolute;left:0;top:0;bottom:0;background:#E9E4D8;transition:width 1s linear}
-.tl-seal-bar.go i{width:30%!important;animation:tlSweep 1.6s ease-in-out infinite}
-@keyframes tlSweep{0%{left:-30%}100%{left:100%}}
-.tl-seal-foot{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px;color:#8A8B8F}
-.tl-seal-foot a{color:#E9E4D8;text-decoration:underline;text-underline-offset:3px}
-@media (max-width:760px){.tl-seal{grid-template-columns:auto 1fr;padding:24px 22px;gap:20px 22px}.tl-seal img{width:64px}.tl-seal-ns{grid-column:1/-1;justify-content:flex-start;gap:36px}.tl-seal-n{text-align:left}}
-@media (prefers-reduced-motion:reduce){.tl-seal-bar.go i{animation:none}}
-</style>
+<script src="js/header.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+<script src="js/ocean.js" defer></script>
+<script src="js/tideline.js" defer></script>
 <script src="/js/i18n.js" defer></script>
 </head>
 <body>
-<!--snapshot--><div data-dc-snapshot="">
-<div style="background: rgb(11, 11, 13); color: rgb(233, 228, 216); font-family: Inter, sans-serif; min-height: 100vh;">
 
-<header style="border-bottom: 1px solid rgb(28, 29, 32);">
-<div style="max-width: 1280px; margin: 0px auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
-<a href="/" aria-label="Moon home" style="display: block;">
-<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block;">
-<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
-<circle cx="172" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
-<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></circle>
-<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
-<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></path>
-<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></path>
-<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
-</svg>
-</a>
-<nav aria-label="Main" id="mm-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;">
-<a href="/night">YOUR MOON</a>
-<a href="/uses">USES</a>
-<a href="/tideline" aria-current="page">TIDELINE</a>
-<a href="/trust">TRUST</a>
-<a href="/api">API</a>
-<a href="/verify">VERIFY</a>
-<a href="/sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
-</nav>
-<button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
-</header>
-
-<section id="top" class="tl-hero" style="border-bottom: 1px solid rgb(28, 29, 32); overflow: hidden;"><div class="moon-stars" aria-hidden="true"><div class="moon-starlayer" aria-hidden="true" style="background-size: 640px 640px; background-image: url(&quot;data:image/png;base64,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&quot;);"></div><div class="moon-twinkle" aria-hidden="true"><i style="left: 65.4%; top: 48.4%; width: 3.9px; height: 3.9px;"></i><i style="left: 5%; top: 45.9%; width: 2.9px; height: 2.9px;"></i><i style="left: 59.9%; top: 69.7%; width: 3.5px; height: 3.5px;"></i><i style="left: 60.8%; top: 79.4%; width: 2.6px; height: 2.6px;"></i></div><div class="moon-twinkle" aria-hidden="true"><i style="left: 28.4%; top: 62%; width: 3.6px; height: 3.6px;"></i><i style="left: 94.9%; top: 42.9%; width: 3.6px; height: 3.6px;"></i><i style="left: 59.8%; top: 64.2%; width: 3.3px; height: 3.3px;"></i><i style="left: 8.7%; top: 14.7%; width: 4.4px; height: 4.4px;"></i></div><div class="moon-meteor" aria-hidden="true"></div></div>
-<canvas class="tl-sea" data-sea-flow="right" data-sea-line="#8A8B8F" data-sea-line-w="3" data-sea-line-a="0.5" aria-hidden="true"></canvas>
-<div style="position: relative; z-index: 1; max-width: 1280px; margin: 0px auto; padding: 100px 32px 240px; display: flex; flex-direction: column; gap: 24px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143); letter-spacing: 0.3em;">MOON'S PUBLIC LOG</div>
-<h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1;">TIDELINE</h1>
-<p style="margin: 0px; max-width: 720px; font-size: 18px; line-height: 1.65; color: rgb(185, 182, 174);">Every lune, Moon seals its signed Moonmarks into a tide: one fingerprint of every receipt, chained to the tide before it and signed with Moon's keys. Every receipt is listed here the moment it's signed. Once its tide is sealed, no one can add, remove or backdate a receipt, Moon&nbsp;included.</p>
-</div>
-</section>
-
-<section style="border-bottom: 1px solid rgb(28, 29, 32);">
-<div style="max-width: 1280px; margin: 0px auto; padding: 56px 32px 0px;">
-<div class="tl-seal" data-tl-seal="" aria-live="polite"></div>
-<div class="tl-stats" data-tl-stats=""></div>
-</div>
-</section>
-
-
-
-<section>
-<div style="max-width: 1280px; margin: 0px auto; padding: 72px 32px 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 32px; align-items: start;">
-
-<div style="border: 1px solid rgb(233, 228, 216); padding: 28px; display: flex; flex-direction: column; gap: 18px;">
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;"><span style="font-family: Syncopate, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em;">THE OPEN LUNE</span><span style="display: inline-flex; align-items: center; gap: 8px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.18em; color: rgb(138, 139, 143);"><img src="/assets/moon-loader.svg" alt="" aria-hidden="true" style="height: 14px; width: auto;">LIVE</span></div>
-<div style="font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(28px, 3.4vw, 40px); letter-spacing: 0.06em;">1928.05.08</div>
-<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px;"><span style="color: rgb(138, 139, 143);">RECEIPTS SO FAR</span><span>–</span></div>
-<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0px; border-top: 1px solid rgb(28, 29, 32); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; border-bottom: 1px solid rgb(28, 29, 32);"><span style="color: rgb(138, 139, 143);">SEALS IN</span><span style="font-variant-numeric: tabular-nums;"><span style="visibility: hidden;">22h 10m 15s</span></span></div>
-<p style="margin: 0px; font-size: 14px; line-height: 1.6; color: rgb(138, 139, 143);">Every file signed on Moon right now lands in this lune. When the lune ends, all of them are sealed into one tide.</p>
-<a href="/#sign" style="border: 1px solid rgb(233, 228, 216); padding: 16px 26px; min-height: 44px; box-sizing: border-box; font-family: Syncopate, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: relative; overflow: hidden; align-self: flex-start;">SIGN A FILE</a>
-</div>
-
-<div style="border: 1px solid rgb(36, 38, 42); padding: 28px; display: flex; flex-direction: column; gap: 18px;">
-<div style="font-family: Syncopate, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em;">VERIFY A RECEIPT</div>
-<p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Choose, drop or paste a receipt (<code>.moonmark.json</code>). Your browser checks the proof itself: the receipt's fingerprint, hashed up the tree, must land exactly on the tide's&nbsp;root.</p>
-<label style="border: 1px solid rgb(233, 228, 216); padding: 16px 26px; min-height: 44px; box-sizing: border-box; font-family: Syncopate, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: relative; overflow: hidden; align-self: flex-start;">CHOOSE A RECEIPT<input type="file" accept=".json,application/json" style="position: absolute; inset: 0px; opacity: 0; cursor: pointer;"></label>
-<form style="display: flex; flex-direction: column; gap: 10px; margin: 0px;"><textarea aria-label="Paste a receipt" placeholder="Or paste a receipt: {&quot;receipt&quot;:&quot;moonmark-receipt/3&quot;,…}" spellcheck="true" style="min-height: 84px; resize: vertical; background: rgb(8, 8, 10); color: rgb(233, 228, 216); border: 1px solid rgb(36, 38, 42); padding: 12px 14px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; line-height: 1.5;"></textarea><button type="submit" style="align-self: flex-start; background: none; border: 1px solid rgb(138, 139, 143); color: rgb(233, 228, 216); padding: 12px 20px; min-height: 44px; font-family: Syncopate, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.24em; cursor: pointer;">CHECK PASTED</button></form>
-
-</div>
-
-</div>
-</section>
-
-<section id="search">
-<div style="max-width: 1280px; margin: 0px auto; padding: 32px 32px 8px; display: flex; flex-direction: column; gap: 16px;">
-<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">SEARCH THE TIDELINE</h2>
-<p style="margin: 0px; max-width: 760px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Search by file, by fingerprint, by moment or by verified name. Registrations under a verified name show in full; for everyone else, only the moment is&nbsp;shown.</p>
-<form class="tl-sform" role="search">
-<label class="tl-sl"><span class="tl-sk">SEARCH</span><input class="tl-si" name="q" type="search" placeholder="1928.05.06 · a SHA-256 · 2026-11-16 · Moon" aria-label="Search the Tideline" autocomplete="off" spellcheck="true"></label>
-<button class="tl-sb" type="submit">SEARCH</button>
-<label class="tl-sb tl-sf">OR CHOOSE A FILE<input type="file" aria-label="Choose a file to search by its fingerprint"></label>
-</form>
-
-
-
-</div>
-</section>
-
-<section>
-<div style="max-width: 1280px; margin: 0px auto; padding: 32px 32px 40px; display: flex; flex-direction: column; gap: 20px;">
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;"><h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">IN LUNE 1928.05.08</h2><span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"></span></div>
-<p style="margin: 0px; max-width: 760px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Every receipt signed this lune, in order. Each line is the receipt's fingerprint in the log; the receipt itself, and the file, stay with whoever signed it. When the lune ends, these exact lines become the&nbsp;tide.</p>
-
-<p style="margin: 0px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; color: rgb(138, 139, 143);">Could not reach Moon.</p>
-</div>
-</section>
-
-<section>
-<div style="max-width: 1280px; margin: 0px auto; padding: 40px 32px 100px; display: flex; flex-direction: column; gap: 24px;">
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;"><h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25;">SEALED TIDES</h2><span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);">COULD NOT REACH MOON</span></div>
-
-
-<div style="border: 1px solid rgb(36, 38, 42); padding: 28px; display: flex; flex-direction: column; gap: 10px; max-width: 760px;">
-<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">THE FIRST TIDE</div>
-<p style="margin: 0px; font-size: 17px; line-height: 1.65; color: rgb(233, 228, 216);"><span style="visibility: hidden;">Seals after 2026-11-18 17:14 UTC, in 22h 10m 15s. It will hold every receipt in lune 1928.05.08, listed&nbsp;above.</span></p>
-</div>
-
-</div>
-</section>
-
-<section style="border-top: 1px solid rgb(28, 29, 32);">
-<div style="max-width: 1280px; margin: 0px auto; padding: 90px 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px;">
-<div style="display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">01 · RECORD</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Every receipt Moon signs is added to its lune's list the moment it's&nbsp;signed.</p></div>
-<div style="display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">02 · SEAL</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">When the lune ends, its receipts become one Merkle root, the same structure that secures website certificates, signed with Ed25519 and&nbsp;ML-DSA-65.</p></div>
-<div style="display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">03 · CHAIN</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Each tide includes the previous tide's fingerprint, so the newest tide vouches for the whole&nbsp;history.</p></div>
-<div style="display: flex; flex-direction: column; gap: 10px;"><div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">04 · CHECK</div><p style="margin: 0px; font-size: 15px; line-height: 1.65; color: rgb(162, 163, 167);">Anyone can check a receipt against its tide right in the browser, without trusting Moon: the receipt's fingerprint, hashed up the tree, must land exactly on the signed&nbsp;root.</p></div>
-</div>
-</section>
-
-</div>
-
-<footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
-<nav class="ft" aria-label="Footer">
-<div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
-<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/app">Moon app</a><a href="/m">Moonmark</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/sign">Sign a file</a><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/audit">Audit</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/widgets">Widgets</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
-<div class="ft-base"><span>Moon · The new standard for time</span><span>Open source under the MIT license</span></div>
-</nav>
-</footer>
-
-
-</div><!--/snapshot-->
-<template data-dc>
-<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
-
+<div data-dc-root style="background: #0B0B0D; color: #E9E4D8; font-family: Inter, sans-serif; min-height: 100vh">
 <header style="border-bottom: 1px solid #1C1D20">
 <div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
 <a href="/" aria-label="Moon home" style="display: block">
@@ -303,125 +221,106 @@ footer > div > div:first-child svg{width:64px!important}
 <a href="/trust">TRUST</a>
 <a href="/api">API</a>
 <a href="/verify">VERIFY</a>
-<a href="/sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
+<a href="/sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN AN ITEM</a>
 </nav>
 </div>
 </header>
 
+<div class="tl-pv" data-tl-pv hidden><div class="tl-wrap"><span>PREVIEW · SAMPLE DATA · NOT THE REAL TIDELINE</span><a href="/tideline">EXIT PREVIEW</a></div></div>
+
 <section id="top" class="tl-hero" style="border-bottom: 1px solid #1C1D20; overflow: hidden">
-<canvas class="tl-sea" data-sea-flow="right" data-sea-line="#8A8B8F" data-sea-line-w="3" data-sea-line-a="0.5" aria-hidden="true"></canvas>
-<div style="position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 100px 32px 240px; display: flex; flex-direction: column; gap: 24px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F; letter-spacing: 0.3em">MOON&#39;S PUBLIC LOG</div>
-<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(32px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">TIDELINE</h1>
-<p style="margin: 0; max-width: 720px; font-size: 18px; line-height: 1.65; color: #B9B6AE">Every lune, Moon seals its signed Moonmarks into a tide: one fingerprint of every receipt, chained to the tide before it and signed with Moon&#39;s keys. Every receipt is listed here the moment it&#39;s signed. Once its tide is sealed, no one can add, remove or backdate a receipt, Moon&nbsp;included.</p>
+<canvas class="tl-sea" data-stars="1" data-sea-px="200" data-sea-flow="right" data-sea-line="#8A8B8F" data-sea-line-w="3" data-sea-line-a="0.5" aria-hidden="true"></canvas>
+<div class="tl-wrap tl-hero-in">
+<div class="tl-k">MOON'S PUBLIC RECORD</div>
+<h1 class="tl-h1">TIDELINE</h1>
+<p class="tl-p">A permanent, public list of everything signed on Moon. Each item is listed the moment it's signed. When the lune ends, the list is sealed and chained to every lune before it. After that, no one can add, remove or backdate an item, Moon included.</p>
+<div class="tl-nums">
+<div class="tl-num"><b data-st="total">–</b><span>ITEMS SIGNED</span></div>
+<div class="tl-num"><b data-st="tides">–</b><span>TIDES SEALED</span></div>
+<div class="tl-num"><b data-st="lune">–</b><span>THIS LUNE</span></div>
+</div>
+<div class="tl-btns"><a class="tl-btn solid" href="/sign">SIGN AN ITEM</a><a class="tl-btn" href="#check">CHECK A RECEIPT</a></div>
 </div>
 </section>
 
-<section style="border-bottom: 1px solid #1C1D20">
-<div style="max-width: 1280px; margin: 0 auto; padding: 56px 32px 0">
-<div class="tl-seal" data-tl-seal aria-live="polite"></div>
-<div class="tl-stats" data-tl-stats></div>
+<section class="tl-sec" id="shore" style="border-top: 0">
+<div class="tl-wrap tl-sec-in">
+<div class="tl-shore-h"><span class="tl-live"><i class="tl-dot" aria-hidden="true"></i><span>OPEN LUNE <span data-tl-open translate="no">–</span></span></span><span class="tl-turn"><span>Tide turns in</span> <b data-tl-turn>–</b></span></div>
+<section class="tl-basin-sec" data-tl-basin aria-label="The open lune's tide">
+<canvas class="tl-sea tl-basin" data-sea-flow="right" data-sea-line="#E9E4D8" data-sea-line-w="2" data-sea-line-a="0.8" data-sea-px="60" aria-hidden="true"></canvas>
+<svg class="tl-lines" data-tl-lines viewBox="0 0 1000 420" preserveAspectRatio="none" aria-hidden="true"></svg>
+<div class="tl-labs" data-tl-labs></div>
+<div class="tl-flecks" data-tl-flecks></div>
+<div class="tl-cnt"><b data-tl-count>–</b><span>items in this tide</span></div>
+</section>
+<p class="tl-cap">All lune, the tide carries in whatever is signed. When the lune ends, it goes out and leaves its line, laid against every line before it. No tide after it, and no one at Moon, can move it.</p>
+<ul class="tl-feed" data-tl-feed aria-live="polite"></ul>
+<div class="tl-shore-f"><span class="tl-k" style="letter-spacing:.2em" data-tl-feednote></span><button type="button" class="tl-ghost" data-tl-preview>Preview the seal</button></div>
 </div>
 </section>
 
-<sc-if value="{{isPreview}}"><section style="background: #2A1E1C; border-bottom: 1px solid #8A4B44"><div style="max-width: 1280px; margin: 0 auto; padding: 18px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #E0A49C">PREVIEW · SAMPLE DATA · NOT THE REAL TIDELINE</div><div style="display: flex; flex-wrap: wrap; gap: 12px"><a href="/tideline" style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.22em; color: #E0A49C; padding: 12px 6px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">EXIT PREVIEW</a><a href="{{sampleHref}}" download="sample.moonmark.json" style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.22em; color: #E9E4D8; border: 1px solid #E0A49C; padding: 12px 18px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">DOWNLOAD A SAMPLE RECEIPT</a></div></div></section></sc-if>
-
-<section>
-<div style="max-width: 1280px; margin: 0 auto; padding: 72px 32px 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 32px; align-items: start">
-
-<div style="border: 1px solid #E9E4D8; padding: 28px; display: flex; flex-direction: column; gap: 18px">
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><span style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em">THE OPEN LUNE</span><span style="display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #8A8B8F"><img src="/assets/moon-loader.svg" alt="" aria-hidden="true" style="height: 14px; width: auto">LIVE</span></div>
-<div style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(28px, 3.4vw, 40px); letter-spacing: 0.06em">{{openLune}}</div>
-<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">RECEIPTS SO FAR</span><span>{{openCount}}</span></div>
-<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-bottom: 1px solid #1C1D20"><span style="color: #8A8B8F">SEALS IN</span><span style="font-variant-numeric: tabular-nums">{{sealsIn}}</span></div>
-<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #8A8B8F">Every file signed on Moon right now lands in this lune. When the lune ends, all of them are sealed into one tide.</p>
-<a href="/#sign" style="border: 1px solid #E9E4D8; padding: 16px 26px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: relative; overflow: hidden; align-self: flex-start">SIGN A FILE</a>
+<section class="tl-sec" id="check">
+<div class="tl-wrap tl-sec-in">
+<div class="tl-k">VERIFY</div>
+<h2 class="tl-h2">Check an item</h2>
+<p class="tl-cap">Drop a file, paste text, or drop its receipt. Your browser checks it against the sealed record by itself, so you don't have to take Moon's word for it. Your item never leaves your device.</p>
+<div class="tl-drop" data-tl-drop>
+<div class="tl-drop-t">Drop a file or a .moonmark.json receipt here, or paste text below</div>
+<textarea data-tl-text aria-label="Paste text or a receipt" placeholder="Paste text or a receipt" spellcheck="false"></textarea>
+<div class="tl-drop-b"><button type="button" class="tl-btn solid" data-tl-checktext>CHECK</button><label class="tl-btn tl-file">CHOOSE A FILE<input type="file" data-tl-file aria-label="Choose a file or receipt to check"></label></div>
 </div>
-
-<div onDrop="{{drop}}" onDragOver="{{over}}" style="border: 1px solid #24262A; padding: 28px; display: flex; flex-direction: column; gap: 18px">
-<div style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.22em">VERIFY A RECEIPT</div>
-<p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Choose, drop or paste a receipt (<code>.moonmark.json</code>). Your browser checks the proof itself: the receipt&#39;s fingerprint, hashed up the tree, must land exactly on the tide&#39;s&nbsp;root.</p>
-<label style="border: 1px solid #E9E4D8; padding: 16px 26px; min-height: 44px; box-sizing: border-box; font-family: 'Syncopate', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.24em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: relative; overflow: hidden; align-self: flex-start">CHOOSE A RECEIPT<input type="file" accept=".json,application/json" onChange="{{pick}}" style="position: absolute; inset: 0; opacity: 0; cursor: pointer"></label>
-<form onSubmit="{{checkPaste}}" style="display: flex; flex-direction: column; gap: 10px; margin: 0"><textarea aria-label="Paste a receipt" placeholder='Or paste a receipt: {"receipt":"moonmark-receipt/3",…}' spellcheck="false" onInput="{{paste}}" value="{{pasted}}" style="min-height: 84px; resize: vertical; background: #08080A; color: #E9E4D8; border: 1px solid #24262A; padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.5"></textarea><button type="submit" style="align-self: flex-start; background: none; border: 1px solid #8A8B8F; color: #E9E4D8; padding: 12px 20px; min-height: 44px; font-family: 'Syncopate', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.24em; cursor: pointer">CHECK PASTED</button></form>
-<sc-if value="{{checkText}}"><div role="status" style="font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; color: {{checkColor}}; border-top: 1px solid #1C1D20; padding-top: 14px">{{checkText}}</div></sc-if>
-</div>
-
+<div class="tl-res" data-tl-res role="status"><div class="tl-res-h" data-tl-res-h></div><p data-tl-res-p></p><div data-tl-res-b></div></div>
 </div>
 </section>
 
-<section id="search">
-<div style="max-width: 1280px; margin: 0 auto; padding: 32px 32px 8px; display: flex; flex-direction: column; gap: 16px">
-<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">SEARCH THE TIDELINE</h2>
-<p style="margin: 0; max-width: 760px; font-size: 15px; line-height: 1.65; color: #A2A3A7">Search by file, by fingerprint, by moment or by verified name. Registrations under a verified name show in full; for everyone else, only the moment is&nbsp;shown.</p>
-<form class="tl-sform" onSubmit="{{onSearch}}" role="search">
-<label class="tl-sl"><span class="tl-sk">SEARCH</span><input class="tl-si" name="q" type="search" placeholder="1928.05.06 · a SHA-256 · 2026-11-16 · Moon" aria-label="Search the Tideline" autocomplete="off" spellcheck="false" value="{{sq}}" onInput="{{onQ}}"></label>
-<button class="tl-sb" type="submit">SEARCH</button>
-<label class="tl-sb tl-sf">OR CHOOSE A FILE<input type="file" onChange="{{onFile}}" aria-label="Choose a file to search by its fingerprint"></label>
+<section class="tl-sec">
+<div class="tl-wrap tl-sec-in">
+<h2 class="tl-h2">What people use it for</h2>
+<div class="tl-grid">
+<div class="tl-card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><h3>You shot it first</h3><p>A photographer signs the original. If it's stolen later, the record shows whose was here first.</p></div>
+<div class="tl-card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 14l2 2 4-4"/></svg><h3>This is the version we agreed to</h3><p>Sign a contract the day it's final. Any edited copy won't match the sealed one.</p></div>
+<div class="tl-card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 10-10-3-3L5 16z"/><path d="M13 8l3 3"/><path d="M14 20h6"/></svg><h3>Made by a person</h3><p>Sign your work as you make it, so its history shows it existed before anyone could have generated it.</p></div>
+<div class="tl-card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg><h3>My idea, dated</h3><p>Inventors and writers sign drafts and notes to prove when an idea was theirs.</p></div>
+</div>
+</div>
+</section>
+
+<section class="tl-sec">
+<div class="tl-wrap tl-sec-in">
+<h2 class="tl-h2">How a tide is sealed</h2>
+<div class="tl-grid">
+<div class="tl-step"><b>01</b><h3>Written down</h3><p>Sign an item and its fingerprint is listed here instantly. The item itself stays with you.</p></div>
+<div class="tl-step"><b>02</b><h3>Sealed</h3><p>When the lune ends, the whole list is sealed into one tide. Nothing can be slipped in or pulled out.</p></div>
+<div class="tl-step"><b>03</b><h3>Chained</h3><p>Each tide is locked to the one before it, so today's seal protects every day in the past.</p></div>
+<div class="tl-step"><b>04</b><h3>Checked by anyone</h3><p>Anyone can verify a receipt in their own browser, with no account and no need to trust Moon.</p></div>
+</div>
+</div>
+</section>
+
+<section class="tl-sec" id="search">
+<div class="tl-wrap tl-sec-in">
+<h2 class="tl-h2">Sealed tides</h2>
+<form class="tl-sform" data-tl-sform role="search">
+<label class="tl-sl"><span class="tl-k" style="font-size:11px;letter-spacing:.24em">SEARCH BY ITEM, FINGERPRINT, MOMENT OR VERIFIED NAME</span><input class="tl-si" data-tl-q name="q" type="search" placeholder="1928.05.06 · a SHA-256 · 2026-11-16 · Moon" aria-label="Search the Tideline" autocomplete="off" spellcheck="false"></label>
+<button class="tl-btn solid" type="submit" style="min-height:52px">SEARCH</button>
+<label class="tl-btn tl-file" style="min-height:52px">OR CHOOSE AN ITEM<input type="file" data-tl-sfile aria-label="Choose an item to search by its fingerprint"></label>
 </form>
-<sc-if value="{{sHead}}"><div role="status" style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: {{sColor}}; padding-top: 4px">{{sHead}}</div></sc-if>
-<sc-if value="{{hasS}}">
-<ol class="tl-list tl-res">
-<sc-for list="{{sres}}" as="r">
-<li><span class="tl-n">{{r.when}}</span><span class="tl-leaf">{{r.who}}</span><span class="tl-what"><sc-if value="{{r.href}}"><a href="{{r.href}}" target="_blank" rel="noopener">{{r.what}} ↗</a></sc-if><sc-if value="{{r.plain}}">{{r.what}}</sc-if></span></li>
-</sc-for>
-</ol>
-</sc-if>
-<sc-if value="{{sPage}}"><a href="{{sPage}}" style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #E9E4D8; align-self: flex-start; min-height: 44px; display: inline-flex; align-items: center; border-bottom: 1px solid #E9E4D8">EVERYTHING REGISTERED BY {{sName}} →</a></sc-if>
+<div class="tl-shead" data-tl-shead role="status"></div>
+<ol class="tl-slist" data-tl-slist hidden></ol>
+<a data-tl-spage hidden style="font-family:'JetBrains Mono',monospace;font-size:13px;align-self:flex-start;min-height:44px;display:inline-flex;align-items:center;border-bottom:1px solid #E9E4D8"></a>
+<table class="tl-table" data-tl-table>
+<thead><tr><th>TIDE</th><th>ITEMS</th><th class="tl-hide">SEALED</th><th>STATUS</th></tr></thead>
+<tbody data-tl-tbody><tr><td colspan="4" class="tl-empty">Loading…</td></tr></tbody>
+</table>
+<details class="tl-aud" data-tl-aud>
+<summary>Details for auditors</summary>
+<div class="tl-aud-in">
+<p>Each tide is a Merkle tree of item fingerprints. Its root is signed with Ed25519 and ML-DSA-65 and includes the previous tide's fingerprint, so every tide is chained to the one before it. Bitcoin proofs are OpenTimestamps files (.ots). The raw counts are at <a href="https://api.moon369.org/v1/stats" style="text-decoration:underline">/v1/stats</a>, and you can <a href="/audit" style="text-decoration:underline">audit it yourself</a>.</p>
+<table class="tl-table"><thead><tr><th>TIDE</th><th>ROOT</th><th class="tl-hide">CHAINED TO</th><th class="tl-hide">SIGNED WITH</th><th>BITCOIN</th></tr></thead><tbody data-tl-audbody></tbody></table>
+</div>
+</details>
 </div>
 </section>
-
-<section>
-<div style="max-width: 1280px; margin: 0 auto; padding: 32px 32px 40px; display: flex; flex-direction: column; gap: 20px">
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap"><h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">IN LUNE {{openLune}}</h2><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">{{entriesNote}}</span></div>
-<p style="margin: 0; max-width: 760px; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every receipt signed this lune, in order. Each line is the receipt&#39;s fingerprint in the log; the receipt itself, and the file, stay with whoever signed it. When the lune ends, these exact lines become the&nbsp;tide.</p>
-<sc-if value="{{hasEntries}}">
-<ol class="tl-list">
-<sc-for list="{{entries}}" as="e">
-<li class="{{e.cls}}"><span class="tl-n">#{{e.n}}</span><a class="tl-leaf" href="{{e.find}}" title="Look up {{e.leaf}}">{{e.leafShort}}</a><span class="tl-what"><sc-if value="{{e.href}}"><a href="{{e.href}}">{{e.label}}</a></sc-if><sc-if value="{{e.plain}}">{{e.label}}</sc-if></span></li>
-</sc-for>
-</ol>
-</sc-if>
-<sc-if value="{{noEntries}}"><p style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #8A8B8F">{{emptyText}}</p></sc-if>
-</div>
-</section>
-
-<section>
-<div style="max-width: 1280px; margin: 0 auto; padding: 40px 32px 100px; display: flex; flex-direction: column; gap: 24px">
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap"><h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em; line-height: 1.25">SEALED TIDES</h2><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">{{status}}</span></div>
-<sc-if value="{{hasTides}}">
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); gap: 20px">
-<sc-for list="{{tides}}" as="t">
-<div style="border: 1px solid #24262A; background: #0B0B0D; padding: 24px 26px; display: flex; flex-direction: column; gap: 6px">
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding-bottom: 8px">
-<div style="display: flex; align-items: baseline; gap: 14px"><a href="/tide/{{t.lune}}" style="font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.08em; color: #E9E4D8; text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px">TIDE {{t.lune}}</a><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F">{{t.sizeText}}</span></div>
-</div>
-<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">ROOT</span><span title="{{t.root}}">{{t.rootShort}}</span></div>
-<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">CHAINED TO</span><span>{{t.prevShort}}</span></div>
-<div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">SIGNED WITH</span><span>{{t.algs}}</span></div>
-<sc-if value="{{t.hasBtc}}"><div style="display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid #1C1D20; font-family: 'JetBrains Mono', monospace; font-size: 13px"><span style="color: #8A8B8F">BITCOIN</span><span>{{t.btcText}}<sc-if value="{{t.otsUrl}}"> &middot; <a href="{{t.otsUrl}}" style="color: #E9E4D8; text-decoration: underline; text-underline-offset: 3px">.ots</a></sc-if></span></div></sc-if>
-</div>
-</sc-for>
-</div>
-</sc-if>
-<sc-if value="{{noTides}}">
-<div style="border: 1px solid #24262A; padding: 28px; display: flex; flex-direction: column; gap: 10px; max-width: 760px">
-<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">THE FIRST TIDE</div>
-<p style="margin: 0; font-size: 17px; line-height: 1.65; color: #E9E4D8">Seals after {{sealsAt}}, in {{sealsIn}}. It will hold every receipt in lune {{openLune}}, listed&nbsp;above.</p>
-</div>
-</sc-if>
-</div>
-</section>
-
-<section style="border-top: 1px solid #1C1D20">
-<div style="max-width: 1280px; margin: 0 auto; padding: 90px 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px">
-<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">01 · RECORD</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Every receipt Moon signs is added to its lune&#39;s list the moment it&#39;s&nbsp;signed.</p></div>
-<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">02 · SEAL</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">When the lune ends, its receipts become one Merkle root, the same structure that secures website certificates, signed with Ed25519 and&nbsp;ML-DSA-65.</p></div>
-<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">03 · CHAIN</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Each tide includes the previous tide&#39;s fingerprint, so the newest tide vouches for the whole&nbsp;history.</p></div>
-<div style="display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #8A8B8F">04 · CHECK</div><p style="margin: 0; font-size: 15px; line-height: 1.65; color: #A2A3A7">Anyone can check a receipt against its tide right in the browser, without trusting Moon: the receipt&#39;s fingerprint, hashed up the tree, must land exactly on the signed&nbsp;root.</p></div>
-</div>
-</section>
-
-</div>
 
 <footer style="border-top: 1px solid #1C1D20"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <nav class="ft" aria-label="Footer">
@@ -430,206 +329,8 @@ footer > div > div:first-child svg{width:64px!important}
 <div class="ft-base"><span>Moon · The new standard for time</span><span>Open source under the MIT license</span></div>
 </nav>
 </footer>
-
 </div>
-</template>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3200}}'>
-class Component extends DCLogic {
-  componentDidMount() {
-    this.isPreview = /[?&]preview\b/.test(location.search);
-    if (this.isPreview) { this.buildPreview(); this.iv = setInterval(() => this.setState({ now: Date.now() }), 1000); this.iv3 = setInterval(() => { const n = (this.state.openSize || 0) + (Math.random() < 0.45 ? 1 : 0); const due = !this.state.lastCp || Date.now() - Number(BigInt(this.state.lastCp.at_unix_ns) / 1000000n) > 60000; this.setState({ openSize: n, lastCp: due ? { at_unix_ns: String(Date.now()) + '000000', size: n } : this.state.lastCp }); }, 2000); return; }
-    // Moon's own signed files, so the log can name them (everyone else's entries stay anonymous).
-    const q0 = new URLSearchParams(location.search).get('q');
-    if (q0) this.setState({ sq: q0, sHead: 'Searching…' });
-    // Moon's own signed files, so the log can name them; a search in the address waits for them.
-    const knownP = fetch('/assets/brand/moonmarks.json').then((r) => r.json()).then((j) => this.setState({ known: j.leaves || {} })).catch(() => {});
-    Promise.all([knownP, this.load()]).then(() => { if (q0) this.search(q0); });
-    this.iv = setInterval(() => this.setState({ now: Date.now() }), 1000);
-    this.iv2 = setInterval(() => this.load(), 30000);
-  }
-  search(term) {
-    term = (term || '').trim();
-    if (!term) return;
-    // A fingerprint copied from the list in its short form (start…end): find the full one.
-    const known = this.state.known || {}, cut = /^([0-9a-f]{4,})\s*(?:…|\.\.\.)\s*([0-9a-f]{4,})$/i.exec(term);
-    if (cut) {
-      const all = [...(this.state.entries || []).map((e) => e.leaf), ...Object.keys(known)];
-      const full = all.find((l) => l.startsWith(cut[1].toLowerCase()) && l.endsWith(cut[2].toLowerCase()));
-      if (!full) { this.setState({ sHead: 'That is a shortened fingerprint, and it is not in the open lune. Paste the full 64-character one.', sOk: false, sres: [], sPage: '' }); return; }
-      term = full; this.setState({ sq: full });
-    }
-    // Moon's own entries from before the log was searchable: look up the file they belong to.
-    if (known[term.toLowerCase()] && known[term.toLowerCase()].sha256) term = known[term.toLowerCase()].sha256;
-    this.setState({ sBusy: true, sHead: 'Searching…', sres: [], sPage: '' });
-    fetch('https://api.moon369.org/v1/search?q=' + encodeURIComponent(term)).then((r) => r.json().then((j) => { if (!r.ok) throw new Error((j.error && j.error.message) || 'Error ' + r.status); return j; })).then((j) => {
-      const fmt = (r) => ({ when: r.moonmark.slice(0, 19), who: r.registrant + (r.registrant_verified ? ' · verified' : ''), what: r.label || (r.sha256 ? r.sha256.slice(0, 16) + '…' : 'Signed Moonmark'), href: r.signed_url || '', plain: !r.signed_url });
-      const n = j.count, kind = j.kind;
-      const head = kind === 'file' ? (n ? 'This file is on Moon: registered ' + n + (n === 1 ? ' time.' : ' times. The earliest is first.') : 'No file or Tideline entry has this fingerprint.')
-        : kind === 'entry' ? 'This is a Tideline entry: the log fingerprint of the receipt below.'
-        : kind === 'label' ? (n ? n + ' file' + (n === 1 ? '' : 's') + ' registered under a verified name match “' + term + '”.' : 'No verified name or file matches “' + term + '”.')
-        : kind === 'time' ? (n ? n + (j.truncated ? '+' : '') + ' registration' + (n === 1 ? '' : 's') + ' in that ' + ({ lune: 'lune', minute: 'minute', second: 'second', utc_day: 'UTC day' }[j.window.span] || 'window') + '.' : 'Nothing was registered in that ' + (j.window.span === 'utc_day' ? 'UTC day' : j.window.span) + '.')
-        : kind === 'registrant' ? (n ? n + ' registration' + (n === 1 ? '' : 's') + ' by ' + j.registrant + ', verified.' : 'No verified name matches “' + term + '”. Only names Moon has verified have a public list.')
-        : 'Nothing found. Try a SHA-256, a Moonmark like 1928.05.06 10:43:17, a UTC date like 2026-11-16, or a verified name.';
-      this.setState({ sBusy: false, sHead: head, sOk: n > 0, sres: (j.results || []).slice(0, 500).map(fmt), sPage: kind === 'registrant' && n ? '/by/' + j.slug : '', sName: (j.registrant || '').toUpperCase() });
-    }).catch((e) => this.setState({ sBusy: false, sHead: e.message || 'Could not reach Moon.', sOk: false, sres: [] }));
-  }
-  searchFile(e) {
-    const f = e.target.files && e.target.files[0]; e.target.value = '';
-    if (!f) return;
-    this.setState({ sHead: 'Fingerprinting ' + f.name + ' on your device…', sres: [] });
-    f.arrayBuffer().then((b) => crypto.subtle.digest('SHA-256', b)).then((h) => {
-      const hex = Array.from(new Uint8Array(h), (x) => x.toString(16).padStart(2, '0')).join('');
-      this.setState({ sq: hex }); this.search(hex);
-    });
-  }
-  componentWillUnmount() { clearInterval(this.iv); clearInterval(this.iv2); clearInterval(this.iv3); }
-  load() {
-    return fetch('https://api.moon369.org/v1/tideline').then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((b) => {
-      this.setState({ tl: b, err: null });
-      return fetch('https://api.moon369.org/v1/tideline/' + b.open_lune).then((r) => r.json()).then((o) => this.setState({ openSize: o.size, lastCp: o.last_checkpoint || null, entries: o.entries || [], truncated: !!o.entries_truncated }));
-    }).catch((e) => this.setState({ err: e === 503 ? 'soon' : 'offline' }));
-  }
 
-  // ---------- Preview mode (?preview): sample data built in the browser with the real Merkle math ----------
-  async buildPreview() {
-    const enc = new TextEncoder();
-    const hex = (b) => Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, '0')).join('');
-    const unhex = (h) => Uint8Array.from(h.match(/../g) || [], (x) => parseInt(x, 16));
-    const sha = async (u8) => new Uint8Array(await crypto.subtle.digest('SHA-256', u8));
-    const cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let i = 0; for (const x of a) { o.set(x, i); i += x.length; } return o; };
-    const EPOCH = -62165308562978.61, K = 1.0403730490216803, DAY = 86400000 * K, p2 = (x) => String(x).padStart(2, '0');
-    const moonAt = (ms) => {
-      const t = ms - EPOCH, da = Math.floor(t / DAY), y = Math.floor(da / 369), dy = da - y * 369, mi = Math.floor(dy * 13 / 369), d = dy - Math.ceil(mi * 369 / 13) + 1;
-      let sec = (t - da * DAY) / (1000 * K); const h = Math.floor(sec / 3600); sec -= h * 3600; const m = Math.floor(sec / 60); sec -= m * 60;
-      const whole = Math.floor(sec), ns = String(Math.floor((sec - whole) * 1e9)).padStart(9, '0');
-      return { da, lune: y + '.' + p2(mi + 1) + '.' + p2(d), mark: y + '.' + p2(mi + 1) + '.' + p2(d) + ' ' + p2(h) + ':' + p2(m) + ':' + p2(whole) + '.' + ns };
-    };
-    const leafOf = async (r) => hex(await sha(cat(new Uint8Array([0]), enc.encode([r.receipt, 'sha256:' + r.sha256, r.moonmark, r.unix_ns, r.key_id, 'ml-dsa-65:' + r.pq.key_id].join('\n')))));
-    const rootOf = async (ls) => { if (!ls.length) return hex(await sha(new Uint8Array(0))); if (ls.length === 1) return hex(ls[0]); let k = 1; while (k * 2 < ls.length) k *= 2; return hex(await sha(cat(new Uint8Array([1]), unhex(await rootOf(ls.slice(0, k))), unhex(await rootOf(ls.slice(k)))))); };
-    const pathOf = async (i, ls) => { if (ls.length <= 1) return []; let k = 1; while (k * 2 < ls.length) k *= 2; return i < k ? [...await pathOf(i, ls.slice(0, k)), await rootOf(ls.slice(k))] : [...await pathOf(i - k, ls.slice(k)), await rootOf(ls.slice(0, k))]; };
-    const now = Date.now(), today = moonAt(now).da;
-    const tides = [], book = new Map(); let prev = null, sample = null;
-    for (let back = 6; back >= 1; back--) {
-      const start = EPOCH + (today - back) * DAY, n = 20 + Math.floor(Math.random() * 180), receipts = [], leaves = [];
-      for (let i = 0; i < n; i++) {
-        const ms = start + ((i + Math.random()) / n) * DAY;
-        const r = { receipt: 'moonmark-receipt/3', sha256: hex(crypto.getRandomValues(new Uint8Array(32))), moonmark: moonAt(ms).mark, unix_ns: String(Math.floor(ms)) + '000000', key_id: 'sample0000000000', pq: { alg: 'ML-DSA-65', key_id: 'sample0000000001', signature: 'SAMPLE' }, signature: 'SAMPLE' };
-        receipts.push(r); leaves.push(unhex(await leafOf(r)));
-      }
-      const root = await rootOf(leaves), lune = moonAt(start + DAY / 2).lune;
-      const hash = hex(await sha(enc.encode(['tideline/1', 'lune:' + lune, 'size:' + n, 'root:' + root, 'prev:' + (prev || 'none')].join('\n'))));
-      const tide = { tideline: 'tideline/1', lune, size: n, root, prev, hash, pq: { alg: 'ML-DSA-65' }, anchor: { network: 'xrpl', ledger_index: 104880000 + (7 - back) * 22300, explorer: '' }, bitcoin: back === 1 ? { status: 'pending' } : { status: 'confirmed', block_height: 927300 + (7 - back) * 144 } };
-      tides.unshift(tide); prev = hash;
-      book.set(lune, { tide, receipts, leaves });
-      if (back === 2) sample = receipts[Math.floor(receipts.length / 2)];
-    }
-    this.pv = { book, leafOf, pathOf, hex };
-    const href = URL.createObjectURL(new Blob([JSON.stringify(sample, null, 2) + '\n'], { type: 'application/json' }));
-    const open = moonAt(now), end = EPOCH + (today + 1) * DAY;
-    this.setState({ lastCp: { at_unix_ns: String(now - 14000) + '000000', size: 12 }, tl: { tideline: 'tideline/1', open_lune: open.lune, seals_after_utc: new Date(end).toISOString(), tides }, openSize: 12 + Math.floor(Math.random() * 30), sampleHref: href, err: null });
-  }
-  async previewProof(rc) {
-    const lune = String(rc.moonmark || '').slice(0, 10), e = this.pv && this.pv.book.get(lune);
-    if (!e) return { status: 'not_found', lune };
-    const leaf = await this.pv.leafOf(rc), idx = e.leaves.findIndex((l) => this.pv.hex(l) === leaf);
-    if (idx < 0) return { status: 'not_found', lune };
-    return { status: 'sealed', lune, leaf, index: idx, size: e.tide.size, path: await this.pv.pathOf(idx, e.leaves), root: e.tide.root, tide: e.tide };
-  }
-  async inclusion(leaf, index, size, path, root) {
-    const hx = (h) => Uint8Array.from(h.match(/../g) || [], (x) => parseInt(x, 16));
-    const toHex = (b) => Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, '0')).join('');
-    const node = async (l, r) => new Uint8Array(await crypto.subtle.digest('SHA-256', new Uint8Array([1, ...l, ...r])));
-    if (index < 0 || index >= size) return false;
-    let fn = index, sn = size - 1, r = hx(leaf);
-    for (const p of path) {
-      if (sn === 0) return false;
-      const pb = hx(p);
-      if (fn % 2 === 1 || fn === sn) { r = await node(pb, r); if (fn % 2 === 0) while (fn % 2 === 0 && fn !== 0) { fn >>= 1; sn >>= 1; } }
-      else r = await node(r, pb);
-      fn >>= 1; sn >>= 1;
-    }
-    return sn === 0 && toHex(r) === root;
-  }
-  pick(e) {
-    const input = e.target, f = input.files && input.files[0]; input.value = '';
-    if (!f) return;
-    this.say('Reading ' + f.name + '…');
-    f.text().then((t) => this.checkText(t)).catch(() => this.say('Could not read that file.', false));
-  }
-  say(text, ok) { this.setState({ check: { text, color: ok === true ? '#E9E4D8' : ok === false ? '#E0A49C' : '#8A8B8F' } }); }
-  checkText(t) {
-    const say = (text, ok) => this.say(text, ok);
-    if (!String(t || '').trim()) return say('Paste a receipt first.', false);
-    return Promise.resolve().then(() => {
-      let rc; try { rc = JSON.parse(t); rc = rc.receipt && typeof rc.receipt === 'object' ? rc.receipt : rc; } catch (x) { say('That file is not a Moon receipt.', false); return; }
-      say('Asking the Tideline for its proof…');
-      return (this.isPreview ? this.previewProof(rc) : fetch('https://api.moon369.org/v1/tideline/proof', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receipt: rc }) }).then((r) => r.json()))
-        .then(async (p) => {
-          if (p.status === 'checkpointed') {
-            const okc = await this.inclusion(p.leaf, p.index, p.size, p.path, p.root);
-            return say(okc ? '✓ Locked in a signed checkpoint of lune ' + p.lune + ' (receipt ' + (p.index + 1) + ' of ' + p.size + '), proven in your browser. Its tide seals after ' + p.seals_after_utc.replace('T', ' ').slice(0, 16) + ' UTC.' : '✕ The proof does not match the checkpoint. Do not rely on this receipt.', okc);
-          }
-          if (p.status === 'pending') return say('Recorded in lune ' + p.lune + ' as receipt #' + (p.index + 1) + '. It seals into a tide after ' + p.seals_after_utc.replace('T', ' ').slice(0, 16) + ' UTC.', null);
-          if (p.status === 'not_found') return say('This receipt is not in the Tideline. It was either signed before the Tideline started, or it was changed.', false);
-          if (p.status !== 'sealed') return say((p.error && p.error.message) || 'Could not check that receipt.', false);
-          const ok = await this.inclusion(p.leaf, p.index, p.size, p.path, p.root);
-          say(ok ? '✓ Included in tide ' + p.lune + ' as receipt ' + (p.index + 1) + ' of ' + p.size + '. Proven in your browser.' + (this.isPreview ? ' (Sample data.)' : p.tide.bitcoin && p.tide.bitcoin.status === 'confirmed' ? ' Anchored in Bitcoin.' : '') + ' To check its signature too, use Verify.' : '✕ The proof does not match the tide. Do not rely on this receipt.', ok);
-        });
-    }).catch(() => say('Could not reach Moon. Try again.', false));
-  }
-  renderVals() {
-    const s = this.state || {}, tl = s.tl, now = s.now || Date.now();
-    const short = (h) => h ? h.slice(0, 10) + '…' + h.slice(-6) : 'none (first tide)';
-    const fmt = (t) => ({
-      lune: t.lune, root: t.root, rootShort: short(t.root), prevShort: short(t.prev),
-      sizeText: t.size === 1 ? '1 receipt' : t.size.toLocaleString('en-US') + ' receipts',
-      algs: t.pq ? 'Ed25519 + ML-DSA-65' : 'Ed25519',
-      anchorText: t.anchor ? 'ledger ' + (t.anchor.ledger_index || '').toLocaleString('en-US') + (t.anchor.explorer ? '' : ' (sample)') : 'not anchored',
-      anchorUrl: t.anchor ? t.anchor.explorer : '',
-      hasBtc: !!(t.bitcoin && (t.bitcoin.ots || t.bitcoin.status === 'confirmed')),
-      btcText: !t.bitcoin ? 'not yet' : t.bitcoin.status === 'confirmed' ? 'block ' + Number(t.bitcoin.block_height).toLocaleString('en-US') + (t.bitcoin.ots ? '' : ' (sample)') : 'confirming, a few hours',
-      otsUrl: t.bitcoin && t.bitcoin.ots ? 'https://api.moon369.org' + t.bitcoin.ots : ''
-    });
-    const tides = tl ? (tl.tides || []).map(fmt) : [];
-    // The open lune and when it ends, from the Moon standard itself (same math as the API).
-    const EPOCH = -62165308562978.61, DAY = 86400000 * 1.0403730490216803;
-    const da = Math.floor((now - EPOCH) / DAY), yy = Math.floor(da / 369), dy = da - yy * 369, mi = Math.floor(dy * 13 / 369);
-    const p2 = (x) => String(x).padStart(2, '0');
-    let openLune = yy + '.' + p2(mi + 1) + '.' + p2(dy - Math.ceil(mi * 369 / 13) + 1), endMs = EPOCH + (da + 1) * DAY, sealsIn = '';
-    if (tl) { openLune = tl.open_lune; endMs = Date.parse(tl.seals_after_utc); }
-    {
-      const ms = Math.max(0, endMs - now);
-      const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, sec = Math.floor(ms / 1000) % 60;
-      sealsIn = h + 'h ' + String(m).padStart(2, '0') + 'm ' + String(sec).padStart(2, '0') + 's';
-    }
-    let lockedText = s.err ? '–' : 'not yet';
-    if (s.lastCp) { const ago = Math.max(0, Math.round((now - Number(BigInt(s.lastCp.at_unix_ns) / 1000000n)) / 1000)); lockedText = (ago < 60 ? ago + 's' : Math.round(ago / 60) + 'm') + ' ago · ' + Number(s.lastCp.size).toLocaleString('en-US') + ' receipts'; }
-    if (!this._pick) { this._pick = (e) => this.pick(e); this._paste = (e) => this.setState({ pasted: e.target.value }); this._checkPaste = (e) => { e.preventDefault(); this.checkText(this.state.pasted); };
-      this._drop = (e) => { e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) { this.say('Reading ' + f.name + '…'); f.text().then((t) => this.checkText(t)); } }; this._over = (e) => e.preventDefault(); }
-    if (!this._onSearch) { this._onSearch = (e) => { e.preventDefault(); this.search(this.state.sq); }; this._onQ = (e) => this.setState({ sq: e.target.value }); this._onFile = (e) => this.searchFile(e); }
-    const known = s.known || {}, list = (s.entries || []).slice().reverse();   // newest first
-    const entries = list.slice(0, 500).map((e) => {
-      const k = known[e.leaf], label = k ? k.label : 'Signed Moonmark';
-      return { n: e.index + 1, leaf: e.leaf, find: '/tideline?q=' + e.leaf + '#search', leafShort: e.leaf.slice(0, 16) + '…' + e.leaf.slice(-8), label, href: k ? '/by/moon' : '', plain: !k, cls: k ? 'tl-moon' : '' };
-    });
-    const mine = list.filter((e) => known[e.leaf]).length;
-    const sealsAt = new Date(endMs).toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
-    const c = s.check || {};
-    return {
-      openLune, sealsIn, lockedText, openCount: s.err ? '–' : s.openSize == null ? '…' : Number(s.openSize).toLocaleString('en-US'),
-      tides, hasTides: tides.length > 0, noTides: tides.length === 0 && !this.isPreview, hasCp: !!s.lastCp,
-      entries, hasEntries: entries.length > 0, noEntries: entries.length === 0,
-      emptyText: s.err ? 'Could not reach Moon.' : s.entries ? 'Nothing signed yet this lune.' : 'Loading…',
-      entriesNote: s.entries ? (list.length.toLocaleString('en-US') + (list.length === 1 ? ' receipt' : ' receipts') + (mine ? ' · ' + mine + ' from Moon' : '') + (list.length > 500 ? ' · newest 500 shown' : '') + (s.truncated ? ' · first 2,000 listed' : '')) : '',
-      sealsAt, onSearch: this._onSearch, onQ: this._onQ, onFile: this._onFile, sq: s.sq || '', sHead: s.sHead || '', sColor: s.sOk ? '#E9E4D8' : '#8A8B8F',
-      sres: s.sres || [], hasS: !!(s.sres && s.sres.length), sPage: s.sPage || '', sName: s.sName || '',
-      status: this.isPreview ? 'SAMPLE TIDES' : s.err === 'soon' ? 'THE TIDELINE IS STARTING' : s.err ? 'COULD NOT REACH MOON' : tl ? (tides.length ? tides.length + (tides.length === 1 ? ' TIDE' : ' TIDES') : 'NONE SEALED YET') : 'LOADING',
-      ex: { lune: '1928.05.04', sizeText: '214 receipts', root: '', rootShort: '7f3a91c0d2…e4b81c', prevShort: '19c4e0aa57…02f7d9', algs: 'Ed25519 + ML-DSA-65', anchorText: 'ledger 104,882,113', btcText: 'block 927,418', otsUrl: '' },
-      isPreview: !!this.isPreview, sampleHref: s.sampleHref || '#', pick: this._pick, paste: this._paste, pasted: s.pasted || '', checkPaste: this._checkPaste, drop: this._drop, over: this._over, checkText: c.text || '', checkColor: c.color || '#8A8B8F'
-    };
-  }
-}
-</script>
 <script src="js/footglow.js" defer></script>
 </body>
 </html>
