@@ -25,11 +25,11 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 .mt b{font:700 10.5px Syncopate,sans-serif;letter-spacing:.18em}.mt span{font-size:12px;color:#8A8B8F;line-height:1.45}
 .sw{position:relative;overflow:hidden}.sw>a{position:relative;z-index:1;background:#0B0B0D;transition:transform .22s cubic-bezier(.2,.8,.2,1);touch-action:pan-y}.sw-del{position:absolute;right:0;top:0;bottom:0;width:92px;border:0;background:#E0A49C;color:#0B0B0D;font:11px "JetBrains Mono",monospace;letter-spacing:.18em;cursor:pointer}
 /* The mark: a flash from the button and the captured time, large, over everything, for a beat. */
-.mflash{position:fixed;inset:0;z-index:2147483000;pointer-events:none;display:flex;align-items:center;justify-content:center;animation:mfs 1.4s ease forwards}
+.mflash{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;z-index:2147483000;pointer-events:none;display:flex;align-items:center;justify-content:center;animation:mfs 1.4s ease forwards}
 .mflash::before{content:'';position:absolute;inset:0;background:#FFFCF4;opacity:0;animation:mfw .45s ease-out forwards}
 @keyframes mfw{0%{opacity:.55}100%{opacity:0}}
 @keyframes mfs{0%{background:rgba(5,5,6,0)}12%{background:rgba(5,5,6,.93)}60%{background:rgba(5,5,6,.93)}100%{background:rgba(5,5,6,0)}}
-.mf-t{position:relative;display:flex;align-items:baseline;justify-content:center;gap:.4em;white-space:nowrap;max-width:94vw;font:400 min(5.6vw,60px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:#FFFCF4;text-shadow:0 0 28px rgba(233,228,216,.55);animation:mft 1.4s cubic-bezier(.2,.8,.2,1) forwards}
+.mf-t{position:relative;margin:auto;text-align:center;transform-origin:50% 50%;display:flex;align-items:baseline;justify-content:center;gap:.4em;white-space:nowrap;max-width:94vw;font:400 min(5.6vw,60px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:#FFFCF4;text-shadow:0 0 28px rgba(233,228,216,.55);animation:mft 1.4s cubic-bezier(.2,.8,.2,1) forwards}
 .mf-t b{font-weight:600}
 .mf-t span{white-space:nowrap}
 .mf-t small{font-size:.55em;color:#E9E4D8;margin-left:.05em}
