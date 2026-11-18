@@ -123,7 +123,7 @@
     STARS.list = r.map(function (x) {
       // Weight: longer notes and photos make bigger, brighter stars; a quick few words, a small dim one.
       var g = seeded((x.ms / 1000) | 0), w = Math.min(1, (x.name ? x.name.length : 0) / 200 + (x.sha ? 0.6 : 0));
-      return { seed: (x.ms / 1000) | 0, size: (0.85 + 1.5 * w) * (0.9 + g() * 0.2), lum: 0.6 + 0.4 * w, sp: 0.6 + g() * 1.4, ph: g() * 6.28, ms: x.ms };
+      return { seed: (x.ms / 1000) | 0, size: (0.85 + 1.5 * w) * (0.9 + g() * 0.2) * 0.7 /* 30% smaller */, lum: 0.6 + 0.4 * w, sp: 0.6 + g() * 1.4, ph: g() * 6.28, ms: x.ms };
     });
     STARS.key = '';
     if (STARS.list.length > prev && prev) STARS.born = performance.now();
