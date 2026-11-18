@@ -56,15 +56,55 @@
   function showMoments() {
     var r = store('moonMoments'), box = $('[data-app-recent]');
     setStars();
-    if (!r.length) { box.hidden = true; editing = false; return; }
+    if (!r.length) { editing = false; box.hidden = false; box.innerHTML = '<div class="mlb mlb0"><span>New phone?</span><button type="button" data-m-import>RESTORE A MOONLOG</button></div>'; return; }
     box.hidden = false;
     box.innerHTML = '<div class="rh"><span class="k"><span translate="no">MOONLOG</span><i class="rh-n"> | ' + (r.length === 1 ? T('1 MOMENT') : T('{n} MOMENTS', { n: r.length.toLocaleString(LOC) })) + '</i></span><button type="button" class="ed" data-m-edit>' + (editing ? 'DONE' : 'EDIT') + '</button></div>' +
       (editing ? '<div class="enote2">Removing a moment only clears it from this phone. The proof stays on Moon and its link still works.</div>' : '') +
       r.map(function (x, i) {
         var row = '<a class="ph" href="' + esc(x.url) + '"><span class="nm">' + (x.sha ? '<img alt="" data-thumb="' + esc(x.sha) + '">' : '<span class="noph" aria-hidden="true">' + MMK + '</span>') + '<span>' + esc(x.name || (x.sha ? 'A photo' : 'A moment')) + '</span></span><span>' + MMK + esc(text(moon(x.ms + 1))) + '</span></a>';
         return editing ? '<div class="mrow">' + row + '<button type="button" class="rm" data-m-rm="' + i + '" aria-label="Remove from this phone">✕</button></div>' : row;
-      }).join('');
+      }).join('') +
+      '<div class="mlb"><span>Your Moonlog lives on this phone.</span><button type="button" data-m-export>EXPORT</button><button type="button" data-m-import>IMPORT</button></div>';
     $$('[data-thumb]').forEach(function (im) { getThumb(im.getAttribute('data-thumb')).then(function (b) { if (b) im.src = URL.createObjectURL(b); }); });
+  }
+  // Backup: the whole Moonlog, with its photos, in one file the person keeps. Import merges it back, nothing is overwritten.
+  function blobToData(b) { return new Promise(function (ok) { if (!b) return ok(null); var f = new FileReader(); f.onload = function () { ok(f.result); }; f.onerror = function () { ok(null); }; f.readAsDataURL(b); }); }
+  function exportLog() {
+    var moments = store('moonMoments'), shas = [];
+    moments.forEach(function (x) { if (x.sha && shas.indexOf(x.sha) < 0) shas.push(x.sha); });
+    toast(T('Packing your Moonlog…'));
+    Promise.all(shas.map(function (h) {
+      return Promise.all([getThumb(h), getThumb('full:' + h)]).then(function (b) { return Promise.all([blobToData(b[0]), blobToData(b[1])]); }).then(function (d) { return [h, { thumb: d[0], full: d[1] }]; });
+    })).then(function (ph) {
+      var photos = {}; ph.forEach(function (x) { photos[x[0]] = x[1]; });
+      var data = { format: 'moonlog/1', exported: new Date().toISOString(), moments: moments, events: store('moonEvents'), nights: store('moonNights'), photos: photos };
+      var name = 'moonlog-' + text(moon(Date.now())).slice(0, 10) + '.json';
+      var file = new File([JSON.stringify(data)], name, { type: 'application/json' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title: 'Moonlog backup' }).then(function () { toast(T('Moonlog saved.')); }, function () {});
+      var a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      toast(T('Moonlog saved.'));
+    });
+  }
+  function importLog() {
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+    inp.onchange = function () {
+      var f = inp.files && inp.files[0]; if (!f) return;
+      f.text().then(function (t) {
+        var d = JSON.parse(t); if (!d || d.format !== 'moonlog/1' || !Array.isArray(d.moments)) throw 0;
+        var merge = function (key, items, keep) {
+          var have = store(key), seen = {}; have.forEach(function (x) { seen[x.url] = 1; });
+          var add = (items || []).filter(function (x) { return x && x.url && !seen[x.url]; });
+          store(key, have.concat(add).sort(function (a, b) { return (b.ms || 0) - (a.ms || 0); }).slice(0, keep)); return add.length;
+        };
+        var n = merge('moonMoments', d.moments, 500); merge('moonEvents', d.events, 12); merge('moonNights', d.nights, 12);
+        var jobs = Object.keys(d.photos || {}).map(function (h) {
+          var x = d.photos[h], put = function (k, u) { return u ? fetch(u).then(function (r) { return r.blob(); }).then(function (b) { return putThumb(k, b); }) : null; };
+          return Promise.all([put(h, x.thumb), put('full:' + h, x.full)]);
+        });
+        return Promise.all(jobs).then(function () { showMoments(); buzz(); toast(n === 1 ? T('Restored 1 moment.') : T('Restored {n} moments.', { n: n })); });
+      }).catch(function () { toast(T('That file is not a Moonlog backup.')); });
+    };
+    inp.click();
   }
   function removeMoment(i) {
     var r = store('moonMoments'), x = r[i]; if (!x) return;
@@ -568,6 +608,8 @@
     $('[data-sheet-x]').onclick = function () { this.href = xHref(); buzz(); };
     $('[data-sheet-photo]').onchange = function () { pickPhoto(this.files && this.files[0]); };
     $('[data-app-recent]').addEventListener('click', function (e) {
+      if (e.target.closest('[data-m-export]')) { exportLog(); return; }
+      if (e.target.closest('[data-m-import]')) { importLog(); return; }
       if (e.target.closest('[data-m-edit]')) { editing = !editing; showMoments(); buzz(); return; }
       var b = e.target.closest('[data-m-rm]'); if (!b) return;
       e.preventDefault();

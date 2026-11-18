@@ -216,6 +216,16 @@
 "1 MOMENT",
 "Chaque moment ajoute une étoile.",
 "Signature de la photo…",
-"{t} votre heure. Signé avec la photo."],
+"{t} votre heure. Signé avec la photo.",
+"Préparation de ton Moonlog…",
+"Moonlog enregistré.",
+"1 moment restauré.",
+"{n} moments restaurés.",
+"Ce fichier n'est pas une sauvegarde Moonlog.",
+"Nouveau téléphone ?",
+"RESTAURER UN MOONLOG",
+"Ton Moonlog vit sur ce téléphone.",
+"EXPORTER",
+"IMPORTER"],
   site: {}
 };

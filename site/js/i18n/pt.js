@@ -216,6 +216,16 @@
 "1 MOMENTO",
 "Cada momento acrescenta uma estrela.",
 "A assinar a foto…",
-"{t} sua hora. Assinado com a foto."],
+"{t} sua hora. Assinado com a foto.",
+"A preparar o teu Moonlog…",
+"Moonlog guardado.",
+"1 momento restaurado.",
+"{n} momentos restaurados.",
+"Esse ficheiro não é uma cópia do Moonlog.",
+"Telemóvel novo?",
+"RESTAURAR UM MOONLOG",
+"O teu Moonlog vive neste telemóvel.",
+"EXPORTAR",
+"IMPORTAR"],
   site: {}
 };

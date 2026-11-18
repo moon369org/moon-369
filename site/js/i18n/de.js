@@ -208,6 +208,16 @@
 "1 MOMENT",
 "Jeder Moment fügt einen Stern hinzu.",
 "Foto wird signiert…",
-"{t} deine Zeit. Mit dem Foto signiert."],
+"{t} deine Zeit. Mit dem Foto signiert.",
+"Dein Moonlog wird gepackt…",
+"Moonlog gespeichert.",
+"1 Moment wiederhergestellt.",
+"{n} Momente wiederhergestellt.",
+"Diese Datei ist keine Moonlog-Sicherung.",
+"Neues Telefon?",
+"MOONLOG WIEDERHERSTELLEN",
+"Dein Moonlog lebt auf diesem Telefon.",
+"EXPORTIEREN",
+"IMPORTIEREN"],
   site: {}
 };

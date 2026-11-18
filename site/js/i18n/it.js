@@ -216,6 +216,16 @@
 "1 MOMENTO",
 "Ogni momento aggiunge una stella.",
 "Firma della foto…",
-"{t} ora locale. Firmato con la foto."],
+"{t} ora locale. Firmato con la foto.",
+"Preparo il tuo Moonlog…",
+"Moonlog salvato.",
+"1 momento ripristinato.",
+"{n} momenti ripristinati.",
+"Questo file non è un backup Moonlog.",
+"Telefono nuovo?",
+"RIPRISTINA UN MOONLOG",
+"Il tuo Moonlog vive su questo telefono.",
+"ESPORTA",
+"IMPORTA"],
   site: {}
 };

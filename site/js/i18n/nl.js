@@ -214,6 +214,16 @@
 "1 MOMENT",
 "Elk moment voegt een ster toe.",
 "Foto wordt ondertekend…",
-"{t} jouw tijd. Ondertekend met de foto."],
+"{t} jouw tijd. Ondertekend met de foto.",
+"Je Moonlog wordt ingepakt…",
+"Moonlog bewaard.",
+"1 moment hersteld.",
+"{n} momenten hersteld.",
+"Dat bestand is geen Moonlog-back-up.",
+"Nieuwe telefoon?",
+"EEN MOONLOG HERSTELLEN",
+"Je Moonlog staat op deze telefoon.",
+"EXPORTEREN",
+"IMPORTEREN"],
   site: {}
 };
