@@ -381,6 +381,18 @@
   "Who registered it: when a company signs with an API key, Moon vouches for the company name. Anything they add, like the photographer's name, is shown as they stated it. Files signed without a key show as anonymous.": 'Quién lo registró: cuando una empresa firma con una clave de API, Moon avala el nombre de la empresa. Lo que añadan, como el nombre del fotógrafo, se muestra tal como lo indicaron. Los archivos firmados sin clave aparecen como anónimos.',
   'PUT IT ON YOUR SITE': 'PONLO EN TU SITIO', 'One script. A badge next to any image or file you have registered, or this same checker on your own page.': 'Un solo script. Una insignia junto a cualquier imagen o archivo que hayas registrado, o este mismo verificador en tu página.',
   'The API behind it:': 'La API detrás:', 'and': 'y',
+    // Sky and tides
+    "TIDAL RANGE · NEXT 14 DAYS": "RANGO DE MAREA · PRÓXIMOS 14 DÍAS",
+    "SPRING": "VIVA",
+    "NEAP": "MUERTA",
+    "{dir} · {kind} in {h}h {m}m": "{dir} · {kind} en {h} h {m} min",
+    "At {t} · {dir}": "A las {t} · {dir}",
+    "HORIZON DETAIL · 6× VERTICAL": "DETALLE DEL HORIZONTE · 6× VERTICAL",
+    "astronomical {t}": "astronómico {t}",
+    "behind the land": "tras el terreno",
+    "CLEARS RIDGE": "SUPERA LA CRESTA",
+    "BEHIND RIDGE": "TRAS LA CRESTA",
+    "BEHIND THE LAND": "TRAS EL TERRENO",
     // Tideline
     "MOON'S PUBLIC RECORD": "REGISTRO PÚBLICO DE MOON",
     "A permanent, public list of everything signed on Moon. Each item is listed the moment it's signed. When the lune ends, the list is sealed and chained to every lune before it. After that, no one can add, remove or backdate an item, Moon included.": "Una lista pública y permanente de todo lo firmado en Moon. Cada elemento se anota en el momento en que se firma. Cuando termina la lune, la lista se sella y se encadena a todas las lunes anteriores. Desde entonces nadie puede añadir, quitar ni antedatar un elemento, ni siquiera Moon.",

@@ -229,6 +229,18 @@
 "IMPORTAR",
 "GUARDAR MOMENTO"],
   site: {
+    // Sky and tides
+    "TIDAL RANGE · NEXT 14 DAYS": "AMPLITUDE DE MARÉ · PRÓXIMOS 14 DIAS",
+    "SPRING": "VIVA",
+    "NEAP": "MORTA",
+    "{dir} · {kind} in {h}h {m}m": "{dir} · {kind} em {h} h {m} min",
+    "At {t} · {dir}": "Às {t} · {dir}",
+    "HORIZON DETAIL · 6× VERTICAL": "DETALHE DO HORIZONTE · 6× VERTICAL",
+    "astronomical {t}": "astronómico {t}",
+    "behind the land": "atrás do relevo",
+    "CLEARS RIDGE": "PASSA A CRISTA",
+    "BEHIND RIDGE": "ATRÁS DA CRISTA",
+    "BEHIND THE LAND": "ATRÁS DO RELEVO",
     // Tideline
     "MOON'S PUBLIC RECORD": "REGISTRO PÚBLICO DA MOON",
     "A permanent, public list of everything signed on Moon. Each item is listed the moment it's signed. When the lune ends, the list is sealed and chained to every lune before it. After that, no one can add, remove or backdate an item, Moon included.": "Uma lista pública e permanente de tudo o que é assinado na Moon. Cada item é registado no momento em que é assinado. Quando a lune termina, a lista é selada e encadeada a todas as lunes anteriores. A partir daí, ninguém pode adicionar, remover ou antedatar um item, nem a Moon.",

@@ -227,6 +227,18 @@
 "IMPORTEREN",
 "MOMENT BEWAREN"],
   site: {
+    // Sky and tides
+    "TIDAL RANGE · NEXT 14 DAYS": "GETIJVERSCHIL · KOMENDE 14 DAGEN",
+    "SPRING": "SPRINGTIJ",
+    "NEAP": "DOODTIJ",
+    "{dir} · {kind} in {h}h {m}m": "{dir} · {kind} over {h} u {m} min",
+    "At {t} · {dir}": "Om {t} · {dir}",
+    "HORIZON DETAIL · 6× VERTICAL": "HORIZONDETAIL · 6× VERTICAAL",
+    "astronomical {t}": "astronomisch {t}",
+    "behind the land": "achter het land",
+    "CLEARS RIDGE": "BOVEN DE KAM",
+    "BEHIND RIDGE": "ACHTER DE KAM",
+    "BEHIND THE LAND": "ACHTER HET LAND",
     // Tideline
     "MOON'S PUBLIC RECORD": "OPENBAAR REGISTER VAN MOON",
     "A permanent, public list of everything signed on Moon. Each item is listed the moment it's signed. When the lune ends, the list is sealed and chained to every lune before it. After that, no one can add, remove or backdate an item, Moon included.": "Een permanente, openbare lijst van alles wat op Moon wordt ondertekend. Elk item wordt vastgelegd op het moment dat het wordt ondertekend. Als de lune eindigt, wordt de lijst verzegeld en gekoppeld aan elke lune ervoor. Daarna kan niemand een item toevoegen, verwijderen of antidateren, ook Moon niet.",

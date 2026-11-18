@@ -106,8 +106,13 @@
     var lat = cfg.lat, lng = cfg.lng, clock = cfg.clock, south = lat >= 0;
     var sky = pass(cfg.t0, cfg.t1, cfg.at, lat, lng), t0 = sky.w0, t1 = sky.w1, tag = cfg.dayTag || function () { return ''; };
     var at = cfg.at != null ? cfg.at : (sky.top ? sky.top.t : (t0 + t1) / 2), playing = null;
+    // The real horizon: the land around you, once it has loaded. Until then the horizon is flat.
+    var hor = null, vis = { rise: null, set: null };
+    var landAt = function (az) { return hor && window.MoonHorizon ? window.MoonHorizon.at(hor, az) : 0; };
+    var hidden = function (p) { return p.alt <= RISE || p.alt < landAt(p.az) + RISE; };
     el.innerHTML =
       '<div class="sk-sky"><canvas aria-hidden="true"></canvas></div>' +
+      '<div class="sk-hd" data-sk="hd" hidden><span>' + T('HORIZON DETAIL · 6× VERTICAL') + '</span><canvas aria-hidden="true"></canvas></div>' +
       '<div class="sk-stats">' + ['RISE', 'HIGHEST', 'SET'].map(function (k, i) { return '<div><span class="sk-k">' + k + '</span><b data-sk="v' + i + '"></b><span class="sk-s" data-sk="s' + i + '"></span></div>'; }).join('') + '</div>' +
       '<div class="sk-scrub"><div class="sk-row"><span class="sk-now" data-sk="now"></span><button type="button" class="sk-play" data-sk="play" aria-pressed="false"></button></div>' +
       '<div class="sk-track"><div class="sk-bar"></div><div data-sk="ups"></div>' +
@@ -136,9 +141,37 @@
       PAUSE = '<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0h3.5v12H0zM6.5 0H10v12H6.5z" fill="currentColor"/></svg><span class="sk-pl">' + T('PAUSE') + '</span>';
     q('play').innerHTML = PLAY;
     var setStat = function (i, ev, sub) { q('v' + i).textContent = ev ? clock(ev.t) : '—'; q('s' + i).textContent = ev ? sub : T(i === 1 ? 'not up' : 'not that day'); };
-    setStat(0, sky.rise, sky.rise && T('in the {dir}', { dir: T(compass(sky.rise.az)) }) + tag(sky.rise.t));
-    setStat(1, sky.top && sky.top.alt > 0 ? sky.top : null, sky.top && T('{deg}° up, {dir}', { deg: Math.round(sky.top.alt), dir: T(compass(sky.top.az)) }) + tag(sky.top.t));
-    setStat(2, sky.set, sky.set && T('in the {dir}', { dir: T(compass(sky.set.az)) }) + tag(sky.set.t));
+    function stats() {
+      // With the land loaded, RISE and SET are when the moon clears the ridge and drops behind it; the sea-level times move to the second line.
+      if (hor && (vis.rise || vis.set || sky.rise || sky.set)) {
+        q('v0').textContent = vis.rise ? clock(vis.rise.t) : '—'; q('s0').textContent = vis.rise ? T('astronomical {t}', { t: sky.rise ? clock(sky.rise.t) : '—' }) + tag(vis.rise.t) : T('behind the land');
+        q('v2').textContent = vis.set ? clock(vis.set.t) : '—'; q('s2').textContent = vis.set ? T('astronomical {t}', { t: sky.set ? clock(sky.set.t) : '—' }) + tag(vis.set.t) : T('behind the land');
+      } else {
+        setStat(0, sky.rise, sky.rise && T('in the {dir}', { dir: T(compass(sky.rise.az)) }) + tag(sky.rise.t));
+        setStat(2, sky.set, sky.set && T('in the {dir}', { dir: T(compass(sky.set.az)) }) + tag(sky.set.t));
+      }
+      setStat(1, sky.top && sky.top.alt > 0 ? sky.top : null, sky.top && T('{deg}° up, {dir}', { deg: Math.round(sky.top.alt), dir: T(compass(sky.top.az)) }) + tag(sky.top.t));
+    }
+    stats();
+    // When the moon clears the land and when it drops behind it: where its altitude crosses the land's at its bearing.
+    function visible() {
+      var r = null, st = null, p = sky.pts;
+      for (var i = 1; i < p.length; i++) {
+        var fa = p[i - 1].alt - RISE - landAt(p[i - 1].az), fb = p[i].alt - RISE - landAt(p[i].az);
+        if ((fa < 0) !== (fb < 0)) {
+          var k = fa / (fa - fb), ev = { t: p[i - 1].t + k * (p[i].t - p[i - 1].t), az: p[i - 1].az + k * (((p[i].az - p[i - 1].az + 540) % 360) - 180) };
+          ev.alt = p[i - 1].alt + k * (p[i].alt - p[i - 1].alt);
+          if (fb > fa && !r) r = ev; else if (fb < fa && r && !st) st = ev; else if (fb < fa && !r && !st) st = ev;
+        }
+      }
+      return { rise: r, set: st };
+    }
+    if (window.MoonHorizon && lat != null && lng != null && !cfg.noTerrain) {
+      window.MoonHorizon.profile(lat, lng, south).then(function (p) {
+        if (!el.isConnected) return;
+        hor = p; vis = visible(); stats(); draw();
+      }).catch(function () {});
+    }
     var cx = cv.getContext('2d');
     function X(az, W, pad) { var a = south ? az : (az + 180) % 360; a = Math.max(15, Math.min(345, a)); return pad + (a - 15) / 330 * (W - pad * 2); }
     function draw() {
@@ -162,6 +195,20 @@
       cx.font = (10 * dpr) + 'px "JetBrains Mono", monospace'; cx.textAlign = 'left';
       [30, 60].forEach(function (a) { cx.beginPath(); cx.moveTo(0, Y(a)); cx.lineTo(W, Y(a)); cx.stroke(); cx.fillStyle = 'rgba(138,139,143,.6)'; cx.fillText(a + '°', 8 * dpr, Y(a) - 6 * dpr); });
       cx.setLineDash([]);
+      // The land, at true scale: a dark silhouette with a thin light rim, above the sky and below the moon.
+      var land = null;
+      if (hor) {
+        land = new Path2D(); var n = 0;
+        for (var rel = 15; rel <= 345; rel += 0.5) {
+          var az = south ? rel : (rel + 180) % 360, x = X(az, W, pad), y = Y(Math.max(0, landAt(az)));
+          if (!n++) land.moveTo(x, y); else land.lineTo(x, y);
+        }
+        var rim = new Path2D(land);
+        land.lineTo(W, hz + 1); land.lineTo(0, hz + 1); land.closePath();
+        var lg = cx.createLinearGradient(0, Y(15), 0, hz); lg.addColorStop(0, '#17181C'); lg.addColorStop(1, '#101114');
+        cx.fillStyle = lg; cx.fill(land);
+        cx.strokeStyle = 'rgba(233,228,216,.42)'; cx.lineWidth = 1 * dpr; cx.lineJoin = 'round'; cx.stroke(rim);
+      }
       function path() {
         cx.beginPath(); var first = true, last = null;
         sky.pts.forEach(function (p) {
@@ -171,11 +218,15 @@
           last = x;
         });
       }
+      if (land) { cx.strokeStyle = 'rgba(233,228,216,.22)'; cx.lineWidth = 2 * dpr; cx.lineCap = 'round'; cx.setLineDash([0.1, 7 * dpr]); path(); cx.stroke(); cx.setLineDash([]); }
+      cx.save();
+      if (land) { var above = new Path2D(); above.rect(0, 0, W, H); above.addPath(land); cx.clip(above, 'evenodd'); }
       cx.save();
       if (BLUR_OK) { cx.filter = 'blur(' + 8 * dpr + 'px)'; cx.strokeStyle = 'rgba(233,228,216,.35)'; cx.lineWidth = 10 * dpr; }
       else { cx.shadowColor = 'rgba(233,228,216,.55)'; cx.shadowBlur = 16 * dpr; cx.strokeStyle = 'rgba(233,228,216,.14)'; cx.lineWidth = 3 * dpr; }
       path(); cx.stroke(); cx.restore();
       cx.strokeStyle = 'rgba(233,228,216,.85)'; cx.lineWidth = 2 * dpr; cx.lineCap = 'round'; cx.setLineDash([0.1, 7 * dpr]); path(); cx.stroke(); cx.setLineDash([]);
+      cx.restore();
       var gg = cx.createLinearGradient(0, hz, 0, H); gg.addColorStop(0, '#121316'); gg.addColorStop(1, '#0B0B0D');
       cx.fillStyle = gg; cx.fillRect(0, hz, W, H - hz);
       cx.strokeStyle = 'rgba(233,228,216,.5)'; cx.lineWidth = 1.2 * dpr; cx.beginPath(); cx.moveTo(0, hz); cx.lineTo(W, hz); cx.stroke();
@@ -197,8 +248,25 @@
       mark(sky.rise, T('RISE {t}', { t: sky.rise ? clock(sky.rise.t) : '' }));
       if (sky.top && sky.top.alt > 0) mark(sky.top, clock(sky.top.t) + ' · ' + Math.round(sky.top.alt) + '°', true);
       mark(sky.set, T('SET {t}', { t: sky.set ? clock(sky.set.t) : '' }));
+      // Where the moon clears the land and where it drops behind it: a ring on the arc, labelled on the outside of the arc.
+      function ridge(ev, l1, l2, side) {
+        if (!ev) return; var x = X(ev.az, W, pad), y = Y(Math.max(0, ev.alt));
+        cx.strokeStyle = '#E9E4D8'; cx.lineWidth = 1.5 * dpr; cx.beginPath(); cx.arc(x, y, 5 * dpr, 0, 7); cx.stroke();
+        cx.font = (10.5 * dpr) + 'px "JetBrains Mono", monospace'; cx.fillStyle = 'rgba(233,228,216,.92)';
+        var w = Math.max(cx.measureText(l1).width, cx.measureText(l2).width), gap = 10 * dpr;
+        if (side < 0 && x - gap - w < 4 * dpr) side = 1; if (side > 0 && x + gap + w > W - 4 * dpr) side = -1;
+        cx.textAlign = side < 0 ? 'right' : 'left';
+        var tx = x + side * gap, ty = Math.max(28 * dpr, y - 12 * dpr);
+        cx.fillText(l1, tx, ty - 13 * dpr); cx.fillText(l2, tx, ty);
+      }
+      if (hor) {
+        ridge(vis.rise, T('CLEARS RIDGE'), vis.rise ? clock(vis.rise.t) : '', -1);
+        ridge(vis.set, T('BEHIND RIDGE'), vis.set ? clock(vis.set.t) : '', 1);
+      }
       var f = window.MoonPhase ? window.MoonPhase.fraction(at) : cfg.f;
+      var behind = m.alt > RISE && hor && hidden(m);
       if (m.alt > RISE) {
+        cx.save(); if (behind) cx.globalAlpha = 0.35;
         var mx = X(m.az, W, pad), my = Y(Math.max(0, m.alt)), r = (narrow ? 15 : 22) * dpr;
         var gl = cx.createRadialGradient(mx, my, r * 0.6, mx, my, r * 4);
         gl.addColorStop(0, 'rgba(233,228,216,' + (0.38 * (1 - dk * 0.6)).toFixed(3) + ')'); gl.addColorStop(1, 'rgba(233,228,216,0)');
@@ -220,16 +288,37 @@
         cx.save(); cx.translate(mx, my); if (window.MoonPhase && window.MoonPhase.limbAngle) cx.rotate(rot); else if (!south) cx.scale(-1, 1);
         if (BLUR_OK) cx.filter = 'blur(' + (0.8 * dpr) + 'px)';
         cx.fillStyle = '#E9E4D8'; cx.fill(lit); cx.restore();
+        cx.restore();
       } else {
         var gx = X(m.az, W, pad);
         cx.strokeStyle = 'rgba(233,228,216,.35)'; cx.setLineDash([3 * dpr, 4 * dpr]); cx.lineWidth = 1.2 * dpr;
         cx.beginPath(); cx.arc(gx, hz + 70 * dpr, 10 * dpr, 0, 7); cx.stroke(); cx.setLineDash([]);
       }
+      detail(dpr, pad);
       range.value = toV(at);
       // break only between the parts, so it wraps cleanly onto two lines on phones
-      q('now').innerHTML = [clock(at), tag(at).replace(' · ', '').toUpperCase(), T(m.alt > RISE ? 'MOON UP' : 'BELOW THE HORIZON')]
+      q('now').innerHTML = [clock(at), tag(at).replace(' · ', '').toUpperCase(), T(behind ? 'BEHIND THE LAND' : m.alt > RISE ? 'MOON UP' : 'BELOW THE HORIZON')]
         .filter(Boolean).map(function (x, i, all) { return '<span>' + x + (i < all.length - 1 ? ' ·' : '') + '</span>'; }).join(' ');
       if (cfg.onTime) cfg.onTime(at, m);
+    }
+    // Flat country: a thin strip under the chart shows the land 6 times taller, so its shape can be seen.
+    function detail(dpr, pad) {
+      var box = q('hd'); if (!box) return;
+      var mx = 0; if (hor) for (var i = 0; i < hor.alt.length; i++) mx = Math.max(mx, hor.alt[i]);
+      if (!hor || mx >= 3) { box.hidden = true; return; }
+      box.hidden = false;
+      var c2 = box.querySelector('canvas'), W = Math.round(c2.clientWidth * dpr), Hh = Math.round(c2.clientHeight * dpr); if (!W || !Hh) return;
+      if (c2.width !== W || c2.height !== Hh) { c2.width = W; c2.height = Hh; }
+      var g2 = c2.getContext('2d'), base = Hh - 4 * dpr, ppd = (cv.height - 88 * dpr - cv.height * 0.07) / 90 * 6;
+      g2.clearRect(0, 0, W, Hh);
+      var pth = new Path2D(), n = 0;
+      for (var rel = 15; rel <= 345; rel += 0.5) {
+        var az = south ? rel : (rel + 180) % 360, x = X(az, W, pad * W / cv.width), y = base - Math.max(0, landAt(az)) * ppd;
+        if (!n++) pth.moveTo(x, Math.max(2 * dpr, y)); else pth.lineTo(x, Math.max(2 * dpr, y));
+      }
+      var rim = new Path2D(pth); pth.lineTo(W, base); pth.lineTo(0, base); pth.closePath();
+      g2.fillStyle = '#16171A'; g2.fill(pth); g2.strokeStyle = 'rgba(233,228,216,.5)'; g2.lineWidth = dpr; g2.stroke(rim);
+      g2.strokeStyle = 'rgba(233,228,216,.2)'; g2.beginPath(); g2.moveTo(0, base); g2.lineTo(W, base); g2.stroke();
     }
     function stop() { if (playing) { cancelAnimationFrame(playing.raf); playing = null; } q('play').setAttribute('aria-pressed', 'false'); q('play').innerHTML = PLAY; }
     range.addEventListener('input', function () { stop(); at = toT(+range.value); draw(); });

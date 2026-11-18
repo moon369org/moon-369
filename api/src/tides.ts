@@ -33,8 +33,8 @@ export function nearest(list: Station[], at: { lat: number; lng: number }): { st
 const ymd = (ms: number) => new Date(ms).toISOString().slice(0, 10).replace(/-/g, '');
 const iso = (t: string) => t.replace(' ', 'T') + ':00Z';   // NOAA gives "2026-11-17 03:12" in GMT
 
-async function predictions(f: typeof fetch, id: string, begin: number, interval: string) {
-  const q = new URLSearchParams({ product: 'predictions', application: 'moon369', begin_date: ymd(begin), range: '72', datum: 'MLLW', station: id, time_zone: 'gmt', units: 'english', interval, format: 'json' });
+async function predictions(f: typeof fetch, id: string, begin: number, interval: string, hours = 72) {
+  const q = new URLSearchParams({ product: 'predictions', application: 'moon369', begin_date: ymd(begin), range: String(hours), datum: 'MLLW', station: id, time_zone: 'gmt', units: 'english', interval, format: 'json' });
   const r = await f(`${NOAA}/api/prod/datagetter?${q}`, { signal: AbortSignal.timeout(10_000), headers: { 'User-Agent': 'Moon (+https://moon369.org)', Accept: 'application/json' } });
   if (!r.ok) throw new Error('predictions ' + r.status);
   const j = (await r.json()) as { predictions?: { t: string; v: string; type?: string }[]; error?: { message: string } };
@@ -48,10 +48,12 @@ export async function tidesNear(lat: number, lng: number, nowMs: number, f: type
   const begin = nowMs - 864e5;
   // Most stations near a coastline are subordinate stations, which NOAA only predicts as highs and lows,
   // so the curve is drawn between them the standard way: a half cosine from each turn to the next.
-  const hl = await predictions(f, n.station.id, begin, 'hilo');
+  // Highs and lows for about two weeks (the phone draws each day's range from them); the curve covers the first three days.
+  const hl = await predictions(f, n.station.id, begin, 'hilo', 16 * 24);
   const turns = hl.map((p) => ({ t: Date.parse(iso(p.t)), v: Number(p.v) })).filter((x) => Number.isFinite(x.t) && Number.isFinite(x.v));
   const curve: { t: string; v: string }[] = [];
-  for (let i = 0; i + 1 < turns.length; i++) {
+  const curveEnd = begin + 4 * 864e5;
+  for (let i = 0; i + 1 < turns.length && turns[i].t < curveEnd; i++) {
     const a = turns[i], b = turns[i + 1];
     for (let t = Math.ceil(a.t / 1_800_000) * 1_800_000; t < b.t; t += 1_800_000) {
       const k = (1 - Math.cos(Math.PI * (t - a.t) / (b.t - a.t))) / 2;

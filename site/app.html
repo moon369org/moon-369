@@ -196,6 +196,8 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .sky-ask[hidden]{display:none}.sky-ask p{margin:0;font-size:13px;line-height:1.55;color:#A2A3A7}
 .sk-sky{position:relative;width:100%;aspect-ratio:1000/440}
 .sk-sky canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sk-hd{position:relative;margin-top:2px}.sk-hd canvas{display:block;width:100%;height:40px}.sk-hd span{display:block;padding:8px 0 4px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#8A8B8F}
+
 .sk-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #24262A}
 .sk-stats>div{padding:18px 24px;display:flex;flex-direction:column;gap:6px}.sk-stats>div+div{border-left:1px solid #24262A}
 .sk-k{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
@@ -229,8 +231,31 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .sky-where{display:flex;justify-content:center;align-items:center;gap:12px;font:11px 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8A8B8F}
 .sky-where[hidden]{display:none}.sky-where button{background:none;border:0;color:#E9E4D8;font:inherit;letter-spacing:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:36px}
 .tide[hidden]{display:none}.tide{display:flex;flex-direction:column;gap:14px}
-.tide-ch{width:100%;height:170px;display:block;border-top:1px solid #24262A;border-bottom:1px solid #24262A;background:linear-gradient(#0B0B0D,#101114)}
-.tide-ax{position:relative;display:flex;justify-content:space-between;font:10px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#8A8B8F;margin-top:-6px}
+.tide-ch{width:100%;height:200px;display:block;border-top:1px solid #24262A;border-bottom:1px solid #24262A;background:linear-gradient(#0B0B0D,#101114)}
+.tide-ax{position:relative;height:24px;font:10px 'JetBrains Mono',monospace;letter-spacing:.06em;color:#8A8B8F;margin-top:-14px}
+.tide-ax i{position:absolute;top:0;width:1px;height:5px;background:#3A3B3F}.tide-ax i.m{height:8px;background:#6A6C70}
+.tide-ax span{position:absolute;top:10px;transform:translateX(-50%);white-space:nowrap}
+.tide-now[hidden]{display:none}.tide-now{display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px 0 2px}
+.tide-now b{font:700 clamp(40px,12vw,60px) Syncopate,sans-serif;letter-spacing:.02em;line-height:1;font-variant-numeric:tabular-nums}
+.tide-now span{font:12px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#A2A3A7;text-align:center}
+.tide-labs{position:absolute;inset:0;pointer-events:none}
+.tide-lab{position:absolute;font:10.5px/1.35 'JetBrains Mono',monospace;color:#E9E4D8;text-align:center;white-space:nowrap}
+.tide-lab i{display:block;font-style:normal;color:#8A8B8F}
+.tide-lab.hi{transform:translate(-50%,calc(-100% - 9px))}.tide-lab.lo{transform:translate(-50%,9px)}
+.tide-lab.l{text-align:left;transform:translate(-4px,calc(-100% - 9px))}.tide-lab.lo.l{transform:translate(-4px,9px)}
+.tide-lab.r{text-align:right;transform:translate(calc(-100% + 4px),calc(-100% - 9px))}.tide-lab.lo.r{transform:translate(calc(-100% + 4px),9px)}
+.tide-range[hidden]{display:none}.tide-range{display:flex;flex-direction:column;gap:10px;border-top:1px solid #24262A;padding-top:14px}
+.tide-k{font:10px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8A8B8F}
+.tide-days{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;height:118px}
+.td{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;min-width:0}
+.td em{font:8px 'JetBrains Mono',monospace;letter-spacing:.06em;font-style:normal;color:#A2A3A7;writing-mode:vertical-rl;transform:rotate(180deg);height:34px;display:flex;align-items:center}
+.td i{display:block;width:100%;max-width:16px;background:#3A3B3F;border-radius:1px}
+.td.sp i{background:#8A8B8F}.td.now i{background:#E9E4D8}
+.td span{font:9px 'JetBrains Mono',monospace;color:#6A6C70;line-height:1.2;text-align:center}.td.now span{color:#E9E4D8}
+.tide-str b{display:flex;align-items:center;gap:10px}.tide-str b svg{width:18px;height:18px;flex:none}
+.tide-cur.now b{animation:tidePulse 2.2s ease-out infinite}
+@keyframes tidePulse{0%{box-shadow:0 0 0 0 rgba(233,228,216,.45)}100%{box-shadow:0 0 0 12px rgba(233,228,216,0)}}
+@media (prefers-reduced-motion:reduce){.tide-cur.now b{animation:none}}
 .tide-ax .nw{position:absolute;top:0;transform:translateX(-50%);color:#E9E4D8}
 .tide-list{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #24262A}
 .tide-list>div{padding:12px 8px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid #1C1D20}
@@ -281,14 +306,16 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
       <div class="sky-h" data-sky-h></div>
       <div data-sky-chart></div>
       <div class="tide" data-tide hidden>
+        <div class="tide-now" data-tide-now hidden><b data-tide-ft></b><span data-tide-sub></span></div>
         <div class="sky-h" data-tide-h></div>
         <div class="tide-wrap" data-tide-wrap>
-          <svg class="tide-ch" data-tide-chart viewBox="0 0 360 170" preserveAspectRatio="none" role="img" aria-label="The tide over the next day"></svg>
+          <svg class="tide-ch" data-tide-chart viewBox="0 0 360 200" preserveAspectRatio="none" role="img" aria-label="The tide over the next day"></svg>
+          <div class="tide-labs" data-tide-labs></div>
           <div class="tide-cur" data-tide-cur hidden><i></i><b></b><span></span></div>
         </div>
         <div class="tide-ax" data-tide-ax></div>
         <button type="button" class="tide-back" data-tide-back hidden>BACK TO NOW</button>
-        <div class="tide-list" data-tide-list></div>
+        <div class="tide-range" data-tide-range hidden><div class="tide-k">TIDAL RANGE · NEXT 14 DAYS</div><div class="tide-days" data-tide-days></div></div>
         <div class="tide-str" data-tide-str></div>
         <div class="tide-src" data-tide-src></div>
       </div>
@@ -373,6 +400,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 
 <script src="/js/i18n.js" defer></script>
 <script src="/js/moon-phase.js" defer></script>
+<script src="/js/horizon.js" defer></script>
 <script src="/js/sky.js" defer></script>
 <script src="/js/moonglow.js" defer></script>
 <script src="/js/qrcode.js" defer></script>
