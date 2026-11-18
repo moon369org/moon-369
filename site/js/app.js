@@ -391,10 +391,36 @@
     var bx = e && e.clientX ? e.clientX : innerWidth / 2, by = e && e.clientY ? e.clientY : innerHeight / 2;
     var o = document.createElement('div'); o.className = 'mflash'; o.setAttribute('aria-hidden', 'true');
     o.style.setProperty('--x', bx + 'px'); o.style.setProperty('--y', by + 'px');
-    o.innerHTML = '<i class="mf-burst"></i><i class="mf-ring"></i><div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
-    document.body.appendChild(o); buzz();
+    o.innerHTML = '<canvas class="mf-spark"></canvas><i class="mf-ring"></i><div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
+    document.body.appendChild(o); buzz(); spark(o.querySelector('.mf-spark'));
     setTimeout(function () { o.remove(); }, 1500);
     return true;
+  }
+  // A spark from the middle of the screen: hot streaks flying out, thinning and dimming, with embers drifting after.
+  function spark(cv) {
+    var dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr, c = cv.getContext('2d');
+    var cx = W / 2, cy = H / 2, reach = Math.hypot(W, H) * 0.42, t0 = performance.now(), rays = [], embers = [], i;
+    for (i = 0; i < 46; i++) rays.push({ a: Math.random() * 6.283, v: 0.35 + Math.random() * 0.75, len: 0.08 + Math.random() * 0.22, w: (0.6 + Math.random() * 1.6) * dpr, d: Math.random() * 0.08 });
+    for (i = 0; i < 70; i++) { var a = Math.random() * 6.283, sp = (0.2 + Math.random() * 0.8) * reach; embers.push({ vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: (0.6 + Math.random() * 1.4) * dpr, life: 0.5 + Math.random() * 0.7 }); }
+    (function frame(now) {
+      var t = (now - t0) / 1000; c.clearRect(0, 0, W, H); if (t > 1.3 || !cv.isConnected) return;
+      var core = Math.max(0, 1 - t / 0.18), g = c.createRadialGradient(cx, cy, 0, cx, cy, 60 * dpr);   // the white-hot point
+      g.addColorStop(0, 'rgba(255,252,244,' + core + ')'); g.addColorStop(1, 'rgba(255,252,244,0)'); c.fillStyle = g; c.fillRect(cx - 60 * dpr, cy - 60 * dpr, 120 * dpr, 120 * dpr);
+      c.lineCap = 'round';
+      rays.forEach(function (r) {   // streaks: fast out, easing off, tails shrinking as they cool
+        var u = Math.max(0, t - r.d) / 0.75; if (u <= 0 || u >= 1) return;
+        var e = 1 - Math.pow(1 - u, 3), head = reach * r.v * e, tail = Math.max(0, head - reach * r.len * (1 - u)), al = (1 - u) * (1 - u);
+        var x1 = cx + Math.cos(r.a) * tail, y1 = cy + Math.sin(r.a) * tail, x2 = cx + Math.cos(r.a) * head, y2 = cy + Math.sin(r.a) * head;
+        var lg = c.createLinearGradient(x1, y1, x2, y2); lg.addColorStop(0, 'rgba(233,228,216,0)'); lg.addColorStop(1, 'rgba(255,252,244,' + al + ')');
+        c.strokeStyle = lg; c.lineWidth = r.w * (1 - u * 0.6); c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+      });
+      embers.forEach(function (m) {   // embers: slow, falling a little, flickering out
+        var u = t / m.life; if (u >= 1) return;
+        var e = 1 - Math.pow(1 - Math.min(1, u), 2), x = cx + m.vx * e * 0.6, y = cy + m.vy * e * 0.6 + 40 * dpr * u * u;
+        c.fillStyle = 'rgba(255,252,244,' + ((1 - u) * (0.6 + 0.4 * Math.sin(t * 40 + m.r * 9))) + ')'; c.beginPath(); c.arc(x, y, m.r, 0, 6.283); c.fill();
+      });
+      requestAnimationFrame(frame);
+    })(t0);
   }
   function openSheet(kind, ms, name) {
     cur = { ms: kind === 'event' ? Math.floor(ms / 1000) * 1000 : ms, kind: kind }; made = null;   // a moment is the instant passed in: the touch on Mark This Moment
