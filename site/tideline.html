@@ -146,7 +146,14 @@ header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(1
 .tl-pv{background:#1A160D;border-bottom:1px solid #6B5A33;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;color:#D9B26A}
 .tl-pv .tl-wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:14px;padding-bottom:14px}.tl-pv a{color:#D9B26A;text-decoration:underline}
 @media (max-width:720px){
- .tl-wrap{padding:0 20px}.tl-hero-in{padding:56px 20px 190px}.tl-sec-in{padding:56px 20px}
+ .tl-wrap{padding:0 20px}.tl-hero-in{padding:28px 20px 150px;gap:16px}.tl-sec-in{padding:56px 20px}
+ /* Phones: a tighter hero, so the moving sea at its foot shows on the first screen. */
+ #top.tl-hero{padding:0!important}
+ .tl-hero .tl-p{font-size:15px;line-height:1.55}
+ .tl-hero .tl-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:0}
+ .tl-hero .tl-num b{font-size:24px}.tl-hero .tl-num span{font-size:10px;letter-spacing:.14em}
+ .tl-hero .tl-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:0}
+ .tl-hero .tl-btn{padding:0 8px;font-size:9.5px;letter-spacing:.14em}
  .tl-nums{gap:18px 32px}.tl-sform{grid-template-columns:minmax(0,1fr)}
  .tl-slist li{grid-template-columns:minmax(0,1fr);gap:4px}
  .tl-table .tl-hide{display:none}

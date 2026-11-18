@@ -309,6 +309,8 @@
   // ---------- start ----------
   function start() {
     basin = $('[data-tl-basin]'); sea = basin && basin.querySelector('canvas');
+    // On phones the hero's sea is lower, so it shows on the first screen.
+    var heroSea = $('#top canvas.tl-sea'); if (heroSea && window.matchMedia && matchMedia('(max-width: 720px)').matches) heroSea.setAttribute('data-sea-px', '130');
     setPx(luneLevel());
     var pv = $('[data-tl-preview]');
     if (pv) pv.addEventListener('click', function () {
