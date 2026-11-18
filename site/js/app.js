@@ -715,10 +715,8 @@
     $('[data-sky-change]').onclick = function () { try { localStorage.removeItem('moonPlace'); } catch (e) {} if (skyBox) skyBox.stop(); drawPath(); };
     setView(view, false);
     $$('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
-    // The moment is the instant the finger touches Mark This Moment, not when it lifts.
-    var downAt = 0;
-    $('[data-app-mark]').addEventListener('pointerdown', function () { downAt = nowMs(); });
-    $('[data-app-mark]').onclick = function () { var t = nowMs(), at = downAt && t - downAt < 1500 ? downAt : t; downAt = 0; openSheet('moment', at); };
+    // The moment is the tap of Mark This Moment, on the same clock the screen shows.
+    $('[data-app-mark]').onclick = function () { openSheet('moment', nowMs()); };
     $('[data-sheet-close]').onclick = closeSheet;
     $('[data-app-sheet]').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeSheet(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });

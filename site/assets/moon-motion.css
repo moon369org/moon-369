@@ -336,3 +336,16 @@ html.sl-lock { overflow: hidden; }
   footer > div{flex-wrap:nowrap!important}
   footer > div > div:last-child{flex:0 1 auto;max-width:min(820px,68%);justify-content:flex-start;row-gap:14px!important}
 }
+
+/* Desktop header: logo on the left; links, Sign a file and the language globe together on the right,
+   all on one centre line. (The underline's bottom padding is balanced so the words sit level with the button.) */
+@media (min-width: 721px) {
+  :is([data-dc-root],[data-dc-snapshot]) header > div { justify-content: flex-start !important; flex-wrap: nowrap !important; }
+  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] { margin-left: auto; flex-wrap: nowrap !important; gap: clamp(18px, 2.2vw, 32px) !important; }
+  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] a:not([style*="border"]) { padding: 4px 0; white-space: nowrap; }
+  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] a[style*="border"] { white-space: nowrap; }
+  :is([data-dc-root],[data-dc-snapshot]) header .mlp-g { margin-left: 4px !important; flex: none; }
+}
+@media (min-width: 721px) and (max-width: 1000px) {
+  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] { font-size: 10px !important; letter-spacing: 0.2em !important; }
+}
