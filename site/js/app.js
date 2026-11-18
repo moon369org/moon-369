@@ -123,7 +123,9 @@
 
   // ---------- your stars: one around the moon for every moment you've marked ----------
   // Each star's place, size and twinkle come from its own moment, so it never moves. The newest is born bright.
-  var STARS = { list: [], born: 0, raf: 0, fall: null };
+  var STARS = { list: [], born: 0, raf: 0, fall: null, birth: null };
+  // A moment marked on the last visit gets its star born the first time the sky is seen again.
+  (function () { try { var b = +localStorage.getItem('moonNewStar'); localStorage.removeItem('moonNewStar'); if (b) STARS.birth = { ms: b, t0: performance.now() + 650 }; } catch (e) {} })();
   function seeded(n) { return function () { n = (n + 0x6D2B79F5) | 0; var t = Math.imul(n ^ (n >>> 15), 1 | n); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   function setStars() {
     var r = store('moonMoments'), prev = STARS.list.length;
@@ -166,6 +168,7 @@
     var newest = STARS.list.length ? STARS.list.reduce(function (m, s) { return s.ms > m.ms ? s : m; }, STARS.list[0]) : null, age = (now - STARS.born) / 1000;
     STARS.list.forEach(function (s) {
       var x = s.x, y = s.y;
+      if (STARS.birth && s.ms === STARS.birth.ms) { birthStar(c, now, dpr, s); return; }
       var tw = (still ? 0.85 : 0.72 + 0.28 * Math.sin(t * s.sp + s.ph)) * (s.lum || 1), size = s.size * dpr * 1.15;
       if (s === newest && STARS.born && age < 2.5) { var k = 1 - age / 2.5; size *= 1 + 2.2 * k; tw = Math.min(1, tw + k); }
       var g = c.createRadialGradient(x, y, 0, x, y, size * 4);
@@ -174,7 +177,37 @@
       c.fillStyle = 'rgba(255,252,244,' + tw + ')'; c.beginPath(); c.arc(x, y, size * 0.7, 0, Math.PI * 2); c.fill();
     });
     if (STARS.fall) fallStar(c, now, dpr, W, H);
-    if (!still || (STARS.born && age < 2.5) || STARS.fall) STARS.raf = requestAnimationFrame(drawStars);
+    if (!still || (STARS.born && age < 2.5) || STARS.fall || STARS.birth) STARS.raf = requestAnimationFrame(drawStars);
+  }
+  // A new moment's star is born: light gathers in from the dark, ignites with a flash and four rays, then settles to a twinkle.
+  function birthStar(c, now, dpr, s) {
+    var b = STARS.birth, t = (now - b.t0) / 1000, size = s.size * dpr * 1.15, x = s.x, y = s.y, P = dpr;
+    if (t < 0) return;
+    if (t > 2.6) { STARS.birth = null; dot(c, x, y, size, s.lum || 1); return; }
+    var g = seeded(s.seed ^ 0x2545f491), i, a, r;
+    if (t < 0.95) {   // gathering: motes spiral in
+      var k = t / 0.95, ease = k * k;
+      for (i = 0; i < 16; i++) {
+        a = g() * 6.283 + k * 2.2; r = (34 + g() * 46) * P * (1 - ease);
+        var px = x + Math.cos(a) * r, py = y + Math.sin(a) * r, al = Math.min(1, k * 1.6) * (0.35 + g() * 0.5);
+        c.fillStyle = 'rgba(233,228,216,' + al + ')'; c.beginPath(); c.arc(px, py, (0.6 + g() * 0.9) * P, 0, 6.283); c.fill();
+      }
+      c.strokeStyle = 'rgba(233,228,216,' + (0.18 * k) + ')'; c.lineWidth = 1 * P; c.beginPath(); c.arc(x, y, 60 * P * (1 - ease) + size, 0, 6.283); c.stroke();
+      dot(c, x, y, size * (0.3 + 0.7 * k), 0.4 + 0.6 * k);
+      return;
+    }
+    var u = Math.min(1, (t - 0.95) / 1.65), fl = Math.max(0, 1 - u * 2.2);   // ignition, then settling
+    var R = size * (3 + 30 * Math.min(1, u * 3)), halo = c.createRadialGradient(x, y, 0, x, y, R);
+    halo.addColorStop(0, 'rgba(255,252,244,' + (0.95 * fl + 0.1) + ')'); halo.addColorStop(0.25, 'rgba(233,228,216,' + (0.35 * fl) + ')'); halo.addColorStop(1, 'rgba(233,228,216,0)');
+    c.fillStyle = halo; c.beginPath(); c.arc(x, y, R, 0, 6.283); c.fill();
+    c.strokeStyle = 'rgba(233,228,216,' + (0.55 * fl) + ')'; c.lineWidth = 1.2 * P; c.beginPath(); c.arc(x, y, size * 4 + 70 * P * Math.min(1, u * 2), 0, 6.283); c.stroke();
+    var L = (46 * P) * (1 - u) + size * 3, w = (1.4 * P) * (1 - u * 0.6);   // four rays, long at first, drawing back in
+    [[1, 0], [0, 1], [-1, 0], [0, -1]].forEach(function (d) {
+      var lg = c.createLinearGradient(x, y, x + d[0] * L, y + d[1] * L);
+      lg.addColorStop(0, 'rgba(255,252,244,' + (0.9 * (1 - u * 0.8)) + ')'); lg.addColorStop(1, 'rgba(255,252,244,0)');
+      c.strokeStyle = lg; c.lineWidth = w; c.lineCap = 'round'; c.beginPath(); c.moveTo(x, y); c.lineTo(x + d[0] * L, y + d[1] * L); c.stroke();
+    });
+    dot(c, x, y, size * (1 + 1.6 * (1 - u)), 1);
   }
   // A removed moment's star: a flash where it stood, then it falls away like a shooting star and is gone.
   function fallStar(c, now, dpr, W, H) {
@@ -353,7 +386,8 @@
     it = it || { ms: cur.ms, name: name, url: url };
     if (cur.kind === 'event') { remember('moonEvents', it, function (x) { return x.url === url; }); showEvents(); }
     else {
-      remember('moonMoments', it, function (x) { return x.url === url; }); showMoments(); buzz();
+      remember('moonMoments', it, function (x) { return x.url === url; }); buzz();
+      try { localStorage.setItem('moonNewStar', String(it.ms)); } catch (e) {}   // its star is born when the sky is next seen
       // A new moment opens straight in its own page.
       location.href = url.replace(/^https:\/\/moon369\.org/, '');
       return;
