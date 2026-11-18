@@ -476,40 +476,37 @@
       if (rd && !rb.innerHTML.trim()) { rd.hidden = true; new MutationObserver(function () { if (rb.innerHTML.trim()) rd.hidden = false; }).observe(rb, { childList: true }); }
     }
   }
-  // Little white stars drift inside the two rings of the Moon mark, at their own speeds, bumping off the rings and each other.
+  // Little white stars travel the two rings of the Moon mark: clockwise on the left ring, counterclockwise on the right,
+  // each at its own speed. A faster star that catches the one ahead bumps it, and they trade speeds. It loops forever.
   function ringStars(svg) {
     if (!svg || svg.__stars) return; svg.__stars = 1;
-    var NS = 'http://www.w3.org/2000/svg', C = [[-30, 0], [30, 0]], R = 40.5, r = 4.6, N = 7, still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var NS = 'http://www.w3.org/2000/svg', RING = 46, still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     var g = document.createElementNS(NS, 'g'); svg.appendChild(g);
-    var shape = 'M0,-4.6 L1.1,-1.1 L4.6,0 L1.1,1.1 L0,4.6 L-1.1,1.1 L-4.6,0 L-1.1,-1.1 Z';
-    var ps = [];
-    for (var i = 0; i < N; i++) {
-      var c = C[i % 2], a = Math.random() * 6.283, d = Math.random() * (R - r - 6), sp = 6 + Math.random() * 18, h = Math.random() * 6.283;
-      var el = document.createElementNS(NS, 'path'); el.setAttribute('d', shape); el.setAttribute('fill', '#E9E4D8'); g.appendChild(el);
-      ps.push({ x: c[0] + Math.cos(a) * d, y: c[1] + Math.sin(a) * d, vx: Math.cos(h) * sp, vy: Math.sin(h) * sp, rot: Math.random() * 90, vr: (Math.random() - 0.5) * 60, tw: Math.random() * 6.283, el: el });
-    }
-    var inside = function (p) { return C.some(function (c) { return Math.hypot(p.x - c[0], p.y - c[1]) <= R - r; }); };
+    var shape = 'M0,-5 L1.2,-1.2 L5,0 L1.2,1.2 L0,5 L-1.2,1.2 L-5,0 L-1.2,-1.2 Z', GAP = 0.24;   // gap: how close (in radians) two stars get before they bump
+    var rings = [{ cx: -30, dir: 1, ps: [] }, { cx: 30, dir: -1, ps: [] }];
+    rings.forEach(function (rg) {
+      for (var k = 0; k < 3; k++) {
+        var el = document.createElementNS(NS, 'path'); el.setAttribute('d', shape); el.setAttribute('fill', '#E9E4D8'); g.appendChild(el);
+        rg.ps.push({ a: k * 2.094 + Math.random() * 0.8, w: 0.35 + Math.random() * 0.9, rot: Math.random() * 90, tw: Math.random() * 6.283, el: el });
+      }
+    });
     var last = performance.now();
     function step(now) {
       var dt = Math.min(0.05, (now - last) / 1000); last = now;
-      ps.forEach(function (p) {
-        p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; p.tw += dt * 2.4;
-        if (!inside(p)) {   // off the edge of both rings: bounce off the nearer one
-          var c = Math.hypot(p.x - C[0][0], p.y - C[0][1]) < Math.hypot(p.x - C[1][0], p.y - C[1][1]) ? C[0] : C[1];
-          var dx = p.x - c[0], dy = p.y - c[1], L = Math.hypot(dx, dy) || 1, nx = dx / L, ny = dy / L, dot = p.vx * nx + p.vy * ny;
-          if (dot > 0) { p.vx -= 2 * dot * nx; p.vy -= 2 * dot * ny; }
-          p.x = c[0] + nx * (R - r); p.y = c[1] + ny * (R - r);
+      rings.forEach(function (rg) {
+        rg.ps.forEach(function (p) { p.a += rg.dir * p.w * dt; p.rot += rg.dir * 90 * dt; p.tw += dt * 2.4; });
+        // bumps: along the direction of travel, if a star closes on the one ahead, they swap speeds
+        for (var i = 0; i < rg.ps.length; i++) for (var j = 0; j < rg.ps.length; j++) {
+          if (i === j) continue;
+          var A = rg.ps[i], B = rg.ps[j], d = ((B.a - A.a) * rg.dir) % 6.283; if (d < 0) d += 6.283;   // how far B is ahead of A
+          if (d < GAP && A.w > B.w) { var t = A.w; A.w = B.w; B.w = t; A.a = B.a - rg.dir * GAP; }
         }
+        rg.ps.forEach(function (p) {
+          var x = rg.cx + Math.cos(p.a) * RING, y = Math.sin(p.a) * RING;
+          p.el.setAttribute('transform', 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ') rotate(' + p.rot.toFixed(1) + ')');
+          p.el.setAttribute('opacity', (0.7 + 0.3 * Math.sin(p.tw)).toFixed(2));
+        });
       });
-      for (var i = 0; i < N; i++) for (var j = i + 1; j < N; j++) {   // stars bump into each other
-        var a = ps[i], b = ps[j], dx = b.x - a.x, dy = b.y - a.y, D = Math.hypot(dx, dy);
-        if (D > 0 && D < 2 * r) {
-          var nx = dx / D, ny = dy / D, rel = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny, o = (2 * r - D) / 2;
-          a.x -= nx * o; a.y -= ny * o; b.x += nx * o; b.y += ny * o;
-          if (rel > 0) { a.vx -= rel * nx; a.vy -= rel * ny; b.vx += rel * nx; b.vy += rel * ny; }
-        }
-      }
-      ps.forEach(function (p) { p.el.setAttribute('transform', 'translate(' + p.x.toFixed(2) + ' ' + p.y.toFixed(2) + ') rotate(' + p.rot.toFixed(1) + ')'); p.el.setAttribute('opacity', (0.65 + 0.35 * Math.sin(p.tw)).toFixed(2)); });
       if (!still && svg.isConnected) requestAnimationFrame(step);
     }
     step(last);
