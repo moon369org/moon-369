@@ -159,6 +159,13 @@
       if (pr && pr.status && pr.status !== 'not_found') {
         var lune = pr.lune, n = pr.index + 1;
         head = '<a class="mk-rec-n" href="/tide/' + lune + '#e' + pr.index + '"><span>TIDE ' + lune + '</span><span>ENTRY ' + n.toLocaleString('en-US') + '</span></a>';
+        // The same entry, linked from the proof, so anyone can find this exact receipt in the public log.
+        var sb = root.querySelector('[data-mk-sig]'), btn1 = sb && sb.querySelector('.mk-sig-btn');
+        if (sb && btn1 && !sb.querySelector('[data-mk-tl]')) {
+          var tl = document.createElement('a'); tl.className = 'mk-sig-btn'; tl.setAttribute('data-mk-tl', ''); tl.href = '/tide/' + lune + '#e' + pr.index;
+          tl.textContent = 'SEE IT IN THE TIDELINE · TIDE ' + lune + ' · ENTRY ' + n.toLocaleString('en-US');
+          btn1.parentNode.insertBefore(tl, btn1);
+        }
         steps.push(step(true, 'Written into the Tideline', 'Tide ' + lune + ', entry ' + n.toLocaleString('en-US') + ' · Moon&#39;s public log'));
         if (pr.status === 'sealed' && pr.tide) {
           steps.push(step(true, 'Sealed into tide ' + lune, when(pr.tide.sealed_unix_ns) + ' · one Merkle root over ' + pr.tide.size.toLocaleString('en-US') + ' entries'));
