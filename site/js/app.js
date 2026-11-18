@@ -393,8 +393,43 @@
     o.style.setProperty('--x', bx + 'px'); o.style.setProperty('--y', by + 'px');
     o.innerHTML = '<canvas class="mf-spark"></canvas><i class="mf-ring"></i><div class="mf-t"><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
     document.body.appendChild(o); buzz(); spark(o.querySelector('.mf-spark'));
-    setTimeout(function () { o.remove(); }, 1500);
+    setTimeout(function () { dissolve(o); }, 1000);   // after a beat, the time breaks into dots and stars that fall away
+    setTimeout(function () { o.remove(); }, 2900);
     return true;
+  }
+  // The flashed time turns to dust: each lit pixel of the text becomes a dot (a few become little stars) that drifts, falls and fades.
+  function dissolve(o) {
+    var t = o.querySelector('.mf-t'), sp = t && t.querySelector('span'); if (!sp || !o.isConnected) return;
+    var dpr = Math.min(2, window.devicePixelRatio || 1), r = sp.getBoundingClientRect(), cs = getComputedStyle(sp);
+    var off = document.createElement('canvas'), W = Math.ceil(r.width * dpr) + 4, H = Math.ceil(r.height * dpr * 1.4) + 4, x = off.getContext('2d');
+    off.width = W; off.height = H; x.scale(dpr, dpr); x.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily; x.textBaseline = 'middle'; x.textAlign = 'left'; x.fillStyle = '#fff';
+    x.fillText(sp.textContent, 0, r.height * 0.7);
+    var data = x.getImageData(0, 0, W, H).data, step = Math.max(2, Math.round(2.4 * dpr)), ps = [];
+    for (var yy = 0; yy < H; yy += step) for (var xx = 0; xx < W; xx += step) if (data[(yy * W + xx) * 4 + 3] > 120) {
+      ps.push({ x: r.left * dpr + xx, y: (r.top - r.height * 0.2) * dpr + yy, vx: (Math.random() - 0.5) * 1.2 * dpr, vy: (-0.6 - Math.random() * 1.4) * dpr, d: Math.random() * 0.35, star: Math.random() < 0.07, s: (0.7 + Math.random() * 0.9) * dpr, tw: Math.random() * 6 });
+    }
+    if (ps.length > 1600) ps = ps.filter(function (_, i) { return i % Math.ceil(ps.length / 1600) === 0; });
+    var cv = document.createElement('canvas'); cv.className = 'mf-dust'; cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; o.appendChild(cv);
+    var c = cv.getContext('2d'), t0 = performance.now();
+    t.style.animation = 'none'; t.style.opacity = '0';
+    (function frame(now) {
+      if (!cv.isConnected) return;
+      var el = (now - t0) / 1000; c.clearRect(0, 0, cv.width, cv.height);
+      var live = 0;
+      ps.forEach(function (p) {
+        var u = el - p.d; if (u < 0) { c.fillStyle = 'rgba(255,252,244,.95)'; c.fillRect(p.x, p.y, p.s, p.s); live++; return; }
+        var life = 1 - u / 1.5; if (life <= 0) return; live++;
+        var px = p.x + p.vx * u * 30, py = p.y + p.vy * u * 30 + 0.5 * 420 * dpr * u * u;   // a little lift, then gravity
+        var a = life * life;
+        if (p.star) {
+          var R = p.s * 2.6 * (0.8 + 0.4 * Math.sin(u * 14 + p.tw)), ri = R * 0.28;
+          c.fillStyle = 'rgba(255,252,244,' + a + ')'; c.beginPath();
+          for (var k = 0; k < 8; k++) { var ang = k * Math.PI / 4, rr = k % 2 ? ri : R; c.lineTo(px + Math.cos(ang) * rr, py + Math.sin(ang) * rr); }
+          c.closePath(); c.fill();
+        } else { c.fillStyle = 'rgba(233,228,216,' + a + ')'; c.beginPath(); c.arc(px, py, p.s * 0.75, 0, 6.283); c.fill(); }
+      });
+      if (live) requestAnimationFrame(frame);
+    })(t0);
   }
   // A spark from the middle of the screen: hot streaks flying out, thinning and dimming, with embers drifting after.
   function spark(cv) {
