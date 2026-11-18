@@ -425,7 +425,7 @@
   function openSheet(kind, ms, name) {
     cur = { ms: kind === 'event' ? Math.floor(ms / 1000) * 1000 : ms, kind: kind }; made = null;   // a moment is the instant passed in: the touch on Mark This Moment
     $('[data-sheet-h]').textContent = kind === 'event' ? 'NEW EVENT' : 'MARK THIS MOMENT';
-    $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'SAVE MOMENT';
+    $('[data-sheet-create]').disabled = false; $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'SAVE MOMENT';
     $('[data-sheet-name]').classList.toggle('short', kind === 'event'); $('[data-sheet-name]').maxLength = kind === 'event' ? 80 : 280;
     $('[data-sheet-name]').value = name || ''; $('[data-sheet-name]').placeholder = kind === 'event' ? 'Name the event' : "What's happening? (optional)";
     if (kind === 'event') {
@@ -497,7 +497,8 @@
         });
       }).catch(function (e) {
         toast(navigator.onLine === false ? 'Signing a photo needs a connection' : (e && e.message) || 'Moon could not sign it. Try again.');
-      }).then(function () { signing = false; btn.disabled = false; btn.textContent = 'SAVE MOMENT'; });
+        btn.disabled = false; btn.textContent = 'SAVE MOMENT';   // only a failed save returns the button
+      }).then(function () { signing = false; });
       return;
     }
     if (cur.kind === 'event') { finish(name, link(cur.ms, name, 'event'), null); return; }
@@ -515,7 +516,7 @@
       var u = new URL(su);
       return stages(b2, true).then(function () { if (cur === c1) finish(name, link(c1.ms, '', 'moment') + u.search + '&v=' + u.pathname.replace(/^\/m\//, '') + '&t=1' + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : ''), null); });
     }).catch(function () { if (cur === c1) return stages(b2, false).then(function () { if (cur === c1) finish(name, plain, null); }); })
-      .then(function () { signing = false; b2.disabled = false; b2.textContent = 'SAVE MOMENT'; });
+      .then(function () { signing = false; });
   }
   function finish(name, url, it) {
     it = it || { ms: cur.ms, name: name, url: url };
