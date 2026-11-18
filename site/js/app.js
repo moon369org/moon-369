@@ -463,6 +463,13 @@
   }
   function closeSheet() { stopClock(); $('[data-app-sheet]').hidden = true; }
   var signing = false;
+  // After signing, the button walks SIGNING > VERIFIED > SAVED before the moment opens.
+  function stages(btn, ok) {
+    return new Promise(function (done) {
+      function say(t, next) { btn.textContent = T(t); setTimeout(next, 650); }
+      if (ok) say('VERIFIED', function () { say('SAVED', done); }); else say('SAVED', done);
+    });
+  }
   function create() {
     var name = $('[data-sheet-name]').value.replace(/\s+/g, ' ').trim().slice(0, cur.kind === 'event' ? 80 : 280);
     if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return; }
@@ -478,6 +485,8 @@
         try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
         // Save the photo before opening the moment, so its page can show it at the top.
         return Promise.all([cur.thumb ? putThumb(s.sha, cur.thumb) : null, thumbOf(cur.photo, 1600).then(function (big) { return big ? putThumb('full:' + s.sha, big) : null; })]).then(function () {
+          return cur === c0 && stages(btn, true);
+        }).then(function () {
           if (cur === c0) finish(name, url, { ms: cur.ms, name: name, url: url, sha: s.sha });
         });
       }).catch(function (e) {
@@ -498,8 +507,8 @@
     }).then(function (r) { return r.json().then(function (b) { if (!r.ok || !b.signed_url) throw 0; return b.signed_url; }); }).then(function (su) {
       if (cur !== c1) return;
       var u = new URL(su);
-      finish(name, link(c1.ms, '', 'moment') + u.search + '&v=' + u.pathname.replace(/^\/m\//, '') + '&t=1' + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : ''), null);
-    }).catch(function () { if (cur === c1) finish(name, plain, null); })
+      return stages(b2, true).then(function () { if (cur === c1) finish(name, link(c1.ms, '', 'moment') + u.search + '&v=' + u.pathname.replace(/^\/m\//, '') + '&t=1' + (name ? '&n=' + encodeURIComponent(name).replace(/%20/g, '+') : ''), null); });
+    }).catch(function () { if (cur === c1) return stages(b2, false).then(function () { if (cur === c1) finish(name, plain, null); }); })
       .then(function () { signing = false; b2.disabled = false; b2.textContent = 'SAVE MOMENT'; });
   }
   function finish(name, url, it) {
