@@ -29,10 +29,10 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 @keyframes mfs{0%{background:rgba(5,5,6,0)}12%{background:rgba(5,5,6,.93)}60%{background:rgba(5,5,6,.93)}100%{background:rgba(5,5,6,0)}}
 .mf-burst{position:absolute;left:var(--x);top:var(--y);width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:radial-gradient(circle,rgba(255,252,244,.95) 0,rgba(233,228,216,.5) 30%,rgba(233,228,216,0) 70%);animation:mfb .9s cubic-bezier(.15,.85,.25,1) forwards}
 .mf-ring{position:absolute;left:var(--x);top:var(--y);width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:1.5px solid rgba(233,228,216,.8);animation:mfr .8s cubic-bezier(.2,.8,.2,1) forwards}
-.mf-t{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;color:#FFFCF4;text-shadow:0 0 28px rgba(233,228,216,.55);animation:mft 1.4s cubic-bezier(.2,.8,.2,1) forwards}
-.mf-t b{font:700 clamp(28px,9vw,52px)/1 Syncopate,sans-serif;letter-spacing:.06em}
-.mf-t span{font:400 clamp(30px,10vw,58px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
-.mf-t small{font-size:.4em;color:#E9E4D8;margin-left:.1em}
+.mf-t{position:relative;display:flex;align-items:baseline;justify-content:center;gap:.4em;white-space:nowrap;max-width:94vw;font:400 min(5.6vw,60px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:#FFFCF4;text-shadow:0 0 28px rgba(233,228,216,.55);animation:mft 1.4s cubic-bezier(.2,.8,.2,1) forwards}
+.mf-t b{font-weight:600}
+.mf-t span{white-space:nowrap}
+.mf-t small{font-size:.55em;color:#E9E4D8;margin-left:.05em}
 @keyframes mfb{0%{transform:scale(1);opacity:1}35%{opacity:.9}100%{transform:scale(260);opacity:0}}
 @keyframes mfr{0%{transform:scale(1);opacity:.9}100%{transform:scale(40);opacity:0}}
 @keyframes mft{0%{transform:scale(.86);opacity:0;filter:blur(6px)}14%{transform:scale(1.04);opacity:1;filter:blur(0)}30%{transform:scale(1)}62%{opacity:1}100%{transform:scale(1.02);opacity:0}}
