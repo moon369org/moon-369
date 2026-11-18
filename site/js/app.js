@@ -108,6 +108,13 @@
   }
   function removeMoment(i) {
     var r = store('moonMoments'), x = r[i]; if (!x) return;
+    // Its star takes a last bow: bring the sky into view, flash, and let it fall.
+    var st = STARS.list.filter(function (s) { return s.ms === x.ms; })[0], cv = $('[data-app-stars]');
+    if (st && cv && st.x != null) {
+      var far = window.scrollY > 80, W = cv.width, H = cv.height;
+      STARS.fall = { x: st.x, y: st.y, size: st.size, lum: st.lum, dx: (st.x < W / 2 ? -1 : 1) * 110 * (window.devicePixelRatio > 1 ? Math.min(2, window.devicePixelRatio) : 1), dy: 80 * (window.devicePixelRatio > 1 ? Math.min(2, window.devicePixelRatio) : 1), t0: performance.now() + (far ? 650 : 120) };
+      if (far) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     r.splice(i, 1); store('moonMoments', r);
     if (x.sha && !r.some(function (y) { return y.sha === x.sha; })) delThumb(x.sha);
     if (!r.length) editing = false;
@@ -116,7 +123,7 @@
 
   // ---------- your stars: one around the moon for every moment you've marked ----------
   // Each star's place, size and twinkle come from its own moment, so it never moves. The newest is born bright.
-  var STARS = { list: [], born: 0, raf: 0 };
+  var STARS = { list: [], born: 0, raf: 0, fall: null };
   function seeded(n) { return function () { n = (n + 0x6D2B79F5) | 0; var t = Math.imul(n ^ (n >>> 15), 1 | n); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   function setStars() {
     var r = store('moonMoments'), prev = STARS.list.length;
@@ -147,7 +154,7 @@
   }
   function drawStars(now) {
     STARS.raf = 0;
-    var cv = $('[data-app-stars]'); if (!cv || !STARS.list.length) { if (cv) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); return; }
+    var cv = $('[data-app-stars]'); if (!cv || (!STARS.list.length && !STARS.fall)) { if (cv) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); return; }
     var dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(cv.clientWidth * dpr), H = Math.round(cv.clientHeight * dpr);
     if (!W || !H) { STARS.raf = requestAnimationFrame(drawStars); return; }
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
@@ -156,7 +163,7 @@
     var c = cv.getContext('2d'), t = now / 1000;
     var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     c.clearRect(0, 0, W, H);
-    var newest = STARS.list.reduce(function (m, s) { return s.ms > m.ms ? s : m; }, STARS.list[0]), age = (now - STARS.born) / 1000;
+    var newest = STARS.list.length ? STARS.list.reduce(function (m, s) { return s.ms > m.ms ? s : m; }, STARS.list[0]) : null, age = (now - STARS.born) / 1000;
     STARS.list.forEach(function (s) {
       var x = s.x, y = s.y;
       var tw = (still ? 0.85 : 0.72 + 0.28 * Math.sin(t * s.sp + s.ph)) * (s.lum || 1), size = s.size * dpr * 1.15;
@@ -166,7 +173,35 @@
       c.fillStyle = g; c.beginPath(); c.arc(x, y, size * 4, 0, Math.PI * 2); c.fill();
       c.fillStyle = 'rgba(255,252,244,' + tw + ')'; c.beginPath(); c.arc(x, y, size * 0.7, 0, Math.PI * 2); c.fill();
     });
-    if (!still || (STARS.born && age < 2.5)) STARS.raf = requestAnimationFrame(drawStars);
+    if (STARS.fall) fallStar(c, now, dpr, W, H);
+    if (!still || (STARS.born && age < 2.5) || STARS.fall) STARS.raf = requestAnimationFrame(drawStars);
+  }
+  // A removed moment's star: a flash where it stood, then it falls away like a shooting star and is gone.
+  function fallStar(c, now, dpr, W, H) {
+    var f = STARS.fall, t = (now - f.t0) / 1000; if (t < 0) { dot(c, f.x, f.y, f.size * dpr * 1.15, f.lum); return; }
+    if (t > 2.2) { STARS.fall = null; return; }
+    var size = f.size * dpr * 1.15;
+    if (t < 0.4) {   // the flash
+      var k = t / 0.4, R = size * (4 + 16 * k);
+      var g = c.createRadialGradient(f.x, f.y, 0, f.x, f.y, R);
+      g.addColorStop(0, 'rgba(255,252,244,' + (1 - k * 0.4) + ')'); g.addColorStop(0.2, 'rgba(233,228,216,' + (0.6 * (1 - k)) + ')'); g.addColorStop(1, 'rgba(233,228,216,0)');
+      c.fillStyle = g; c.beginPath(); c.arc(f.x, f.y, R, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = 'rgba(233,228,216,' + (0.5 * (1 - k)) + ')'; c.lineWidth = 1.2 * dpr; c.beginPath(); c.arc(f.x, f.y, size * (3 + 22 * k), 0, Math.PI * 2); c.stroke();
+      dot(c, f.x, f.y, size * (1 + 1.5 * k), 1); return;
+    }
+    var u = (t - 0.4) / 1.8, e = u * u * (3 - 2 * u);   // the fall, easing in and out
+    var hx = f.x + f.dx * e, hy = f.y + f.dy * e, tail = 0.35 + 0.65 * Math.sin(Math.PI * Math.min(1, u * 1.2)), fade = 1 - Math.max(0, (u - 0.55) / 0.45);
+    var tx = hx - f.dx * 0.32 * tail, ty = hy - f.dy * 0.32 * tail;
+    var lg = c.createLinearGradient(tx, ty, hx, hy);
+    lg.addColorStop(0, 'rgba(233,228,216,0)'); lg.addColorStop(1, 'rgba(255,252,244,' + (0.9 * fade) + ')');
+    c.strokeStyle = lg; c.lineWidth = size * 1.3; c.lineCap = 'round'; c.beginPath(); c.moveTo(tx, ty); c.lineTo(hx, hy); c.stroke();
+    dot(c, hx, hy, size * 1.2, fade);
+  }
+  function dot(c, x, y, size, a) {
+    var g = c.createRadialGradient(x, y, 0, x, y, size * 4);
+    g.addColorStop(0, 'rgba(233,228,216,' + (0.9 * a) + ')'); g.addColorStop(0.25, 'rgba(233,228,216,' + (0.35 * a) + ')'); g.addColorStop(1, 'rgba(233,228,216,0)');
+    c.fillStyle = g; c.beginPath(); c.arc(x, y, size * 4, 0, Math.PI * 2); c.fill();
+    c.fillStyle = 'rgba(255,252,244,' + a + ')'; c.beginPath(); c.arc(x, y, size * 0.7, 0, Math.PI * 2); c.fill();
   }
 
   // ---------- photos: kept on this phone only ----------
