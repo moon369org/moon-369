@@ -590,6 +590,10 @@
     var LANGS = [['auto', 'Automatic', T('PHONE SETTING')]].concat(((window.MoonI18n && MoonI18n.languages) || [['en', 'English']]).map(function (l) { return [l[0], l[1], l[0].toUpperCase()]; }));
     $('[data-lang-list]').innerHTML = LANGS.map(function (l) { var on = l[0] === 'auto' ? !chosen : chosen === l[0]; return '<button type="button" data-lang="' + l[0] + '" aria-current="' + on + '">' + esc(l[0] === 'auto' ? T('Automatic') : l[1]) + ' <span>' + esc(l[2]) + '</span></button>'; }).join('');
     $('[data-lang-open]').onclick = function () { $('[data-lang-sheet]').hidden = false; buzz(); };
+    // More: a drawer from the bottom with the rest of Moon.
+    $('[data-more-open]').onclick = function () { $('[data-more-sheet]').hidden = false; buzz(); };
+    $('[data-more-close]').onclick = function () { $('[data-more-sheet]').hidden = true; };
+    $('[data-more-sheet]').addEventListener('click', function (e) { if (e.target === e.currentTarget) e.currentTarget.hidden = true; });
     $('[data-lang-close]').onclick = function () { $('[data-lang-sheet]').hidden = true; };
     $('[data-lang-sheet]').addEventListener('click', function (e) {
       if (e.target === this) { this.hidden = true; return; }

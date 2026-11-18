@@ -17,6 +17,12 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 /* The Moonmark mark: a double M in front of every Moonmark. */
 .mmk{display:inline-block;width:.95em;height:.95em;vertical-align:-.12em;margin-right:.45em;flex:none}
 .mlb{display:flex;align-items:center;gap:14px;padding:22px 0 8px;font-size:12px;color:#6E6F73}.mlb span{flex:1}.mlb button{background:none;border:0;color:#E9E4D8;font:inherit;letter-spacing:.2em;padding:10px 0;cursor:pointer}.mlb0{border-top:1px solid #1C1D20}
+.more .panel{animation:mup .28s cubic-bezier(.2,.8,.2,1)}@keyframes mup{from{transform:translateY(100%)}to{transform:none}}
+.grab{justify-self:center;width:38px;height:4px;border-radius:2px;background:#2E3035;margin:-8px 0 6px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mt{display:flex;flex-direction:column;gap:8px;padding:18px 16px;border:1px solid #24262A;background:#0B0B0D;color:#E9E4D8;text-decoration:none;min-height:124px}
+.mt:active{background:#16171A}.mt svg{width:28px;height:28px;color:#E9E4D8;margin-bottom:6px}
+.mt b{font:700 10.5px Syncopate,sans-serif;letter-spacing:.18em}.mt span{font-size:12px;color:#8A8B8F;line-height:1.45}
 </style>
 <meta name="description" content="Moon time and the live moon in your pocket. Mark any moment with one tap and send a link that opens in everyone's own time.">
 <link rel="canonical" href="https://moon369.org/app">
@@ -82,7 +88,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px
 .foot a{color:#8A8B8F;text-decoration:none}
 .scr[hidden]{display:none}.scr{width:100%;display:flex;flex-direction:column;align-items:center}
 .stage.sm{width:min(44vw,170px)}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:1fr 1fr 1fr;background:#0B0B0D;border-top:1px solid #1C1D20;padding-bottom:env(safe-area-inset-bottom)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;background:#0B0B0D;border-top:1px solid #1C1D20;padding-bottom:env(safe-area-inset-bottom)}
 .tabs button{background:none;border:0;color:#8A8B8F;font:11px 'JetBrains Mono',monospace;letter-spacing:.22em;min-height:56px;cursor:pointer}
 .tabs button{position:relative}.tabs button[aria-current="page"]{color:#E9E4D8}
 .tabs button[aria-current="page"]::after{content:'';position:absolute;left:50%;bottom:9px;width:18px;height:2px;background:#E9E4D8;transform:translateX(-50%)}
@@ -293,12 +299,13 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
     <div class="recent" data-e-list hidden></div>
   </section>
 </main>
+<div class="sheet more" data-more-sheet hidden role="dialog" aria-modal="true" aria-label="More"><div class="panel"><i class="grab" aria-hidden="true"></i><div class="mgrid"><a class="mt" href="/calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 9.5h17M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15.5" cy="15" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><b>CALENDAR</b><span>The 13 moons of the year</span></a><a class="mt" href="/sign"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 3v4h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 15.5l2 2 4-4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><b>SIGN A FILE</b><span>Prove when it existed</span></a><a class="mt" href="/verify"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 15l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 10.5l1.8 1.8 3.2-3.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><b>VERIFY A FILE</b><span>Check any Moon receipt</span></a><a class="mt" href="/notarize"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 14l-2 7 5-2.5 5 2.5-2-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 9.5l1.5 1.5 2.5-2.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><b>NOTARIZE</b><span>A printable certificate for any document</span></a></div><button type="button" class="btn g" data-more-close>CLOSE</button></div></div>
 <div class="sheet" data-lang-sheet hidden role="dialog" aria-modal="true" aria-labelledby="lang-h"><div class="panel">
   <h2 id="lang-h">LANGUAGE</h2>
   <div class="lgl" data-lang-list></div>
   <button class="x" type="button" data-lang-close>CLOSE</button>
 </div></div>
-<nav class="tabs" aria-label="App"><button type="button" data-tab="now" aria-current="page">NOW</button><button type="button" data-tab="nights">NIGHTS</button><button type="button" data-tab="events">EVENTS</button></nav>
+<nav class="tabs" aria-label="App"><button type="button" data-tab="now" aria-current="page">NOW</button><button type="button" data-tab="nights">NIGHTS</button><button type="button" data-tab="events">EVENTS</button><button type="button" data-more-open aria-haspopup="dialog">MORE</button></nav>
 
 <div class="sheet" data-app-sheet hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sheet-h">
