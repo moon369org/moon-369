@@ -482,11 +482,19 @@
     if (!svg || svg.__stars) return; svg.__stars = 1;
     var NS = 'http://www.w3.org/2000/svg', RING = 46, still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     var g = document.createElementNS(NS, 'g'); svg.appendChild(g);
-    var shape = 'M0,-5 L1.2,-1.2 L5,0 L1.2,1.2 L0,5 L-1.2,1.2 L-5,0 L-1.2,-1.2 Z', GAP = 0.15;   // gap: how close (in radians) two stars get before they bump
+    // Each star is a little circle; the one being born morphs into a four-point star and back.
+    var shape = function (k) {   // k: 0 a circle, 1 a four-point star
+      var d = '';
+      for (var i = 0; i < 16; i++) {
+        var a = i * Math.PI / 8 - Math.PI / 2, q = i % 4, sr = q === 0 ? 5 : q === 2 ? 1.2 : 1.6, r = 2.1 + (sr - 2.1) * k;
+        d += (i ? 'L' : 'M') + (Math.cos(a) * r).toFixed(2) + ',' + (Math.sin(a) * r).toFixed(2);
+      }
+      return d + 'Z';
+    }, CIRCLE = shape(0), GAP = 0.15;   // gap: how close (in radians) two stars get before they bump
     var rings = [{ cx: -30, dir: 1, ps: [] }, { cx: 30, dir: -1, ps: [] }];
     rings.forEach(function (rg) {
       for (var k = 0; k < 22; k++) {
-        var el = document.createElementNS(NS, 'path'); el.setAttribute('d', shape); el.setAttribute('fill', '#E9E4D8'); g.appendChild(el);
+        var el = document.createElementNS(NS, 'path'); el.setAttribute('d', CIRCLE); el.setAttribute('fill', '#E9E4D8'); g.appendChild(el);
         rg.ps.push({ a: k * 0.2856 + Math.random() * 0.12, w: 0.35 + Math.random() * 0.9, rot: Math.random() * 90, tw: Math.random() * 6.283, el: el });
       }
     });
@@ -500,21 +508,21 @@
     var burst = null, nextBurst = performance.now() + 1500 + Math.random() * 2500;
     function drawBurst(now, x, y) {
       var t = (now - burst.t0) / 1000;
-      if (t > 1.9) { burst.p.big = 1; burst = null; fx.style.display = 'none'; nextBurst = now + 2500 + Math.random() * 4500; return; }
+      if (t > 1.9) { burst.p.big = 1; burst.p.el.setAttribute('d', CIRCLE); burst = null; fx.style.display = 'none'; nextBurst = now + 2500 + Math.random() * 4500; return; }
       fx.style.display = '';
       if (t < 0.7) {   // gathering
         var k = t / 0.7, e = k * k;
         motes.forEach(function (o) { var a = o.a + k * 2, r = o.d * (1 - e); o.el.setAttribute('cx', x + Math.cos(a) * r); o.el.setAttribute('cy', y + Math.sin(a) * r); o.el.setAttribute('opacity', Math.min(1, k * 1.8) * 0.8); });
         ring.setAttribute('cx', x); ring.setAttribute('cy', y); ring.setAttribute('r', 22 * (1 - e) + 2); ring.setAttribute('opacity', 0.25 * k);
         halo.setAttribute('opacity', 0); rays.forEach(function (l) { l.setAttribute('opacity', 0); });
-        burst.p.big = 0.4 + 0.6 * k; return;
+        burst.p.big = 1; burst.p.el.setAttribute('d', shape(e)); return;
       }
       motes.forEach(function (o) { o.el.setAttribute('opacity', 0); });
       var u = Math.min(1, (t - 0.7) / 1.2), fl = Math.max(0, 1 - u * 2.2), L = 16 * (1 - u) + 5;   // ignition, then settling
       halo.setAttribute('cx', x); halo.setAttribute('cy', y); halo.setAttribute('r', 3 + 9 * Math.min(1, u * 3)); halo.setAttribute('opacity', 0.55 * fl);
       ring.setAttribute('cx', x); ring.setAttribute('cy', y); ring.setAttribute('r', 4 + 22 * Math.min(1, u * 2)); ring.setAttribute('opacity', 0.6 * fl);
       [[1, 0], [0, 1], [-1, 0], [0, -1]].forEach(function (d, i) { var l = rays[i]; l.setAttribute('x1', x); l.setAttribute('y1', y); l.setAttribute('x2', x + d[0] * L); l.setAttribute('y2', y + d[1] * L); l.setAttribute('opacity', 0.9 * (1 - u)); });
-      burst.p.big = 1 + 1.4 * (1 - u);
+      burst.p.big = 1 + 1.4 * (1 - u); burst.p.el.setAttribute('d', shape(u < 0.55 ? 1 : 1 - (u - 0.55) / 0.45));
     }
     var last = performance.now();
     function step(now) {
@@ -531,7 +539,7 @@
         rg.ps.forEach(function (p) {
           var x = rg.cx + Math.cos(p.a) * RING, y = Math.sin(p.a) * RING, sc = p.big == null ? 1 : p.big;
           if (burst && burst.p === p) drawBurst(now, x, y), sc = p.big;
-          p.el.setAttribute('transform', 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ') rotate(' + p.rot.toFixed(1) + ') scale(' + sc.toFixed(2) + ')');
+          p.el.setAttribute('transform', 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ') scale(' + sc.toFixed(2) + ')');
           p.el.setAttribute('opacity', (0.7 + 0.3 * Math.sin(p.tw)).toFixed(2));
         });
       });
