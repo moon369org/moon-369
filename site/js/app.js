@@ -37,7 +37,8 @@
   var lastSec = -1;
   function tick() {
     var now = Date.now(), k = moon(now), P = window.MoonPhase;
-    $('[data-app-clock]').innerHTML = p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + p(Math.floor(k.f * 1000), 3) + '</small>';
+    var n9 = String(Math.min(999999999, Math.floor(k.f * 1e9))).padStart(9, '0');   // to the nanosecond, as Moonmarks are
+    $('[data-app-clock]').innerHTML = p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n9.slice(0, 3) + ' ' + n9.slice(3, 6) + ' ' + n9.slice(6) + '</small>';
     if (k.s !== lastSec) {
       lastSec = k.s;
       $('[data-app-date]').textContent = k.y + '.' + p(k.m) + '.' + p(k.d);
