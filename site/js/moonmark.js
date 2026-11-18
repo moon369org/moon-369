@@ -476,23 +476,50 @@
       if (rd && !rb.innerHTML.trim()) { rd.hidden = true; new MutationObserver(function () { if (rb.innerHTML.trim()) rd.hidden = false; }).observe(rb, { childList: true }); }
     }
   }
-  // Little white stars travel the two rings of the Moon mark: clockwise on the left ring, counterclockwise on the right, eighteen on each,
+  // Little white stars travel the two rings of the Moon mark: clockwise on the left ring, counterclockwise on the right, twenty-two on each,
   // each at its own speed. A faster star that catches the one ahead bumps it, and they trade speeds. It loops forever.
   function ringStars(svg) {
     if (!svg || svg.__stars) return; svg.__stars = 1;
     var NS = 'http://www.w3.org/2000/svg', RING = 46, still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     var g = document.createElementNS(NS, 'g'); svg.appendChild(g);
-    var shape = 'M0,-5 L1.2,-1.2 L5,0 L1.2,1.2 L0,5 L-1.2,1.2 L-5,0 L-1.2,-1.2 Z', GAP = 0.18;   // gap: how close (in radians) two stars get before they bump
+    var shape = 'M0,-5 L1.2,-1.2 L5,0 L1.2,1.2 L0,5 L-1.2,1.2 L-5,0 L-1.2,-1.2 Z', GAP = 0.15;   // gap: how close (in radians) two stars get before they bump
     var rings = [{ cx: -30, dir: 1, ps: [] }, { cx: 30, dir: -1, ps: [] }];
     rings.forEach(function (rg) {
-      for (var k = 0; k < 18; k++) {
+      for (var k = 0; k < 22; k++) {
         var el = document.createElementNS(NS, 'path'); el.setAttribute('d', shape); el.setAttribute('fill', '#E9E4D8'); g.appendChild(el);
-        rg.ps.push({ a: k * 0.349 + Math.random() * 0.15, w: 0.35 + Math.random() * 0.9, rot: Math.random() * 90, tw: Math.random() * 6.283, el: el });
+        rg.ps.push({ a: k * 0.2856 + Math.random() * 0.12, w: 0.35 + Math.random() * 0.9, rot: Math.random() * 90, tw: Math.random() * 6.283, el: el });
       }
     });
+    // Now and then one star is born again, like a new star on Now: light gathers in, flashes, four rays, and it settles.
+    var fx = document.createElementNS(NS, 'g'); svg.appendChild(fx); fx.setAttribute('pointer-events', 'none');
+    var mk = function (tag, at) { var e = document.createElementNS(NS, tag); for (var k in at) e.setAttribute(k, at[k]); fx.appendChild(e); return e; };
+    var motes = []; for (var m = 0; m < 10; m++) motes.push({ el: mk('circle', { r: 0.9, fill: '#E9E4D8' }), a: Math.random() * 6.283, d: 14 + Math.random() * 12 });
+    var halo = mk('circle', { r: 0, fill: '#FFFCF4', opacity: 0 }), ring = mk('circle', { r: 0, fill: 'none', stroke: '#E9E4D8', 'stroke-width': 0.8, opacity: 0 });
+    var rays = [0, 1, 2, 3].map(function () { return mk('line', { stroke: '#FFFCF4', 'stroke-width': 1, 'stroke-linecap': 'round', opacity: 0 }); });
+    fx.style.display = 'none';
+    var burst = null, nextBurst = performance.now() + 1500 + Math.random() * 2500;
+    function drawBurst(now, x, y) {
+      var t = (now - burst.t0) / 1000;
+      if (t > 1.9) { burst.p.big = 1; burst = null; fx.style.display = 'none'; nextBurst = now + 2500 + Math.random() * 4500; return; }
+      fx.style.display = '';
+      if (t < 0.7) {   // gathering
+        var k = t / 0.7, e = k * k;
+        motes.forEach(function (o) { var a = o.a + k * 2, r = o.d * (1 - e); o.el.setAttribute('cx', x + Math.cos(a) * r); o.el.setAttribute('cy', y + Math.sin(a) * r); o.el.setAttribute('opacity', Math.min(1, k * 1.8) * 0.8); });
+        ring.setAttribute('cx', x); ring.setAttribute('cy', y); ring.setAttribute('r', 22 * (1 - e) + 2); ring.setAttribute('opacity', 0.25 * k);
+        halo.setAttribute('opacity', 0); rays.forEach(function (l) { l.setAttribute('opacity', 0); });
+        burst.p.big = 0.4 + 0.6 * k; return;
+      }
+      motes.forEach(function (o) { o.el.setAttribute('opacity', 0); });
+      var u = Math.min(1, (t - 0.7) / 1.2), fl = Math.max(0, 1 - u * 2.2), L = 16 * (1 - u) + 5;   // ignition, then settling
+      halo.setAttribute('cx', x); halo.setAttribute('cy', y); halo.setAttribute('r', 3 + 9 * Math.min(1, u * 3)); halo.setAttribute('opacity', 0.55 * fl);
+      ring.setAttribute('cx', x); ring.setAttribute('cy', y); ring.setAttribute('r', 4 + 22 * Math.min(1, u * 2)); ring.setAttribute('opacity', 0.6 * fl);
+      [[1, 0], [0, 1], [-1, 0], [0, -1]].forEach(function (d, i) { var l = rays[i]; l.setAttribute('x1', x); l.setAttribute('y1', y); l.setAttribute('x2', x + d[0] * L); l.setAttribute('y2', y + d[1] * L); l.setAttribute('opacity', 0.9 * (1 - u)); });
+      burst.p.big = 1 + 1.4 * (1 - u);
+    }
     var last = performance.now();
     function step(now) {
       var dt = Math.min(0.05, (now - last) / 1000); last = now;
+      if (!burst && now > nextBurst) { var rg0 = rings[Math.random() < 0.5 ? 0 : 1]; burst = { p: rg0.ps[Math.floor(Math.random() * rg0.ps.length)], rg: rg0, t0: now }; }
       rings.forEach(function (rg) {
         rg.ps.forEach(function (p) { p.a += rg.dir * p.w * dt; p.rot += rg.dir * 90 * dt; p.tw += dt * 2.4; });
         // bumps: along the direction of travel, if a star closes on the one ahead, they swap speeds
@@ -502,8 +529,9 @@
           if (d < GAP && A.w > B.w) { var t = A.w; A.w = B.w; B.w = t; A.a = B.a - rg.dir * GAP; }
         }
         rg.ps.forEach(function (p) {
-          var x = rg.cx + Math.cos(p.a) * RING, y = Math.sin(p.a) * RING;
-          p.el.setAttribute('transform', 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ') rotate(' + p.rot.toFixed(1) + ')');
+          var x = rg.cx + Math.cos(p.a) * RING, y = Math.sin(p.a) * RING, sc = p.big == null ? 1 : p.big;
+          if (burst && burst.p === p) drawBurst(now, x, y), sc = p.big;
+          p.el.setAttribute('transform', 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ') rotate(' + p.rot.toFixed(1) + ') scale(' + sc.toFixed(2) + ')');
           p.el.setAttribute('opacity', (0.7 + 0.3 * Math.sin(p.tw)).toFixed(2));
         });
       });
