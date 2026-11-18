@@ -438,6 +438,12 @@
   var T2 = function (x, v) { x = window.MoonT ? window.MoonT(x, v) : x; return x.replace(/\{(\w+)\}/g, function (m, k) { return v[k]; }); };
   function fold(root, rc, nm, il, ms, mkOf) {
     var main = root.querySelector('.mk-main'), ts = main.querySelector('.mk-ts'); if (!main || !ts) return;
+    // The moment itself (photo, words, Moonmark) sits in its own card; what Moon knows about it follows below, apart.
+    var card = document.createElement('div'); card.className = 'mk-card';
+    var kids = [], n = main.firstElementChild; while (n) { kids.push(n); if (n === ts) break; n = n.nextElementSibling; }
+    main.insertBefore(card, kids[0]); kids.forEach(function (k) { card.appendChild(k); });
+    var lab = document.createElement('div'); lab.className = 'mk-dl'; lab.textContent = 'ABOUT THIS MOMENT';
+    card.parentNode.insertBefore(lab, card.nextSibling); ts = lab;
     var k = window.MoonPhase && window.MoonPhase.sky ? window.MoonPhase.sky(ms) : null;
     var chev = '<svg class="mk-fd-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     var at = ts;
