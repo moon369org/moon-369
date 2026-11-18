@@ -29,7 +29,7 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 .mflash::before{content:'';position:absolute;inset:0;background:#FFFCF4;opacity:0;animation:mfw .45s ease-out forwards}
 @keyframes mfw{0%{opacity:.55}100%{opacity:0}}
 .mf-spark{position:absolute;top:0;left:0;width:100%;height:100%}
-.mf-ring{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:1.5px solid rgba(233,228,216,.8);animation:mfr .8s cubic-bezier(.2,.8,.2,1) forwards}
+.mf-ring{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:radial-gradient(circle closest-side,rgba(233,228,216,0) 0,rgba(233,228,216,.05) 40%,rgba(233,228,216,.3) 72%,rgba(255,252,244,.68) 94%,rgba(255,252,244,0) 100%);animation:mfr .8s cubic-bezier(.2,.8,.2,1) forwards}
 @keyframes mfr{0%{transform:scale(1);opacity:.9}100%{transform:scale(40);opacity:0}}
 @keyframes mfs{0%{background:rgba(5,5,6,0)}12%{background:rgba(5,5,6,.93)}60%{background:rgba(5,5,6,.93)}100%{background:rgba(5,5,6,0)}}
 .mf-t{position:relative;margin:auto;text-align:center;transform-origin:50% 50%;display:flex;align-items:baseline;justify-content:center;gap:.4em;white-space:nowrap;max-width:94vw;font:400 min(4.6vw,52px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:#FFFCF4;text-shadow:0 0 28px rgba(233,228,216,.55);animation:mft 1.25s cubic-bezier(.2,.8,.2,1) .3s both}
