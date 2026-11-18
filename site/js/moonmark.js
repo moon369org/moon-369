@@ -454,7 +454,7 @@
       var stmt = 'moon-moment/1\n' + text(mkOf) + '.' + p(mkOf.ns, 9) + '\n' + (q2.get('n') || '');
       Promise.all([verifyEarly(rc), crypto.subtle.digest('SHA-256', new TextEncoder().encode(stmt))]).then(function (a) {
         var h = Array.from(new Uint8Array(a[1]), function (x) { return x.toString(16).padStart(2, '0'); }).join('');
-        pd2.querySelector('[data-fd-sub]').textContent = !(a[0] && a[0].valid) ? 'The signature does not check out' : h === rc.sha256 ? T2('✓ This moment and its words, signed on Moon') : T2('The words were changed after Moon signed them');
+        pd2.querySelector('[data-fd-sub]').textContent = !(a[0] && a[0].valid) ? 'Signature does not check out' : h === rc.sha256 ? T2('✓ Words and time signed') : T2('Words changed since signing');
       }, function () { pd2.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
     } else if (rc) {
       var PHOTO = '<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
@@ -462,7 +462,7 @@
       // An image when it came from the app's camera (v=) or the linked file is a picture; any other signed file is a file.
       var isImg = !!new URLSearchParams(location.search).get('v') || /\.(png|jpe?g|gif|webp|avif|heic|heif|svg)(\?|#|$)/i.test(linkedFile());
       var pd = part(isImg ? PHOTO + 'IMAGE PROOF' : FILE + 'FILE PROOF', 'Checking the signature…', [q('[data-mk-sig]')]);
-      verifyEarly(rc).then(function (v) { pd.querySelector('[data-fd-sub]').textContent = v && v.valid ? (new URLSearchParams(location.search).get('v') ? T2('✓ Image signed on Moon {s} s before this moment', { s: Math.max(0, (ms - Number(BigInt(rc.unix_ns) / 1000000n)) / 1000).toFixed(1) }) : '✓ Signed and verified on Moon') : 'The signature does not check out'; }, function () { pd.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
+      verifyEarly(rc).then(function (v) { pd.querySelector('[data-fd-sub]').textContent = v && v.valid ? (new URLSearchParams(location.search).get('v') ? T2('✓ Image signed {s} s before', { s: Math.max(0, (ms - Number(BigInt(rc.unix_ns) / 1000000n)) / 1000).toFixed(1) }) : '✓ Verified on Moon') : 'Signature does not check out'; }, function () { pd.querySelector('[data-fd-sub]').textContent = 'Signed on Moon'; });
     }
     // The same living moon as the app, as it was at this moment.
     var st = document.createElement('div'); st.className = 'mk-stage';
@@ -471,7 +471,7 @@
     var sky = q('.mk-skyw'); if (sky) { var sh = sky.querySelector('.mk-skyh'); if (sh) sh.remove(); }
     part('<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' + 'SKY &amp; TIDE', k ? esc(k.tide.strength.charAt(0).toUpperCase() + k.tide.strength.slice(1)) + ' tide · ' + Math.round(k.distance.km).toLocaleString() + ' km away' : '', [sky]);
     if (rc) {
-      var rb = q('[data-mk-rec]'), rd = part('<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>' + 'PERMANENT RECORD', 'Kept in the Tideline, anchored in Bitcoin', [rb]);
+      var rb = q('[data-mk-rec]'), rd = part('<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>' + 'PERMANENT RECORD', 'In the Tideline and Bitcoin', [rb]);
       if (rd && !rb.innerHTML.trim()) { rd.hidden = true; new MutationObserver(function () { if (rb.innerHTML.trim()) rd.hidden = false; }).observe(rb, { childList: true }); }
     }
   }
