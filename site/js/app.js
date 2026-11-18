@@ -142,8 +142,8 @@
     // Its star takes a last bow: bring the sky into view, flash, and let it fall.
     var st = STARS.list.filter(function (s) { return s.ms === x.ms; })[0], cv = $('[data-app-stars]');
     if (st && cv && st.x != null) {
-      var far = window.scrollY > 80, W = cv.width, H = cv.height;
-      STARS.fall = { x: st.x, y: st.y, size: st.size, lum: st.lum, dx: (st.x < W / 2 ? 1 : -1) * 150 * (window.devicePixelRatio > 1 ? Math.min(2, window.devicePixelRatio) : 1), dy: 110 * (window.devicePixelRatio > 1 ? Math.min(2, window.devicePixelRatio) : 1), t0: performance.now() + (far ? 650 : 120) };
+      var far = window.scrollY > 80;
+      fallAcross(cv, st, performance.now() + (far ? 650 : 120));   // across the whole screen, not just the sky box
       if (far) window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     r.splice(i, 1); store('moonMoments', r);
@@ -187,7 +187,7 @@
   }
   function drawStars(now) {
     STARS.raf = 0;
-    var cv = $('[data-app-stars]'); if (!cv || (!STARS.list.length && !STARS.fall)) { if (cv) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); return; }
+    var cv = $('[data-app-stars]'); if (!cv || !STARS.list.length) { if (cv) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); return; }
     var dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(cv.clientWidth * dpr), H = Math.round(cv.clientHeight * dpr);
     if (!W || !H) { STARS.raf = requestAnimationFrame(drawStars); return; }
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
@@ -207,8 +207,7 @@
       c.fillStyle = g; c.beginPath(); c.arc(x, y, size * 4, 0, Math.PI * 2); c.fill();
       c.fillStyle = 'rgba(255,252,244,' + tw + ')'; c.beginPath(); c.arc(x, y, size * 0.7, 0, Math.PI * 2); c.fill();
     });
-    if (STARS.fall) fallStar(c, now, dpr, W, H);
-    if (!still || (STARS.born && age < 2.5) || STARS.fall || STARS.birth) STARS.raf = requestAnimationFrame(drawStars);
+    if (!still || (STARS.born && age < 2.5) || STARS.birth) STARS.raf = requestAnimationFrame(drawStars);
   }
   // A new moment's star is born: light gathers in from the dark, ignites with a flash and four rays, then settles to a twinkle.
   function birthStar(c, now, dpr, s) {
@@ -241,6 +240,22 @@
     dot(c, x, y, size * (1 + 1.6 * (1 - u)), 1);
   }
   // A removed moment's star: a flash where it stood, then it falls away like a shooting star and is gone.
+  // The shooting star gets the whole screen: a full-screen layer for its flash and fall, removed when it's gone.
+  function fallAcross(cv, st, t0) {
+    var dpr = Math.min(2, window.devicePixelRatio || 1), o = document.createElement('canvas');
+    o.className = 'fallsky'; o.width = innerWidth * dpr; o.height = innerHeight * dpr; document.body.appendChild(o);
+    var c = o.getContext('2d'), f = { size: st.size, lum: st.lum, t0: t0 };
+    (function loop(now) {
+      var r = cv.getBoundingClientRect(), k = cv.width / r.width || 1;
+      if (f.dx == null || (now < t0)) {   // follows the star while the page scrolls up to the sky
+        f.x = (r.left + st.x / k) * dpr; f.y = (r.top + st.y / k) * dpr;
+        f.dx = (f.x < o.width / 2 ? 1 : -1) * o.width * 0.72; f.dy = o.height * 0.5;
+      }
+      c.clearRect(0, 0, o.width, o.height);
+      STARS.fall = f; fallStar(c, now, dpr, o.width, o.height);
+      if (STARS.fall) requestAnimationFrame(loop); else o.remove();
+    })(performance.now());
+  }
   function fallStar(c, now, dpr, W, H) {
     var f = STARS.fall, t = (now - f.t0) / 1000; if (t < 0) { dot(c, f.x, f.y, f.size * dpr * 1.15, f.lum); return; }
     if (t > 2.2) { STARS.fall = null; return; }
