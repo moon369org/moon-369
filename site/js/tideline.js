@@ -28,13 +28,7 @@
   }
 
   var S = { open: null, endMs: 0, tides: [], count: null, entries: [], seen: {}, stats: null, sealing: false };
-  // The shore's geometry, for a 420px panel; phones use a shorter panel and everything scales with it.
-  var PH = 420, LOW = 60, HIGH = 200, NEWEST = 212, STEP = 32, KEEP = 7;
-  function geometry() {
-    var b = document.querySelector('[data-tl-basin]'), h = b && b.clientHeight || 420, k = h / 420;
-    PH = h; LOW = 60 * k; HIGH = 200 * k; NEWEST = h - HIGH - 8; STEP = 32 * k;
-    var svg = document.querySelector('[data-tl-lines]'); if (svg) svg.setAttribute('viewBox', '0 0 1000 ' + h);
-  }
+  var LOW = 60, HIGH = 200, NEWEST = 420 - HIGH - 8, STEP = 32, KEEP = 7;
 
   // ---------- the tide level ----------
   var basin, sea, px = LOW, pxAnim = null;
@@ -152,7 +146,7 @@
   // ---------- the hero numbers ----------
   function stats() {
     var s = S.stats; if (!s) return;
-    var set = function (k, v) { document.querySelectorAll('[data-st="' + k + '"]').forEach(function (el) { el.textContent = v; }); };
+    var set = function (k, v) { var el = $('[data-st="' + k + '"]'); if (el) el.textContent = v; };
     var lune = Math.max(Number(s.this_lune || 0), S.count || 0), extra = lune - Number(s.this_lune || 0);
     set('total', n(Number(s.total_receipts || 0) + Math.max(0, extra))); set('tides', n(s.tides_sealed)); set('lune', n(lune));
   }
@@ -314,8 +308,7 @@
 
   // ---------- start ----------
   function start() {
-    basin = $('[data-tl-basin]'); sea = basin && basin.querySelector('canvas'); geometry();
-    var lastH = PH; window.addEventListener('resize', function () { geometry(); if (PH !== lastH && !S.sealing) { lastH = PH; drawLines(S.tides); setPx(luneLevel()); } });
+    basin = $('[data-tl-basin]'); sea = basin && basin.querySelector('canvas');
     setPx(luneLevel());
     var pv = $('[data-tl-preview]');
     if (pv) pv.addEventListener('click', function () {
