@@ -46,7 +46,11 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 .cam-shot{width:76px;height:76px;border-radius:50%;border:3px solid #E9E4D8;background:none;padding:5px;cursor:pointer}.cam-shot i{display:block;width:100%;height:100%;border-radius:50%;background:#E9E4D8}.cam-shot:active i{transform:scale(.9)}
 .cam-flip{justify-self:end;width:48px;height:48px;border-radius:50%;border:1px solid #24262A;background:none;color:#E9E4D8;font-size:22px;cursor:pointer}.cam-flip[hidden]{display:none}
 .fallsky{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2147482000;pointer-events:none}
-.mload{display:inline-block;width:30px;height:auto;margin-right:12px;vertical-align:middle}
+.mload{display:inline-block;width:30px;height:auto;margin-right:12px;vertical-align:middle;flex:none}
+.mst{display:inline-flex;align-items:center;vertical-align:middle}
+.mst-l{display:inline-grid;text-align:left}
+.mst-l b{grid-area:1/1;font:inherit;visibility:hidden}
+.mst-l b.on{visibility:visible}
 </style>
 <meta name="description" content="Moon time and the live moon in your pocket. Mark any moment with one tap and send a link that opens in everyone's own time.">
 <link rel="canonical" href="https://moon369.org/app">

@@ -464,10 +464,16 @@
   function closeSheet() { stopClock(); $('[data-app-sheet]').hidden = true; }
   var signing = false;
   // After signing, the button walks SIGNING > VERIFIED > SAVED before the moment opens.
+  // The loader stays put the whole time; the labels share one left-aligned slot as wide as the longest, so nothing shifts.
+  function busy(btn, first) {
+    btn.innerHTML = '<span class="mst"><img class="mload" src="/assets/moon-loader-black.svg" alt="" aria-hidden="true"><span class="mst-l">'
+      + [first, 'VERIFIED', 'SAVED'].map(function (t, i) { return '<b' + (i ? '' : ' class="on"') + '>' + T(t) + '</b>'; }).join('') + '</span></span>';
+  }
   function stages(btn, ok) {
+    var b = btn.querySelectorAll('.mst-l b');
     return new Promise(function (done) {
-      function say(t, next) { btn.textContent = T(t); setTimeout(next, 650); }
-      if (ok) say('VERIFIED', function () { say('SAVED', done); }); else say('SAVED', done);
+      function say(i, next) { b.forEach(function (x, j) { x.classList.toggle('on', j === i); }); setTimeout(next, 650); }
+      if (ok) say(1, function () { say(2, done); }); else say(2, done);
     });
   }
   function create() {
@@ -475,7 +481,7 @@
     if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return; }
     if (cur.kind !== 'event' && cur.photo) {
       if (signing) return; signing = true;
-      var btn = $('[data-sheet-create]'); btn.innerHTML = '<img class="mload" src="/assets/moon-loader-black.svg" alt="" aria-hidden="true">' + T('SIGNING THE PHOTO'); btn.disabled = true;
+      var btn = $('[data-sheet-create]'); busy(btn, 'SIGNING THE PHOTO'); btn.disabled = true;
       var c0 = cur;
       (cur.sig || signPhoto(cur.photo)).then(function (s) {
         if (cur !== c0) return;
@@ -498,7 +504,7 @@
     // A moment without a photo: Moon signs the moment itself, its exact Moonmark and its words, into the Tideline.
     // Only a fingerprint is sent; the words stay in the link. Offline, it's still made, just without the proof.
     if (signing) return; signing = true;
-    var b2 = $('[data-sheet-create]'); b2.innerHTML = '<img class="mload" src="/assets/moon-loader-black.svg" alt="" aria-hidden="true">' + T('SIGNING'); b2.disabled = true;
+    var b2 = $('[data-sheet-create]'); busy(b2, 'SIGNING'); b2.disabled = true;
     var c1 = cur, k = moon(cur.ms), plain = link(cur.ms, name, 'moment');
     var stmt = 'moon-moment/1\n' + text(k) + '.' + ns9(k) + '\n' + name;
     crypto.subtle.digest('SHA-256', new TextEncoder().encode(stmt)).then(function (d) {
