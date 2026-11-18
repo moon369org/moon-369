@@ -468,7 +468,7 @@
     if (cur.kind === 'event' && !name) { toast('Name the event first'); $('[data-sheet-name]').focus(); return; }
     if (cur.kind !== 'event' && cur.photo) {
       if (signing) return; signing = true;
-      var btn = $('[data-sheet-create]'); btn.innerHTML = '<i class="spin" aria-hidden="true"></i>' + T('SIGNING THE PHOTO'); btn.disabled = true;
+      var btn = $('[data-sheet-create]'); btn.innerHTML = '<img class="mload" src="/assets/moon-loader-black.svg" alt="" aria-hidden="true">' + T('SIGNING THE PHOTO'); btn.disabled = true;
       var c0 = cur;
       (cur.sig || signPhoto(cur.photo)).then(function (s) {
         if (cur !== c0) return;
@@ -489,7 +489,7 @@
     // A moment without a photo: Moon signs the moment itself, its exact Moonmark and its words, into the Tideline.
     // Only a fingerprint is sent; the words stay in the link. Offline, it's still made, just without the proof.
     if (signing) return; signing = true;
-    var b2 = $('[data-sheet-create]'); b2.innerHTML = '<i class="spin" aria-hidden="true"></i>' + T('SIGNING'); b2.disabled = true;
+    var b2 = $('[data-sheet-create]'); b2.innerHTML = '<img class="mload" src="/assets/moon-loader-black.svg" alt="" aria-hidden="true">' + T('SIGNING'); b2.disabled = true;
     var c1 = cur, k = moon(cur.ms), plain = link(cur.ms, name, 'moment');
     var stmt = 'moon-moment/1\n' + text(k) + '.' + ns9(k) + '\n' + name;
     crypto.subtle.digest('SHA-256', new TextEncoder().encode(stmt)).then(function (d) {
