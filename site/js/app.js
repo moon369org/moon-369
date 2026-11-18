@@ -376,7 +376,7 @@
     var bx = e && e.clientX ? e.clientX : innerWidth / 2, by = e && e.clientY ? e.clientY : innerHeight / 2;
     var o = document.createElement('div'); o.className = 'mflash'; o.setAttribute('aria-hidden', 'true');
     o.style.setProperty('--x', bx + 'px'); o.style.setProperty('--y', by + 'px');
-    o.innerHTML = '<div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
+    o.innerHTML = '<i class="mf-burst"></i><i class="mf-ring"></i><div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
     document.body.appendChild(o); buzz();
     setTimeout(function () { o.remove(); }, 1500);
     return true;

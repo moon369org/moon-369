@@ -28,6 +28,10 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 .mflash{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;z-index:2147483000;pointer-events:none;display:flex;align-items:center;justify-content:center;animation:mfs 1.4s ease forwards}
 .mflash::before{content:'';position:absolute;inset:0;background:#FFFCF4;opacity:0;animation:mfw .45s ease-out forwards}
 @keyframes mfw{0%{opacity:.55}100%{opacity:0}}
+.mf-burst{position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:radial-gradient(circle,rgba(255,252,244,.95) 0,rgba(233,228,216,.5) 30%,rgba(233,228,216,0) 70%);animation:mfb .9s cubic-bezier(.15,.85,.25,1) forwards}
+.mf-ring{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:1.5px solid rgba(233,228,216,.8);animation:mfr .8s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes mfb{0%{transform:scale(1);opacity:1}35%{opacity:.9}100%{transform:scale(260);opacity:0}}
+@keyframes mfr{0%{transform:scale(1);opacity:.9}100%{transform:scale(40);opacity:0}}
 @keyframes mfs{0%{background:rgba(5,5,6,0)}12%{background:rgba(5,5,6,.93)}60%{background:rgba(5,5,6,.93)}100%{background:rgba(5,5,6,0)}}
 .mf-t{position:relative;margin:auto;text-align:center;transform-origin:50% 50%;display:flex;align-items:baseline;justify-content:center;gap:.4em;white-space:nowrap;max-width:94vw;font:400 min(5.6vw,60px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:#FFFCF4;text-shadow:0 0 28px rgba(233,228,216,.55);animation:mft 1.4s cubic-bezier(.2,.8,.2,1) forwards}
 .mf-t b{font-weight:600}
