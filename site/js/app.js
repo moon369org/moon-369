@@ -36,7 +36,7 @@
   // ---------- NOW ----------
   var lastSec = -1;
   function tick() {
-    var now = Date.now(), k = moon(now), P = window.MoonPhase;
+    var now = (performance.timeOrigin || Date.now() - performance.now()) + performance.now(), k = moon(now), P = window.MoonPhase;   // the same high-resolution clock the moment is stamped with
     var n9 = String(Math.min(999999999, Math.floor(k.f * 1e9))).padStart(9, '0');   // to the nanosecond, as Moonmarks are
     $('[data-app-clock]').innerHTML = p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n9.slice(0, 3) + ' ' + n9.slice(3, 6) + ' ' + n9.slice(6) + '</small>';
     if (k.s !== lastSec) {
@@ -336,7 +336,7 @@
   var cur = null, made = null;   // cur: { ms, kind }; made: { url, name, mark }
   function step(which) { $$('[data-step]').forEach(function (s) { s.hidden = s.getAttribute('data-step') !== which; }); }
   function openSheet(kind, ms, name) {
-    cur = { ms: kind === 'event' ? Math.floor(ms / 1000) * 1000 : nowMs(), kind: kind }; made = null;   // a moment is the tap that opened the sheet
+    cur = { ms: kind === 'event' ? Math.floor(ms / 1000) * 1000 : ms, kind: kind }; made = null;   // a moment is the instant passed in: the touch on Mark This Moment
     $('[data-sheet-h]').textContent = kind === 'event' ? 'NEW EVENT' : 'MARK THIS MOMENT';
     $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'SAVE MOMENT';
     $('[data-sheet-name]').classList.toggle('short', kind === 'event'); $('[data-sheet-name]').maxLength = kind === 'event' ? 80 : 280;
@@ -715,7 +715,10 @@
     $('[data-sky-change]').onclick = function () { try { localStorage.removeItem('moonPlace'); } catch (e) {} if (skyBox) skyBox.stop(); drawPath(); };
     setView(view, false);
     $$('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
-    $('[data-app-mark]').onclick = function () { openSheet('moment', Date.now()); };
+    // The moment is the instant the finger touches Mark This Moment, not when it lifts.
+    var downAt = 0;
+    $('[data-app-mark]').addEventListener('pointerdown', function () { downAt = nowMs(); });
+    $('[data-app-mark]').onclick = function () { var t = nowMs(), at = downAt && t - downAt < 1500 ? downAt : t; downAt = 0; openSheet('moment', at); };
     $('[data-sheet-close]').onclick = closeSheet;
     $('[data-app-sheet]').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeSheet(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
@@ -774,7 +777,7 @@
       openSheet('event', v, name);
     };
     var h = location.hash.replace('#', ''); if (h === 'nights' || h === 'events') go(h);
-    if (/[?&]mark=1/.test(location.search)) openSheet('moment', Date.now());
+    if (/[?&]mark=1/.test(location.search)) openSheet('moment', nowMs());
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/app-sw.js', { scope: '/app' }).catch(function () {});
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
