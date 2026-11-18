@@ -593,7 +593,12 @@
     // More: a drawer from the bottom with the rest of Moon.
     $('[data-more-open]').onclick = function () { $('[data-more-sheet]').hidden = false; buzz(); };
     $('[data-more-close]').onclick = function () { $('[data-more-sheet]').hidden = true; };
-    $('[data-more-sheet]').addEventListener('click', function (e) { if (e.target === e.currentTarget) e.currentTarget.hidden = true; });
+    $('[data-more-sheet]').addEventListener('click', function (e) {
+      if (e.target === e.currentTarget) { e.currentTarget.hidden = true; return; }
+      // Tapping a tile: close the drawer first, so coming Back finds the app as it was, not the drawer.
+      if (e.target.closest('.mt')) e.currentTarget.hidden = true;
+    });
+    window.addEventListener('pageshow', function () { $('[data-more-sheet]').hidden = true; });
     $('[data-lang-close]').onclick = function () { $('[data-lang-sheet]').hidden = true; };
     $('[data-lang-sheet]').addEventListener('click', function (e) {
       if (e.target === this) { this.hidden = true; return; }
