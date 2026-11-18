@@ -467,12 +467,17 @@
   // The loader stays put the whole time; the labels share one left-aligned slot as wide as the longest, so nothing shifts.
   function busy(btn, first) {
     btn.innerHTML = '<span class="mst"><img class="mload" src="/assets/moon-loader-black.svg" alt="" aria-hidden="true"><span class="mst-l">'
-      + [first, 'VERIFIED', 'SAVED'].map(function (t, i) { return '<b' + (i ? '' : ' class="on"') + '>' + T(t) + '</b>'; }).join('') + '</span></span>';
+      + [first, 'VERIFYING', 'SAVED'].map(function (t, i) { return '<b' + (i ? '' : ' class="on"') + '>' + T(t) + '</b>'; }).join('') + '</span></span>';
   }
   function stages(btn, ok) {
     var b = btn.querySelectorAll('.mst-l b');
     return new Promise(function (done) {
-      function say(i, next) { b.forEach(function (x, j) { x.classList.toggle('on', j === i); }); setTimeout(next, 650); }
+      function say(i, next) {
+        b.forEach(function (x, j) { x.classList.toggle('on', j === i); });
+        // SAVED: the two loader rings slide into one ring, and a check draws inside it.
+        if (i === 2) { var im = btn.querySelector('.mload'); if (im) im.outerHTML = '<svg class="mload mdone" viewBox="-90 -70 180 140" aria-hidden="true"><circle class="md-a" r="46" fill="none" stroke="currentColor" stroke-width="8"/><circle class="md-b" r="46" fill="none" stroke="currentColor" stroke-width="8"/><path class="md-c" d="M-21 1 L-6 16 L22 -14" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/></svg>'; }
+        setTimeout(next, i === 2 ? 900 : 650);
+      }
       if (ok) say(1, function () { say(2, done); }); else say(2, done);
     });
   }

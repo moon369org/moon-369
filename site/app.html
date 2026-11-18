@@ -47,6 +47,11 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 .cam-flip{justify-self:end;width:48px;height:48px;border-radius:50%;border:1px solid #24262A;background:none;color:#E9E4D8;font-size:22px;cursor:pointer}.cam-flip[hidden]{display:none}
 .fallsky{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2147482000;pointer-events:none}
 .mload{display:inline-block;width:30px;height:auto;margin-right:12px;vertical-align:middle;flex:none}
+.mdone{color:#0B0B0D;overflow:visible}
+.mdone .md-a{animation:mdA .35s cubic-bezier(.45,0,.55,1) both}.mdone .md-b{animation:mdB .35s cubic-bezier(.45,0,.55,1) both}
+.mdone .md-c{stroke-dasharray:1;stroke-dashoffset:1;animation:mdC .3s cubic-bezier(.3,0,.2,1) .3s forwards}
+@keyframes mdA{from{transform:translateX(-30px)}to{transform:none}}@keyframes mdB{from{transform:translateX(30px)}to{transform:none}}
+@keyframes mdC{to{stroke-dashoffset:0}}
 .mst{display:inline-flex;align-items:center;vertical-align:middle}
 .mst-l{display:inline-grid;text-align:left}
 .mst-l b{grid-area:1/1;font:inherit;visibility:hidden}
