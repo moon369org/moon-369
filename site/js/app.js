@@ -319,6 +319,40 @@
       });
     }
   }
+  // Moon's own camera: a live view and a shutter. The photo is the frame on screen when the shutter is pressed.
+  function openCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast(T('This device has no camera Moon can use.')); return; }
+    var facing = 'environment', stream = null, box = document.createElement('div');
+    box.className = 'cam'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'Camera');
+    box.innerHTML = '<video playsinline autoplay muted></video><div class="cam-bar"><button type="button" class="cam-x" data-cam-x>' + T('CANCEL') + '</button><button type="button" class="cam-shot" data-cam-shot aria-label="Take the photo"><i></i></button><button type="button" class="cam-flip" data-cam-flip aria-label="Switch camera" hidden>⟲</button></div>';
+    document.body.appendChild(box);
+    var v = box.querySelector('video');
+    var stop = function () { if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; };
+    var close = function () { stop(); box.remove(); };
+    var start = function () {
+      stop();
+      return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1440 } }, audio: false }).then(function (st) {
+        stream = st; v.srcObject = st; box.classList.toggle('front', facing === 'user');
+        return navigator.mediaDevices.enumerateDevices().then(function (d) { box.querySelector('[data-cam-flip]').hidden = d.filter(function (x) { return x.kind === 'videoinput'; }).length < 2; });
+      });
+    };
+    start().catch(function (e) {
+      close();
+      toast(e && e.name === 'NotAllowedError' ? T('Moon needs the camera to take a photo.') : T('No camera found. Moments take photos with the camera only.'));
+    });
+    box.querySelector('[data-cam-x]').onclick = close;
+    box.querySelector('[data-cam-flip]').onclick = function () { facing = facing === 'user' ? 'environment' : 'user'; start().catch(function () {}); };
+    box.querySelector('[data-cam-shot]').onclick = function () {
+      if (!v.videoWidth) return;
+      var c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
+      c.getContext('2d').drawImage(v, 0, 0);
+      box.classList.add('snap'); buzz();
+      c.toBlob(function (b) {
+        close();
+        if (b) pickPhoto(new File([b], 'moon-photo.jpg', { type: 'image/jpeg', lastModified: Date.now() }));
+      }, 'image/jpeg', 0.92);
+    };
+  }
   function clearPhoto() { var had = cur && cur.photo; if (cur) { cur.photo = null; cur.thumb = null; cur.sig = null; } $('[data-sheet-pv-img]').removeAttribute('src'); $('[data-sheet-pv]').hidden = true; $('[data-sheet-pick]').hidden = cur && cur.kind === 'event'; $('[data-sheet-photo]').value = ''; }
   // Sign the photo: its fingerprint, at this moment. The signed link proves the photo existed by then.
   function signPhoto(file) {
@@ -342,7 +376,7 @@
     var bx = e && e.clientX ? e.clientX : innerWidth / 2, by = e && e.clientY ? e.clientY : innerHeight / 2;
     var o = document.createElement('div'); o.className = 'mflash'; o.setAttribute('aria-hidden', 'true');
     o.style.setProperty('--x', bx + 'px'); o.style.setProperty('--y', by + 'px');
-    o.innerHTML = '<i class="mf-burst"></i><i class="mf-ring"></i><div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
+    o.innerHTML = '<div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
     document.body.appendChild(o); buzz();
     setTimeout(function () { o.remove(); }, 1500);
     return true;
@@ -735,6 +769,13 @@
     $('[data-sheet-share]').onclick = share;
     $('[data-sheet-x]').onclick = function () { this.href = xHref(); buzz(); };
     $('[data-sheet-photo]').onchange = function () { pickPhoto(this.files && this.files[0]); };
+    // Moments take photos with the camera only. iPhone and iPad honor capture and open the camera; everywhere else
+    // (computers, Android) the file picker would let any file in, so Moon opens its own live camera instead.
+    var nativeCam = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!nativeCam) {
+      $('[data-sheet-photo]').disabled = true; $('[data-sheet-photo]').style.pointerEvents = 'none';   // a disabled input would swallow the tap
+      $('[data-sheet-pick]').addEventListener('click', function (e) { e.preventDefault(); openCamera(); });
+    }
     $('[data-app-recent]').addEventListener('click', function (e) {
       if (e.target.closest('[data-m-export]')) { exportLog(); return; }
       if (e.target.closest('[data-m-import]')) { importLog(); return; }

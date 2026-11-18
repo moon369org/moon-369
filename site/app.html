@@ -26,16 +26,22 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 .sw{position:relative;overflow:hidden}.sw>a{position:relative;z-index:1;background:#0B0B0D;transition:transform .22s cubic-bezier(.2,.8,.2,1);touch-action:pan-y}.sw-del{position:absolute;right:0;top:0;bottom:0;width:92px;border:0;background:#E0A49C;color:#0B0B0D;font:11px "JetBrains Mono",monospace;letter-spacing:.18em;cursor:pointer}
 /* The mark: a flash from the button and the captured time, large, over everything, for a beat. */
 .mflash{position:fixed;inset:0;z-index:2147483000;pointer-events:none;display:flex;align-items:center;justify-content:center;animation:mfs 1.4s ease forwards}
+.mflash::before{content:'';position:absolute;inset:0;background:#FFFCF4;opacity:0;animation:mfw .45s ease-out forwards}
+@keyframes mfw{0%{opacity:.55}100%{opacity:0}}
 @keyframes mfs{0%{background:rgba(5,5,6,0)}12%{background:rgba(5,5,6,.93)}60%{background:rgba(5,5,6,.93)}100%{background:rgba(5,5,6,0)}}
-.mf-burst{position:absolute;left:var(--x);top:var(--y);width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:radial-gradient(circle,rgba(255,252,244,.95) 0,rgba(233,228,216,.5) 30%,rgba(233,228,216,0) 70%);animation:mfb .9s cubic-bezier(.15,.85,.25,1) forwards}
-.mf-ring{position:absolute;left:var(--x);top:var(--y);width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:1.5px solid rgba(233,228,216,.8);animation:mfr .8s cubic-bezier(.2,.8,.2,1) forwards}
 .mf-t{position:relative;display:flex;align-items:baseline;justify-content:center;gap:.4em;white-space:nowrap;max-width:94vw;font:400 min(5.6vw,60px)/1 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:#FFFCF4;text-shadow:0 0 28px rgba(233,228,216,.55);animation:mft 1.4s cubic-bezier(.2,.8,.2,1) forwards}
 .mf-t b{font-weight:600}
 .mf-t span{white-space:nowrap}
 .mf-t small{font-size:.55em;color:#E9E4D8;margin-left:.05em}
-@keyframes mfb{0%{transform:scale(1);opacity:1}35%{opacity:.9}100%{transform:scale(260);opacity:0}}
-@keyframes mfr{0%{transform:scale(1);opacity:.9}100%{transform:scale(40);opacity:0}}
 @keyframes mft{0%{transform:scale(.86);opacity:0;filter:blur(6px)}14%{transform:scale(1.04);opacity:1;filter:blur(0)}30%{transform:scale(1)}62%{opacity:1}100%{transform:scale(1.02);opacity:0}}
+.cam{position:fixed;inset:0;z-index:2147482500;background:#000;display:flex;flex-direction:column}
+.cam video{flex:1;min-height:0;width:100%;object-fit:cover;background:#000}
+.cam.front video{transform:scaleX(-1)}
+.cam.snap video{animation:camsnap .35s ease}@keyframes camsnap{0%{filter:brightness(3)}100%{filter:none}}
+.cam-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:20px 24px calc(24px + env(safe-area-inset-bottom));background:#050506}
+.cam-x{justify-self:start;background:none;border:0;color:#E9E4D8;font:12px 'JetBrains Mono',monospace;letter-spacing:.18em;padding:12px 0;cursor:pointer}
+.cam-shot{width:76px;height:76px;border-radius:50%;border:3px solid #E9E4D8;background:none;padding:5px;cursor:pointer}.cam-shot i{display:block;width:100%;height:100%;border-radius:50%;background:#E9E4D8}.cam-shot:active i{transform:scale(.9)}
+.cam-flip{justify-self:end;width:48px;height:48px;border-radius:50%;border:1px solid #24262A;background:none;color:#E9E4D8;font-size:22px;cursor:pointer}.cam-flip[hidden]{display:none}
 </style>
 <meta name="description" content="Moon time and the live moon in your pocket. Mark any moment with one tap and send a link that opens in everyone's own time.">
 <link rel="canonical" href="https://moon369.org/app">
