@@ -391,19 +391,29 @@
     var bx = e && e.clientX ? e.clientX : innerWidth / 2, by = e && e.clientY ? e.clientY : innerHeight / 2;
     var o = document.createElement('div'); o.className = 'mflash'; o.setAttribute('aria-hidden', 'true');
     o.style.setProperty('--x', bx + 'px'); o.style.setProperty('--y', by + 'px');
-    // Tonight's moon, as it is at this moment, flares at its lit edge like the sun catching it.
-    var MP = window.MoonPhase, f = MP ? MP.fraction(ms) : 0.25, tl = MP && MP.tilt ? MP.tilt(ms) : 0, lit = MP ? MP.path(f, 10, tl) : '';
-    var side = (f < 0.5 ? 0 : 180) + tl, fx = 50 + 46 * Math.cos(side * Math.PI / 180), fy = 50 + 46 * Math.sin(side * Math.PI / 180);
-    var moonEl = '<div class="mf-moon" style="--fx:' + fx.toFixed(1) + '%;--fy:' + fy.toFixed(1) + '%"><svg viewBox="-11 -11 22 22"><circle r="10" fill="#16171A"/><path d="' + lit + '" fill="#E9E4D8"/></svg><i class="mf-glow"></i><i class="mf-flare"></i><i class="mf-streak"></i></div>';
-    o.innerHTML = '<canvas class="mf-spark"></canvas>' + moonEl + '<div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
-    document.body.appendChild(o); buzz(); spark(o.querySelector('.mf-spark'));
+    // The live moon is the source: it lifts above the dimmed screen, blurs and brightens with the hit,
+    // and seismic rings radiate out from it across the screen.
+    var stg = $('.stage'), sr = stg ? stg.getBoundingClientRect() : null, onScreen = sr && sr.width && sr.bottom > 0 && sr.top < innerHeight && !stg.closest('[hidden]');
+    var cx = onScreen ? sr.left + sr.width / 2 : innerWidth / 2, cy = onScreen ? sr.top + sr.height / 2 : innerHeight / 2, rad = onScreen ? sr.width * 0.4 : 80;
+    var waves = ''; for (var w = 0; w < 5; w++) waves += '<i class="mf-wave" style="left:' + cx + 'px;top:' + cy + 'px;width:' + rad * 2 + 'px;height:' + rad * 2 + 'px;animation-delay:' + (w * 0.11).toFixed(2) + 's"></i>';
+    o.innerHTML = '<canvas class="mf-spark"></canvas>' + waves + '<div class="mf-t"><b>' + k.y + '.' + p(k.m) + '.' + p(k.d) + '</b><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
+    document.body.appendChild(o); buzz(); spark(o.querySelector('.mf-spark'), cx, cy);
+    // A live copy of the moon above the dimmed screen: it keeps drawing the real moon each frame while it blurs and glows.
+    var live = $('[data-app-moon]');
+    if (onScreen && live && live.width) {
+      var lr = live.getBoundingClientRect(), mc = document.createElement('canvas'); mc.className = 'mf-livemoon';
+      mc.width = live.width; mc.height = live.height; mc.style.cssText = 'left:' + lr.left + 'px;top:' + lr.top + 'px;width:' + lr.width + 'px;height:' + lr.height + 'px';
+      o.insertBefore(mc, o.querySelector('.mf-t'));
+      var mx = mc.getContext('2d');
+      (function copy() { if (!mc.isConnected) return; mx.clearRect(0, 0, mc.width, mc.height); mx.drawImage(live, 0, 0); requestAnimationFrame(copy); })();
+    }
     setTimeout(function () { o.remove(); }, 1500);
     return true;
   }
   // A spark from the middle of the screen: hot streaks flying out, thinning and dimming, with embers drifting after.
-  function spark(cv) {
+  function spark(cv, ox, oy) {
     var dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr, c = cv.getContext('2d');
-    var cx = W / 2, cy = H / 2, reach = Math.hypot(W, H) * 0.42, t0 = performance.now(), rays = [], embers = [], i;
+    var cx = (ox == null ? innerWidth / 2 : ox) * dpr, cy = (oy == null ? innerHeight / 2 : oy) * dpr, reach = Math.hypot(W, H) * 0.42, t0 = performance.now(), rays = [], embers = [], i;
     for (i = 0; i < 46; i++) rays.push({ a: Math.random() * 6.283, v: 0.35 + Math.random() * 0.75, len: 0.08 + Math.random() * 0.22, w: (0.6 + Math.random() * 1.6) * dpr, d: Math.random() * 0.08 });
     for (i = 0; i < 70; i++) { var a = Math.random() * 6.283, sp = (0.2 + Math.random() * 0.8) * reach; embers.push({ vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: (0.6 + Math.random() * 1.4) * dpr, life: 0.5 + Math.random() * 0.7 }); }
     (function frame(now) {
