@@ -27,7 +27,7 @@
       '<div class="sl-in">' +
         '<div class="sl-top"><span class="sl-k">SIGNED MOONMARK</span><button type="button" class="sl-x" aria-label="Close">&times;</button></div>' +
         '<div class="sl-stage">' +
-          '<div class="sl-moonwrap"><canvas class="hm-moonglow sl-moon" aria-hidden="true"></canvas><img class="sl-load" src="/assets/moon-loader-black.svg" alt="" aria-hidden="true"><div class="sl-ring"></div><div class="sl-ring sl-ring2"></div></div>' +
+          '<div class="sl-moonwrap"><canvas class="hm-moonglow sl-moon" aria-hidden="true"></canvas><img class="sl-load" src="/assets/moon-loader-black.svg?v=2" alt="" aria-hidden="true"><div class="sl-ring"></div><div class="sl-ring sl-ring2"></div></div>' +
           '<div class="sl-status" role="status" aria-live="polite"></div>' +
           '<div class="sl-hex" aria-hidden="true"></div>' +
           '<div class="sl-mark" aria-live="polite"></div>' +

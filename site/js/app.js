@@ -466,7 +466,7 @@
   // After signing, the button walks SIGNING > VERIFIED > SAVED before the moment opens.
   // The loader stays put the whole time; the labels share one left-aligned slot as wide as the longest, so nothing shifts.
   function busy(btn, first) {
-    btn.innerHTML = '<span class="mst"><img class="mload" src="/assets/moon-loader-black.svg" alt="" aria-hidden="true"><span class="mst-l">'
+    btn.innerHTML = '<span class="mst"><img class="mload" src="/assets/moon-loader-black.svg?v=2" alt="" aria-hidden="true"><span class="mst-l">'
       + [first, 'VERIFYING', 'SAVED'].map(function (t, i) { return '<b' + (i ? '' : ' class="on"') + '>' + T(t) + '</b>'; }).join('') + '</span></span>';
   }
   function stages(btn, ok) {
