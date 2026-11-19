@@ -24,6 +24,13 @@ a{color:inherit}
 .dr-cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .dr-cam::after{content:'';position:absolute;inset:16%;border:2px solid rgba(233,228,216,.7);border-radius:8px;pointer-events:none}
 .dr-cam p{position:absolute;inset:0;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;font-size:14px;line-height:1.55;color:#8A8B8F}
+.dr-camsel{display:flex;align-items:center;gap:14px;border:1px solid #2E3035;padding:0 0 0 16px;min-height:52px;position:relative}
+.dr-camsel[hidden]{display:none}
+.dr-camsel span{font:400 11px 'JetBrains Mono',monospace;letter-spacing:.24em;color:#8A8B8F;flex:none}
+.dr-camsel select{all:unset;box-sizing:border-box;flex:1;min-width:0;height:50px;line-height:50px;padding:0 44px 0 0;font:500 15px/50px Inter,sans-serif;color:#E9E4D8;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr-camsel::after{content:'';position:absolute;right:18px;top:50%;width:7px;height:7px;border:solid #8A8B8F;border-width:0 1.5px 1.5px 0;transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.dr-camsel select option{background:#16171A;color:#E9E4D8}
+.dr-cam.mirror video{transform:scaleX(-1)}
 .dr-btn{all:unset;box-sizing:border-box;cursor:pointer;min-height:54px;padding:0 22px;display:flex;align-items:center;justify-content:center;background:#E9E4D8;color:#0B0B0D;border-radius:2px;font:700 11px Syncopate,sans-serif;letter-spacing:.22em;text-align:center}
 .dr-res{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 28px;text-align:center;animation:drIn .18s ease-out}
 @keyframes drIn{from{transform:scale(1.04)}}
@@ -48,6 +55,7 @@ a{color:inherit}
     <div class="dr-count"><div><b data-d-in>0</b>IN</div><div><b data-d-all>0</b>TICKETS</div><div><b data-d-net>·</b>LIST</div></div>
     <div class="dr-cam"><video data-d-video playsinline muted></video><p data-d-camtxt>Tap START to scan tickets.</p></div>
     <button class="dr-btn" type="button" data-d-start>START SCANNING</button>
+    <label class="dr-camsel" data-d-camrow hidden><span>CAMERA</span><select data-d-cam aria-label="Camera"></select></label>
     <ul class="dr-log" data-d-log></ul>
   </section>
 </main>

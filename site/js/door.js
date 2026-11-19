@@ -119,13 +119,39 @@
       setTimeout(tick, 130);
     })();
   }
-  function startCam() {
+  // The camera: the back one on a phone, or the one picked from the list (remembered on this device).
+  var stream = null;
+  function savedCam() { try { return localStorage.getItem('moonDoorCam') || ''; } catch (e) { return ''; } }
+  function startCam(id) {
     var b = $('[data-d-start]');
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false }).then(function (s) {
+    if (stream) stream.getTracks().forEach(function (t) { t.stop(); });
+    id = id || savedCam();
+    var video = { width: { ideal: 1280 }, height: { ideal: 720 } };
+    if (id) video.deviceId = { exact: id }; else video.facingMode = { ideal: 'environment' };
+    navigator.mediaDevices.getUserMedia({ video: video, audio: false }).then(function (s) {
+      stream = s;
       var v = $('[data-d-video]'); v.srcObject = s; v.play().catch(function () {});
-      $('[data-d-camtxt]').hidden = true; scanning = true; b.hidden = true; scan();
+      var tr = s.getVideoTracks()[0], st = tr && tr.getSettings ? tr.getSettings() : {};
+      // A camera facing you (a laptop's, or a phone's front one) shows like a mirror, so holding a ticket up is natural.
+      $('.dr-cam').classList.toggle('mirror', st.facingMode !== 'environment');
+      $('[data-d-camtxt]').hidden = true; b.hidden = true;
+      if (!scanning) { scanning = true; scan(); }
+      cams(st.deviceId);
       try { if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(function () {}); } catch (e) {}
-    }).catch(function () { $('[data-d-camtxt]').textContent = T('Moon needs the camera to scan tickets. Allow it in your browser settings, then try again.'); });
+    }).catch(function () {
+      if (id) { try { localStorage.removeItem('moonDoorCam'); } catch (e) {} return startCam(''); }   // the saved camera is gone: use the default
+      $('[data-d-camtxt]').hidden = false;
+      $('[data-d-camtxt]').textContent = T('Moon needs the camera to scan tickets. Allow it in your browser settings, then try again.');
+    });
+  }
+  function cams(current) {
+    if (!navigator.mediaDevices.enumerateDevices) return;
+    navigator.mediaDevices.enumerateDevices().then(function (ds) {
+      var vs = ds.filter(function (d) { return d.kind === 'videoinput'; }), sel = $('[data-d-cam]');
+      $('[data-d-camrow]').hidden = vs.length < 2;
+      sel.innerHTML = '';
+      vs.forEach(function (d, i) { var o = document.createElement('option'); o.value = d.deviceId; o.textContent = d.label || T('Camera {n}', { n: i + 1 }); if (d.deviceId === current) o.selected = true; sel.appendChild(o); });
+    }, function () {});
   }
 
   function start() {
@@ -146,7 +172,9 @@
     $('[data-d-main]').hidden = false;
     try { var cached = JSON.parse(localStorage.getItem('moonDoorList:' + ev) || 'null'); if (cached) { list = cached.tickets || {}; skew = cached.skew || 0; $('[data-d-name]').textContent = cached.name; counts(); } } catch (e) {}
     try { queue = JSON.parse(localStorage.getItem('moonDoorQ:' + ev) || '[]'); } catch (e) { queue = []; }
-    $('[data-d-start]').addEventListener('click', startCam);
+    $('[data-d-start]').addEventListener('click', function () { startCam(); });
+    $('[data-d-cam]').addEventListener('change', function () { var id = this.value; try { localStorage.setItem('moonDoorCam', id); } catch (e) {} startCam(id); });
+    if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) navigator.mediaDevices.addEventListener('devicechange', function () { if (stream) cams(savedCam()); });
     load().then(function () { setInterval(load, 15000); }, function () { setInterval(load, 15000); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
