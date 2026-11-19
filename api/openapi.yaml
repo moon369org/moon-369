@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moon API
-  version: 1.8.0
+  version: 1.9.0
   summary: The open standard for time. The worldwide timestamp, locked to the moon.
   license: { name: MIT, identifier: MIT }
   description: |
@@ -221,6 +221,48 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '429': { $ref: '#/components/responses/RateLimited' }
         '503': { description: Signing is not configured on this deployment }
+  /v1/tickets:
+    post:
+      summary: Open a ticketed event. Returns its id, a door key and the ticket and door links
+      description: Moon stores only the SHA-256 of the door key. Anyone with the door key can check guests in, so keep the door link private.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [name], properties: { name: { type: string, maxLength: 80 }, moonmark: { type: string }, start_utc: { type: string, format: date-time }, max: { type: integer, maximum: 5000 } } } } }
+      responses:
+        '200': { description: 'event, door_key, links.tickets (https://moon369.org/ticket?e={event}) and links.door (https://moon369.org/door#{event}.{door_key})' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /v1/tickets/{event}:
+    get:
+      summary: A ticketed event, with how many tickets are issued and checked in
+      parameters: [{ name: event, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 'event, tickets, checked_in, max, server_ms' }, '404': { description: No such event } }
+  /v1/tickets/{event}/issue:
+    post:
+      summary: Issue a ticket bound to a phone's P-256 public key
+      description: 'The phone keeps the private key (non-extractable in WebCrypto). Moon signs moon-ticket/1, event:{id}, name:{event name}, ticket:{id}, key:{sha256 of the raw public key}, joined by newlines.'
+      parameters: [{ name: event, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [pub], properties: { pub: { type: string, description: 'Raw uncompressed P-256 public key (65 bytes), base64url' }, name: { type: string, maxLength: 80 } } } } }
+      responses: { '200': { description: 'ticket, event, statement, receipt, window_ms, server_ms' }, '400': { $ref: '#/components/responses/BadRequest' }, '409': { description: The event is full } }
+  /v1/tickets/{event}/{ticket}:
+    get:
+      summary: A ticket and whether it has been checked in
+      parameters: [{ name: event, in: path, required: true, schema: { type: string } }, { name: ticket, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 'ticket, event, checked_in (ISO time or null), checkin_moonmark, checkin_url, window_ms, server_ms' } }
+  /v1/tickets/{event}/door:
+    post:
+      summary: The guest list for a door, with each ticket's public key, so codes can be checked with no signal
+      parameters: [{ name: event, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key], properties: { key: { type: string } } } } } }
+      responses: { '200': { description: 'event, window_ms, window_slack, server_ms, tickets [{ id, pub, name, moonmark, checked_in }]' }, '403': { description: Wrong door key } }
+  /v1/tickets/{event}/checkin:
+    post:
+      summary: Check a guest in with the live code from their phone, once
+      description: 'w is floor(unix_ms / 5000); sig is the phone''s ECDSA P-256 / SHA-256 signature (raw r||s, base64url) over moon-ticket-code/1|{event}|{ticket}|{w}. A code is accepted within 3 windows of now, or up to a day old with late true (a door that had no signal). The check-in is signed as moon-checkin/1, event:{id}, ticket:{id}.'
+      parameters: [{ name: event, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key, ticket, w, sig], properties: { key: { type: string }, ticket: { type: string }, w: { type: integer }, sig: { type: string }, late: { type: boolean } } } } } }
+      responses: { '200': { description: 'ok true with name, checked_in, moonmark and signed_url; or ok false with reason: no_ticket, stale_code, wrong_phone, bad_code, already_in' }, '403': { description: Wrong door key } }
   /v1/verify:
     post:
       summary: Check a receipt, and optionally that it matches your content

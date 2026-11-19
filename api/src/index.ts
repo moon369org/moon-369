@@ -16,6 +16,7 @@ import { mcp } from './mcp.js';
 import { eventLinks, eventIcs, cleanEventName } from './event.js';
 import { RESEAL, resealFingerprint } from './reseal.js';
 import { parseStatement, statementSha, newPrintIds, type EditionStore } from './editions.js';
+import { type TicketStore, type TicketEvent, type Ticket, newId, sha256hex, isId, cleanName, p256, ticketStatement, checkInStatement, checkCode, doorOk, MAX_TICKETS, WINDOW_MS, WINDOW_SLACK } from './tickets.js';
 import { makeRegistration, publicRegistration, isPhash, phashKind, hamming, bands, SIMILAR_BITS, registrantSlug, type RegistryStore, type Registration } from './registry.js';
 import { svgToPng } from './png.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
@@ -80,6 +81,8 @@ export interface Env {
   FREE_LIMITS?: { per_min: number; sign_per_day: number; req_per_day?: number };
   /** Edition registry for certificates of authenticity. Without it, /v1/editions answers 503. */
   EDITIONS?: EditionStore;
+  /** Ticketed events: Moon-signed tickets bound to the guest's phone. Without it, /v1/tickets answers 503. */
+  TICKETS?: TicketStore;
   /** Admin token (MOON_ADMIN_TOKEN) for issuing verified business keys in one call: POST /v1/admin/keys. Without it, admin routes answer 404. */
   ADMIN_TOKEN?: string;
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
@@ -512,6 +515,93 @@ async function tsaResponse(req: Request, env: Env, planHdr: Record<string, strin
   return reply(der, mark ? { 'X-Moon-Moonmark': mark, ...(moonmarkUrl ? { 'X-Moon-Url': moonmarkUrl } : {}) } : {});
 }
 
+/** Ticketed events. A ticket is a Moonmark bound to the guest's phone; the door checks a code only that phone can make. */
+async function ticketRoute(req: Request, env: Env, path: string, planHdr: Record<string, string>, gate: Gate): Promise<Response> {
+  if (!env.TICKETS) throw new HttpError(503, 'tickets_unavailable', 'Tickets are not configured on this deployment');
+  const T = env.TICKETS, hdr = { 'Cache-Control': 'no-store', ...planHdr };
+  const parts = path.split('/').slice(3);   // after /v1/tickets
+  const pub = (ev: TicketEvent) => ({ id: ev.id, name: ev.name, moonmark: ev.moonmark, start_utc: ev.start_utc, created: ev.created });
+  const tpub = (t: Ticket) => ({ id: t.id, event: t.event, name: t.name, key_sha256: t.key_sha256, moonmark: t.moonmark, signed_url: t.signed_url, created: t.created });
+  const evOr404 = async (id: string) => { if (!isId(id)) throw new HttpError(404, 'not_found', 'No such event'); const ev = await T.getEvent(id); if (!ev) throw new HttpError(404, 'not_found', 'No such event'); return ev; };
+  const post = req.method === 'POST';
+
+  // POST /v1/tickets  {name, moonmark?, start_utc?}: a ticketed event, and the organizer's door key.
+  if (parts.length === 0) {
+    if (!post) throw new HttpError(405, 'method_not_allowed', 'Use POST to create a ticketed event');
+    const body = await readJson(req, 4096);
+    const name = cleanName(body.name);
+    if (!name) throw new HttpError(400, 'bad_param', 'name: what the event is called, up to 80 characters');
+    const mm = typeof body.moonmark === 'string' && /^\d{4}\.\d{2}\.\d{2}[ -]\d{2}[.:]\d{2}[.:]\d{2}/.test(body.moonmark) ? body.moonmark.slice(0, 40) : null;
+    const st = typeof body.start_utc === 'string' && !Number.isNaN(Date.parse(body.start_utc)) ? new Date(body.start_utc).toISOString() : null;
+    const key = newId(24), ev: TicketEvent = { id: newId(9), name, moonmark: mm, start_utc: st, door: sha256hex(key), created: new Date().toISOString(), max: MAX_TICKETS };
+    await T.putEvent(ev);
+    return json({ event: pub(ev), door_key: key,
+      links: { tickets: `https://moon369.org/ticket?e=${ev.id}`, door: `https://moon369.org/door#${ev.id}.${key}` },
+      note: 'Keep the door key private: it is the only way to check guests in. Moon keeps only its fingerprint.' }, 200, hdr);
+  }
+  const ev = await evOr404(parts[0]);
+
+  // GET /v1/tickets/<event>: the event and how many are coming.
+  if (parts.length === 1) {
+    const c = await T.count(ev.id);
+    return json({ event: pub(ev), tickets: c.tickets, checked_in: c.in, max: ev.max, server_ms: Date.now() }, 200, hdr);
+  }
+
+  // POST /v1/tickets/<event>/issue  {pub, name?}: Moon signs a ticket bound to this phone's public key.
+  if (parts[1] === 'issue' && parts.length === 2) {
+    if (!post) throw new HttpError(405, 'method_not_allowed', 'Use POST');
+    if (!env.SIGNER) throw new HttpError(503, 'signing_unavailable', 'Signing is not configured on this deployment');
+    const body = await readJson(req, 4096);
+    if (!p256(body.pub)) throw new HttpError(400, 'bad_param', "pub: the phone's P-256 public key, raw uncompressed, base64url");
+    const c = await T.count(ev.id);
+    if (c.tickets >= ev.max) throw new HttpError(409, 'sold_out', 'This event has given out all its tickets');
+    const id = newId(9), keySha = sha256hex(Buffer.from(body.pub as string, 'base64url'));
+    const out = await signNow(env, sha256hex(ticketStatement(ev, id, keySha)), undefined, whoFrom({}, gate));
+    const t: Ticket = { id, event: ev.id, pub: body.pub as string, key_sha256: keySha, name: cleanName(body.name, 60) || null, moonmark: out.receipt.moonmark, signed_url: (out as { signed_url?: string }).signed_url ?? null, created: new Date().toISOString() };
+    await T.addTicket(t);
+    return json({ ticket: tpub(t), event: pub(ev), statement: ticketStatement(ev, id, keySha), receipt: out.receipt, window_ms: WINDOW_MS, server_ms: Date.now() }, 200, hdr);
+  }
+
+  // POST /v1/tickets/<event>/door  {key}: every ticket and who is in, for the door's own checks.
+  if (parts[1] === 'door' && parts.length === 2) {
+    if (!post) throw new HttpError(405, 'method_not_allowed', 'Use POST');
+    const body = await readJson(req, 4096);
+    if (!doorOk(ev, body.key)) throw new HttpError(403, 'bad_door_key', 'That door key is not for this event');
+    const [ts, ins] = await Promise.all([T.tickets(ev.id), T.checkIns(ev.id)]);
+    return json({ event: pub(ev), window_ms: WINDOW_MS, window_slack: WINDOW_SLACK, server_ms: Date.now(),
+      tickets: ts.map((t) => ({ id: t.id, pub: t.pub, name: t.name, moonmark: t.moonmark, checked_in: ins[t.id]?.at ?? null })) }, 200, hdr);
+  }
+
+  // POST /v1/tickets/<event>/checkin  {key, ticket, w, sig}: check a live code and let the guest in, once.
+  if (parts[1] === 'checkin' && parts.length === 2) {
+    if (!post) throw new HttpError(405, 'method_not_allowed', 'Use POST');
+    const body = await readJson(req, 4096);
+    if (!doorOk(ev, body.key)) throw new HttpError(403, 'bad_door_key', 'That door key is not for this event');
+    const t = isId(body.ticket) ? await T.getTicket(ev.id, body.ticket) : null;
+    if (!t) return json({ ok: false, reason: 'no_ticket', message: 'Not a ticket for this event' }, 200, hdr);
+    const late = body.late === true;   // a door that had no signal, sending the check-ins it made on its own
+    const code = checkCode(t, body.w, body.sig, Date.now(), late);
+    const already = await T.getCheckIn(ev.id, t.id);
+    if (!code.ok) return json({ ok: false, reason: code.reason, name: t.name, checked_in: already?.at ?? null,
+      message: code.reason === 'stale_code' ? 'This code is old: a screenshot, or a phone clock far off. Ask to see the live ticket.' : code.reason === 'wrong_phone' ? 'This code was not made by the phone the ticket belongs to' : 'Not a valid ticket code' }, 200, hdr);
+    if (already) return json({ ok: false, reason: 'already_in', name: t.name, checked_in: already.at, message: 'Already checked in' }, 200, hdr);
+    let mm: string | null = null, url: string | null = null;
+    if (env.SIGNER) { try { const s = await signNow(env, sha256hex(checkInStatement(ev.id, t.id)), undefined, whoFrom({}, gate)); mm = s.receipt.moonmark; url = (s as { signed_url?: string }).signed_url ?? null; } catch { /* the check-in stands without its Moonmark */ } }
+    const r = await T.checkIn(ev.id, t.id, { at: new Date().toISOString(), moonmark: mm, signed_url: url });
+    if (!r.first) return json({ ok: false, reason: 'already_in', name: t.name, checked_in: r.checkin.at, message: 'Already checked in' }, 200, hdr);
+    return json({ ok: true, name: t.name, ticket: t.id, checked_in: r.checkin.at, moonmark: mm, signed_url: url }, 200, hdr);
+  }
+
+  // GET /v1/tickets/<event>/<ticket>: a ticket and whether its guest is in (the guest's phone asks this).
+  if (parts.length === 2 && isId(parts[1])) {
+    const t = await T.getTicket(ev.id, parts[1]);
+    if (!t) throw new HttpError(404, 'not_found', 'No such ticket');
+    const ci = await T.getCheckIn(ev.id, t.id);
+    return json({ ticket: tpub(t), event: pub(ev), checked_in: ci ? ci.at : null, checkin_moonmark: ci?.moonmark ?? null, checkin_url: ci?.signed_url ?? null, window_ms: WINDOW_MS, server_ms: Date.now() }, 200, hdr);
+  }
+  throw new HttpError(404, 'not_found', 'Unknown tickets route');
+}
+
 export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
   const url = new URL(req.url);
@@ -524,10 +614,11 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
     return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, registrantOf(gate));
   }
   const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof` || path === `/${API_VERSION}/editions` || path === `/${API_VERSION}/reseal` || path === `/${API_VERSION}/reseal/verify`;
-  if (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD'))
+  const either = path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`);   // tickets: GET to read, POST to change
+  if (!either && (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD')))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /v1/tickets', '/v1/tickets/{event}', 'POST /v1/tickets/{event}/issue', '/v1/tickets/{event}/{ticket}', 'POST /v1/tickets/{event}/door', 'POST /v1/tickets/{event}/checkin', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   if (path.startsWith(`/${API_VERSION}/admin/`)) return adminRoute(req, env, path);
@@ -902,6 +993,9 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         const h = await env.EDITIONS.hit(sha.toLowerCase(), print, new Date().toISOString());
         return json({ registered: true, valid: true, print, edition: ed.n, registered_at: ed.created, checks: h.count, first_check: h.first }, 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
+
+      case path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`):
+        return await ticketRoute(req, env, path, planHdr, gate);
 
       case path === `/${API_VERSION}/reseal`: {
         // Re-seal an old receipt: Moon signs its fingerprint now, with today's algorithms.

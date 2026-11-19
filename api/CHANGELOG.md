@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.0 (Moon 05, Lune 10, Year 1928)
+
+- **Tickets**: tickets that only work on the phone they were issued to. `POST /v1/tickets` opens a ticketed event and returns a door key (Moon keeps only its SHA-256). A guest's phone makes its own P-256 key pair and sends the public half to `POST /v1/tickets/{event}/issue`; Moon signs a `moon-ticket/1` statement naming the event, the ticket and the key's fingerprint. At the door the phone shows a code that changes every 5 seconds: the ticket, the window number (`floor(unix_ms / 5000)`) and the phone's ECDSA P-256 signature over `moon-ticket-code/1|{event}|{ticket}|{window}`. `POST /v1/tickets/{event}/checkin` accepts a code within 3 windows of now, checks the guest in once, and signs a `moon-checkin/1` Moonmark. A screenshot is stale within seconds, and no other phone can make the next code.
+- **`POST /v1/tickets/{event}/door`** (the guest list, so a door can check codes with no signal; check-ins made offline are sent later with `late: true`), **`GET /v1/tickets/{event}`** and **`GET /v1/tickets/{event}/{ticket}`**.
+
 ## 1.8.0 (Moon 05, Lune 06, Year 1928)
 
 - **Evidence statements**: `POST /v1/evidence` checks a receipt now (signatures, beacon, optional file fingerprint, its place in the Tideline, XRP Ledger and Bitcoin anchors) and returns what it found as a statement signed with Ed25519 and ML-DSA-65. Signed bytes: `moon-evidence/1`, a newline, then the statement as JSON with keys sorted. moon369.org/evidence turns it into a printable report and a bundle anyone can check without Moon.

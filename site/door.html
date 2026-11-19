@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<link rel="preconnect" href="https://api.moon369.org" crossorigin>
+<title>Door · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#0B0B0D;color:#E9E4D8;font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased;min-height:100%}
+a{color:inherit}
+.dr{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 32px);display:flex;flex-direction:column;gap:16px;min-height:100vh}
+.dr-top{display:flex;justify-content:space-between;align-items:center}
+.dr-top img{height:16px;display:block}
+.k{font:400 11px 'JetBrains Mono',monospace;letter-spacing:.28em;color:#8A8B8F}
+.dr-name{margin:0;font:700 clamp(18px,5.4vw,24px)/1.25 Syncopate,sans-serif;letter-spacing:.06em;text-transform:uppercase;overflow-wrap:anywhere}
+.dr-count{display:flex;gap:28px;font:400 12px 'JetBrains Mono',monospace;color:#8A8B8F;letter-spacing:.14em}
+.dr-count b{display:block;font:700 26px Syncopate,sans-serif;color:#E9E4D8;letter-spacing:.02em;margin-bottom:4px}
+.dr-cam{position:relative;width:100%;aspect-ratio:1;border:1px solid #24262A;border-radius:6px;overflow:hidden;background:#111214}
+.dr-cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.dr-cam::after{content:'';position:absolute;inset:16%;border:2px solid rgba(233,228,216,.7);border-radius:8px;pointer-events:none}
+.dr-cam p{position:absolute;inset:0;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;font-size:14px;line-height:1.55;color:#8A8B8F}
+.dr-btn{all:unset;box-sizing:border-box;cursor:pointer;min-height:54px;padding:0 22px;display:flex;align-items:center;justify-content:center;background:#E9E4D8;color:#0B0B0D;border-radius:2px;font:700 11px Syncopate,sans-serif;letter-spacing:.22em;text-align:center}
+.dr-res{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 28px;text-align:center;animation:drIn .18s ease-out}
+@keyframes drIn{from{transform:scale(1.04)}}
+.dr-res.ok{background:#12301C}.dr-res.no{background:#3A1414}.dr-res.wait{background:#2A2410}
+.dr-res b{font:700 clamp(26px,8vw,40px) Syncopate,sans-serif;letter-spacing:.08em}
+.dr-res span{font-size:clamp(18px,5vw,24px);font-weight:500}
+.dr-res small{font:400 13px 'JetBrains Mono',monospace;color:rgba(233,228,216,.75);max-width:340px;line-height:1.6}
+.dr-log{list-style:none;margin:0;padding:0;border-top:1px solid #1C1D20}
+.dr-log li{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #1C1D20;font:400 13px 'JetBrains Mono',monospace;color:#A2A3A7}
+.dr-log li i{font-style:normal}.dr-log li.ok i{color:#7FBF8E}.dr-log li.no i{color:#E07A6A}
+.dr-msg{border:1px solid #2E3035;border-radius:4px;padding:16px;font-size:15px;line-height:1.6;color:#B9B6AE}
+[hidden]{display:none!important}
+</style>
+<script src="/js/i18n.js" defer></script>
+</head>
+<body>
+<main class="dr">
+  <div class="dr-top"><a href="/" aria-label="Moon home"><img src="/assets/brand/logo/moon-wordmark-cream.svg" alt="Moon"></a><span class="k">DOOR</span></div>
+  <div data-d-msg class="dr-msg" hidden></div>
+  <section data-d-main hidden style="display:flex;flex-direction:column;gap:16px">
+    <div><div class="k" style="margin-bottom:8px">CHECKING IN</div><h1 class="dr-name" data-d-name>…</h1></div>
+    <div class="dr-count"><div><b data-d-in>0</b>IN</div><div><b data-d-all>0</b>TICKETS</div><div><b data-d-net>·</b>LIST</div></div>
+    <div class="dr-cam"><video data-d-video playsinline muted></video><p data-d-camtxt>Tap START to scan tickets.</p></div>
+    <button class="dr-btn" type="button" data-d-start>START SCANNING</button>
+    <ul class="dr-log" data-d-log></ul>
+  </section>
+</main>
+<div class="dr-res" data-d-res hidden><b data-d-rb></b><span data-d-rn></span><small data-d-rs></small></div>
+<canvas data-d-canvas hidden></canvas>
+<script src="/js/jsqr.js" defer></script>
+<script src="/js/door.js" defer></script>
+</body>
+</html>

@@ -11,7 +11,7 @@
     var qrcode = opts.qrcode || root.qrcode, phase = opts.phase || root.MoonPhase;
     var q = qrcode(0, 'H'); q.addData(url); q.make();
     var n = q.getModuleCount(), quiet = 4, size = n + quiet * 2;
-    var c = n / 2, clear = Math.max(3.5, n * 0.12);
+    var c = n / 2, clear = Math.max(3.5, n * (opts.clear || 0.12));
 
     function inEye(r, col) {
       return (r < 8 && col < 8) || (r < 8 && col >= n - 8) || (r >= n - 8 && col < 8);
@@ -24,6 +24,7 @@
     var d = '', rr = 0.48;
     for (var r = 0; r < n; r++) for (var col = 0; col < n; col++) {
       if (!q.isDark(r, col) || inEye(r, col) || inCenter(r, col)) continue;
+      if (opts.square) { d += 'M' + col + ',' + r + 'h1v1h-1z'; continue; }   // solid modules, for codes read in a hurry (a ticket at a door)
       var x = col + 0.5, y = r + 0.5;
       d += 'M' + (x - rr) + ',' + y + 'a' + rr + ',' + rr + ' 0 1,0 ' + (2 * rr) + ',0a' + rr + ',' + rr + ' 0 1,0 ' + (-2 * rr) + ',0';
     }
@@ -31,7 +32,8 @@
     var eyes = '';
     [[0, 0], [n - 7, 0], [0, n - 7]].forEach(function (p) {
       eyes += '<rect x="' + (p[0] + 0.5) + '" y="' + (p[1] + 0.5) + '" width="6" height="6" fill="none" stroke="' + INK + '" stroke-width="1"/>' +
-              '<circle cx="' + (p[0] + 3.5) + '" cy="' + (p[1] + 3.5) + '" r="1.5" fill="' + INK + '"/>';
+              (opts.square ? '<rect x="' + (p[0] + 2) + '" y="' + (p[1] + 2) + '" width="3" height="3" fill="' + INK + '"/>'
+                           : '<circle cx="' + (p[0] + 3.5) + '" cy="' + (p[1] + 3.5) + '" r="1.5" fill="' + INK + '"/>');
     });
 
     var mr = clear - 1, lit = phase ? phase.path(f || 0, mr, opts.tilt || 0) : '';
@@ -43,7 +45,7 @@
 
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + (-quiet) + ' ' + (-quiet) + ' ' + size + ' ' + size + '" shape-rendering="geometricPrecision" role="img" aria-label="QR code for this Moonmark">' +
       '<rect x="' + (-quiet) + '" y="' + (-quiet) + '" width="' + size + '" height="' + size + '" fill="' + PAPER + '"/>' +
-      '<path d="' + d + '" fill="' + INK + '"/>' + eyes + moon + '</svg>';
+      '<path d="' + d + '" fill="' + INK + '"' + (opts.square ? ' shape-rendering="crispEdges"' : '') + '/>' + eyes + moon + '</svg>';
   }
 
   var api = { svg: svg };

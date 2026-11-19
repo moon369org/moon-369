@@ -1,5 +1,6 @@
 /* Moonmark page: open, show and share one exact moment on the Moon engine. */
 (function () {
+  var tix = (function (t) { return /^[A-Za-z0-9_-]{8,24}$/.test(t) ? t : ''; })(new URLSearchParams(location.search).get('t') || '');   // a ticketed event: tickets at /ticket?e=
   var EPOCH = -62165308562978.61, K = 1.0403730490216803, SEC = 1000 * K;
   var MMK = '<svg class="mmk" viewBox="0 0 40 40" aria-hidden="true"><path d="M9 33V7l11 13L31 7v26M9 17l11 13 11-13" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="bevel"/></svg>';
   var p = function (n, w) { return String(n).padStart(w || 2, '0'); };
@@ -384,7 +385,7 @@
       '</div>' +
       skyBox(ms) +
       (ev
-        ? '<div class="mk-btns"><a class="mk-p" data-mk-ics href="#" download="">ADD TO CALENDAR</a><a href="' + esc(gcal(ev, ms, url, text(mk))) + '" target="_blank" rel="noopener">GOOGLE CALENDAR</a><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-embed>COPY EMBED CODE</button></div>'
+        ? '<div class="mk-btns">' + (tix ? '<a class="mk-p" href="/ticket?e=' + esc(tix) + '">GET A TICKET</a>' : '') + '<a' + (tix ? '' : ' class="mk-p"') + ' data-mk-ics href="#" download="">ADD TO CALENDAR</a><a href="' + esc(gcal(ev, ms, url, text(mk))) + '" target="_blank" rel="noopener">GOOGLE CALENDAR</a><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-embed>COPY EMBED CODE</button></div>'
         : post
           ? (mine(mk) ? '' : '<div class="mk-btns"><a href="/app?mark=1" class="mk-p">MARK YOUR OWN MOMENT</a></div>')   /* a moment is kept, not shared: no Share for your own */
           : '<div class="mk-btns"><button type="button" data-mk-copy>COPY LINK</button><button type="button" data-mk-now class="mk-p">MARK THIS MOMENT</button></div>') +

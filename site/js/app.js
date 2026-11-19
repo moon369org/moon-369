@@ -422,8 +422,8 @@
       requestAnimationFrame(frame);
     })(t0);
   }
-  function openSheet(kind, ms, name) {
-    cur = { ms: kind === 'event' ? Math.floor(ms / 1000) * 1000 : ms, kind: kind }; made = null;   // a moment is the instant passed in: the touch on Mark This Moment
+  function openSheet(kind, ms, name, tix) {
+    cur = { ms: kind === 'event' ? Math.floor(ms / 1000) * 1000 : ms, kind: kind, tix: !!tix }; made = null;   // a moment is the instant passed in: the touch on Mark This Moment
     $('[data-sheet-h]').textContent = kind === 'event' ? 'NEW EVENT' : 'MARK THIS MOMENT';
     $('[data-sheet-create]').disabled = false; $('[data-sheet-create]').textContent = kind === 'event' ? 'CREATE EVENT' : 'SAVE MOMENT';
     $('[data-sheet-name]').classList.toggle('short', kind === 'event'); $('[data-sheet-name]').maxLength = kind === 'event' ? 80 : 280;
@@ -506,6 +506,24 @@
       }).then(function () { signing = false; });
       return;
     }
+    if (cur.kind === 'event' && cur.tix) {
+      // A ticketed event: Moon opens a guest list for it. The event link carries t=, so its page offers tickets;
+      // the door link (with its key) stays on this phone, for whoever scans at the door.
+      if (signing) return; signing = true;
+      var b3 = $('[data-sheet-create]'); busy(b3, 'CREATING'); b3.disabled = true;
+      var c3 = cur;
+      fetch(API + '/v1/tickets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, moonmark: text(moon(cur.ms + 1)), start_utc: new Date(cur.ms).toISOString() }) })
+        .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error((j.error && j.error.message) || ''); return j; }); })
+        .then(function (j) {
+          if (cur !== c3) return;
+          var url = link(cur.ms, name, 'event') + '&t=' + j.event.id;
+          finish(name, url, { ms: cur.ms, name: name, url: url, door: j.links.door, tix: j.event.id });
+        }).catch(function (e) {
+          toast(navigator.onLine === false ? 'Tickets need a connection' : (e && e.message) || 'Moon could not open tickets. Try again.');
+          b3.disabled = false; b3.textContent = 'CREATE EVENT';
+        }).then(function () { signing = false; });
+      return;
+    }
     if (cur.kind === 'event') { finish(name, link(cur.ms, name, 'event'), null); return; }
     // A moment without a photo: Moon signs the moment itself, its exact Moonmark and its words, into the Tideline.
     // Only a fingerprint is sent; the words stay in the link. Offline, it's still made, just without the proof.
@@ -542,6 +560,7 @@
     $('[data-ready-link]').value = url;
     var box = $('[data-sheet-qrbox]'); try { box.innerHTML = window.MoonQR.svg(url, window.MoonPhase.fraction(cur.ms)); box.hidden = false; } catch (e) { box.hidden = true; }
     $('[data-sheet-embed]').hidden = cur.kind !== 'event';
+    var dr = $('[data-ready-door]'); dr.hidden = !(it && it.door); $('[data-ready-doornote]').hidden = dr.hidden; if (it && it.door) dr.href = it.door.replace(/^https:\/\/moon369\.org/, '');
     $('[data-sheet-close]').textContent = 'DONE';
     step('ready'); buzz();
   }
@@ -615,7 +634,8 @@
   function showEvents() {
     list('moonEvents', '[data-e-list]', 'YOUR EVENTS', function (x) {
       var left = x.ms - Date.now(), when = left > 0 ? 'in ' + span(left) : span(-left) + ' ago';
-      return '<a href="' + esc(x.url) + '"><span>' + esc(x.name) + '<br><small>' + esc(localStr(x.ms)) + '</small></span><span>' + esc(when) + '</span></a>';
+      return '<a href="' + esc(x.url) + '"><span>' + esc(x.name) + '<br><small>' + esc(localStr(x.ms)) + '</small></span><span>' + esc(when) + '</span></a>' +
+        (x.door ? '<a class="e-door" href="' + esc(x.door.replace(/^https:\/\/moon369\.org/, '')) + '"><span>DOOR SCANNER · ' + esc(x.name) + '</span><span>SCAN</span></a>' : '');
     });
   }
   function setWhen(ms) { var d = new Date(ms); $('[data-e-when]').value = d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); noteWhen(); }
@@ -946,7 +966,7 @@
     $('[data-e-make]').onclick = function () {
       var v = Date.parse($('[data-e-when]').value); if (isNaN(v)) { toast('Pick a date and time'); return; }
       var name = $('[data-e-name]').value.replace(/\s+/g, ' ').trim(); if (!name) { toast('Name the event first'); $('[data-e-name]').focus(); return; }
-      openSheet('event', v, name);
+      openSheet('event', v, name, $('[data-e-tix]').checked);
     };
     var h = location.hash.replace('#', ''); if (h === 'nights' || h === 'events') go(h);
     if (/[?&]mark=1/.test(location.search)) openSheet('moment', nowMs());

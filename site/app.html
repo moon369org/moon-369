@@ -164,6 +164,12 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .nphase:empty{display:none}
 .nres .date{margin-top:4px}
 .pick{position:relative;display:flex;align-items:center;justify-content:center;min-height:52px;border:1px dashed #3A3B3F;color:#B9B6AE;font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;cursor:pointer}
+.tix{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid #2E3035;cursor:pointer;font-size:13px;line-height:1.5;color:#A2A3A7}
+.tix b{display:block;font:700 10px Syncopate,sans-serif;letter-spacing:.2em;color:#E9E4D8;margin-bottom:5px}
+.tix input{appearance:none;-webkit-appearance:none;flex:none;width:22px;height:22px;margin:1px 0 0;border:1px solid #8A8B8F;display:grid;place-items:center;cursor:pointer}
+.tix input:checked{background:#E9E4D8;border-color:#E9E4D8}
+.tix input:checked::after{content:'';width:10px;height:5px;border:solid #0B0B0D;border-width:0 0 2px 2px;transform:translateY(-1px) rotate(-45deg)}
+.tix[hidden],[data-ready-door][hidden]{display:none}
 .pick input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
 .pick[hidden],.pv[hidden],.rph[hidden]{display:none}
 .pv{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;border:1px solid #24262A;padding:8px}
@@ -355,6 +361,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
     <label class="fld wide"><span class="fl">DATE &amp; TIME · YOUR TIME</span><span class="fw"><input type="datetime-local" class="f" data-e-when></span></label>
     <div class="chips g ev" data-e-quick><button type="button" data-add="now">NOW</button><button type="button" data-add="3600000">+ 1 HOUR</button><button type="button" data-add="86400000">+ 1 DAY</button><button type="button" data-add="604800000">+ 1 WEEK</button></div>
     <div class="meta dim enote" data-e-note>Everyone who opens the link sees it in their own time.</div>
+    <label class="tix"><input type="checkbox" data-e-tix><span><b>TICKETS AT THE DOOR</b>Guests get a live code on their phone. You scan it at the door. Screenshots don't work.</span></label>
     <button class="btn p" type="button" data-e-make>MAKE THE LINK</button>
     <div class="recent" data-e-list hidden></div>
   </section>
@@ -391,6 +398,8 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
       <div class="two"><button class="btn" type="button" data-sheet-copy>COPY LINK</button><button class="btn" type="button" data-sheet-card>SAVE CARD</button></div>
       <a class="btn" target="_blank" rel="noopener" data-sheet-x href="https://x.com">POST TO X</a>
       <button class="x" type="button" data-sheet-embed hidden>COPY COUNTDOWN EMBED</button>
+      <a class="btn" data-ready-door hidden>OPEN THE DOOR SCANNER</a>
+      <div class="lt" data-ready-doornote hidden style="text-align:center;white-space:normal;overflow:visible">Keep the door link private: anyone with it can check guests in.</div>
       <div class="lt" style="text-align:center">It works right away. Anyone who opens it sees it in their own time.</div>
     </div>
     <button class="x" type="button" data-sheet-close>DONE</button>
