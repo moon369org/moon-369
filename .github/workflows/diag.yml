@@ -6,13 +6,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check the live loader files
+      - name: Check tickets live
         run: |
           {
-          for u in /assets/moon-loader.svg /assets/moon-loader-black.svg /assets/brand/loader/moon-loader.svg; do
-            echo "=== $u"; curl -s -D /tmp/h "https://moon369.org$u" -o /tmp/b; grep -i "etag\|age\|cache" /tmp/h; grep -o "animation-duration:[^;}]*" /tmp/b
-          done
-          echo "=== index loader styles"; curl -s https://moon369.org/ | grep -o "mw-a,.mw-b,.mw-fill{animation-duration:[^;]*" | head -2
+          echo "=== create"; curl -s -X POST https://api.moon369.org/v1/tickets -H 'content-type: application/json' -d '{"name":"Live check"}' | tee /tmp/c | head -c 400; echo
+          E=$(python3 -c "import json;print(json.load(open('/tmp/c'))['event']['id'])")
+          echo "=== get"; curl -s https://api.moon369.org/v1/tickets/$E | head -c 300; echo
+          echo "=== pages"; for u in /ticket /door /js/ticket.js /js/door.js /js/jsqr.js; do echo "$u $(curl -s -o /dev/null -w '%{http_code}' https://moon369.org$u)"; done
+          echo "=== api docs"; curl -s https://moon369.org/api | grep -c 'id="tickets"'
           } > result.txt 2>&1
           git config user.name Moon && git config user.email moon369org@proton.me
           git add result.txt && git commit -m "diag result" && git push origin HEAD:diag-share-card
