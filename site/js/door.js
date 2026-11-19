@@ -70,7 +70,12 @@
     recent[tid] = Date.now();
     if (m[1] !== ev) return result('no', T('WRONG EVENT'), '', T(WHY.other_event));
     var t = list[tid];
-    if (!t) return result('no', T('NO TICKET'), '', T(WHY.no_ticket));
+    if (!t) {   // a ticket issued since the list was last loaded: load it again, then check once more
+      if (handle.reloaded === tid) return result('no', T('NO TICKET'), '', T(WHY.no_ticket));
+      handle.reloaded = tid; busy = true; delete recent[tid];
+      load().then(function () { busy = false; if (list[tid]) handle(text); else result('no', T('NO TICKET'), '', T(WHY.no_ticket)); }, function () { busy = false; result('no', T('NO TICKET'), '', T(WHY.no_ticket)); });
+      return;
+    }
     if (t.checked_in || t.local_in) return result('no', T('ALREADY IN'), t.name, T('Checked in at {t}', { t: at(t.checked_in || t.local_in) }));
     busy = true;
     verifyHere(t, w, sig).then(function (v) {
