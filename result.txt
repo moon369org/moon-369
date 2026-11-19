@@ -1,26 +1,37 @@
-=== /assets/moon-loader.svg
-age: 0
-cache-control: public, max-age=0, must-revalidate
-content-type: image/svg+xml
-etag: "c4a83a44d0d6aa645136af172414c9df"
-strict-transport-security: max-age=63072000
-x-vercel-cache: MISS
-animation-duration:1.6s
-=== /assets/moon-loader-black.svg
-age: 0
-cache-control: public, max-age=0, must-revalidate
-content-type: image/svg+xml
-etag: "f468fa2d4c0248c3aacc296c5ca9fbce"
-strict-transport-security: max-age=63072000
-x-vercel-cache: MISS
-animation-duration:1.6s
-=== /assets/brand/loader/moon-loader.svg
-age: 0
-cache-control: public, max-age=0, must-revalidate
-content-type: image/svg+xml
-etag: "c4a83a44d0d6aa645136af172414c9df"
-strict-transport-security: max-age=63072000
-x-vercel-cache: MISS
-animation-duration:1.6s
-=== index loader styles
-mw-a,.mw-b,.mw-fill{animation-duration:1.6s
+=== create
+{
+  "event": {
+    "id": "USnB53r0bhWe",
+    "name": "Live check",
+    "moonmark": null,
+    "start_utc": null,
+    "created": "2026-11-19T23:39:15.406Z"
+  },
+  "door_key": "2mg00thrLJR0yuqSO6Le-kIr8cocRve8",
+  "links": {
+    "tickets": "https://moon369.org/ticket?e=USnB53r0bhWe",
+    "door": "https://moon369.org/door#USnB53r0bhWe.2mg00thrLJR0yuqSO6Le-kIr8cocRve8"
+  },
+  "note": "Keep the door key
+=== get
+{
+  "event": {
+    "id": "USnB53r0bhWe",
+    "name": "Live check",
+    "moonmark": null,
+    "start_utc": null,
+    "created": "2026-11-19T23:39:15.406Z"
+  },
+  "tickets": 0,
+  "checked_in": 0,
+  "max": 5000,
+  "server_ms": 1795131555972
+}
+=== pages
+/ticket 200
+/door 200
+/js/ticket.js 200
+/js/door.js 200
+/js/jsqr.js 200
+=== api docs
+2
