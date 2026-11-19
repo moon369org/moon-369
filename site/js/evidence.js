@@ -83,10 +83,9 @@
       (c.valid ? '' : row('Result', no(REASONS[c.reason] || c.reason))) +
       '</table></div>';
     var tl = '';
-    if (t.status === 'sealed') tl = row('Status', ok('sealed into a tide')) + row('Tide', esc(t.lune) + ' · receipt ' + (t.index + 1) + ' of ' + t.size) + row('Merkle root', esc(t.root)) + row('Inclusion proof', state.inclusion ? ok('checked in this browser') : no('did not check')) + row('Tide fingerprint', esc(t.tide_hash)) + row('Chained to', esc(t.prev || 'none (first tide)')) +
-      row('XRP Ledger', t.xrpl ? 'transaction ' + esc(t.xrpl.tx) + (t.xrpl.ledger_index ? ' · ledger ' + Number(t.xrpl.ledger_index).toLocaleString('en-US') : '') : '<span class="ev-small">Not anchored</span>');
+    if (t.status === 'sealed') tl = row('Status', ok('sealed into a tide')) + row('Tide', esc(t.lune) + ' · receipt ' + (t.index + 1) + ' of ' + t.size) + row('Merkle root', esc(t.root)) + row('Inclusion proof', state.inclusion ? ok('checked in this browser') : no('did not check')) + row('Tide fingerprint', esc(t.tide_hash)) + row('Chained to', esc(t.prev || 'none (first tide)'));
     else if (t.status === 'checkpointed') tl = row('Status', ok('locked in a checkpoint')) + row('Lune', esc(t.lune) + ' · receipt ' + (t.index + 1) + ' of ' + t.size) + row('Merkle root', esc(t.root)) + row('Inclusion proof', state.inclusion ? ok('checked in this browser') : no('did not check')) + row('Checkpoint', esc(t.checkpoint_utc.replace('T', ' ').slice(0, 19)) + ' UTC · ' + esc(t.checkpoint_hash)) +
-      row('XRP Ledger', t.xrpl ? 'transaction ' + esc(t.xrpl.tx) : '<span class="ev-small">Not anchored</span>') + row('Tide', 'seals after ' + esc((t.seals_after_utc || '').replace('T', ' ').slice(0, 16)) + ' UTC. Build the pack again then for the full record.');
+      row('Tide', 'seals after ' + esc((t.seals_after_utc || '').replace('T', ' ').slice(0, 16)) + ' UTC. Build the pack again then for the full record.');
     else if (t.status === 'pending') tl = row('Status', 'recorded, waiting for its first checkpoint') + row('Lune', esc(t.lune));
     else if (t.status === 'not_found') tl = row('Status', '<span class="ev-small">Not in the Tideline (signed before it started, or changed)</span>');
     else tl = row('Status', '<span class="ev-small">The Tideline is not available on this deployment yet</span>');
@@ -100,7 +99,6 @@
       '<li>Fingerprint the original file with SHA-256 (<code>shasum -a 256 file</code>) and compare it to the receipt.</li>' +
       '<li>Check the receipt&#39;s signatures with Moon&#39;s public keys, offline: <code>npm install moon369</code>, then <code>verify(receipt)</code>.</li>' +
       '<li>Check the inclusion proof (<code>proof.json</code>) against the tide&#39;s Merkle root (RFC 9162).</li>' +
-      '<li>Look up the tide fingerprint in the XRP Ledger transaction.</li>' +
       '<li>Check this statement: its signed bytes are <code>moon-evidence/1</code>, a newline, then <code>statement</code> as JSON with keys sorted.</li></ol></div>';
     h += '<div class="ev-small" style="border-top:1px solid #D9D4C8;padding-top:14px">Moon is an open standard for time (moon369.org). This report describes cryptographic records; it is not legal advice. Every fact above can be checked from the files in the evidence bundle, without trusting Moon.</div>';
     h += '</div>';
@@ -168,8 +166,7 @@
         '1. shasum -a 256 <your file>  must equal receipt.json "sha256".',
         '2. npm install moon369, then verify(receipt) checks both signatures and the drand beacon offline.',
         '3. Hash the receipt leaf up proof.json "path"; it must equal the tide\'s "root".',
-        '4. Look up the tide fingerprint in the XRP Ledger transaction.',
-        '5. evidence.json is signed over: "moon-evidence/1", a newline, then "statement" as JSON with keys sorted.', '',
+        '4. evidence.json is signed over: "moon-evidence/1", a newline, then "statement" as JSON with keys sorted.', '',
         'Moon\'s public keys: https://api.moon369.org/v1/keys', 'Moon: https://moon369.org'
       ].join('\n') + '\n'
     };

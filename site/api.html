@@ -888,7 +888,7 @@ openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 18px;">/v1/evidence</span>
 <span style="font-family: Syncopate, sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid rgb(36, 38, 42); color: rgb(138, 139, 143);">SIGNED</span>
 </div>
-<p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">An evidence statement for a receipt, ready for a legal or compliance file. Moon re-checks the receipt now (both signatures, the drand beacon, the file match if you add <code>sha256</code>, and where it sits in the <a href="/tideline" style="color: rgb(242, 242, 240);">Tideline</a> with its XRP Ledger anchor) and signs what it found with Ed25519 and ML-DSA-65. The response also returns the receipt and its Merkle proof. Signed bytes: <code>moon-evidence/1</code>, a newline, then the statement as JSON with keys sorted. <a href="/evidence" style="color: rgb(242, 242, 240);">moon369.org/evidence</a> turns it into a readable report and a&nbsp;bundle.</p>
+<p style="margin: 0px; max-width: 720px; font-size: 15px; line-height: 1.7; color: rgb(162, 163, 167);">An evidence statement for a receipt, ready for a legal or compliance file. Moon re-checks the receipt now (both signatures, the drand beacon, the file match if you add <code>sha256</code>, and where it sits in the <a href="/tideline" style="color: rgb(242, 242, 240);">Tideline</a>) and signs what it found with Ed25519 and ML-DSA-65. The response also returns the receipt and its Merkle proof. Signed bytes: <code>moon-evidence/1</code>, a newline, then the statement as JSON with keys sorted. <a href="/evidence" style="color: rgb(242, 242, 240);">moon369.org/evidence</a> turns it into a readable report and a&nbsp;bundle.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
 <div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>REQUEST</span><span></span></div>
@@ -904,8 +904,7 @@ openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
     "checks": { "valid": true, "post_quantum": true,
       "signatures": ["Ed25519", "ML-DSA-65"],
       "content_match": true, "not_before": {...} },
-    "tideline": { "status": "sealed", "lune": "1928.05.05",
-      "xrpl": {...} },
+    "tideline": { "status": "sealed", "lune": "1928.05.05", ... },
     "issued": {...}, "receipt": {...}
   },
   "signature": { "key_id": "8efd3211b23533ed", "pq": {...} },
@@ -1938,7 +1937,7 @@ openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
 <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px">/v1/evidence</span>
 <span style="font-family: 'Syncopate', sans-serif; font-size: 10px; letter-spacing: 0.2em; padding: 6px 10px; border: 1px solid #24262A; color: #8A8B8F">SIGNED</span>
 </div>
-<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">An evidence statement for a receipt, ready for a legal or compliance file. Moon re-checks the receipt now (both signatures, the drand beacon, the file match if you add <code>sha256</code>, and where it sits in the <a href="/tideline" style="color: #F2F2F0">Tideline</a> with its XRP Ledger anchor) and signs what it found with Ed25519 and ML-DSA-65. The response also returns the receipt and its Merkle proof. Signed bytes: <code>moon-evidence/1</code>, a newline, then the statement as JSON with keys sorted. <a href="/evidence" style="color: #F2F2F0">moon369.org/evidence</a> turns it into a readable report and a&nbsp;bundle.</p>
+<p style="margin: 0; max-width: 720px; font-size: 15px; line-height: 1.7; color: #A2A3A7">An evidence statement for a receipt, ready for a legal or compliance file. Moon re-checks the receipt now (both signatures, the drand beacon, the file match if you add <code>sha256</code>, and where it sits in the <a href="/tideline" style="color: #F2F2F0">Tideline</a>) and signs what it found with Ed25519 and ML-DSA-65. The response also returns the receipt and its Merkle proof. Signed bytes: <code>moon-evidence/1</code>, a newline, then the statement as JSON with keys sorted. <a href="/evidence" style="color: #F2F2F0">moon369.org/evidence</a> turns it into a readable report and a&nbsp;bundle.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
 <div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
 <div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>REQUEST</span><span></span></div>
@@ -1954,8 +1953,7 @@ openssl ts -verify -in resp.tsr -data photo.jpg -CAfile moon.pem
     &quot;checks&quot;: { &quot;valid&quot;: true, &quot;post_quantum&quot;: true,
       &quot;signatures&quot;: [&quot;Ed25519&quot;, &quot;ML-DSA-65&quot;],
       &quot;content_match&quot;: true, &quot;not_before&quot;: {...} },
-    &quot;tideline&quot;: { &quot;status&quot;: &quot;sealed&quot;, &quot;lune&quot;: &quot;1928.05.05&quot;,
-      &quot;xrpl&quot;: {...} },
+    &quot;tideline&quot;: { &quot;status&quot;: &quot;sealed&quot;, &quot;lune&quot;: &quot;1928.05.05&quot;, ... },
     &quot;issued&quot;: {...}, &quot;receipt&quot;: {...}
   },
   &quot;signature&quot;: { &quot;key_id&quot;: &quot;8efd3211b23533ed&quot;, &quot;pq&quot;: {...} },

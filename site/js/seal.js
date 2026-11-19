@@ -184,7 +184,7 @@
       .then(function () { if (alive() && rc.beacon) check('Not before', 'drand round ' + Number(rc.beacon.round).toLocaleString('en-US')); return wait(200); })
       .then(function () { if (alive()) check('Ed25519', 'key ' + rc.key_id); return wait(200); })
       .then(function () { if (alive() && rc.pq) check('ML-DSA-65', 'post-quantum'); return wait(200); })
-      .then(function () { var tl = s.tideline; if (alive() && tl) check('Tideline', tl.checkpoint ? 'locked on the XRP Ledger within a minute' : 'in Moon\u2019s public log'); return wait(320); })
+      .then(function () { var tl = s.tideline; if (alive() && tl) check('Tideline', 'in Moon\u2019s public log'); return wait(320); })
       .then(function () {
         if (!alive()) return;
         var x = el.querySelector('[data-a="x"]');
