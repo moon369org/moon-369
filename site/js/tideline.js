@@ -169,14 +169,12 @@
       ab.innerHTML = ''; return;
     }
     var day = function (t) { try { return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(Number(BigInt(t.sealed_unix_ns) / 1000000n))); } catch (e) { return ''; } };
-    var btc = function (t) { return t.bitcoin && t.bitcoin.status === 'confirmed'; };
     tb.innerHTML = S.tides.map(function (t) {
       return '<tr><td><a href="/tide/' + esc(t.lune) + '" translate="no">' + esc(t.lune) + '</a></td><td>' + n(t.size) + '</td><td class="tl-hide">' + esc(t.sealed_unix_ns ? day(t) : '') + '</td>' +
-        '<td><span class="tl-st">' + CHECK + '<span>' + esc(T('Sealed')) + '</span>' + (btc(t) ? '<span class="tl-btc">· ' + esc(T('on Bitcoin')) + '</span>' : '') + '</span></td></tr>';
+        '<td><span class="tl-st">' + CHECK + '<span>' + esc(T('Sealed')) + '</span></span></td></tr>';
     }).join('');
     ab.innerHTML = S.tides.map(function (t) {
-      return '<tr><td translate="no">' + esc(t.lune) + '</td><td title="' + esc(t.root) + '">' + esc(short(t.root)) + '</td><td class="tl-hide">' + esc(short(t.prev)) + '</td><td class="tl-hide">' + (t.pq ? 'Ed25519 + ML-DSA-65' : 'Ed25519') + '</td>' +
-        '<td>' + (btc(t) ? esc(T('block {b}', { b: n(t.bitcoin.block_height) })) + (t.bitcoin.ots ? ' · <a href="' + esc(API + t.bitcoin.ots) + '">.ots</a>' : '') : '–') + '</td></tr>';
+      return '<tr><td translate="no">' + esc(t.lune) + '</td><td title="' + esc(t.root) + '">' + esc(short(t.root)) + '</td><td class="tl-hide">' + esc(short(t.prev)) + '</td><td class="tl-hide">' + (t.pq ? 'Ed25519 + ML-DSA-65' : 'Ed25519') + '</td></tr>';
     }).join('');
   }
 
@@ -209,7 +207,7 @@
     var r = Math.random, rhex = function () { return hexOf(crypto.getRandomValues(new Uint8Array(32))); };
     for (var back = 1; back <= 8; back++) {
       var l = luneAt(open.start - (back - 0.5) * DAY), root = rhex();
-      tides.push({ lune: l.label, size: 40 + Math.floor(r() * 160), root: root, prev: null, pq: { alg: 'ML-DSA-65' }, sealed_unix_ns: String(Math.floor(l.end + 600000)) + '000000', bitcoin: back > 1 ? { status: 'confirmed', block_height: 927800 - back * 144 } : { status: 'pending' } });
+      tides.push({ lune: l.label, size: 40 + Math.floor(r() * 160), root: root, prev: null, pq: { alg: 'ML-DSA-65' }, sealed_unix_ns: String(Math.floor(l.end + 600000)) + '000000' });
     }
     for (var i = tides.length - 1; i >= 0; i--) { tides[i].prev = prevRoot; prevRoot = tides[i].root; }
     var entries = []; for (var k = 0; k < 24; k++) entries.push({ index: k, leaf: rhex() });

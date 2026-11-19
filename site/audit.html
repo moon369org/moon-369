@@ -195,10 +195,9 @@ console.log(report.ok, report.problems);</pre><button type="button" class="wg-co
 <div style="max-width: 1280px; margin: 0px auto; padding: 64px 32px; display: flex; flex-direction: column; gap: 22px;">
 <div class="wg-eye">02</div>
 <h2 class="wg-h2">KEEP A MIRROR</h2>
-<p class="wg-p">Save every tide, its exact signed text and its Bitcoin proof. If Moon ever changed a sealed tide, your copy, and the proof already in Bitcoin, would disagree with it.</p>
+<p class="wg-p">Save every tide and its exact signed text. If Moon ever changed a sealed tide, your copy would disagree with it.</p>
 <div class="au-two"><div class="wg-card"><div class="wg-body">
-<b>ON YOUR MACHINE</b><p>Writes <code>tide-&lt;lune&gt;.json</code>, <code>tide-&lt;lune&gt;.txt</code> and <code>tide-&lt;lune&gt;.txt.ots</code> to a folder. Check a Bitcoin proof with the <a href="https://opentimestamps.org" style="color: rgb(233, 228, 216);">OpenTimestamps</a> client.</p><pre class="wg-code">npx moon369 audit --mirror ./tideline
-ots verify ./tideline/tide-1928.05.06.txt.ots</pre><button type="button" class="wg-copy" data-copy="">COPY</button>
+<b>ON YOUR MACHINE</b><p>Writes <code>tide-&lt;lune&gt;.json</code> and <code>tide-&lt;lune&gt;.txt</code> to a folder.</p><pre class="wg-code">npx moon369 audit --mirror ./tideline</pre><button type="button" class="wg-copy" data-copy="">COPY</button>
 </div></div><div class="wg-card"><div class="wg-body">
 <b>EVERY DAY, ON GITHUB</b><p>A free public mirror: this workflow audits Moon daily and commits each tide to your repository. The history of that repository is a record Moon doesn't control.</p><pre class="wg-code">name: Mirror the Moon Tideline
 on:
@@ -226,11 +225,11 @@ jobs:
 <div class="au-two"><div class="au-box"><h3>IT PROVES</h3><ul class="au-list" style="font-size: 15px;">
 <li>No sealed tide was changed, removed or reordered after it was published.</li>
 <li>Every tide was signed with the keys Moon publishes.</li>
-<li>Every receipt in a sealed tide existed by the time that tide reached Bitcoin.</li>
+<li>Every receipt in a sealed tide existed by the time that tide was sealed.</li>
 </ul></div><div class="au-box"><h3>IT DOESN'T PROVE</h3><ul class="au-list" style="font-size: 15px;">
 <li>Who made a file, or that what it says is true. A receipt proves a fingerprint existed at a moment.</li>
 <li>That Moon logged every receipt. A receipt missing from the Tideline is one to question; <a href="/tideline" style="color: rgb(233, 228, 216);">check yours</a>.</li>
-<li>That a receipt is honest if Moon's keys were ever stolen. The beacon in each receipt and the Bitcoin proof limit what a thief could backdate.</li>
+<li>That a receipt is honest if Moon's keys were ever stolen. The beacon in each receipt limits what a thief could backdate.</li>
 </ul></div></div>
 </div>
 </section>
@@ -238,7 +237,7 @@ jobs:
 <div style="max-width: 1280px; margin: 0px auto; padding: 64px 32px; display: flex; flex-direction: column; gap: 22px;">
 <div class="wg-eye">04</div>
 <h2 class="wg-h2">HOW MOON'S KEYS WERE MADE AND ARE KEPT</h2>
-<p class="wg-p">Plainly: there was no witnessed key ceremony and no hardware security module. Moon's keys were generated with standard open-source cryptography software in a private cloud workspace, by Moon's operator, then stored as encrypted secrets on the API host. A backup is held privately by the operator. We'd rather tell you that than imply more. What protects you anyway is that every signature is public, and the Tideline and Bitcoin make any later change visible.</p>
+<p class="wg-p">Plainly: there was no witnessed key ceremony and no hardware security module. Moon's keys were generated with standard open-source cryptography software in a private cloud workspace, by Moon's operator, then stored as encrypted secrets on the API host. A backup is held privately by the operator. We'd rather tell you that than imply more. What protects you anyway is that every signature is public, and the Tideline makes any later change visible.</p>
 <div class="au-wrap"><table class="au-tbl">
 <tbody><tr><th>KEY</th><th>MADE</th><th>USED FOR</th><th>KEPT</th></tr>
 <tr><td><b>Signing key</b><br>Ed25519</td><td>2026-11-14</td><td>Every receipt and every tide</td><td>Encrypted secret on the API host</td></tr>
@@ -356,10 +355,9 @@ console.log(report.ok, report.problems);</pre><button type="button" class="wg-co
 <div style="max-width: 1280px; margin: 0 auto; padding: 64px 32px; display: flex; flex-direction: column; gap: 22px">
 <div class="wg-eye">02</div>
 <h2 class="wg-h2">KEEP A MIRROR</h2>
-<p class="wg-p">Save every tide, its exact signed text and its Bitcoin proof. If Moon ever changed a sealed tide, your copy, and the proof already in Bitcoin, would disagree with it.</p>
+<p class="wg-p">Save every tide and its exact signed text. If Moon ever changed a sealed tide, your copy would disagree with it.</p>
 <div class="au-two"><div class="wg-card"><div class="wg-body">
-<b>ON YOUR MACHINE</b><p>Writes <code>tide-&lt;lune&gt;.json</code>, <code>tide-&lt;lune&gt;.txt</code> and <code>tide-&lt;lune&gt;.txt.ots</code> to a folder. Check a Bitcoin proof with the <a href="https://opentimestamps.org" style="color:#E9E4D8">OpenTimestamps</a> client.</p><pre class="wg-code">npx moon369 audit --mirror ./tideline
-ots verify ./tideline/tide-1928.05.06.txt.ots</pre><button type="button" class="wg-copy" data-copy>COPY</button>
+<b>ON YOUR MACHINE</b><p>Writes <code>tide-&lt;lune&gt;.json</code> and <code>tide-&lt;lune&gt;.txt</code> to a folder.</p><pre class="wg-code">npx moon369 audit --mirror ./tideline</pre><button type="button" class="wg-copy" data-copy>COPY</button>
 </div></div><div class="wg-card"><div class="wg-body">
 <b>EVERY DAY, ON GITHUB</b><p>A free public mirror: this workflow audits Moon daily and commits each tide to your repository. The history of that repository is a record Moon doesn&#39;t control.</p><pre class="wg-code">name: Mirror the Moon Tideline
 on:
@@ -387,11 +385,11 @@ jobs:
 <div class="au-two"><div class="au-box"><h3>IT PROVES</h3><ul class="au-list" style="font-size:15px">
 <li>No sealed tide was changed, removed or reordered after it was published.</li>
 <li>Every tide was signed with the keys Moon publishes.</li>
-<li>Every receipt in a sealed tide existed by the time that tide reached Bitcoin.</li>
+<li>Every receipt in a sealed tide existed by the time that tide was sealed.</li>
 </ul></div><div class="au-box"><h3>IT DOESN&#39;T PROVE</h3><ul class="au-list" style="font-size:15px">
 <li>Who made a file, or that what it says is true. A receipt proves a fingerprint existed at a moment.</li>
 <li>That Moon logged every receipt. A receipt missing from the Tideline is one to question; <a href="/tideline" style="color:#E9E4D8">check yours</a>.</li>
-<li>That a receipt is honest if Moon&#39;s keys were ever stolen. The beacon in each receipt and the Bitcoin proof limit what a thief could backdate.</li>
+<li>That a receipt is honest if Moon&#39;s keys were ever stolen. The beacon in each receipt limits what a thief could backdate.</li>
 </ul></div></div>
 </div>
 </section>
@@ -399,7 +397,7 @@ jobs:
 <div style="max-width: 1280px; margin: 0 auto; padding: 64px 32px; display: flex; flex-direction: column; gap: 22px">
 <div class="wg-eye">04</div>
 <h2 class="wg-h2">HOW MOON&#39;S KEYS WERE MADE AND ARE KEPT</h2>
-<p class="wg-p">Plainly: there was no witnessed key ceremony and no hardware security module. Moon&#39;s keys were generated with standard open-source cryptography software in a private cloud workspace, by Moon&#39;s operator, then stored as encrypted secrets on the API host. A backup is held privately by the operator. We&#39;d rather tell you that than imply more. What protects you anyway is that every signature is public, and the Tideline and Bitcoin make any later change visible.</p>
+<p class="wg-p">Plainly: there was no witnessed key ceremony and no hardware security module. Moon&#39;s keys were generated with standard open-source cryptography software in a private cloud workspace, by Moon&#39;s operator, then stored as encrypted secrets on the API host. A backup is held privately by the operator. We&#39;d rather tell you that than imply more. What protects you anyway is that every signature is public, and the Tideline makes any later change visible.</p>
 <div class="au-wrap"><table class="au-tbl">
 <tr><th>KEY</th><th>MADE</th><th>USED FOR</th><th>KEPT</th></tr>
 <tr><td><b>Signing key</b><br>Ed25519</td><td>2026-11-14</td><td>Every receipt and every tide</td><td>Encrypted secret on the API host</td></tr>

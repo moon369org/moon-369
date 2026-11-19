@@ -84,8 +84,7 @@
       '</table></div>';
     var tl = '';
     if (t.status === 'sealed') tl = row('Status', ok('sealed into a tide')) + row('Tide', esc(t.lune) + ' · receipt ' + (t.index + 1) + ' of ' + t.size) + row('Merkle root', esc(t.root)) + row('Inclusion proof', state.inclusion ? ok('checked in this browser') : no('did not check')) + row('Tide fingerprint', esc(t.tide_hash)) + row('Chained to', esc(t.prev || 'none (first tide)')) +
-      row('XRP Ledger', t.xrpl ? 'transaction ' + esc(t.xrpl.tx) + (t.xrpl.ledger_index ? ' · ledger ' + Number(t.xrpl.ledger_index).toLocaleString('en-US') : '') : '<span class="ev-small">Not anchored</span>') +
-      row('Bitcoin', t.bitcoin ? (t.bitcoin.status === 'confirmed' ? ok('block ' + Number(t.bitcoin.block_height).toLocaleString('en-US')) : 'confirming (OpenTimestamps)') : '<span class="ev-small">Not anchored</span>');
+      row('XRP Ledger', t.xrpl ? 'transaction ' + esc(t.xrpl.tx) + (t.xrpl.ledger_index ? ' · ledger ' + Number(t.xrpl.ledger_index).toLocaleString('en-US') : '') : '<span class="ev-small">Not anchored</span>');
     else if (t.status === 'checkpointed') tl = row('Status', ok('locked in a checkpoint')) + row('Lune', esc(t.lune) + ' · receipt ' + (t.index + 1) + ' of ' + t.size) + row('Merkle root', esc(t.root)) + row('Inclusion proof', state.inclusion ? ok('checked in this browser') : no('did not check')) + row('Checkpoint', esc(t.checkpoint_utc.replace('T', ' ').slice(0, 19)) + ' UTC · ' + esc(t.checkpoint_hash)) +
       row('XRP Ledger', t.xrpl ? 'transaction ' + esc(t.xrpl.tx) : '<span class="ev-small">Not anchored</span>') + row('Tide', 'seals after ' + esc((t.seals_after_utc || '').replace('T', ' ').slice(0, 16)) + ' UTC. Build the pack again then for the full record.');
     else if (t.status === 'pending') tl = row('Status', 'recorded, waiting for its first checkpoint') + row('Lune', esc(t.lune));
@@ -101,7 +100,7 @@
       '<li>Fingerprint the original file with SHA-256 (<code>shasum -a 256 file</code>) and compare it to the receipt.</li>' +
       '<li>Check the receipt&#39;s signatures with Moon&#39;s public keys, offline: <code>npm install moon369</code>, then <code>verify(receipt)</code>.</li>' +
       '<li>Check the inclusion proof (<code>proof.json</code>) against the tide&#39;s Merkle root (RFC 9162).</li>' +
-      '<li>Look up the tide fingerprint in the XRP Ledger transaction, and check the Bitcoin proof with OpenTimestamps: <code>ots verify -f tide.txt tide.txt.ots</code>.</li>' +
+      '<li>Look up the tide fingerprint in the XRP Ledger transaction.</li>' +
       '<li>Check this statement: its signed bytes are <code>moon-evidence/1</code>, a newline, then <code>statement</code> as JSON with keys sorted.</li></ol></div>';
     h += '<div class="ev-small" style="border-top:1px solid #D9D4C8;padding-top:14px">Moon is an open standard for time (moon369.org). This report describes cryptographic records; it is not legal advice. Every fact above can be checked from the files in the evidence bundle, without trusting Moon.</div>';
     h += '</div>';
@@ -164,12 +163,12 @@
         'evidence.json  Moon\'s signed statement of every check it ran when this bundle was made.',
         'proof.json     The receipt\'s place in the Tideline, Moon\'s public log (Merkle inclusion proof, RFC 9162).',
         'tide.txt       The sealed tide, exactly as Moon signed it (when sealed).',
-        'tide.txt.ots   Its Bitcoin proof (OpenTimestamps), when available.', '',
+        '',
         'Check it without Moon:',
         '1. shasum -a 256 <your file>  must equal receipt.json "sha256".',
         '2. npm install moon369, then verify(receipt) checks both signatures and the drand beacon offline.',
         '3. Hash the receipt leaf up proof.json "path"; it must equal the tide\'s "root".',
-        '4. ots verify -f tide.txt tide.txt.ots   (Bitcoin), and look up the tide fingerprint in the XRP Ledger transaction.',
+        '4. Look up the tide fingerprint in the XRP Ledger transaction.',
         '5. evidence.json is signed over: "moon-evidence/1", a newline, then "statement" as JSON with keys sorted.', '',
         'Moon\'s public keys: https://api.moon369.org/v1/keys', 'Moon: https://moon369.org'
       ].join('\n') + '\n'
@@ -177,7 +176,6 @@
     var extras = [];
     if (t && t.downloads) {
       if (t.downloads.tide_txt) extras.push(fetch(API + t.downloads.tide_txt).then(function (r) { return r.ok ? r.text() : null; }).then(function (x) { if (x) files['tide.txt'] = x; }).catch(function () {}));
-      if (t.downloads.tide_ots) extras.push(fetch(API + t.downloads.tide_ots).then(function (r) { return r.ok ? r.arrayBuffer() : null; }).then(function (x) { if (x) files['tide.txt.ots'] = new Uint8Array(x); }).catch(function () {}));
     }
     Promise.all(extras).then(function () {
       if (window.JSZip) {

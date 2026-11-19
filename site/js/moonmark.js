@@ -169,12 +169,8 @@
         steps.push(step(true, 'Written into the Tideline', 'Tide ' + lune + ', entry ' + n.toLocaleString('en-US') + ' · Moon&#39;s public log'));
         if (pr.status === 'sealed' && pr.tide) {
           steps.push(step(true, 'Sealed into tide ' + lune, when(pr.tide.sealed_unix_ns) + ' · one Merkle root over ' + pr.tide.size.toLocaleString('en-US') + ' entries'));
-          var b = pr.tide.bitcoin;
-          if (b && b.status === 'confirmed') steps.push(step(true, 'Anchored in Bitcoin', 'Block ' + Number(b.block_height).toLocaleString('en-US') + ' · through OpenTimestamps'));
-          else if (b) steps.push(step(false, 'Anchoring in Bitcoin', 'Waiting for the next Bitcoin blocks, usually a few hours'));
         } else {
           steps.push(step(false, 'Sealed into tide ' + lune, 'When the lune ends: ' + String(pr.seals_after_utc || '').replace('T', ' ').slice(0, 16) + ' UTC'));
-          steps.push(step(false, 'Anchored in Bitcoin', 'After the tide seals'));
         }
       }
       box.innerHTML = '<div class="mk-rec-k">IN THE PERMANENT RECORD</div>' + head +
@@ -478,7 +474,7 @@
     var sky = q('.mk-skyw'); if (sky) { var sh = sky.querySelector('.mk-skyh'); if (sh) sh.remove(); }
     part('<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' + 'SKY &amp; TIDE', k ? esc(k.tide.strength.charAt(0).toUpperCase() + k.tide.strength.slice(1)) + ' tide · ' + Math.round(k.distance.km).toLocaleString() + ' km away' : '', [sky]);
     if (rc) {
-      var rb = q('[data-mk-rec]'), rd = part('<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>' + 'PERMANENT RECORD', 'In the Tideline and Bitcoin', [rb]);
+      var rb = q('[data-mk-rec]'), rd = part('<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>' + 'PERMANENT RECORD', 'In the Tideline', [rb]);
       if (rd && !rb.innerHTML.trim()) { rd.hidden = true; new MutationObserver(function () { if (rb.innerHTML.trim()) rd.hidden = false; }).observe(rb, { childList: true }); }
     }
   }

@@ -78,21 +78,19 @@
     return { start: end - Number(LUNE_NS / 1000000n), end: end, sealed: t.sealed_unix_ns ? ms(t.sealed_unix_ns) : null };
   }
   function summary(t) {
-    var w = times(t), files = n(t.size, 'file was', 'files were'), btc = t.bitcoin && t.bitcoin.status;
+    var w = times(t), files = n(t.size, 'file was', 'files were');
     if (t.status === 'sealed') return 'From ' + local(w.start) + ' to ' + local(w.end) + ', ' + files + ' signed on Moon. ' +
       'Moon sealed ' + (t.size === 1 ? 'it' : t.size ? 'all of them' : 'the empty lune, so the chain has no gap,') + ' into this tide on ' + local(w.sealed) + '. ' +
-      (btc === 'confirmed' ? 'The seal is now fixed in Bitcoin, in block ' + Number(t.bitcoin.block_height).toLocaleString('en-US') + ', so not even Moon can change it.' :
-       btc ? 'The seal has been sent to Bitcoin and is waiting for a block, usually a few hours.' : 'Its signatures and chain already lock it; nothing can be added or removed.');
+      'Its signatures and chain lock it; nothing can be added or removed.';
     if (t.status === 'open') return 'This lune is still open: ' + files.replace('were', 'have been').replace('was', 'has been') + ' signed since ' + local(w.start) + '. When it ends at ' + local(w.end) + ', Moon seals every one of them into a tide.';
     return 'This lune ended at ' + local(w.end) + ' with ' + n(t.size, 'file', 'files') + ' signed. Moon seals it within minutes.';
   }
   function timeline(t) {
-    var w = times(t), now = Date.now(), btc = t.bitcoin && t.bitcoin.status;
+    var w = times(t), now = Date.now();
     var steps = [
       ['OPENED', utc(w.start), 'Receipts start landing here.', true],
       ['ENDED', utc(w.end), 'No more receipts can join.', now >= w.end],
-      ['SEALED', w.sealed ? utc(w.sealed) : 'soon after it ends', 'One root over every entry, chained and signed.', !!w.sealed],
-      ['IN BITCOIN', btc === 'confirmed' ? 'block ' + Number(t.bitcoin.block_height).toLocaleString('en-US') : btc ? 'waiting for a block' : 'after sealing', 'Fixed in a public record Moon doesn’t control.', btc === 'confirmed']
+      ['SEALED', w.sealed ? utc(w.sealed) : 'soon after it ends', 'One root over every entry, chained and signed.', !!w.sealed]
     ];
     var cur = steps.findIndex(function (x) { return !x[3]; });
     return steps.map(function (x, i) { return '<li class="' + (x[3] ? 'done' : i === cur ? 'now' : '') + '"><i></i><b>' + x[0] + '</b><span>' + esc(x[1]) + '</span><p>' + x[2] + '</p></li>'; }).join('');
@@ -106,7 +104,6 @@
         r('ROOT', '<span class="td-h">' + t.root + '</span>') + r('TIDE HASH', '<span class="td-h">' + t.hash + '</span>') +
         r('CHAINED TO', t.prev ? '<span class="td-h">' + t.prev + '</span>' : 'the first tide') +
         r('SIGNED WITH', 'Ed25519' + (t.pq ? ' + ML-DSA-65' : '') + ' · key ' + esc(t.key_id)) +
-        (t.bitcoin && t.bitcoin.status ? r('BITCOIN', t.bitcoin.status === 'confirmed' ? 'block ' + Number(t.bitcoin.block_height).toLocaleString('en-US') : 'confirming') : '') +
         r('DOWNLOAD', '<a href="' + API + '/v1/tideline/' + esc(t.lune) + '.txt">tide-' + esc(t.lune) + '.txt</a> · <a href="' + API + '/v1/tideline/' + esc(t.lune) + '">JSON</a>');
     } else {
       out += r('SEALS AFTER', esc(String(t.seals_after_utc || '').replace('T', ' ').slice(0, 19)) + ' UTC');

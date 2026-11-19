@@ -38,7 +38,6 @@
       cards.push(card(s.timestamps.ok ? 'ok' : 'bad', 'TIMESTAMPS', s.timestamps.ok ? 'RFC 3161' : esc(s.timestamps.error), s.timestamps.ok ? 'For PDFs, code signing and Content Credentials' : ''));
       var t = s.tideline;
       cards.push(card(!t.ok ? 'bad' : t.overdue ? 'warn' : 'ok', 'TIDELINE', t.ok ? 'Lune ' + esc(t.open_lune) + ' open' : esc(t.error), t.ok ? (t.overdue ? t.waiting_to_seal + ' lunes waiting to seal' : 'Seals after ' + fmt(t.seals_after_utc)) : ''));
-      cards.push(card(t.ok && t.anchoring.bitcoin ? 'ok' : 'off', 'BITCOIN ANCHORING', t.ok && t.anchoring.bitcoin ? 'OpenTimestamps' : 'Not switched on', 'Each sealed tide, in a Bitcoin block'));
       if (!s.signing.ok) problems.push('Signing is down');
       if (!s.beacon.ok) problems.push('The drand beacon is not answering');
       if (!s.timestamps.ok) problems.push('Timestamps are down');
@@ -55,10 +54,9 @@
     var tides = (tl && tl.b && tl.b.tides) || [], rows = $('[data-st-tides]');
     if (!tides.length) {
       var after = s && s.tideline && s.tideline.ok ? s.tideline.seals_after_utc : (tl && tl.b && tl.b.seals_after_utc);
-      rows.innerHTML = '<tr><td colspan="4" class="st-empty">No tide has sealed yet. The first one seals after ' + (after ? fmt(after) : 'the current lune ends') + '.</td></tr>';
+      rows.innerHTML = '<tr><td colspan="3" class="st-empty">No tide has sealed yet. The first one seals after ' + (after ? fmt(after) : 'the current lune ends') + '.</td></tr>';
     } else rows.innerHTML = tides.map(function (x) {
-      var b = x.bitcoin, btc = !b ? '<span class="st-mut">not anchored</span>' : b.status === 'confirmed' ? 'Block ' + Number(b.block_height).toLocaleString('en-US') : '<span class="st-mut">confirming</span>';
-      return '<tr><td><a href="/tide/' + esc(x.lune) + '">' + esc(x.lune) + '</a></td><td>' + Number(x.size).toLocaleString('en-US') + '</td><td>' + fmt(new Date(Number(BigInt(x.sealed_unix_ns) / 1000000n)).toISOString()) + '</td><td>' + btc + '</td></tr>';
+      return '<tr><td><a href="/tide/' + esc(x.lune) + '">' + esc(x.lune) + '</a></td><td>' + Number(x.size).toLocaleString('en-US') + '</td><td>' + fmt(new Date(Number(BigInt(x.sealed_unix_ns) / 1000000n)).toISOString()) + '</td></tr>';
     }).join('');
 
     // Dates that matter
