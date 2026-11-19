@@ -1,0 +1,26 @@
+=== /assets/moon-loader.svg
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-type: image/svg+xml
+etag: "c4a83a44d0d6aa645136af172414c9df"
+strict-transport-security: max-age=63072000
+x-vercel-cache: MISS
+animation-duration:1.6s
+=== /assets/moon-loader-black.svg
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-type: image/svg+xml
+etag: "f468fa2d4c0248c3aacc296c5ca9fbce"
+strict-transport-security: max-age=63072000
+x-vercel-cache: MISS
+animation-duration:1.6s
+=== /assets/brand/loader/moon-loader.svg
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-type: image/svg+xml
+etag: "c4a83a44d0d6aa645136af172414c9df"
+strict-transport-security: max-age=63072000
+x-vercel-cache: MISS
+animation-duration:1.6s
+=== index loader styles
+mw-a,.mw-b,.mw-fill{animation-duration:1.6s
