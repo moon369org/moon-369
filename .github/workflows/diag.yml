@@ -6,17 +6,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch as X and as a browser
+      - name: Check the live loader files
         run: |
           {
-          for ua in "Twitterbot/1.0" "facebookexternalhit/1.1" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36"; do
-            for u in "https://moon369.org/" "https://moon369.org" "https://moon369.org/assets/og/home.jpg?v=3" "https://moon369.org/tideline"; do
-              echo "=== $ua | $u"
-              curl -s -o /tmp/body -D - -A "$ua" "$u" | head -20
-              echo "--- bytes: $(wc -c < /tmp/body)"
-              grep -o '<meta[^>]*\(og:image\|twitter:card\|twitter:image\)[^>]*>' /tmp/body | head -3 || true
-            done
+          for u in /assets/moon-loader.svg /assets/moon-loader-black.svg /assets/brand/loader/moon-loader.svg; do
+            echo "=== $u"; curl -s -D /tmp/h "https://moon369.org$u" -o /tmp/b; grep -i "etag\|age\|cache" /tmp/h; grep -o "animation-duration:[^;}]*" /tmp/b
           done
+          echo "=== index loader styles"; curl -s https://moon369.org/ | grep -o "mw-a,.mw-b,.mw-fill{animation-duration:[^;]*" | head -2
           } > result.txt 2>&1
           git config user.name Moon && git config user.email moon369org@proton.me
           git add result.txt && git commit -m "diag result" && git push origin HEAD:diag-share-card
