@@ -157,7 +157,7 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 .fw input::-webkit-datetime-edit{padding:0;line-height:52px}
 .fw input::-webkit-calendar-picker-indicator{filter:invert(.85);opacity:.7}
 .fw .ph{position:absolute;left:14px;top:26px;transform:translateY(-50%);pointer-events:none;color:#5E6064;font-size:15px;white-space:nowrap}
-.fw input.empty::-webkit-datetime-edit{color:transparent}
+.fw input.empty:not(:focus),.fw input.empty:not(:focus)::-webkit-datetime-edit,.fw input.empty:not(:focus)::-webkit-datetime-edit-fields-wrapper,.fw input.empty:not(:focus)::-webkit-datetime-edit-text,.fw input.empty:not(:focus)::-webkit-datetime-edit-month-field,.fw input.empty:not(:focus)::-webkit-datetime-edit-day-field,.fw input.empty:not(:focus)::-webkit-datetime-edit-year-field,.fw input.empty:not(:focus)::-webkit-datetime-edit-hour-field,.fw input.empty:not(:focus)::-webkit-datetime-edit-minute-field,.fw input.empty:not(:focus)::-webkit-datetime-edit-ampm-field{color:transparent}
 .fw input.empty:focus::-webkit-datetime-edit{color:inherit}
 .fw input:not(.empty)+.ph,.fw input:focus+.ph{display:none}
 .nphase{font:500 17px 'JetBrains Mono',monospace;color:#E9E4D8;text-align:center;margin-top:2px}
