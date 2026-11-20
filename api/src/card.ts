@@ -88,7 +88,7 @@ function realFace(f: number, size: number, turn: number): string {
       const edge = Math.min(1, Math.max(0, (1 - Math.sqrt(rr)) * R + 0.5));
       if (edge <= 0) continue;
       const nz = Math.sqrt(Math.max(0, 1 - rr)), dot = nx * sx + nz * sz;
-      const A = -0.07, B = 0.16;   // one even softness, so the lit side curves all the way round the limb to its horns
+      const A = -0.1 - 0.15 * nz, B = 0.08 + 0.37 * nz;   // the wide fade across the middle, soft at the rim so the cusps curve
       const t = Math.min(1, Math.max(0, (dot - A) / (B - A))), sun = t * t * (3 - 2 * t);
       const rim = Math.sqrt(rr); let keep = rim < 0.7 ? 1 : Math.max(0, 1 - (rim - 0.7) / 0.3); keep = keep * keep * (3 - 2 * keep);
       keep = 1 - (1 - keep) * sun;   // the fade and the brightening belong to the lit side only
