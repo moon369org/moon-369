@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<link rel="preconnect" href="https://api.moon369.org" crossorigin>
+<title>Your stay · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Your Moon stay pass: it opens the door during your stay, only on your phone.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#0B0B0D;color:#E9E4D8;font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased;min-height:100%}
+a{color:inherit}
+.tk{max-width:440px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 40px);display:flex;flex-direction:column;gap:20px;min-height:100vh}
+.tk-top{display:flex;justify-content:space-between;align-items:center}
+.tk-top img{height:16px;display:block}
+.k{font:400 11px 'JetBrains Mono',monospace;letter-spacing:.28em;color:#8A8B8F}
+.tk-name{margin:0;font:700 clamp(22px,6.4vw,30px)/1.25 Syncopate,sans-serif;letter-spacing:.06em;text-transform:uppercase;overflow-wrap:anywhere}
+.tk-when{font:400 13px 'JetBrains Mono',monospace;color:#A2A3A7;letter-spacing:.04em}
+.tk-p{margin:0;font-size:15px;line-height:1.6;color:#A2A3A7}
+.tk-in{box-sizing:border-box;width:100%;min-height:52px;padding:0 14px;background:#111214;border:1px solid #2E3035;border-radius:2px;color:#E9E4D8;font:400 16px Inter,sans-serif}
+.tk-in:focus{outline:none;border-color:#E9E4D8}
+.tk-btn{all:unset;box-sizing:border-box;cursor:pointer;min-height:54px;padding:0 22px;display:flex;align-items:center;justify-content:center;gap:12px;background:#E9E4D8;color:#0B0B0D;border-radius:2px;font:700 11px Syncopate,sans-serif;letter-spacing:.22em;text-align:center}
+.tk-btn[disabled]{opacity:.6;cursor:default}
+.tk-btn img{width:26px;height:auto}
+/* The live ticket */
+.tk-card{position:relative;border:1px solid #24262A;border-radius:6px;padding:18px 18px 16px;display:flex;flex-direction:column;align-items:center;gap:14px;overflow:hidden;background:#0E0E10}
+.tk-card::before{content:'';position:absolute;inset:-40%;background:conic-gradient(from 0deg,transparent 0 70%,rgba(233,228,216,.16) 80%,transparent 90%);animation:tkSpin 4s linear infinite;pointer-events:none}
+@keyframes tkSpin{to{transform:rotate(360deg)}}
+.tk-qr{position:relative;width:100%;max-width:330px;aspect-ratio:1;border-radius:4px;overflow:hidden;background:#E9E4D8}
+.tk-qr svg{display:block;width:100%;height:100%}
+.tk-bar{position:relative;width:100%;max-width:330px;height:3px;background:#24262A;border-radius:2px;overflow:hidden}
+.tk-bar i{position:absolute;inset:0;background:#E9E4D8;transform-origin:left;transform:scaleX(1)}
+.tk-clock{position:relative;font:400 clamp(15px,4.6vw,18px) 'JetBrains Mono',monospace;letter-spacing:.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tk-note{position:relative;margin:0;text-align:center;font-size:13px;line-height:1.55;color:#8A8B8F}
+.tk-meta{display:flex;flex-direction:column;gap:6px;border-top:1px solid #1C1D20;padding-top:16px}
+.tk-row{display:flex;justify-content:space-between;gap:16px;font:400 12px 'JetBrains Mono',monospace;color:#8A8B8F}
+.tk-row b{font-weight:400;color:#E9E4D8;text-align:right;overflow-wrap:anywhere}
+.tk-ok{display:flex;flex-direction:column;align-items:center;gap:14px;padding:30px 18px;border:1px solid #3E6B4A;border-radius:6px;background:#0F1A13;text-align:center}
+.tk-ok svg{width:64px;height:64px}
+.tk-ok b{font:700 22px Syncopate,sans-serif;letter-spacing:.12em}
+.tk-err{border:1px solid #6B5A33;background:#1A160D;color:#D9B26A;border-radius:4px;padding:14px 16px;font-size:14px;line-height:1.55}
+.tk-wait{display:flex;flex-direction:column;align-items:center;gap:10px;padding:34px 18px;border:1px solid #24262A;border-radius:6px;background:#0E0E10;text-align:center}
+.tk-wait b{font:700 clamp(26px,8vw,36px) Syncopate,sans-serif;letter-spacing:.06em}
+.tk-wait span{font:400 13px 'JetBrains Mono',monospace;color:#A2A3A7}
+.tk-pin{border-top:1px solid #1C1D20;padding-top:14px}
+.tk-pin button{all:unset;cursor:pointer;font:400 12px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#A2A3A7;text-decoration:underline;text-underline-offset:4px}
+.tk-pin div{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.tk-pin b{font:400 28px 'JetBrains Mono',monospace;letter-spacing:.12em}
+.tk-pin span{font-size:13px;line-height:1.55;color:#8A8B8F}
+.tk-ring{position:relative;width:100%;max-width:330px;display:flex;justify-content:space-between;font:400 11px 'JetBrains Mono',monospace;color:#8A8B8F;letter-spacing:.14em}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){.tk-card::before{animation:none}}
+</style>
+<script src="/js/i18n.js" defer></script>
+</head>
+<body>
+<main class="tk">
+  <div class="tk-top"><a href="/" aria-label="Moon home"><img src="/assets/brand/logo/moon-wordmark-cream.svg" alt="Moon"></a><span class="k">STAY</span></div>
+  <div>
+    <div class="k" style="margin-bottom:10px">YOUR STAY</div>
+    <h1 class="tk-name" data-t-name>…</h1>
+    <div class="tk-when" data-s-dates></div>
+    <div class="tk-when" data-t-when></div>
+  </div>
+  <div class="tk-err" data-t-err hidden></div>
+
+  <section data-t-get hidden style="display:flex;flex-direction:column;gap:14px">
+    <p class="tk-p">This invite puts your door pass on this phone. It opens the door from check-in to check-out, only on this phone, and works even when the cabin has no internet. The invite works once.</p>
+    <button class="tk-btn" type="button" data-t-go>ADD MY STAY</button>
+  </section>
+
+  <section data-t-live hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="tk-wait" data-s-wait hidden><div class="k">YOUR DOOR OPENS IN</div><b data-s-count>·</b><span data-s-opens></span></div>
+    <div class="tk-card" data-s-card>
+      <div class="tk-qr" data-t-qr></div>
+      <div class="tk-bar" aria-hidden="true"><i data-t-bar></i></div>
+      <div class="tk-ring"><span>NEW CODE IN <b data-s-secs style="font-weight:400;color:#E9E4D8">30</b>s</span><span data-s-off hidden>NO SIGNAL · STILL WORKS</span></div>
+      <div class="tk-clock" data-t-clock aria-label="Moon time, live"></div>
+      <p class="tk-note">Hold this up to the reader at the door. The code changes every 30 seconds and only this phone can make it, so a screenshot stops working.</p>
+    </div>
+    <div class="tk-meta">
+      <div class="tk-row"><span>GUEST</span><b data-s-guest>·</b></div>
+      <div class="tk-row"><span>CHECK-IN</span><b data-s-in>·</b></div>
+      <div class="tk-row"><span>CHECK-OUT</span><b data-s-out>·</b></div>
+      <div class="tk-row"><span>DOOR OPENED</span><b data-s-opened>·</b></div>
+      <div class="tk-row"><span>PASS GOOD UNTIL</span><b data-s-passna>·</b></div>
+    </div>
+    <div class="tk-pin"><button type="button" data-s-pinbtn>SHOW BACKUP PIN</button><div data-s-pin hidden><b data-s-pinv translate="no">·</b><span>If your phone dies, type this on the lock's keypad. It works from check-in to check-out. Write it down now.</span></div>
+    </div>
+  </section>
+
+  <section data-t-in hidden></section>
+</main>
+<script src="/js/qrcode.js" defer></script>
+<script src="/js/moon-phase.js" defer></script>
+<script src="/js/moonqr.js" defer></script>
+<script src="/js/stay.js" defer></script>
+</body>
+</html>

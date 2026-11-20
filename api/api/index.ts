@@ -9,6 +9,7 @@ import { upstashStore } from '../src/tideline.js';
 import { upstashRegistry } from '../src/registry.js';
 import { upstashEditions } from '../src/editions.js';
 import { upstashTickets } from '../src/tickets.js';
+import { upstashStays } from '../src/stays.js';
 import { xrplAnchorer } from '../src/anchor.js';
 import { stamp, upgrade, summarize } from '../src/ots.js';
 import { waitUntil } from '@vercel/functions';
@@ -111,6 +112,7 @@ const route = (req: Request) => {
     ADMIN_TOKEN: process.env.MOON_ADMIN_TOKEN,
     EDITIONS: RL_URL && RL_TOKEN ? upstashEditions(RL_URL, RL_TOKEN) : undefined,
     TICKETS: RL_URL && RL_TOKEN ? upstashTickets(RL_URL, RL_TOKEN) : undefined,
+    STAYS: RL_URL && RL_TOKEN ? upstashStays(RL_URL, RL_TOKEN) : undefined,
   });
 };
 

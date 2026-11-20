@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.11.0 (Moon 05, Lune 10, Year 1928)
+
+- **Stays**: guest passes for short-term rentals that a lock checks offline. `POST /v1/stays` adds a door (time zone, check-in and check-out hours) and returns its key and a PIN secret the lock keeps. `POST /v1/stays/{door}/book` makes a stay with a single-use invite and a 10-digit backup PIN. `POST /v1/stays/{door}/join` binds the stay to the guest's P-256 key and returns a pass: Moon's Ed25519 signature over `moon-stay-pass/1`, door, stay, phone key, and a window (renewed daily by default with `POST /v1/stays/{door}/pass`). The phone signs `moon-stay-code/1|{door}|{stay}|{w}` every 30 seconds; a lock checks the pass, the window, the code and the PIN with only Moon's public key and its own clock.
+- **`POST /v1/stays/{door}/lock`** (what a lock saves to work offline, including cancelled stays), **`/log`** (openings the lock sends when online, each signed as `moon-stay-visit/1`), **`/host`**, **`/cancel`** and **`GET /v1/stays/{door}/{stay}`**. Reference pages: moon369.org/host, /stay and /lock.
+
 ## 1.10.0 (Moon 05, Lune 10, Year 1928)
 
 - **Passes**: member passes for gyms, clubs and coworking spaces, built on tickets. `POST /v1/passes` opens a place and returns its key (Moon keeps only its SHA-256). `POST /v1/passes/{place}/invite` makes a single-use invite; `POST /v1/passes/{place}/join` binds it to a phone's P-256 key and Moon signs `moon-pass/1` (place, name, pass, key fingerprint, end date). A pass shows the same live code as a ticket and is used at every visit until it ends or is cancelled. `POST /v1/passes/{place}/checkin` refuses a pass that came in less than `passback_min` minutes ago (default 30) and signs each visit as `moon-visit/1`.

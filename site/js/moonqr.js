@@ -9,9 +9,9 @@
   function svg(url, f, opts) {
     opts = opts || {};
     var qrcode = opts.qrcode || root.qrcode, phase = opts.phase || root.MoonPhase;
-    var q = qrcode(0, 'H'); q.addData(url); q.make();
+    var level = opts.level || 'H', q = qrcode(0, level); q.addData(url); q.make();   // below H there's no room for the moon in the middle
     var n = q.getModuleCount(), quiet = 4, size = n + quiet * 2;
-    var c = n / 2, clear = Math.max(3.5, n * (opts.clear || 0.12));
+    var c = n / 2, clear = level === 'H' ? Math.max(3.5, n * (opts.clear || 0.12)) : 0;
 
     function inEye(r, col) {
       return (r < 8 && col < 8) || (r < 8 && col >= n - 8) || (r >= n - 8 && col < 8);
@@ -36,8 +36,8 @@
                            : '<circle cx="' + (p[0] + 3.5) + '" cy="' + (p[1] + 3.5) + '" r="1.5" fill="' + INK + '"/>');
     });
 
-    var mr = clear - 1, lit = phase ? phase.path(f || 0, mr, opts.tilt || 0) : '';
-    var moon = '<g transform="translate(' + c + ',' + c + ')">' +
+    var mr = clear - 1, lit = phase && clear ? phase.path(f || 0, mr, opts.tilt || 0) : '';
+    var moon = !clear ? '' : '<g transform="translate(' + c + ',' + c + ')">' +
       '<circle r="' + mr + '" fill="' + INK + '"/>' +
       (lit ? '<path d="' + lit + '" fill="' + PAPER + '"/>' : '') +
       '<circle r="' + mr + '" fill="none" stroke="' + INK + '" stroke-width="0.35"/>' +

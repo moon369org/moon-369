@@ -16,6 +16,7 @@ import { mcp } from './mcp.js';
 import { eventLinks, eventIcs, cleanEventName } from './event.js';
 import { RESEAL, resealFingerprint } from './reseal.js';
 import { parseStatement, statementSha, newPrintIds, type EditionStore } from './editions.js';
+import { type StayStore, type StayDoor, type Stay, type StayVisit, passBytes, stayPin, passWindow, stayWindow, checkStayCode, ownerOk, newSecret, validTz, zoned, dayNumber, visitStatement as stayVisitStatement, CODE_MS, CODE_SLACK, MAX_STAYS } from './stays.js';
 import { type TicketStore, type TicketEvent, type Ticket, newId, sha256hex, isId, cleanName, p256, ticketStatement, checkInStatement, checkCode, doorOk, MAX_TICKETS, WINDOW_MS, WINDOW_SLACK, passStatement, visitStatement, MAX_MEMBERS } from './tickets.js';
 import { makeRegistration, publicRegistration, isPhash, phashKind, hamming, bands, SIMILAR_BITS, registrantSlug, type RegistryStore, type Registration } from './registry.js';
 import { svgToPng } from './png.js';
@@ -83,6 +84,7 @@ export interface Env {
   EDITIONS?: EditionStore;
   /** Ticketed events: Moon-signed tickets bound to the guest's phone. Without it, /v1/tickets answers 503. */
   TICKETS?: TicketStore;
+  STAYS?: StayStore;
   /** Admin token (MOON_ADMIN_TOKEN) for issuing verified business keys in one call: POST /v1/admin/keys. Without it, admin routes answer 404. */
   ADMIN_TOKEN?: string;
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
@@ -515,6 +517,156 @@ async function tsaResponse(req: Request, env: Env, planHdr: Record<string, strin
   return reply(der, mark ? { 'X-Moon-Moonmark': mark, ...(moonmarkUrl ? { 'X-Moon-Url': moonmarkUrl } : {}) } : {});
 }
 
+/** Moon Stays: guest passes for short-term rentals that a lock can check offline. */
+async function stayRoute(req: Request, env: Env, path: string, planHdr: Record<string, string>, gate: Gate): Promise<Response> {
+  if (!env.STAYS) throw new HttpError(503, 'stays_unavailable', 'Stays are not configured on this deployment');
+  const S = env.STAYS, hdr = { 'Cache-Control': 'no-store', ...planHdr }, now = Date.now();
+  const parts = path.split('/').slice(3), post = req.method === 'POST';
+  const needPost = () => { if (!post) throw new HttpError(405, 'method_not_allowed', 'Use POST'); };
+  const dpub = (d: StayDoor) => ({ id: d.id, name: d.name, tz: d.tz, checkin_hour: d.checkin_hour, checkout_hour: d.checkout_hour, renew_hours: d.renew_hours, created: d.created });
+  const status = (s: Stay) => (s.cancelled ? 'cancelled' : now >= Date.parse(s.check_out) ? 'ended' : now >= Date.parse(s.check_in) ? 'active' : 'upcoming');
+  const spub = (s: Stay) => ({ id: s.id, guest: s.guest, arrive: s.arrive, depart: s.depart, check_in: s.check_in, check_out: s.check_out, joined: s.joined, cancelled: s.cancelled, status: status(s) });
+  const nights = (s: Stay) => dayNumber(s.depart) - dayNumber(s.arrive);
+  const keyId = () => env.SIGNER!.info().key_id;
+  // A stay pass: Moon's Ed25519 signature over the door, stay, phone key and window. Checked offline by the lock.
+  const pass = (d: StayDoor, s: Stay) => {
+    const { nb, na } = passWindow(d, s, now);
+    const sig = env.SIGNER!.signBytes(passBytes(d.id, s.id, s.pub!, nb, na)).signature;
+    return { nb, na, key_id: keyId(), sig, code_ms: CODE_MS };
+  };
+  const date = (v: unknown, what: string) => { if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v) || Number.isNaN(Date.parse(v + 'T00:00:00Z'))) throw new HttpError(400, 'bad_param', what + ': a date, YYYY-MM-DD'); return v; };
+
+  // POST /v1/stays {name, tz, checkin_hour?, checkout_hour?, renew_hours?}: a door, its owner key and its PIN secret.
+  if (parts.length === 0) {
+    needPost();
+    const b = await readJson(req, 4096), name = cleanName(b.name);
+    if (!name) throw new HttpError(400, 'bad_param', 'name: what the rental or door is called');
+    if (!validTz(b.tz)) throw new HttpError(400, 'bad_param', 'tz: the door\'s time zone, like America/Denver');
+    const hour = (v: unknown, dflt: number, what: string) => { const n = v === undefined ? dflt : Number(v); if (!Number.isInteger(n) || n < 0 || n > 23) throw new HttpError(400, 'bad_param', what + ': 0 to 23'); return n; };
+    const rh = b.renew_hours === undefined ? 24 : Number(b.renew_hours);
+    if (!Number.isInteger(rh) || rh < 0 || rh > 720) throw new HttpError(400, 'bad_param', 'renew_hours: 0 (one pass for the whole stay) to 720');
+    const key = newId(24), d: StayDoor = { id: newId(9), name, owner: sha256hex(key), pin_secret: newSecret(), tz: b.tz as string, checkin_hour: hour(b.checkin_hour, 15, 'checkin_hour'), checkout_hour: hour(b.checkout_hour, 11, 'checkout_hour'), renew_hours: rh, created: new Date().toISOString() };
+    await S.putDoor(d);
+    return json({ door: dpub(d), key, links: { host: `https://moon369.org/host#${d.id}.${key}`, lock: `https://moon369.org/lock#${d.id}.${key}` },
+      note: 'Keep the key private: it books stays, cancels them and runs the lock. Moon keeps only its fingerprint.' }, 200, hdr);
+  }
+  if (!isId(parts[0])) throw new HttpError(404, 'not_found', 'No such door');
+  const d = await S.getDoor(parts[0]);
+  if (!d) throw new HttpError(404, 'not_found', 'No such door');
+  const sub = parts[1];
+  const owner = async () => { const b = await readJson(req, 65536); if (!ownerOk(d, b.key)) throw new HttpError(403, 'bad_key', 'That key is not for this door'); return b; };
+
+  if (parts.length === 1) return json({ door: dpub(d), server_ms: now }, 200, hdr);
+
+  // POST /v1/stays/<door>/book {key, guest?, arrive, depart}: a stay, its single-use invite and its backup PIN.
+  if (sub === 'book' && parts.length === 2) {
+    needPost();
+    const b = await owner();
+    const arrive = date(b.arrive, 'arrive'), depart = date(b.depart, 'depart');
+    const n = dayNumber(depart) - dayNumber(arrive);
+    if (n < 1 || n > 99) throw new HttpError(400, 'bad_param', 'A stay is 1 to 99 nights');
+    if ((await S.stays(d.id)).length >= MAX_STAYS) throw new HttpError(409, 'full', 'This door has too many stays');
+    const [ay, am, ad] = arrive.split('-').map(Number), [dy, dm, dd] = depart.split('-').map(Number);
+    const tok = newId(12);
+    const s: Stay = { id: newId(9), door: d.id, guest: cleanName(b.guest, 60) || null, arrive, depart,
+      check_in: new Date(zoned(d.tz, ay, am, ad, d.checkin_hour)).toISOString(), check_out: new Date(zoned(d.tz, dy, dm, dd, d.checkout_hour)).toISOString(),
+      invite: tok, pub: null, key_sha256: null, created: new Date().toISOString(), joined: null, cancelled: null };
+    await S.putStay(s); await S.addInvite(d.id, tok, s.id);
+    return json({ stay: spub(s), link: `https://moon369.org/stay?d=${d.id}&i=${tok}`, pin: stayPin(d.pin_secret, d.id, arrive, n) }, 200, hdr);
+  }
+
+  // POST /v1/stays/<door>/join {invite, pub}: the guest's phone takes the invite. Moon signs its first pass.
+  if (sub === 'join' && parts.length === 2) {
+    needPost();
+    if (!env.SIGNER) throw new HttpError(503, 'signing_unavailable', 'Signing is not configured on this deployment');
+    const b = await readJson(req, 4096);
+    if (!p256(b.pub)) throw new HttpError(400, 'bad_param', "pub: the phone's P-256 public key, raw uncompressed, base64url");
+    if (typeof b.invite !== 'string' || !/^[A-Za-z0-9_-]{8,24}$/.test(b.invite)) throw new HttpError(400, 'bad_param', 'invite: the token from the invite link');
+    const sid = await S.takeInvite(d.id, b.invite);
+    const s = sid ? await S.getStay(d.id, sid) : null;
+    if (!s) throw new HttpError(410, 'invite_used', 'This invite was already used. Ask your host for a new one.');
+    if (s.cancelled) throw new HttpError(410, 'cancelled', 'This stay was cancelled');
+    s.pub = b.pub as string; s.key_sha256 = sha256hex(Buffer.from(s.pub, 'base64url')); s.joined = new Date().toISOString(); s.invite = null;
+    await S.putStay(s);
+    return json({ stay: spub(s), door: dpub(d), pass: pass(d, s), pin: stayPin(d.pin_secret, d.id, s.arrive, nights(s)), server_ms: now }, 200, hdr);
+  }
+
+  // POST /v1/stays/<door>/pass {stay, w, sig}: a fresh pass. The phone proves it is the stay's phone with a live code.
+  if (sub === 'pass' && parts.length === 2) {
+    needPost();
+    if (!env.SIGNER) throw new HttpError(503, 'signing_unavailable', 'Signing is not configured on this deployment');
+    const b = await readJson(req, 4096);
+    const s = isId(b.stay) ? await S.getStay(d.id, b.stay) : null;
+    if (!s || !s.pub) throw new HttpError(404, 'not_found', 'No such stay');
+    if (!checkStayCode(s, b.w, b.sig, now, 2)) throw new HttpError(403, 'bad_code', 'That code was not made by this stay\'s phone just now');
+    if (s.cancelled) throw new HttpError(410, 'cancelled', 'This stay was cancelled');
+    if (now >= Date.parse(s.check_out)) throw new HttpError(410, 'ended', 'This stay has ended');
+    return json({ stay: spub(s), pass: pass(d, s), server_ms: now }, 200, hdr);
+  }
+
+  // POST /v1/stays/<door>/host {key}: the door, every stay and recent openings.
+  if (sub === 'host' && parts.length === 2) {
+    needPost(); await owner();
+    const [ss, vs] = await Promise.all([S.stays(d.id), S.visits(d.id, 300)]);
+    const count: Record<string, number> = {}; vs.forEach((v) => { count[v.stay] = (count[v.stay] ?? 0) + 1; });
+    return json({ door: dpub(d), server_ms: now,
+      stays: ss.sort((a, b2) => a.check_in.localeCompare(b2.check_in)).map((s) => ({ ...spub(s), pin: stayPin(d.pin_secret, d.id, s.arrive, nights(s)), link: s.invite ? `https://moon369.org/stay?d=${d.id}&i=${s.invite}` : null, openings: count[s.id] ?? 0 })),
+      visits: vs.slice(0, 50) }, 200, hdr);
+  }
+
+  // POST /v1/stays/<door>/cancel {key, stay}
+  if (sub === 'cancel' && parts.length === 2) {
+    needPost();
+    const b = await owner();
+    const s = isId(b.stay) ? await S.getStay(d.id, b.stay) : null;
+    if (!s) throw new HttpError(404, 'not_found', 'No such stay');
+    s.cancelled = s.cancelled ?? new Date().toISOString(); s.invite = null;
+    await S.putStay(s);
+    return json({ stay: spub(s) }, 200, hdr);
+  }
+
+  // POST /v1/stays/<door>/lock {key}: what a lock needs to work offline. Moon's public keys, the PIN secret, the door's
+  // hours and time zone, and the stays it must refuse even with a valid pass.
+  if (sub === 'lock' && parts.length === 2) {
+    needPost(); await owner();
+    const ss = await S.stays(d.id);
+    const keys = [env.SIGNER ? env.SIGNER.info() : null].filter(Boolean).map((k) => ({ key_id: k!.key_id, alg: 'Ed25519', public_key: k!.public_key }));
+    return json({ door: dpub(d), pin_secret: d.pin_secret, moon_keys: keys, code_ms: CODE_MS, code_slack: CODE_SLACK, server_ms: now,
+      revoked: ss.filter((s) => s.cancelled && now < Date.parse(s.check_out) + 86_400_000).map((s) => ({ stay: s.id, pin_day: dayNumber(s.arrive), nights: nights(s) })) }, 200, hdr);
+  }
+
+  // POST /v1/stays/<door>/log {key, visits:[{stay?, method, at, w?, sig?, pin_day?, nights?}]}: openings the lock made,
+  // sent when it is online. QR openings carry the phone's code, which Moon checks again (up to 7 days old).
+  if (sub === 'log' && parts.length === 2) {
+    needPost();
+    const b = await owner();
+    const list = Array.isArray(b.visits) ? (b.visits as Record<string, unknown>[]).slice(0, 200) : [];
+    const ss = await S.stays(d.id), out: StayVisit[] = [];
+    for (const v of list) {
+      const at = typeof v.at === 'string' && !Number.isNaN(Date.parse(v.at)) ? new Date(v.at).toISOString() : null;
+      if (!at || Date.parse(at) > now + 300_000) continue;
+      let s: Stay | undefined;
+      if (v.method === 'qr') { s = ss.find((x) => x.id === v.stay); if (!s || !checkStayCode(s, v.w, v.sig, Date.parse(at), 1)) continue; }
+      else if (v.method === 'pin') s = ss.find((x) => dayNumber(x.arrive) === v.pin_day && nights(x) === v.nights);
+      if (!s) continue;
+      let mm: string | null = null, url: string | null = null;
+      if (env.SIGNER) { try { const r = await signNow(env, sha256hex(stayVisitStatement(d.id, s.id, String(v.method), at)), undefined, whoFrom({}, gate)); mm = r.receipt.moonmark; url = (r as { signed_url?: string }).signed_url ?? null; } catch { /* logged without its Moonmark */ } }
+      out.push({ stay: s.id, method: v.method as 'qr' | 'pin', at, logged: new Date().toISOString(), moonmark: mm, signed_url: url });
+    }
+    await S.log(d.id, out);
+    return json({ logged: out.length, received: list.length }, 200, hdr);
+  }
+
+  // GET /v1/stays/<door>/<stay>: the guest's phone asks how its stay stands.
+  if (parts.length === 2 && isId(sub)) {
+    const s = await S.getStay(d.id, sub);
+    if (!s) throw new HttpError(404, 'not_found', 'No such stay');
+    const vs = (await S.visits(d.id, 300)).filter((v) => v.stay === s.id);
+    return json({ stay: spub(s), door: dpub(d), openings: vs.length, last_opening: vs[0]?.at ?? null, server_ms: now }, 200, hdr);
+  }
+  throw new HttpError(404, 'not_found', 'Unknown stays route');
+}
+
 type Pub = (ev: TicketEvent) => Record<string, unknown>;
 /** Passes: a place (a gym, a club, a coworking space) and its members. A pass is bound to one phone like a ticket,
  *  but it is used again and again, until it expires or is cancelled. Members join only through a single-use invite. */
@@ -748,11 +900,11 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
     return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, registrantOf(gate));
   }
   const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof` || path === `/${API_VERSION}/editions` || path === `/${API_VERSION}/reseal` || path === `/${API_VERSION}/reseal/verify`;
-  const either = path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`) || path === `/${API_VERSION}/passes` || path.startsWith(`/${API_VERSION}/passes/`);   // tickets and passes: GET to read, POST to change
+  const either = path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`) || path === `/${API_VERSION}/passes` || path.startsWith(`/${API_VERSION}/passes/`) || path === `/${API_VERSION}/stays` || path.startsWith(`/${API_VERSION}/stays/`);   // tickets, passes and stays: GET to read, POST to change
   if (!either && (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD')))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /v1/tickets', '/v1/tickets/{event}', 'POST /v1/tickets/{event}/issue', '/v1/tickets/{event}/{ticket}', 'POST /v1/tickets/{event}/door', 'POST /v1/tickets/{event}/checkin', 'POST /v1/passes', 'POST /v1/passes/{place}/invite', 'POST /v1/passes/{place}/join', 'POST /v1/passes/{place}/members', 'POST /v1/passes/{place}/renew', 'POST /v1/passes/{place}/cancel', 'POST /v1/passes/{place}/door', 'POST /v1/passes/{place}/checkin', '/v1/passes/{place}/{pass}', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /v1/tickets', '/v1/tickets/{event}', 'POST /v1/tickets/{event}/issue', '/v1/tickets/{event}/{ticket}', 'POST /v1/tickets/{event}/door', 'POST /v1/tickets/{event}/checkin', 'POST /v1/passes', 'POST /v1/passes/{place}/invite', 'POST /v1/passes/{place}/join', 'POST /v1/passes/{place}/members', 'POST /v1/passes/{place}/renew', 'POST /v1/passes/{place}/cancel', 'POST /v1/passes/{place}/door', 'POST /v1/passes/{place}/checkin', '/v1/passes/{place}/{pass}', 'POST /v1/stays', 'POST /v1/stays/{door}/book', 'POST /v1/stays/{door}/join', 'POST /v1/stays/{door}/pass', 'POST /v1/stays/{door}/host', 'POST /v1/stays/{door}/cancel', 'POST /v1/stays/{door}/lock', 'POST /v1/stays/{door}/log', '/v1/stays/{door}/{stay}', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   if (path.startsWith(`/${API_VERSION}/admin/`)) return adminRoute(req, env, path);
@@ -1128,6 +1280,8 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         return json({ registered: true, valid: true, print, edition: ed.n, registered_at: ed.created, checks: h.count, first_check: h.first }, 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
+      case path === `/${API_VERSION}/stays` || path.startsWith(`/${API_VERSION}/stays/`):
+        return await stayRoute(req, env, path, { 'X-Moon-Plan': gate.plan }, gate);
       case path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`) || path === `/${API_VERSION}/passes` || path.startsWith(`/${API_VERSION}/passes/`):
         return await ticketRoute(req, env, path, planHdr, gate);
 
