@@ -11,10 +11,16 @@
   };
   var $ = function (s) { return document.querySelector(s); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  var yl = function (y) { return y <= 0 ? (1 - y) + ' BCE' : String(y); };
+  var BCE = { es: ' a. C.', fr: ' av. J.-C.', de: ' v. Chr.', it: ' a.C.', pt: ' a.C.', nl: ' v.Chr.' };
+  function lang() { var l = window.MoonI18n && MoonI18n.lang; if (!l) { try { l = localStorage.getItem('moonLang'); } catch (e) {} } if (!l) l = (navigator.language || 'en').slice(0, 2); return BCE[l] ? l : 'en'; }
+  var yl = function (y) { return y <= 0 ? (1 - y) + (BCE[lang()] || ' BCE') : String(y); };
+  function locDate(p, month) {
+    var l = lang(); if (l === 'en') return null;
+    try { return new Intl.DateTimeFormat(l === 'pt' ? 'pt-PT' : l, { day: 'numeric', month: month, year: 'numeric', timeZone: 'UTC' }).formatToParts(new Date(Date.UTC(2000, p.mo - 1, p.d, 12))).map(function (x) { return x.type === 'year' ? yl(p.y) : x.value; }).join(''); } catch (e) { return null; }
+  }
   function parts(date) { var m = /^(-?\d{4})-(\d{2})-(\d{2})$/.exec(date); return { y: +m[1], mo: +m[2], d: +m[3] }; }
-  function longDate(date) { var p = parts(date); return p.d + ' ' + MONTHS[p.mo - 1] + ' ' + yl(p.y); }
-  function shortDate(date) { var p = parts(date); return p.d + ' ' + MONTHS[p.mo - 1].slice(0, 3) + ' ' + yl(p.y); }
+  function longDate(date) { var p = parts(date), L = locDate(p, 'long'); if (L) return L; return p.d + ' ' + MONTHS[p.mo - 1] + ' ' + yl(p.y); }
+  function shortDate(date) { var p = parts(date), L = locDate(p, 'short'); if (L) return L; return p.d + ' ' + MONTHS[p.mo - 1].slice(0, 3) + ' ' + yl(p.y); }
   function icon(t) { return 'assets/eclipse/' + t + '.svg'; }
   function get(path) { return fetch(API + path).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error((j.error && j.error.message) || 'Error ' + r.status); return j; }); }); }
   function toast(t) { var e = $('[data-ec-toast]'); if (!e) return; e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(function () { e.classList.remove('on'); }, 1800); }
@@ -47,7 +53,7 @@
       $('[data-ec-next-icon]').setAttribute('data-type', e.type); $('[data-ec-next-icon]').removeAttribute('data-wait');
       $('[data-ec-next-icon]').setAttribute('aria-label', NAME[e.type]);
       $('[data-ec-next-date]').textContent = longDate(e.date).toUpperCase();
-      $('[data-ec-next-sub]').textContent = e.type.toUpperCase() + ' · ' + new Date(e.unix_ms).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) + ' your time · SAROS ' + e.saros;
+      $('[data-ec-next-sub]').textContent = e.type.toUpperCase() + ' · ' + new Date(e.unix_ms).toLocaleString(lang() === 'en' ? undefined : lang(), { dateStyle: 'medium', timeStyle: 'short' }) + ' your time · SAROS ' + e.saros;
       $('[data-ec-next-days]').textContent = Math.max(0, Math.ceil(e.in_days));
     }).catch(function () {});
     loadList();
@@ -81,7 +87,7 @@
       $('[data-ec-date]').textContent = longDate(e.date).toUpperCase();
       $('[data-ec-sub]').textContent = 'GREATEST ECLIPSE ' + e.greatest_eclipse_td + ' TT · SAROS ' + e.saros;
       var p = parts(e.date);
-      if (p.y >= 1900) $('[data-ec-when]').textContent = 'In your time zone: ' + new Date(e.unix_ms).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' });
+      if (p.y >= 1900) $('[data-ec-when]').textContent = 'In your time zone: ' + new Date(e.unix_ms).toLocaleString(lang() === 'en' ? undefined : lang(), { dateStyle: 'full', timeStyle: 'short' });
       var ut = e.utc.slice(11, 19);
       var mm = e.cycle >= 0 ? '<a href="/m/' + e.moonmark.replace(' ', '-').replace(/:/g, '.') + '.000000000">' + esc(e.moonmark) + '</a>' : esc(e.moonmark);
       var s = e.saros_series;

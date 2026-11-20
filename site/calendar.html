@@ -2850,10 +2850,12 @@ class Component extends DCLogic {
     // Phase shown for a day = the real moon at the middle of that Moon day.
     const dayPhase = (year, dYear) => window.MoonPhase.fraction(dayStart(year, dYear) + MS_DAY / 2);
     const dayIllum = (year, dYear) => window.MoonPhase.illumination(dayStart(year, dYear) + MS_DAY / 2);
-    const fmtShort = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-    const fmtLong = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' });
-    const fmtYear = (ms) => { const y = new Date(ms).getUTCFullYear(); return fmtLong.format(ms).replace(String(y), y < 1 ? (1 - y) + ' BC' : String(y)); };
-    const fmtLoc = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
+    const LOC = (() => { let l = window.MoonI18n && MoonI18n.lang; if (!l) { try { l = localStorage.getItem('moonLang'); } catch (e) {} } if (!l) l = (navigator.language || 'en').slice(0, 2); return ({ es: 'es', fr: 'fr', de: 'de', it: 'it', pt: 'pt-PT', nl: 'nl' })[l] || 'en-US'; })();
+    const BCN = ({ es: ' a. C.', fr: ' av. J.-C.', de: ' v. Chr.', it: ' a.C.', 'pt-PT': ' a.C.', nl: ' v.Chr.' })[LOC] || ' BC';
+    const fmtShort = new Intl.DateTimeFormat(LOC, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    const fmtLong = new Intl.DateTimeFormat(LOC, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' });
+    const fmtYear = (ms) => { const y = new Date(ms).getUTCFullYear(); return fmtLong.format(ms).replace(String(y), y < 1 ? (1 - y) + BCN : String(y)); };
+    const fmtLoc = new Intl.DateTimeFormat(LOC, { month: 'short', day: 'numeric' });
     // The local day(s) whose local noon falls inside this Moon day (the people's date rule).
     const localDays = (s0, s1) => {
       const d0 = new Date(s0); let n = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate(), 12).getTime();
@@ -2863,7 +2865,7 @@ class Component extends DCLogic {
       if (!out.length) return '';
       return out.length === 1 ? fmtLoc.format(out[0]) : fmtLoc.format(out[0]) + '/' + new Date(out[1]).getDate();
     };
-    this._c = { localDays, MS_DAY, YEAR_DAYS, MOONS, moonOfDay, firstDay, toMoon, dayStart, eventsBetween, seasonAt, phaseName, phasePath, dayPhase, dayIllum, fmtShort, fmtLong: { format: fmtYear } };
+    this._c = { localDays, MS_DAY, YEAR_DAYS, MOONS, moonOfDay, firstDay, toMoon, dayStart, eventsBetween, seasonAt, phaseName, phasePath, dayPhase, dayIllum, fmtShort, LOC, fmtLong: { format: fmtYear } };
     return this._c;
   }
 
@@ -2922,8 +2924,8 @@ class Component extends DCLogic {
     const ln = offAt(nowMs);
     const today = c.toMoon(nowMs); // the Moon date is global
     const live = c.toMoon(nowMs);
-    let fmtLocal = c.fmtLong; try { fmtLocal = new Intl.DateTimeFormat('en-US', { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }); } catch (e) {}
-    let fmtDay = null; try { fmtDay = new Intl.DateTimeFormat('en-US', { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric' }); } catch (e) {}
+    let fmtLocal = c.fmtLong; try { fmtLocal = new Intl.DateTimeFormat(c.LOC || 'en-US', { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }); } catch (e) {}
+    let fmtDay = null; try { fmtDay = new Intl.DateTimeFormat(c.LOC || 'en-US', { timeZone: zone, weekday: 'short', month: 'short', day: 'numeric' }); } catch (e) {}
     let fmtClock = null; try { fmtClock = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }); } catch (e) {}
     const place = zone.split('/').pop().replace(/_/g, ' ');
     const year = st.year ?? today.year;
