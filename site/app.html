@@ -38,7 +38,7 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 .mf-t small{font-size:1em;color:inherit;margin-left:0}
 @keyframes mft{0%{transform:scale(.86);opacity:0;filter:blur(6px)}18%{transform:scale(1.04);opacity:1;filter:blur(0)}36%{transform:scale(1)}100%{transform:scale(1.02);opacity:1}}
 /* Then the drawer rises from the bottom over the held time, and the flash gives way to the sheet's own backdrop. */
-.mflash.gone{transition:opacity .3s;opacity:0}
+.mflash.gone{transition:opacity .6s ease;opacity:0}
 .sheet{transition:background-color .3s}
 .sheet.rise{z-index:2147483100}
 .sheet.clear{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}

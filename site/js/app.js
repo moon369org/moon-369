@@ -940,8 +940,9 @@
       setTimeout(function () {
         sh.classList.add('rise', 'clear'); openSheet('moment', t);
         setTimeout(function () {
-          sh.classList.remove('clear'); fl.classList.add('gone');
-          setTimeout(function () { fl.remove(); sh.classList.remove('rise'); }, 320);
+          // The drawer's own backdrop darkens in over the still-dark flash first, then the flash eases away beneath it, so nothing behind ever shows through bright.
+          sh.classList.remove('clear');
+          setTimeout(function () { fl.classList.add('gone'); setTimeout(function () { fl.remove(); sh.classList.remove('rise'); }, 650); }, 350);
         }, 620);
       }, 1250);
     };
