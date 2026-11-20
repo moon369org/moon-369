@@ -322,6 +322,58 @@ paths:
       summary: How a pass stands, for the member's phone
       parameters: [{ name: place, in: path, required: true, schema: { type: string } }, { name: pass, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: 'pass, place, status (active, expired, cancelled), visits, last_visit, last_visit_url' } }
+  /v1/stays:
+    post:
+      summary: Add a door for Moon Stays. Returns its key and the host and lock links
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [name, tz], properties: { name: { type: string }, tz: { type: string, description: IANA time zone }, checkin_hour: { type: integer, default: 15 }, checkout_hour: { type: integer, default: 11 }, renew_hours: { type: integer, default: 24, description: '0 for one pass per stay' } } } } } }
+      responses: { '200': { description: 'door, key, links.host, links.lock' } }
+  /v1/stays/{door}/book:
+    post:
+      summary: A stay with a single-use invite and a 10-digit backup PIN
+      parameters: [{ name: door, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key, arrive, depart], properties: { key: { type: string }, guest: { type: string }, arrive: { type: string, format: date }, depart: { type: string, format: date } } } } } }
+      responses: { '200': { description: 'stay (check_in, check_out), link, pin' } }
+  /v1/stays/{door}/join:
+    post:
+      summary: The guest's phone takes the invite; Moon signs its first pass (Ed25519, checkable offline)
+      parameters: [{ name: door, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [invite, pub], properties: { invite: { type: string }, pub: { type: string } } } } } }
+      responses: { '200': { description: 'stay, door, pass (nb, na, key_id, sig, code_ms), pin' }, '410': { description: Invite used or stay cancelled } }
+  /v1/stays/{door}/pass:
+    post:
+      summary: A fresh pass, for the stay's phone (proved with a current code)
+      parameters: [{ name: door, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [stay, w, sig], properties: { stay: { type: string }, w: { type: integer }, sig: { type: string } } } } } }
+      responses: { '200': { description: 'stay, pass' }, '403': { description: Not this stay's phone }, '410': { description: Cancelled or ended } }
+  /v1/stays/{door}/lock:
+    post:
+      summary: What a lock saves to work offline
+      parameters: [{ name: door, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key], properties: { key: { type: string } } } } } }
+      responses: { '200': { description: 'door, pin_secret, moon_keys, code_ms, code_slack, revoked, server_ms' } }
+  /v1/stays/{door}/log:
+    post:
+      summary: Openings a lock kept, sent when online. Each is checked and signed as moon-stay-visit/1
+      parameters: [{ name: door, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key, visits], properties: { key: { type: string }, visits: { type: array, items: { type: object } } } } } } }
+      responses: { '200': { description: 'logged, received' } }
+  /v1/stays/{door}/host:
+    post:
+      summary: The door, its stays (with PINs and openings) and recent openings
+      parameters: [{ name: door, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key], properties: { key: { type: string } } } } } }
+      responses: { '200': { description: 'door, stays, visits' } }
+  /v1/stays/{door}/cancel:
+    post:
+      summary: Cancel a stay. Locks refuse it at their next sync; its pass can't renew
+      parameters: [{ name: door, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key, stay], properties: { key: { type: string }, stay: { type: string } } } } } }
+      responses: { '200': { description: stay } }
+  /v1/stays/{door}/{stay}:
+    get:
+      summary: How a stay stands, for the guest's phone
+      parameters: [{ name: door, in: path, required: true, schema: { type: string } }, { name: stay, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 'stay, door, openings, last_opening' } }
   /v1/verify:
     post:
       summary: Check a receipt, and optionally that it matches your content

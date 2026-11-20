@@ -175,7 +175,7 @@ footer > div > div:first-child svg{width:64px!important}
 </div>
 <div style="flex: 0 1 380px; border: 1px solid rgb(36, 38, 42); padding: 24px; display: flex; flex-direction: column; gap: 10px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">LIVE · MOONMARK · GET /v1/now</div>
-<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="Waxing gibbous" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none; rotate: 21.9deg;"></canvas><div><span style="visibility: hidden;">06:05:49</span></div></div>
+<div style="display: flex; align-items: center; gap: 0.3em; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;"><canvas class="hm-moonglow" role="img" aria-label="Waxing gibbous" style="width: calc(1.558em); height: calc(1.558em); margin: calc(-0.369em); display: block; flex: 0 0 auto; pointer-events: none; rotate: 21.8deg;"></canvas><div><span style="visibility: hidden;">07:34:59</span></div></div>
 <div class="ap-hide-m" style="font-family: Syncopate, sans-serif; font-size: 12px; letter-spacing: 0.24em;">CYCLE 1928 · MOON 05 · LUNE 10</div>
 <div class="ap-date" style="display: none;"><div class="ap-date-c"><div class="ap-date-l">CYCLE</div><div class="ap-date-v">1928</div></div><div class="ap-date-c"><div class="ap-date-l">MOON</div><div class="ap-date-v">05</div></div><div class="ap-date-c"><div class="ap-date-l">LUNE</div><div class="ap-date-v">10</div></div></div>
 </div>
@@ -193,6 +193,7 @@ footer > div > div:first-child svg{width:64px!important}
 <a href="#events" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Event links</a>
 <a href="#tickets" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Tickets</a>
 <a href="#passes" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Passes</a>
+<a href="#stays" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Stays</a>
 <a href="#constants" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Constants</a>
 <a href="#endpoints" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Endpoints</a>
 <a href="#errors" style="display: block; padding: 10px 0px; min-height: 44px; box-sizing: border-box; font-size: 14px; color: rgb(162, 163, 167);">Errors &amp; limits</a>
@@ -447,6 +448,54 @@ QR: https://moon369.org/door?c={event}.{ticket}.{w}.{sig}</pre>
 </section>
 
 <section style="display: flex; flex-direction: column; gap: 28px;">
+<div id="stays" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 16px; padding-top: 24px;">
+<div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.3em; color: rgb(138, 139, 143);">RENTALS · CABINS · OFFLINE LOCKS</div>
+<h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">STAYS</h2>
+<p style="margin: 0px; max-width: 760px; font-size: 16px; line-height: 1.7; color: rgb(162, 163, 167);">Guest passes a lock checks with no internet. Moon signs each stay pass with Ed25519 over the door, the stay, the guest phone's P-256 key and a time window. The phone adds its own signature on the current 30-second code. A lock needs only Moon's public key, its clock and, for backup PINs, the door's PIN secret. Try it at <a href="/stays" style="color: rgb(242, 242, 240);">moon369.org/stays</a>.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>ADD A DOOR</span><span>POST /v1/stays</span></div>
+<pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">{ "name": "Cabin 1", "tz": "America/Denver",
+  "checkin_hour": 15, "checkout_hour": 11,
+  "renew_hours": 24 }   // 0: one pass for the whole stay
+
+→ { "door": {…}, "key": "…",
+    "links": { "host": "https://moon369.org/host#…",
+               "lock": "https://moon369.org/lock#…" } }</pre>
+</div>
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>BOOK, THEN JOIN</span><span>POST /v1/stays/{door}/book · /join</span></div>
+<pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">book: { "key", "guest", "arrive": "2026-12-04",
+        "depart": "2026-12-07" }
+→ { "stay", "link": ".../stay?d=…&amp;i=…", "pin": "3380322012" }
+
+join: { "invite", "pub" }   // once, from the guest's phone
+→ { "pass": { "nb", "na", "key_id", "sig" }, "pin" }</pre>
+</div>
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>THE QR THE PHONE SHOWS</span><span>every 30 seconds</span></div>
+<pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">https://moon369.org/stay#........
+
+pass_sig: Ed25519 by Moon over
+  "moon-stay-pass/1\n\n\n\n\n"
+code_sig: P-256 by the phone over
+  "moon-stay-code/1|||"   w = floor(ms / 30000)</pre>
+</div>
+<div style="border: 1px solid rgb(36, 38, 42); background: rgb(8, 8, 10); min-width: 0px;">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgb(36, 38, 42); font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; color: rgb(138, 139, 143);"><span>THE BACKUP PIN</span><span>checked offline</span></div>
+<pre style="margin: 0px; padding: 24px 20px; font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 14px; line-height: 1.75; color: rgb(233, 228, 216); overflow-x: auto; white-space: pre;">10 digits: DDD NN MMMMM
+DDD   arrival day (days since 2026-01-01) mod 1000
+NN    nights
+MMMMM HMAC-SHA256(pin_secret,
+        "moon-stay-pin/1|||")
+      first 4 bytes, big-endian, mod 100000</pre>
+</div>
+</div>
+<p style="margin: 0px; max-width: 760px; font-size: 14px; line-height: 1.7; color: rgb(138, 139, 143);">Also: <code>POST /v1/stays/{door}/pass</code> renews a pass when the phone sends a fresh code; <code>/lock</code> (with the key) returns what a lock saves to work offline: Moon's keys, the PIN secret, the door's hours and time zone, and cancelled stays; <code>/log</code> takes the openings a lock kept and signs each one as <code>moon-stay-visit/1</code>; <code>/host</code> and <code>/cancel</code> manage stays. The reference reader is <a href="/js/lock.js" style="color: rgb(242, 242, 240);">lock.js</a>.</p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px;">
 <div id="constants" style="display: flex; flex-direction: column; gap: 16px; padding-top: 24px;">
 <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 12px; letter-spacing: 0.24em; color: rgb(138, 139, 143);">02</div>
 <h2 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em;">CONSTANTS</h2>
@@ -481,11 +530,11 @@ QR: https://moon369.org/door?c={event}.{ticket}.{w}.{sig}</pre>
   "day": 10,
   "day_of_cycle": 124,
   "moon_length_days": 28,
-  "time": "06:05:49",
-  "moonmark": "1928.05.10 06:05:49.395472000",
-  "phase": { "fraction": 0.331529, "name": "Waxing gibbous" },
-  "unix_ms": 1795134791649,
-  "utc": "2026-11-20T00:33:11.649000000Z",
+  "time": "07:34:59",
+  "moonmark": "1928.05.10 07:34:59.802238000",
+  "phase": { "fraction": 0.333701, "name": "Waxing gibbous" },
+  "unix_ms": 1795140358068,
+  "utc": "2026-11-20T02:05:58.068000000Z",
   "time_zone": null,
   "dst": false
 }</span></pre>
@@ -1297,7 +1346,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <nav class="ft" aria-label="Footer">
 <div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
-<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/app">Moon app</a><a href="/m">Moonmark</a><a href="/tickets">Tickets</a><a href="/passes">Passes</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/sign">Sign a file</a><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/audit">Audit</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/widgets">Widgets</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/app">Moon app</a><a href="/m">Moonmark</a><a href="/tickets">Tickets</a><a href="/passes">Passes</a><a href="/stays">Stays</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/sign">Sign a file</a><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/audit">Audit</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/widgets">Widgets</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
 <div class="ft-base"><span>Moon · The new standard for time</span><a href="https://x.com/M00N_369" target="_blank" rel="noopener" aria-label="Moon on X" style="display: inline-flex; align-items: center; gap: 8px; color: rgb(138, 139, 143); text-decoration: none;"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>@M00N_369</a><span>Open source under the MIT license</span></div>
 </nav>
 </footer>
@@ -1359,6 +1408,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <a href="#events" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Event links</a>
 <a href="#tickets" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Tickets</a>
 <a href="#passes" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Passes</a>
+<a href="#stays" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Stays</a>
 <a href="#constants" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Constants</a>
 <a href="#endpoints" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Endpoints</a>
 <a href="#errors" style="display: block; padding: 10px 0; min-height: 44px; box-sizing: border-box; font-size: 14px; color: #A2A3A7">Errors &amp; limits</a>
@@ -1610,6 +1660,54 @@ QR: https://moon369.org/door?c={event}.{ticket}.{w}.{sig}</pre>
 </div>
 </div>
 <p style="margin: 0; max-width: 760px; font-size: 14px; line-height: 1.7; color: #8A8B8F">Also, all with the key: <code>POST /v1/passes/{place}/members</code> lists members (status, visits, last visit) and unused invites; <code>/renew</code> with <code>pass</code> and <code>days</code> extends a membership from its end date or from today; <code>/cancel</code> with <code>pass</code> ends one now, or with <code>invite</code> withdraws an invite; <code>/door</code> returns the list a door uses to check passes with no signal. <code>GET /v1/passes/{place}/{pass}</code> is what the member&#39;s phone asks. Each visit is signed as <code>moon-visit/1</code>.</p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 28px">
+<div id="stays" style="scroll-margin-top: 96px; display: flex; flex-direction: column; gap: 16px; padding-top: 24px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: #8A8B8F">RENTALS · CABINS · OFFLINE LOCKS</div>
+<h2 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: 0.08em">STAYS</h2>
+<p style="margin: 0; max-width: 760px; font-size: 16px; line-height: 1.7; color: #A2A3A7">Guest passes a lock checks with no internet. Moon signs each stay pass with Ed25519 over the door, the stay, the guest phone&#39;s P-256 key and a time window. The phone adds its own signature on the current 30-second code. A lock needs only Moon&#39;s public key, its clock and, for backup PINs, the door&#39;s PIN secret. Try it at <a href="/stays" style="color: #F2F2F0">moon369.org/stays</a>.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>ADD A DOOR</span><span>POST /v1/stays</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">{ "name": "Cabin 1", "tz": "America/Denver",
+  "checkin_hour": 15, "checkout_hour": 11,
+  "renew_hours": 24 }   // 0: one pass for the whole stay
+
+→ { "door": {…}, "key": "…",
+    "links": { "host": "https://moon369.org/host#…",
+               "lock": "https://moon369.org/lock#…" } }</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>BOOK, THEN JOIN</span><span>POST /v1/stays/{door}/book · /join</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">book: { "key", "guest", "arrive": "2026-12-04",
+        "depart": "2026-12-07" }
+→ { "stay", "link": ".../stay?d=…&amp;i=…", "pin": "3380322012" }
+
+join: { "invite", "pub" }   // once, from the guest's phone
+→ { "pass": { "nb", "na", "key_id", "sig" }, "pin" }</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>THE QR THE PHONE SHOWS</span><span>every 30 seconds</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">https://moon369.org/stay#{{door}}.{{stay}}.{{nb}}.{{na}}.{{pub}}.{{key_id}}.{{pass_sig}}.{{w}}.{{code_sig}}
+
+pass_sig: Ed25519 by Moon over
+  "moon-stay-pass/1\n{{door}}\n{{stay}}\n{{pub}}\n{{nb}}\n{{na}}"
+code_sig: P-256 by the phone over
+  "moon-stay-code/1|{{door}}|{{stay}}|{{w}}"   w = floor(ms / 30000)</pre>
+</div>
+<div style="border: 1px solid #24262A; background: #08080A; min-width: 0">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #24262A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A8B8F"><span>THE BACKUP PIN</span><span>checked offline</span></div>
+<pre style="margin: 0; padding: 24px 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; color: #E9E4D8; overflow-x: auto; white-space: pre">10 digits: DDD NN MMMMM
+DDD   arrival day (days since 2026-01-01) mod 1000
+NN    nights
+MMMMM HMAC-SHA256(pin_secret,
+        "moon-stay-pin/1|{{door}}|{{day}}|{{nights}}")
+      first 4 bytes, big-endian, mod 100000</pre>
+</div>
+</div>
+<p style="margin: 0; max-width: 760px; font-size: 14px; line-height: 1.7; color: #8A8B8F">Also: <code>POST /v1/stays/{door}/pass</code> renews a pass when the phone sends a fresh code; <code>/lock</code> (with the key) returns what a lock saves to work offline: Moon&#39;s keys, the PIN secret, the door&#39;s hours and time zone, and cancelled stays; <code>/log</code> takes the openings a lock kept and signs each one as <code>moon-stay-visit/1</code>; <code>/host</code> and <code>/cancel</code> manage stays. The reference reader is <a href="/js/lock.js" style="color: #F2F2F0">lock.js</a>.</p>
 </section>
 
 <section style="display: flex; flex-direction: column; gap: 28px">
@@ -2450,7 +2548,7 @@ function toUnix({ cycle, moon, day, hour = 0, minute = 0, second = 0 }) {
 <footer style="border-top: 1px solid #1C1D20"><canvas class="ft-glow" aria-hidden="true"></canvas>
 <nav class="ft" aria-label="Footer">
 <div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #3A3C41; stroke-width: 9"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
-<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/app">Moon app</a><a href="/m">Moonmark</a><a href="/tickets">Tickets</a><a href="/passes">Passes</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/sign">Sign a file</a><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/audit">Audit</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/widgets">Widgets</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/app">Moon app</a><a href="/m">Moonmark</a><a href="/tickets">Tickets</a><a href="/passes">Passes</a><a href="/stays">Stays</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/sign">Sign a file</a><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/audit">Audit</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/widgets">Widgets</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
 <div class="ft-base"><span>Moon · The new standard for time</span><a href="https://x.com/M00N_369" target="_blank" rel="noopener" aria-label="Moon on X" style="display: inline-flex; align-items: center; gap: 8px; color: #8A8B8F; text-decoration: none"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>@M00N_369</a><span>Open source under the MIT license</span></div>
 </nav>
 </footer>
