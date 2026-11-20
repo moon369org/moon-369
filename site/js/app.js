@@ -174,7 +174,7 @@
   function layoutStars(cv, dpr) {
     var cr = cv.getBoundingClientRect(), top = $('.top'), lab = $('[data-scr="now"] > .k'), st = $('[data-scr="now"] .stage');
     var L = Math.max(cr.left, 12), Rt = Math.min(cr.right, document.documentElement.clientWidth - 12);
-    var T = Math.max(cr.top, top ? top.getBoundingClientRect().bottom + 8 : cr.top), B = Math.min(cr.bottom, lab ? lab.getBoundingClientRect().top - 8 : cr.bottom);
+    var T = Math.max(cr.top, top ? top.getBoundingClientRect().bottom - window.scrollY + 8 : cr.top)   /* the bar is pinned, so measure it where it sits at the top of the page */, B = Math.min(cr.bottom, lab ? lab.getBoundingClientRect().top - 8 : cr.bottom);
     var sr = st.getBoundingClientRect(), mx = sr.left + sr.width / 2, my = sr.top + sr.height / 2, mr = sr.width * 0.8 / 2 + 12;   // the moon is drawn at 80% of its box
     STARS.list.forEach(function (s) {
       var g = seeded(s.seed ^ 0x5bd1e995), x = 0, y = 0, pad = s.size * 3;
