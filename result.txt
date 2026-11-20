@@ -1,5 +1,20 @@
-/tickets 200
-/js/tickets-page.js 200
-/assets/og/tickets.jpg 200
-<title>Tickets · Moon
+{
+  "place": {
+    "id": "2nXk1yf8YSh-",
+    "kind": "pass",
+    "name": "Live check gym",
+    "passback_min": 30,
+    "created": "2026-11-20T00:39:30.877Z"
+  }
+=== invite
+"link": "https://moon369.org/pass?p=2nXk1yf8YSh-&i=RzuaH8Yjp
+=== members
+1
+/passes 200
+/pass 200
+/members 200
+/js/pass.js 200
+/js/members.js 200
+/js/passes-page.js 200
+/assets/og/passes.jpg 200
 2
