@@ -6,11 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check stays page
+      - name: Check API moon
         run: |
-          {
-          for u in /stays /js/stays-page.js /assets/og/stays.jpg; do echo "$u $(curl -s -o /dev/null -w '%{http_code}' https://moon369.org$u)"; done
-          curl -s https://moon369.org/stays | grep -o "<title>[^<]*"; curl -s https://moon369.org/ | grep -c 'href="/stays"'; curl -s https://moon369.org/api | grep -c 'id="stays"'
-          } > result.txt 2>&1
+          curl -s -o moon-check.png "https://api.moon369.org/v1/moon.png?size=512&bg=dark&unix_ms=1795200000000"
+          { file moon-check.png; ls -la moon-check.png; curl -s -o /dev/null -w "svg %{http_code} %{size_download}\n" "https://api.moon369.org/v1/moon.svg?size=256&unix_ms=1795200000000"; } > result.txt 2>&1
+          git add moon-check.png
           git config user.name Moon && git config user.email moon369org@proton.me
           git add result.txt && git commit -m "diag result" && git push origin HEAD:diag-share-card
