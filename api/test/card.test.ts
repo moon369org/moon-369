@@ -98,6 +98,6 @@ describe('card options and moment QR', () => {
     const { shareSvg } = await import('../src/card');
     const base = { year: 1928, moon: 5, lune: 12, lunesInMoon: 28, fraction: 0.4, tilt: 0, illumination: 0.9, name: 'Waxing gibbous', time: '15:00:00', ns: '000000000' };
     expect(shareSvg({ ...base, event: 'Launch', qr: 'https://moon369.org/m/1928.05.12-15.00.00?e=Launch' })).toContain('SCAN · YOUR TIME');
-    expect(shareSvg(base)).not.toContain('SCAN');
+    expect(shareSvg(base)).not.toContain('SCAN · YOUR TIME');   // the full label: the moon's embedded image data can hold any four letters
   });
 });
