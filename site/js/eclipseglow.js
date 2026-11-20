@@ -46,10 +46,11 @@
     var i = Math.floor(x), j = Math.floor(y), fx = x - i, fy = y - j; fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
     return (hash(i, j) * (1 - fx) + hash(i + 1, j) * fx) * (1 - fy) + (hash(i, j + 1) * (1 - fx) + hash(i + 1, j + 1) * fx) * fy;
   }
-  function sunPx(nx, ny) {   // -> [r,g,b] for a point on the sun's disc, nx,ny in -1..1
+  function sunPx(nx, ny, hot) {   // -> [r,g,b] for a point on the sun's disc, nx,ny in -1..1; hot: the white-hot ring of an annular
     var rr = nx * nx + ny * ny, mu = Math.sqrt(Math.max(0, 1 - rr)), m1 = 1 - mu;
     var I = 1 - 0.38 * m1 - 0.2 * m1 * m1;
     var gran = (vnoise(nx * 7 + 9, ny * 7 + 9) - 0.5) * 0.6 + (vnoise(nx * 16 + 3, ny * 16 + 3) - 0.5) * 0.4;
+    if (hot) { var Lh = (0.9 + 0.1 * I) * (1 + gran * 0.04 * mu), wh = Math.pow(m1, 2); return [255 * Lh, (253 - 14 * wh) * Lh, (248 - 40 * wh) * Lh]; }
     var L = (0.7 + 0.3 * I) * (1 + gran * 0.09 * mu), w = Math.pow(m1, 1.2);
     return [(248 * (1 - w) + 228 * w) * L, (244 * (1 - w) + 205 * w) * L, (234 * (1 - w) + 168 * w) * L];
   }
@@ -93,7 +94,7 @@
       var nx = (x + 0.5 - R) / R, ny = (y + 0.5 - R) / R, rr = nx * nx + ny * ny;
       var edge = Math.min(1, Math.max(0, (1 - Math.sqrt(rr)) * R + 0.5));
       if (edge <= 0) continue;
-      var p = kind === 'sun' ? sunPx(nx, ny) : moonPx(nx, ny), o = (y * n + x) * 4;
+      var p = kind === 'moon' ? moonPx(nx, ny) : sunPx(nx, ny, kind === 'hot'), o = (y * n + x) * 4;
       d[o] = p[0]; d[o + 1] = p[1]; d[o + 2] = p[2]; d[o + 3] = edge * 255;
     }
     c.putImageData(im, 0, 0);
@@ -103,7 +104,7 @@
   // Geometry on a 100-unit icon (the same proportions as the static SVG icons).
   function geo(type, W) {
     var s = W / 100, cx = W / 2, cy = W / 2, R = 26 * s;
-    if (type === 'annular') return { s: s, cx: cx, cy: cy, R: R, mx: cx, my: cy, mr: (26 - 5.5) * s };
+    if (type === 'annular') return { s: s, cx: cx, cy: cy, R: R, mx: cx, my: cy, mr: (26 - 3.6) * s };
     if (type === 'hybrid') return { s: s, cx: cx, cy: cy, R: R, mx: cx - 1.9 * s, my: cy, mr: (26 - 1.1) * s };
     if (type === 'partial') return { s: s, cx: cx, cy: cy, R: R, mx: cx + 13 * s, my: cy - 11 * s, mr: (26 + 0.5) * s };
     return { s: s, cx: cx, cy: cy, R: R, mx: cx, my: cy, mr: R };
@@ -119,10 +120,14 @@
       blurDraw(c, W, Math.max(1, Math.round(W / 26)), 0.4, 'lighter', function (x) { x.strokeStyle = 'rgb(' + LIGHT + ')'; x.lineWidth = g.R * 0.16; x.beginPath(); x.arc(g.cx, g.cy, g.R * 1.03, 0, Math.PI * 2); x.stroke(); });
       blurDraw(c, W, Math.max(1, Math.round(W / 140)), 1, 'lighter', function (x) { x.strokeStyle = 'rgb(' + LIGHT + ')'; x.lineWidth = Math.max(1, g.R * 0.075); x.beginPath(); x.arc(g.cx, g.cy, g.R * 1.035, 0, Math.PI * 2); x.stroke(); });
     } else {
-      var glow = type === 'partial' ? 0.3 : 0.42;
+      var glow = type === 'partial' ? 0.3 : 0.42, ring = type !== 'partial';
       blurDraw(c, W, Math.max(1, Math.round(W / 9)), glow, 'lighter', sunPaint(1.02));
       blurDraw(c, W, Math.max(1, Math.round(W / 30)), glow * 0.8, 'lighter', sunPaint(1.01));
-      c.drawImage(faceCanvas('sun', g.R), g.cx - g.R, g.cy - g.R, g.R * 2, g.R * 2);
+      if (ring) {   // a bare ring of sun is blinding: a wide bloom and a tight hot halo hug it
+        blurDraw(c, W, Math.max(1, Math.round(W / 11)), 0.3, 'lighter', sunPaint(1.04));
+        blurDraw(c, W, Math.max(1, Math.round(W / 70)), 0.9, 'lighter', function (x) { x.strokeStyle = '#FFFDF8'; x.lineWidth = g.R * 0.14; x.beginPath(); x.arc(g.cx, g.cy, g.R * 0.985, 0, Math.PI * 2); x.stroke(); });
+      }
+      c.drawImage(faceCanvas(ring ? 'hot' : 'sun', g.R), g.cx - g.R, g.cy - g.R, g.R * 2, g.R * 2);
     }
     return st;
   }

@@ -60,7 +60,7 @@
     });
   }
   function set(l) { try { if (l === 'auto') localStorage.removeItem('moonLang'); else localStorage.setItem('moonLang', l); } catch (e) {} location.reload(); }
-  // The website's picker: a globe in the header and a language line in the footer (the app has its own).
+  // The website's picker: a globe in the header (the app has its own).
   function sitePicker() {
     if (document.querySelector('[data-lang-open]')) return;
     var chosen = null; try { chosen = localStorage.getItem('moonLang'); } catch (e) {}
@@ -90,12 +90,11 @@
       var row = h.querySelector('div') || h, g = make(); g.style.marginLeft = 'auto';
       var nav = row.querySelector('nav'); if (nav) nav.parentNode.insertBefore(g, nav.nextSibling); else row.appendChild(g);
     }
-    var f = document.querySelector('footer'); if (f && !f.querySelector('.mlp-f')) { var w = document.createElement('div'); w.className = 'mlp-f'; w.appendChild(make()); f.appendChild(w); }
   }
   if (!root.__mlpBound) {
     root.__mlpBound = true;
     // Pages redraw their header as they load, so put the picker back whenever it goes missing.
-    var pend = 0, check = function () { pend = 0; var h = document.querySelector('header'); if (h && !h.querySelector('.mlp-g')) sitePicker(); var f = document.querySelector('footer'); if (f && !f.querySelector('.mlp-f')) sitePicker(); };
+    var pend = 0, check = function () { pend = 0; var h = document.querySelector('header'); if (h && !h.querySelector('.mlp-g')) sitePicker(); };
     var go = function () { check(); new MutationObserver(function () { if (!pend) pend = setTimeout(check, 120); }).observe(document.body, { childList: true, subtree: true }); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
   }
