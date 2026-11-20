@@ -91,9 +91,10 @@ function realFace(f: number, size: number, turn: number): string {
       const A = -0.1 - 0.15 * nz, B = 0.08 + 0.37 * nz;   // the wide fade across the middle, soft at the rim so the cusps curve
       const t = Math.min(1, Math.max(0, (dot - A) / (B - A))), sun = t * t * (3 - 2 * t);
       const rim = Math.sqrt(rr); const fx = Math.max(0, (rim - 0.72) / 0.28); let keep = 1 - fx * fx * fx;   // mostly the outer 10%, eased in from further inside so there is no line
-      keep = 1 - (1 - keep) * sun;   // the fade and the brightening belong to the lit side only
+      let gw = Math.min(1, Math.max(0, (dot + 0.05) / 0.45)); gw = sun * gw * gw * (3 - 2 * gw);
+      keep = 1 - (1 - keep) * gw;   // lit side only, tapering off well before the shadow so the cusps meet it softly
       const k = 1 - keep * (1 - albedo(nx * tc - ny * ts, nx * ts + ny * tc, nz));
-      const lum = sun * (0.71 + 0.29 * k) + (1 - sun) * (0.015 + 0.03 * k), hot = (1 - keep) * 0.75 * sun;
+      const lum = sun * (0.71 + 0.29 * k) + (1 - sun) * (0.015 + 0.03 * k), hot = (1 - keep) * 0.75;
       const o = (y * size + x) * 4;
       let r0 = ink[0] * lum + 24 * (1 - lum), g0 = ink[1] * lum + 25 * (1 - lum), b0 = ink[2] * lum + 28 * (1 - lum);
       r0 += (255 - r0) * hot; g0 += (253 - g0) * hot; b0 += (246 - b0) * hot;
