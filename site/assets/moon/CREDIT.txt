@@ -1,0 +1,6 @@
+near-side.jpg: the Moon's near side (longitude -90 to 90), grayscale, cut from the 1K color texture
+of NASA's CGI Moon Kit (lroc_color_poles_1k.jpg).
+
+Source: NASA's Scientific Visualization Studio, CGI Moon Kit, https://svs.gsfc.nasa.gov/4720
+Imagery: Lunar Reconnaissance Orbiter Camera (LROC), NASA/GSFC/Arizona State University.
+NASA imagery is not protected by copyright in the United States. Credit: NASA's Scientific Visualization Studio.

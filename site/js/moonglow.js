@@ -49,10 +49,42 @@
     ctx.restore();
   }
 
+  // The real surface, for canvases marked data-real: NASA's LROC map of the near side (see
+  // /assets/moon/CREDIT.txt), read once into brightness values. Until it loads, the plain moon shows.
+  var TEX = null, texLoading = false;
+  function texture() {
+    if (TEX || texLoading) return TEX; texLoading = true;
+    var im = new Image();
+    im.onload = function () {
+      try {
+        var c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+        var g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(im, 0, 0);
+        var px = g.getImageData(0, 0, im.width, im.height).data, n = im.width * im.height, v = new Float32Array(n);
+        for (var i = 0; i < n; i++) v[i] = px[i * 4] / 255;
+        TEX = { w: im.width, h: im.height, v: v };
+        document.querySelectorAll('canvas.hm-moonglow[data-real]').forEach(function (cv) { cv.__moonKey = null; });
+      } catch (e) { /* a blocked image: keep the plain moon */ }
+    };
+    im.src = '/assets/moon/near-side.jpg';
+    return null;
+  }
+  // Surface brightness at a point on the visible face: maria dark, highlands bright, as the map shows.
+  function albedo(nx, ny, nz) {
+    var lon = Math.atan2(nx, nz), lat = Math.asin(Math.max(-1, Math.min(1, -ny)));
+    var u = (lon / Math.PI + 0.5) * (TEX.w - 1), v = (0.5 - lat / Math.PI) * (TEX.h - 1);
+    var x0 = Math.floor(u), y0 = Math.floor(v), fx = u - x0, fy = v - y0, w = TEX.w, a = TEX.v;
+    var x1 = Math.min(w - 1, x0 + 1), y1 = Math.min(TEX.h - 1, y0 + 1);
+    var k = (a[y0 * w + x0] * (1 - fx) + a[y0 * w + x1] * fx) * (1 - fy) + (a[y1 * w + x0] * (1 - fx) + a[y1 * w + x1] * fx) * fy;
+    return Math.min(1, Math.max(0, (k - 0.22) / 0.58));   // stretch the map's gray range to full
+  }
+
   // Sun direction seen from the Moon (x right, y down, z toward us): new moon behind it, full in
   // front, lit on the right while waxing. Brightness is a smoothstep of the sunlight's angle, so the
   // terminator is soft in proportion to the sphere, and the edge of the disc is antialiased.
-  function shade(W, cx, cy, R, f) {
+  function shade(W, cx, cy, R, f, real, tilt) {
+    // The canvas is turned by the tilt so the lit side points the right way; turn the map back by
+    // the same angle, so the craters and seas stay where they are in the sky (north up).
+    var tc = Math.cos((tilt || 0) * Math.PI / 180), ts = Math.sin((tilt || 0) * Math.PI / 180);
     var cvs = document.createElement('canvas'); cvs.width = cvs.height = W;
     var c = cvs.getContext('2d'), img = c.createImageData(W, W), d = img.data;
     var e = 2 * Math.PI * f, sx = Math.sin(e), sz = -Math.cos(e);
@@ -70,8 +102,15 @@
         // terminator stays soft but meets the edge cleanly (no lit horns, no dark notches).
         var A = -0.03 - 0.22 * nz, B = 0.03 + 0.42 * nz;
         var tt = Math.min(1, Math.max(0, (dot - A) / (B - A))), a = tt * tt * (3 - 2 * tt) * edge;
-        if (a <= 0) continue;
         var o = (y * W + x) * 4;
+        if (real) {
+          // The real face: sunlight on the map's brightness, and a faint earthshine on the dark side.
+          var k = albedo(nx * tc - ny * ts, nx * ts + ny * tc, nz), sun = tt * tt * (3 - 2 * tt), lum = sun * (0.42 + 0.58 * k) + (1 - sun) * (0.015 + 0.03 * k);
+          d[o] = ink[0] * lum + 24 * (1 - lum); d[o + 1] = ink[1] * lum + 25 * (1 - lum); d[o + 2] = ink[2] * lum + 28 * (1 - lum);
+          d[o + 3] = Math.round(edge * 255);
+          continue;
+        }
+        if (a <= 0) continue;
         d[o] = ink[0]; d[o + 1] = ink[1]; d[o + 2] = ink[2]; d[o + 3] = Math.round(a * 255);
       }
     }
@@ -99,7 +138,8 @@
     ctx.clearRect(0, 0, W, W);
 
     // The glow and the moon only change with the phase, so draw them once and reuse them.
-    var sk = W + '|' + f.toFixed(4) + '|' + strength.toFixed(3);
+    var real = cv.hasAttribute('data-real') && !!texture();
+    var sk = W + '|' + f.toFixed(4) + '|' + strength.toFixed(3) + (real ? '|real|' + Math.round(tilt * 2) : '');
     var st = cv.__moonStatic || (cv.__moonStatic = document.createElement('canvas'));
     if (cv.__moonKey !== sk) {
       cv.__moonKey = sk; st.width = W; st.height = W;
@@ -109,11 +149,13 @@
         // Sun hits it there, fading to dark across the terminator. Near the poles the sunlight only
         // grazes, so the lit edge fades out before it gets there: the shadow side meets the edge in
         // one smooth curve, with no thin horns running along the rim.
-        var lit = shade(W, cx, cy, R, f);
+        var lit = shade(W, cx, cy, R, f, real, tilt);
+        // The glow comes from the sunlit part only, never the earthshine: a mask of the plain lit face.
+        var glowSrc = real ? shade(W, cx, cy, R, f, false) : lit;
 
         // Rule 1 + 2: glow made from the lit face itself, blurred at three radii.
         var layers = [[160, 0.4], [70, 0.2], [34, 0.12]];
-        var paintLit = function (c) { c.drawImage(lit, 0, 0); };
+        var paintLit = function (c) { c.drawImage(glowSrc, 0, 0); };
         for (var i = 0; i < layers.length; i++) blurDraw(ctx, W, W, Math.max(1, Math.round(W / layers[i][0])), layers[i][1] * strength, 'lighter', paintLit);
 
         // The moon: the shadow disc, then the lit face on top.
