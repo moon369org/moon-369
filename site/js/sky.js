@@ -109,6 +109,12 @@
     // The real horizon: the land around you, once it has loaded. Until then the horizon is flat.
     var hor = null, vis = { rise: null, set: null };
     var landAt = function (az) { return hor && window.MoonHorizon ? window.MoonHorizon.at(hor, az) : 0; };
+    // While the land loads, a light sweeps the horizon; when it arrives, the ridge rises into place.
+    // The moon's path draws itself in when the view opens. anim() keeps frames coming until all of it settles.
+    var born = performance.now(), landing = null, landT0 = 0, raf = 0;
+    var ease = function (x) { x = Math.max(0, Math.min(1, x)); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function anim() { if (raf || reduce) return; raf = requestAnimationFrame(function () { raf = 0; draw(); var n = performance.now(); if (landing === 'loading' || (landing === 'rising' && n - landT0 < 900) || n - born < 1300) anim(); }); }
     var hidden = function (p) { return p.alt <= RISE || p.alt < landAt(p.az) + RISE; };
     el.innerHTML =
       '<div class="sk-sky"><canvas aria-hidden="true"></canvas></div>' +
@@ -167,10 +173,11 @@
       return { rise: r, set: st };
     }
     if (window.MoonHorizon && lat != null && lng != null && !cfg.noTerrain) {
+      landing = 'loading';
       window.MoonHorizon.profile(lat, lng, south).then(function (p) {
         if (!el.isConnected) return;
-        hor = p; vis = visible(); stats(); draw();
-      }).catch(function () {});
+        hor = p; vis = visible(); stats(); landing = 'rising'; landT0 = performance.now(); draw(); anim();
+      }).catch(function () { landing = null; draw(); });
     }
     var cx = cv.getContext('2d');
     function X(az, W, pad) { var a = south ? az : (az + 180) % 360; a = Math.max(15, Math.min(345, a)); return pad + (a - 15) / 330 * (W - pad * 2); }
@@ -196,11 +203,12 @@
       [30, 60].forEach(function (a) { cx.beginPath(); cx.moveTo(0, Y(a)); cx.lineTo(W, Y(a)); cx.stroke(); cx.fillStyle = 'rgba(138,139,143,.6)'; cx.fillText(a + '°', 8 * dpr, Y(a) - 6 * dpr); });
       cx.setLineDash([]);
       // The land, at true scale: a dark silhouette with a thin light rim, above the sky and below the moon.
-      var land = null;
+      var land = null, now0 = performance.now(), rise = landing === 'rising' && !reduce ? ease((now0 - landT0) / 900) : 1;
+      if (landing === 'rising' && rise >= 1) landing = 'done';
       if (hor) {
         land = new Path2D(); var n = 0;
         for (var rel = 15; rel <= 345; rel += 0.5) {
-          var az = south ? rel : (rel + 180) % 360, x = X(az, W, pad), y = Y(Math.max(0, landAt(az)));
+          var az = south ? rel : (rel + 180) % 360, x = X(az, W, pad), y = Y(Math.max(0, landAt(az)) * rise);
           if (!n++) land.moveTo(x, y); else land.lineTo(x, y);
         }
         var rim = new Path2D(land);
@@ -209,9 +217,11 @@
         cx.fillStyle = lg; cx.fill(land);
         cx.strokeStyle = 'rgba(233,228,216,.42)'; cx.lineWidth = 1 * dpr; cx.lineJoin = 'round'; cx.stroke(rim);
       }
+      var intro = reduce ? 1 : ease((now0 - born) / 1300), upto = Math.ceil(sky.pts.length * intro);
       function path() {
         cx.beginPath(); var first = true, last = null;
-        sky.pts.forEach(function (p) {
+        sky.pts.forEach(function (p, i) {
+          if (i > upto) return;
           if (p.alt < -1) { first = true; return; }
           var x = X(p.az, W, pad), y = Y(Math.max(0, p.alt));
           if (first || (last !== null && Math.abs(x - last) > W * 0.3)) { cx.moveTo(x, y); first = false; } else cx.lineTo(x, y);
@@ -230,6 +240,21 @@
       var gg = cx.createLinearGradient(0, hz, 0, H); gg.addColorStop(0, '#121316'); gg.addColorStop(1, '#0B0B0D');
       cx.fillStyle = gg; cx.fillRect(0, hz, W, H - hz);
       cx.strokeStyle = 'rgba(233,228,216,.5)'; cx.lineWidth = 1.2 * dpr; cx.beginPath(); cx.moveTo(0, hz); cx.lineTo(W, hz); cx.stroke();
+      if (landing === 'loading' && !reduce) {
+        // Reading the land: a light runs back and forth along the horizon, sending up faint range lines.
+        var ph = (now0 - born) / 2400, sx = pad + (W - pad * 2) * (0.5 - 0.5 * Math.cos(ph * Math.PI * 2));
+        var sw = cx.createRadialGradient(sx, hz, 0, sx, hz, W * 0.22);
+        sw.addColorStop(0, 'rgba(233,228,216,.55)'); sw.addColorStop(0.25, 'rgba(233,228,216,.12)'); sw.addColorStop(1, 'rgba(233,228,216,0)');
+        cx.save(); cx.translate(sx, hz); cx.scale(1, 0.35); cx.translate(-sx, -hz); cx.fillStyle = sw; cx.fillRect(0, hz - W * 0.22, W, W * 0.22); cx.restore();
+        for (var j = -6; j <= 6; j++) {
+          var lx = sx + j * 9 * dpr, h = (18 + 22 * Math.abs(Math.sin(j * 1.7 + ph * 9))) * dpr * (1 - Math.abs(j) / 7), al = 0.3 * (1 - Math.abs(j) / 7);
+          var lg2 = cx.createLinearGradient(0, hz, 0, hz - h); lg2.addColorStop(0, 'rgba(233,228,216,' + al.toFixed(3) + ')'); lg2.addColorStop(1, 'rgba(233,228,216,0)');
+          cx.fillStyle = lg2; cx.fillRect(lx - 0.6 * dpr, hz - h, 1.2 * dpr, h);
+        }
+        cx.save(); cx.fillStyle = 'rgba(138,139,143,' + (0.55 + 0.35 * Math.sin(ph * Math.PI * 4)).toFixed(3) + ')'; cx.font = (10 * dpr) + 'px "JetBrains Mono", monospace'; cx.textAlign = 'right';
+        if (cx.letterSpacing !== undefined) cx.letterSpacing = (2.4 * dpr) + 'px';
+        cx.fillText(T('READING THE LAND AROUND YOU'), W - pad, hz - 10 * dpr); cx.restore();
+      }
       cx.fillStyle = '#8A8B8F'; cx.font = (11 * dpr) + 'px "JetBrains Mono", monospace'; cx.textAlign = 'center';
       var pts16 = [[0, 'N'], [45, 'NE'], [90, 'E'], [135, 'SE'], [180, 'S'], [225, 'SW'], [270, 'W'], [315, 'NW']];
       pts16.forEach(function (c) {
@@ -266,7 +291,7 @@
       var f = window.MoonPhase ? window.MoonPhase.fraction(at) : cfg.f;
       var behind = m.alt > RISE && hor && hidden(m);
       if (m.alt > RISE) {
-        cx.save(); if (behind) cx.globalAlpha = 0.35;
+        cx.save(); cx.globalAlpha = (behind ? 0.35 : 1) * ease((intro - 0.55) / 0.45);
         var mx = X(m.az, W, pad), my = Y(Math.max(0, m.alt)), r = (narrow ? 15 : 22) * dpr;
         var gl = cx.createRadialGradient(mx, my, r * 0.6, mx, my, r * 4);
         gl.addColorStop(0, 'rgba(233,228,216,' + (0.38 * (1 - dk * 0.6)).toFixed(3) + ')'); gl.addColorStop(1, 'rgba(233,228,216,0)');
@@ -342,7 +367,7 @@
       })(last);
     });
     if (window.ResizeObserver) new ResizeObserver(function () { draw(); }).observe(cv);
-    draw();
+    draw(); anim();
     return { stop: stop };
   }
 

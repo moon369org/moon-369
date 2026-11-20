@@ -700,14 +700,46 @@
     strength();
     TP = p; var key = p.lat + ',' + p.lng, c = tideCache[key];
     if (c && Date.now() - c.at < 15 * 60000) return showTide(c.d, fmt, dfmt);
-    $('[data-tide-h]').hidden = false; $('[data-tide-h]').textContent = 'Finding the nearest tide station…';
+    tideWave(true);
     var why = '';
     fetch(API + '/v1/tides?lat=' + p.lat + '&lng=' + p.lng).then(function (r) { return r.json(); }).then(function (d) {
-      if (!d || !d.hilo) { why = d && d.error && d.error.detail ? d.error.detail : ''; throw 0; } tideCache[key] = { at: Date.now(), d: d }; if (view === 'tide') showTide(d, fmt, dfmt);
+      if (!d || !d.hilo) { why = d && d.error && d.error.detail ? d.error.detail : ''; throw 0; } tideCache[key] = { at: Date.now(), d: d };
+      tideWave(false); if (view === 'tide') { showTide(d, fmt, dfmt); tideIn(); }
     }).catch(function () {
+      tideWave(false);
       $('[data-tide-h]').textContent = navigator.onLine === false ? 'Tides need a connection.' : 'Tide times are not available right now.';
       $('[data-tide-chart]').innerHTML = ''; $('[data-tide-labs]').innerHTML = ''; $('[data-tide-ax]').innerHTML = ''; $('[data-tide-now]').hidden = true; $('[data-tide-range]').hidden = true; $('[data-tide-h]').hidden = false; $('[data-tide-src]').textContent = why ? 'Details: ' + why : '';
     });
+  }
+  // While the tides load: the sea itself, two slow swells breathing in the chart, and a quiet line under them.
+  var waveRaf = 0;
+  function tideWave(on) {
+    var ch = $('[data-tide-chart]'), wrap = $('[data-tide-wrap]');
+    cancelAnimationFrame(waveRaf); waveRaf = 0;
+    wrap.classList.toggle('tide-loading', on);
+    var h = $('[data-tide-h]'); h.classList.toggle('tide-wait', on);
+    if (!on) return;
+    h.hidden = false; h.textContent = T('FINDING THE NEAREST TIDE STATION');
+    $('[data-tide-labs]').innerHTML = ''; $('[data-tide-ax]').innerHTML = ''; $('[data-tide-now]').hidden = true; $('[data-tide-cur]').hidden = true; $('[data-tide-range]').hidden = true;
+    var t0 = performance.now(), still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var wave = function (t, amp, k, sp, base) {
+      var d = '';
+      for (var x = 0; x <= 360; x += 6) d += (x ? 'L' : 'M') + x + ' ' + (base + amp * Math.sin(x * k + t * sp) + amp * 0.35 * Math.sin(x * k * 2.3 - t * sp * 0.7)).toFixed(1);
+      return d;
+    };
+    (function frame(now) {
+      var t = still ? 0 : (now - t0) / 1000, swell = 1 + 0.18 * Math.sin(t * 0.9);
+      var back = wave(t, 13 * swell, 0.021, 0.8, 104), front = wave(t + 1.7, 10 * swell, 0.028, 1.15, 118);
+      ch.innerHTML =
+        '<defs><linearGradient id="tw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9E4D8" stop-opacity=".16"/><stop offset="1" stop-color="#E9E4D8" stop-opacity="0"/></linearGradient></defs>' +
+        '<path d="' + back + ' L360 200 L0 200 Z" fill="url(#tw)" opacity=".55"/><path d="' + back + '" fill="none" stroke="#E9E4D8" stroke-opacity=".28" stroke-width="1.2" vector-effect="non-scaling-stroke"/>' +
+        '<path d="' + front + ' L360 200 L0 200 Z" fill="url(#tw)"/><path d="' + front + '" fill="none" stroke="#E9E4D8" stroke-opacity=".7" stroke-width="1.6" vector-effect="non-scaling-stroke"/>';
+      if (!still) waveRaf = requestAnimationFrame(frame);
+    })(t0);
+  }
+  // When the tides arrive, the curve runs in from the left and the labels follow it.
+  function tideIn() {
+    var w = $('[data-tide-wrap]'); w.classList.remove('tide-in'); void w.offsetWidth; w.classList.add('tide-in');
   }
   // A small moon, lit as it is now: from Moon's own phase, as in the calendar.
   function phaseGlyph(ms) {
