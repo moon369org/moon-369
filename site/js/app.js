@@ -837,7 +837,6 @@
     cur.hidden = false; cur.style.left = (x * 100).toFixed(3) + '%'; cur.classList.toggle('flip', x > 0.62); cur.classList.toggle('now', !!isNow);
     cur.querySelector('b').style.top = (TC.Y(L.ft) / 200 * 100).toFixed(2) + '%';
     cur.querySelector('span').textContent = (isNow ? T('NOW') : TC.fmt.format(new Date(t))) + ' · ' + TC.ft(L.ft);
-    $('[data-tide-back]').hidden = !!isNow;
     if (isNow) tideHero();
     else { $('[data-tide-ft]').textContent = TC.ft(L.ft); $('[data-tide-sub]').textContent = T('At {t} · {dir}', { t: TC.fmt.format(new Date(t)), dir: T(L.up ? 'rising' : 'falling') }); }
   }
@@ -847,7 +846,6 @@
     w.addEventListener('pointerdown', function (e) { if (!TC) return; dragging = true; try { w.setPointerCapture(e.pointerId); } catch (x) {} var t = at(e); cursorAt(t, Math.abs(t - Date.now()) < 5 * 60000); buzz(); });
     w.addEventListener('pointermove', function (e) { if (!dragging || !TC) return; var t = at(e); cursorAt(t, Math.abs(t - Date.now()) < 5 * 60000); });
     var up = function () { dragging = false; }; w.addEventListener('pointerup', up); w.addEventListener('pointercancel', up);
-    $('[data-tide-back]').onclick = function () { cursorAt(Date.now(), true); buzz(); };
   }
 
   // How strong the tides are worldwide right now: spring tides near new and full moon, neap near the quarters,
