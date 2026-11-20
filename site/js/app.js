@@ -940,9 +940,17 @@
       setTimeout(function () {
         sh.classList.add('rise', 'clear'); openSheet('moment', t);
         setTimeout(function () {
-          // The drawer's own backdrop darkens in over the still-dark flash first, then the flash eases away beneath it, so nothing behind ever shows through bright.
-          sh.classList.remove('clear');
-          setTimeout(function () { fl.classList.add('gone'); setTimeout(function () { fl.remove(); sh.classList.remove('rise'); }, 650); }, 350);
+          // Hand the dark over from the flash to the drawer's backdrop in step, so the light coming through from behind
+          // changes evenly from one to the other: no brighter, no darker, at any frame.
+          var t1 = performance.now(), A = 0.82, F = 0.93, T0 = 1 - F, T1 = 1 - A;
+          sh.classList.remove('clear'); sh.style.transition = 'none';
+          (function step(now) {
+            var u = Math.min(1, (now - t1) / 600), e = u * u * (3 - 2 * u), a = A * e, T = T0 + (T1 - T0) * e;
+            sh.style.backgroundColor = 'rgba(5,5,6,' + a.toFixed(4) + ')';
+            fl.style.animation = 'none'; fl.style.background = 'rgba(5,5,6,' + Math.max(0, Math.min(F, 1 - T / (1 - a))).toFixed(4) + ')';
+            if (u < 1) return requestAnimationFrame(step);
+            fl.remove(); sh.style.backgroundColor = ''; sh.style.transition = ''; sh.classList.remove('rise');
+          })(t1);
         }, 620);
       }, 1250);
     };
