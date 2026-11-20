@@ -384,7 +384,7 @@
   // Nothing is posted anywhere: the link itself carries the Moonmark and the name, so it works the moment it's made.
   var cur = null, made = null;   // cur: { ms, kind }; made: { url, name, mark }
   function step(which) { $$('[data-step]').forEach(function (s) { s.hidden = s.getAttribute('data-step') !== which; }); }
-  // Marking a moment lands with weight: a flash from the button, the captured time large over everything, then it fades.
+  // Marking a moment lands with weight: a flash from the button, the captured time large over everything, then the drawer rises over it.
   function markFlash(ms, e) {
     if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
     var k = moon(ms), n = String(Math.min(999999999, Math.floor(k.f * 1e9))).padStart(9, '0');
@@ -393,8 +393,7 @@
     o.style.setProperty('--x', bx + 'px'); o.style.setProperty('--y', by + 'px');
     o.innerHTML = '<canvas class="mf-spark"></canvas><i class="mf-ring"></i><div class="mf-t"><span>' + p(k.h) + ':' + p(k.mi) + ':' + p(k.s) + '<small>.' + n.slice(0, 3) + ' ' + n.slice(3, 6) + ' ' + n.slice(6) + '</small></span></div>';
     document.body.appendChild(o); buzz(); spark(o.querySelector('.mf-spark'));
-    setTimeout(function () { o.remove(); }, 3000);   // the time fades out slowly
-    return true;
+    return o;   // the time holds until the drawer rises over it
   }
   // A spark from the middle of the screen: hot streaks flying out, thinning and dimming, with embers drifting after.
   function spark(cv) {
@@ -935,7 +934,17 @@
     setView(view, false);
     $$('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
     // The moment is the tap of Mark This Moment, on the same clock the screen shows.
-    $('[data-app-mark]').onclick = function (e) { var t = nowMs(), fl = markFlash(t, e); setTimeout(function () { openSheet('moment', t); }, fl ? 720 : 0); };   // the time is taken on the tap; the sheet follows the flash
+    $('[data-app-mark]').onclick = function (e) {   // the time is taken on the tap; the drawer rises over the flash
+      var t = nowMs(), fl = markFlash(t, e), sh = $('[data-app-sheet]');
+      if (!fl) { openSheet('moment', t); return; }
+      setTimeout(function () {
+        sh.classList.add('rise', 'clear'); openSheet('moment', t);
+        setTimeout(function () {
+          sh.classList.remove('clear'); fl.classList.add('gone');
+          setTimeout(function () { fl.remove(); sh.classList.remove('rise'); }, 320);
+        }, 620);
+      }, 1250);
+    };
     $('[data-sheet-close]').onclick = closeSheet;
     $('[data-app-sheet]').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeSheet(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
