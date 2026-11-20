@@ -1,6 +1,3 @@
-/stays 200
-/js/stays-page.js 200
-/assets/og/stays.jpg 200
-<title>Stays · Moon
-2
-2
+moon-check.png: PNG image data, 512 x 512, 8-bit/color RGBA, non-interlaced
+-rw-r--r-- 1 runner runner 119438 Nov 20 04:36 moon-check.png
+svg 200 231924
