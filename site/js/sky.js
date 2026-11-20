@@ -119,11 +119,11 @@
     el.innerHTML =
       '<div class="sk-sky"><canvas aria-hidden="true"></canvas></div>' +
       '<div class="sk-hd" data-sk="hd" hidden><span>' + T('HORIZON DETAIL · 6× VERTICAL') + '</span><canvas aria-hidden="true"></canvas></div>' +
-      '<div class="sk-stats">' + ['RISE', 'HIGHEST', 'SET'].map(function (k, i) { return '<div><span class="sk-k">' + k + '</span><b data-sk="v' + i + '"></b><span class="sk-s" data-sk="s' + i + '"></span></div>'; }).join('') + '</div>' +
       '<div class="sk-scrub"><div class="sk-row"><span class="sk-now" data-sk="now"></span><button type="button" class="sk-play" data-sk="play" aria-pressed="false"></button></div>' +
       '<div class="sk-track"><div class="sk-bar"></div><div data-sk="ups"></div>' +
       '<input type="range" min="0" max="1440" step="1" aria-label="Time of day"></div>' +
-      '<div class="sk-ticks" data-sk="ticks"></div></div>';
+      '<div class="sk-ticks" data-sk="ticks"></div></div>' +
+      '<div class="sk-stats">' + ['RISE', 'HIGHEST', 'SET'].map(function (k, i) { return '<div><span class="sk-k">' + k + '</span><b data-sk="v' + i + '"></b><span class="sk-s" data-sk="s' + i + '"></span></div>'; }).join('') + '</div>';
     var q = function (k) { return el.querySelector('[data-sk="' + k + '"]'); };
     var cv = el.querySelector('canvas'), range = el.querySelector('input[type=range]');
     var span = t1 - t0, toV = function (t) { return Math.round((t - t0) / span * 1440); }, toT = function (v) { return t0 + v / 1440 * span; };
