@@ -6,15 +6,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check passes live
+      - name: Check stays live
         run: |
           {
-          curl -s -X POST https://api.moon369.org/v1/passes -H 'content-type: application/json' -d '{"name":"Live check gym"}' > /tmp/c; head -c 160 /tmp/c; echo
-          P=$(python3 -c "import json;print(json.load(open('/tmp/c'))['place']['id'])"); K=$(python3 -c "import json;print(json.load(open('/tmp/c'))['key'])")
-          echo "=== invite"; curl -s -X POST https://api.moon369.org/v1/passes/$P/invite -H 'content-type: application/json' -d "{\"key\":\"$K\",\"name\":\"Test\"}" | grep -o '"link": "[^"]*' | cut -c1-60
-          echo "=== members"; curl -s -X POST https://api.moon369.org/v1/passes/$P/members -H 'content-type: application/json' -d "{\"key\":\"$K\"}" | grep -c invites
-          for u in /passes /pass /members /js/pass.js /js/members.js /js/passes-page.js /assets/og/passes.jpg; do echo "$u $(curl -s -o /dev/null -w '%{http_code}' https://moon369.org$u)"; done
-          curl -s https://moon369.org/api | grep -c 'id="passes"'
+          curl -s -X POST https://api.moon369.org/v1/stays -H 'content-type: application/json' -d '{"name":"Live check door","tz":"America/Denver"}' > /tmp/c; head -c 140 /tmp/c; echo
+          D=$(python3 -c "import json;print(json.load(open('/tmp/c'))['door']['id'])"); K=$(python3 -c "import json;print(json.load(open('/tmp/c'))['key'])")
+          echo "=== book"; curl -s -X POST https://api.moon369.org/v1/stays/$D/book -H 'content-type: application/json' -d "{\"key\":\"$K\",\"arrive\":\"2026-12-01\",\"depart\":\"2026-12-04\"}" | grep -o '"pin": "[0-9]*"\|"check_in": "[^"]*"'
+          echo "=== lock"; curl -s -X POST https://api.moon369.org/v1/stays/$D/lock -H 'content-type: application/json' -d "{\"key\":\"$K\"}" | grep -o '"key_id": "[^"]*"\|"code_ms": [0-9]*'
+          for u in /host /stay /lock /js/host.js /js/stay.js /js/lock.js; do echo "$u $(curl -s -o /dev/null -w '%{http_code}' https://moon369.org$u)"; done
           } > result.txt 2>&1
           git config user.name Moon && git config user.email moon369org@proton.me
           git add result.txt && git commit -m "diag result" && git push origin HEAD:diag-share-card
