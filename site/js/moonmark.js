@@ -471,6 +471,22 @@
     // The same living moon as the app, as it was at this moment.
     var st = document.createElement('div'); st.className = 'mk-stage';
     st.innerHTML = '<canvas class="hm-moonglow" role="img" aria-label="' + esc(nm) + '" data-at="' + Math.round(ms) + '"></canvas>';
+    // On a solar eclipse day the moon you'd have seen was the eclipse itself, so show that, live, in its place.
+    // The page redraws, so the answer for each day is kept and applied straight away the next time.
+    (function () {
+      if (il > 6) return;   // only near new moon
+      var dt = new Date(ms), day = dt.getUTCFullYear() + '-' + ('0' + (dt.getUTCMonth() + 1)).slice(-2) + '-' + ('0' + dt.getUTCDate()).slice(-2);
+      var C = window.__mkEclipse || (window.__mkEclipse = {});
+      var show = function (type) {
+        if (!type) return;
+        var name = type.charAt(0).toUpperCase() + type.slice(1) + ' solar eclipse';
+        st.innerHTML = '<canvas class="ec-glow" data-type="' + type + '" role="img" aria-label="' + name + '"></canvas>';
+        setTimeout(function () { var d = st.closest('details'), sub = d && d.querySelector('[data-fd-sub]'); if (sub) sub.textContent = nm + ' · ' + T2(name); }, 0);
+      };
+      if (day in C) { if (C[day] && C[day].then) C[day].then(function () { show(C[day]); }); else show(C[day]); return; }
+      C[day] = fetch('https://api.moon369.org/v1/eclipses/' + day).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (e) { C[day] = e && e.type || null; show(C[day]); }, function () { C[day] = null; });
+    })();
     part('<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>' + 'MOON STATUS', esc(nm) + ' · ' + il + '% lit', [st, q('.mk-date'), q('.mk-mark'), q('.mk-main > .mk-rows')]);
     var sky = q('.mk-skyw'); if (sky) { var sh = sky.querySelector('.mk-skyh'); if (sh) sh.remove(); }
     part('<svg class="mk-fd-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' + 'SKY &amp; TIDE', k ? esc(k.tide.strength.charAt(0).toUpperCase() + k.tide.strength.slice(1)) + ' tide · ' + Math.round(k.distance.km).toLocaleString() + ' km away' : '', [sky]);
