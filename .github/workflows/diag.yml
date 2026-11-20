@@ -6,14 +6,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check stays live
+      - name: Check stays page
         run: |
           {
-          curl -s -X POST https://api.moon369.org/v1/stays -H 'content-type: application/json' -d '{"name":"Live check door","tz":"America/Denver"}' > /tmp/c; head -c 140 /tmp/c; echo
-          D=$(python3 -c "import json;print(json.load(open('/tmp/c'))['door']['id'])"); K=$(python3 -c "import json;print(json.load(open('/tmp/c'))['key'])")
-          echo "=== book"; curl -s -X POST https://api.moon369.org/v1/stays/$D/book -H 'content-type: application/json' -d "{\"key\":\"$K\",\"arrive\":\"2026-12-01\",\"depart\":\"2026-12-04\"}" | grep -o '"pin": "[0-9]*"\|"check_in": "[^"]*"'
-          echo "=== lock"; curl -s -X POST https://api.moon369.org/v1/stays/$D/lock -H 'content-type: application/json' -d "{\"key\":\"$K\"}" | grep -o '"key_id": "[^"]*"\|"code_ms": [0-9]*'
-          for u in /host /stay /lock /js/host.js /js/stay.js /js/lock.js; do echo "$u $(curl -s -o /dev/null -w '%{http_code}' https://moon369.org$u)"; done
+          for u in /stays /js/stays-page.js /assets/og/stays.jpg; do echo "$u $(curl -s -o /dev/null -w '%{http_code}' https://moon369.org$u)"; done
+          curl -s https://moon369.org/stays | grep -o "<title>[^<]*"; curl -s https://moon369.org/ | grep -c 'href="/stays"'; curl -s https://moon369.org/api | grep -c 'id="stays"'
           } > result.txt 2>&1
           git config user.name Moon && git config user.email moon369org@proton.me
           git add result.txt && git commit -m "diag result" && git push origin HEAD:diag-share-card
