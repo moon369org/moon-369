@@ -178,13 +178,13 @@
       var S = cv.__ecS || (cv.__ecS = streamers());
       blurDraw(ctx, W, Math.max(2, Math.round(W / (small ? 40 : 60))), 1, 'lighter', function (c) {
         for (var k = 0; k < S.length; k++) {
-          var st = S[k], ang = st.a + 0.06 * wave(t * 0.05, k * 1.7), env = side(ang);
+          var st = S[k], ang = st.a + 0.09 * wave(t * 0.16, k * 1.7), env = side(ang);
           if (env < 0.03) continue;
-          var len = Math.min(g.R * st.len * (1 + 0.08 * wave(t * 0.09, k * 2.3)), W * 0.44 - g.R), half = st.w;
+          var len = Math.min(g.R * st.len * (1 + 0.16 * wave(t * 0.27, k * 2.3)), W * 0.44 - g.R), half = st.w;
           var bx = g.cx + Math.cos(ang) * g.R, by = g.cy + Math.sin(ang) * g.R;
           var tx = g.cx + Math.cos(ang + st.bend) * (g.R + len), ty = g.cy + Math.sin(ang + st.bend) * (g.R + len);
           var gr = c.createRadialGradient(g.cx, g.cy, g.R * 0.95, g.cx, g.cy, g.R + len);
-          var a = st.op * env * (0.85 + 0.15 * wave(t * 0.11, k));
+          var a = st.op * env * (0.78 + 0.22 * wave(t * 0.33, k));
           gr.addColorStop(0, 'rgba(' + LIGHT + ',' + a + ')');
           gr.addColorStop(0.3, 'rgba(' + LIGHT + ',' + a * 0.45 + ')');
           gr.addColorStop(0.7, 'rgba(' + LIGHT + ',' + a * 0.1 + ')');
@@ -206,13 +206,13 @@
           for (var j = 0; j < F.length; j++) {
             var f = F[j];
             if (f.layer > layer + 1) continue;   // the sharpest layer only draws the brightest rays
-            var ang = f.a + 0.012 * wave(t * 0.06, f.p), env = side(ang), near = 0;
+            var ang = f.a + 0.02 * wave(t * 0.18, f.p), env = side(ang), near = 0;
             for (var k = 0; k < S.length; k++) { var d = Math.atan2(Math.sin(ang - S[k].a), Math.cos(ang - S[k].a)); near += S[k].op * Math.exp(-d * d / 0.08); }
             near = Math.min(1, near);
-            var reach = Math.min(g.R * f.len * (0.6 + 0.6 * near) * (1 + 0.1 * wave(t * 0.08, f.p)), W * 0.45 - g.R);
-            var a = f.op * env * (0.45 + 0.7 * near) * (0.85 + 0.15 * wave(t * 0.1, f.p * 1.3)) / (layer === 2 ? 1.4 : 1);
+            var reach = Math.min(g.R * f.len * (0.6 + 0.6 * near) * (1 + 0.2 * wave(t * 0.24, f.p)), W * 0.45 - g.R);
+            var a = f.op * env * (0.45 + 0.7 * near) * (0.72 + 0.28 * wave(t * 0.36, f.p * 1.3)) / (layer === 2 ? 1.4 : 1);
             if (a < 0.01) continue;
-            var half = f.w * widen * (g.R / 100) / g.R, bend = f.bend + 0.01 * wave(t * 0.07, f.p * 0.7);
+            var half = f.w * widen * (g.R / 100) / g.R, bend = f.bend + 0.02 * wave(t * 0.2, f.p * 0.7);
             var tip = g.R + reach, mid = g.R + reach * 0.4;
             var gr = c.createRadialGradient(g.cx, g.cy, g.R * 0.97, g.cx, g.cy, tip);
             gr.addColorStop(0, 'rgba(' + LIGHT + ',' + Math.min(1, a) + ')');
@@ -232,9 +232,9 @@
       // Annular and partial: no spikes. The bare sun just glows, with light that drifts slowly along the edge.
       blurDraw(ctx, W, Math.max(2, Math.round(W / 22)), 1, 'lighter', function (c) {
         for (var k = 0; k < 7; k++) {
-          var ang = k / 7 * Math.PI * 2 + 0.35 * wave(t * 0.04, k * 2.9), px = g.cx + Math.cos(ang) * g.R, py = g.cy + Math.sin(ang) * g.R;
+          var ang = k / 7 * Math.PI * 2 + 0.5 * wave(t * 0.12, k * 2.9), px = g.cx + Math.cos(ang) * g.R, py = g.cy + Math.sin(ang) * g.R;
           var env = type === 'partial' ? Math.max(0, Math.min(1, (Math.hypot(px - g.mx, py - g.my) - g.mr) / (g.R * 0.25))) : 1;
-          var a = 0.16 * env * (0.6 + 0.4 * (0.5 + 0.5 * wave(t * 0.15, k * 1.3)));
+          var a = 0.2 * env * (0.5 + 0.5 * (0.5 + 0.5 * wave(t * 0.4, k * 1.3)));
           if (a < 0.01) continue;
           var gr = c.createRadialGradient(px, py, 0, px, py, g.R * 0.55);
           gr.addColorStop(0, 'rgba(' + SUN + ',' + a + ')'); gr.addColorStop(1, 'rgba(' + SUN + ',0)');
@@ -247,7 +247,7 @@
     disc(ctx, g.mx, g.my, g.mr * 0.995, DARK); moonMap(); ctx.drawImage(faceCanvas('moon', g.mr), g.mx - g.mr, g.my - g.mr, g.mr * 2, g.mr * 2);
     if (type === 'total') {
       // The diamond ring's last bead of light, breathing very slowly.
-      var b = 0.55 + 0.25 * (0.5 + 0.5 * Math.sin(t * 0.35));
+      var b = 0.5 + 0.35 * (0.5 + 0.5 * Math.sin(t * 0.7));
       blurDraw(ctx, W, Math.max(1, Math.round(W / 70)), b, 'lighter', function (c) { disc(c, g.cx + g.R * 0.72, g.cy - g.R * 0.69, g.R * 0.1, 'rgb(' + SUN + ')'); });
     }
   }
