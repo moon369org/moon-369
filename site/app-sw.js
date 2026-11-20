@@ -1,7 +1,7 @@
 // Moon app: keep the app working offline. Moon time and the moon are computed on the device, so only
 // the app's own files are needed. Pages and files are served from the network when it's there.
-const CACHE = 'moon-app-v113';
-const FILES = ['/app', '/js/moon-phase.js', '/js/moonglow.js', '/js/horizon.js', '/js/sky.js', '/js/i18n.js', '/js/i18n/app-keys.js', '/js/qrcode.js', '/js/moonqr.js', '/js/app.js', '/app.webmanifest', '/assets/fonts/fonts.css',
+const CACHE = 'moon-app-v114';
+const FILES = ['/app', '/js/moon-phase.js', '/js/moonglow.js', '/assets/moon/near-side.jpg', '/js/horizon.js', '/js/sky.js', '/js/i18n.js', '/js/i18n/app-keys.js', '/js/qrcode.js', '/js/moonqr.js', '/js/app.js', '/app.webmanifest', '/assets/fonts/fonts.css',
   '/assets/fonts/inter-latin-400-normal.woff2', '/assets/fonts/syncopate-latin-700-normal.woff2', '/assets/fonts/jetbrains-mono-latin-400-normal.woff2',
   '/assets/app-icon-192.png', '/assets/favicon.svg', '/assets/moon-loader-black.svg'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
