@@ -38,6 +38,68 @@
   }
   function disc(c, x, y, r, fill) { c.fillStyle = fill; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); }
 
+  // The real faces. Shared with the API's eclipse icons (api/src/eclipse-icon.ts), so both look the same.
+  //   sun   brighter in the middle, dimmer and warmer toward its edge (limb darkening), with fine, still granulation
+  //   moon  not a flat black hole: the real near side, barely there in earthshine (same map as js/moonglow.js)
+  function hash(i, j) { var h = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return h - Math.floor(h); }
+  function vnoise(x, y) {
+    var i = Math.floor(x), j = Math.floor(y), fx = x - i, fy = y - j; fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+    return (hash(i, j) * (1 - fx) + hash(i + 1, j) * fx) * (1 - fy) + (hash(i, j + 1) * (1 - fx) + hash(i + 1, j + 1) * fx) * fy;
+  }
+  function sunPx(nx, ny) {   // -> [r,g,b] for a point on the sun's disc, nx,ny in -1..1
+    var rr = nx * nx + ny * ny, mu = Math.sqrt(Math.max(0, 1 - rr)), m1 = 1 - mu;
+    var I = 1 - 0.38 * m1 - 0.2 * m1 * m1;
+    var gran = (vnoise(nx * 7 + 9, ny * 7 + 9) - 0.5) * 0.6 + (vnoise(nx * 16 + 3, ny * 16 + 3) - 0.5) * 0.4;
+    var L = (0.7 + 0.3 * I) * (1 + gran * 0.09 * mu), w = Math.pow(m1, 1.2);
+    return [(248 * (1 - w) + 228 * w) * L, (244 * (1 - w) + 205 * w) * L, (234 * (1 - w) + 168 * w) * L];
+  }
+  var MAP = null, mapLoading = false, faces = {};
+  function moonMap() {
+    if (MAP || mapLoading) return MAP; mapLoading = true;
+    var im = new Image();
+    im.onload = function () {
+      try {
+        var c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+        var x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0);
+        var d = x.getImageData(0, 0, im.width, im.height).data, v = new Uint8Array(im.width * im.height);
+        for (var i = 0; i < v.length; i++) v[i] = d[i * 4];
+        MAP = { w: im.width, h: im.height, v: v }; faces = {};
+      } catch (e) { /* a blocked image: keep the plain disc */ }
+    };
+    var here = /(^|\.)moon369\.org$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+    if (!here) im.crossOrigin = 'anonymous';
+    im.src = (here ? '' : 'https://moon369.org') + '/assets/moon/near-side.jpg';
+    return null;
+  }
+  function albedo(nx, ny, nz) {
+    var lon = Math.atan2(nx, nz), lat = Math.asin(Math.max(-1, Math.min(1, -ny)));
+    var u = (lon / Math.PI + 0.5) * (MAP.w - 1), v = (0.5 - lat / Math.PI) * (MAP.h - 1);
+    var x0 = Math.floor(u), y0 = Math.floor(v), fx = u - x0, fy = v - y0, w = MAP.w, a = MAP.v;
+    var x1 = Math.min(w - 1, x0 + 1), y1 = Math.min(MAP.h - 1, y0 + 1);
+    var k = ((a[y0 * w + x0] * (1 - fx) + a[y0 * w + x1] * fx) * (1 - fy) + (a[y1 * w + x0] * (1 - fx) + a[y1 * w + x1] * fx) * fy) / 255;
+    return Math.min(1, Math.max(0, (k - 0.22) / 0.58));
+  }
+  function moonPx(nx, ny) {   // earthshine on the near side: very dark, the maria just readable
+    var nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny)), k = MAP ? albedo(nx, ny, nz) : 0.5;
+    var lum = (0.025 + 0.17 * k) * (0.45 + 0.55 * nz);
+    return [11 + (233 - 11) * lum, 11 + (228 - 11) * lum, 13 + (216 - 13) * lum];
+  }
+  function faceCanvas(kind, r) {   // a disc of radius r px, antialiased, cached
+    var n = Math.max(4, Math.ceil(r * 2)), key = kind + n + (kind === 'moon' && MAP ? 'm' : '');
+    if (faces[key]) return faces[key];
+    var cv = document.createElement('canvas'); cv.width = cv.height = n;
+    var c = cv.getContext('2d'), im = c.createImageData(n, n), d = im.data, R = n / 2;
+    for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
+      var nx = (x + 0.5 - R) / R, ny = (y + 0.5 - R) / R, rr = nx * nx + ny * ny;
+      var edge = Math.min(1, Math.max(0, (1 - Math.sqrt(rr)) * R + 0.5));
+      if (edge <= 0) continue;
+      var p = kind === 'sun' ? sunPx(nx, ny) : moonPx(nx, ny), o = (y * n + x) * 4;
+      d[o] = p[0]; d[o + 1] = p[1]; d[o + 2] = p[2]; d[o + 3] = edge * 255;
+    }
+    c.putImageData(im, 0, 0);
+    return (faces[key] = cv);
+  }
+
   // Geometry on a 100-unit icon (the same proportions as the static SVG icons).
   function geo(type, W) {
     var s = W / 100, cx = W / 2, cy = W / 2, R = 26 * s;
@@ -60,11 +122,7 @@
       var glow = type === 'partial' ? 0.3 : 0.42;
       blurDraw(c, W, Math.max(1, Math.round(W / 9)), glow, 'lighter', sunPaint(1.02));
       blurDraw(c, W, Math.max(1, Math.round(W / 30)), glow * 0.8, 'lighter', sunPaint(1.01));
-      blurDraw(c, W, Math.max(1, Math.round(W / 220)), 1, 'source-over', function (x) {
-        var gr = x.createRadialGradient(g.cx, g.cy, 0, g.cx, g.cy, g.R);
-        gr.addColorStop(0, 'rgb(' + SUN + ')'); gr.addColorStop(0.85, 'rgb(' + LIGHT + ')'); gr.addColorStop(1, '#D8D1C1');
-        x.fillStyle = gr; x.beginPath(); x.arc(g.cx, g.cy, g.R, 0, Math.PI * 2); x.fill();
-      });
+      c.drawImage(faceCanvas('sun', g.R), g.cx - g.R, g.cy - g.R, g.R * 2, g.R * 2);
     }
     return st;
   }
@@ -181,7 +239,7 @@
     }
 
     // The moon goes on top of everything.
-    disc(ctx, g.mx, g.my, g.mr, DARK);
+    disc(ctx, g.mx, g.my, g.mr * 0.995, DARK); moonMap(); ctx.drawImage(faceCanvas('moon', g.mr), g.mx - g.mr, g.my - g.mr, g.mr * 2, g.mr * 2);
     if (type === 'total') {
       // The diamond ring's last bead of light, breathing very slowly.
       var b = 0.55 + 0.25 * (0.5 + 0.5 * Math.sin(t * 0.35));
