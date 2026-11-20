@@ -105,7 +105,7 @@
         var o = (y * W + x) * 4;
         if (real) {
           // The real face: sunlight on the map's brightness, and a faint earthshine on the dark side.
-          var k = albedo(nx * tc - ny * ts, nx * ts + ny * tc, nz), sun = tt * tt * (3 - 2 * tt), lum = sun * (0.42 + 0.58 * k) + (1 - sun) * (0.015 + 0.03 * k);
+          var k = albedo(nx * tc - ny * ts, nx * ts + ny * tc, nz), sun = tt * tt * (3 - 2 * tt), lum = sun * (0.71 + 0.29 * k) + (1 - sun) * (0.015 + 0.03 * k);
           d[o] = ink[0] * lum + 24 * (1 - lum); d[o + 1] = ink[1] * lum + 25 * (1 - lum); d[o + 2] = ink[2] * lum + 28 * (1 - lum);
           d[o + 3] = Math.round(edge * 255);
           continue;
