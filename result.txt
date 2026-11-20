@@ -1,19 +1,6 @@
-{
-  "door": {
-    "id": "qqlUQ7qeyM-G",
-    "name": "Live check door",
-    "tz": "America/Denver",
-    "checkin_hour": 15,
-    "checkout_hou
-=== book
-"check_in": "2026-12-01T22:00:00.000Z"
-"pin": "3340307310"
-=== lock
-"key_id": "8efd3211b23533ed"
-"code_ms": 30000
-/host 200
-/stay 200
-/lock 200
-/js/host.js 200
-/js/stay.js 200
-/js/lock.js 200
+/stays 200
+/js/stays-page.js 200
+/assets/og/stays.jpg 200
+<title>Stays · Moon
+2
+2
