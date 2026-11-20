@@ -2,7 +2,8 @@
 // the same inside an <img>, where external fonts and scripts never load.
 import { SYNCOPATE_700_WOFF2, JETBRAINS_MONO_400_WOFF2 } from './card-fonts.js';
 import type { skyAt } from './moon.js';
-import { deflateSync } from 'node:zlib';
+import { deflateSync, inflateSync } from 'node:zlib';
+import { MOON_MAP_SIZE, MOON_MAP_ZLIB } from './moon-map.js';
 import qrcode from 'qrcode-generator';
 
 export interface CardData {
@@ -65,6 +66,42 @@ function litFace(f: number, size: number): string {
   return 'data:image/png;base64,' + pngRGBA(size, size, px).toString('base64');
 }
 
+// The real surface (site/js/moonglow.js does the same): the map's brightness under the sunlight, a faint
+// earthshine on the dark side, and over the outer 30% the map fades out and the face brightens toward
+// near white, so it runs smoothly into the glow. `turn` turns the map back by the moon's tilt.
+let MAP: Uint8Array | undefined;
+function albedo(nx: number, ny: number, nz: number): number {
+  const m = MAP ?? (MAP = new Uint8Array(inflateSync(Buffer.from(MOON_MAP_ZLIB, 'base64')))), w = MOON_MAP_SIZE;
+  const lon = Math.atan2(nx, nz), lat = Math.asin(Math.max(-1, Math.min(1, -ny)));
+  const u = (lon / Math.PI + 0.5) * (w - 1), v = (0.5 - lat / Math.PI) * (w - 1);
+  const x0 = Math.floor(u), y0 = Math.floor(v), fx = u - x0, fy = v - y0, x1 = Math.min(w - 1, x0 + 1), y1 = Math.min(w - 1, y0 + 1);
+  const k = ((m[y0 * w + x0] * (1 - fx) + m[y0 * w + x1] * fx) * (1 - fy) + (m[y1 * w + x0] * (1 - fx) + m[y1 * w + x1] * fx) * fy) / 255;
+  return Math.min(1, Math.max(0, (k - 0.22) / 0.58));
+}
+function realFace(f: number, size: number, turn: number): string {
+  const px = new Uint8Array(size * size * 4), R = size / 2, e = 2 * Math.PI * f, sx = Math.sin(e), sz = -Math.cos(e);
+  const tc = Math.cos(turn * Math.PI / 180), ts = Math.sin(turn * Math.PI / 180), ink = [0xE9, 0xE4, 0xD8];
+  for (let y = 0; y < size; y++) {
+    const ny = (y + 0.5 - R) / R;
+    for (let x = 0; x < size; x++) {
+      const nx = (x + 0.5 - R) / R, rr = nx * nx + ny * ny;
+      const edge = Math.min(1, Math.max(0, (1 - Math.sqrt(rr)) * R + 0.5));
+      if (edge <= 0) continue;
+      const nz = Math.sqrt(Math.max(0, 1 - rr)), dot = nx * sx + nz * sz;
+      const A = -0.03 - 0.22 * nz, B = 0.03 + 0.42 * nz;
+      const t = Math.min(1, Math.max(0, (dot - A) / (B - A))), sun = t * t * (3 - 2 * t);
+      const rim = Math.sqrt(rr); let keep = rim < 0.7 ? 1 : Math.max(0, 1 - (rim - 0.7) / 0.3); keep = keep * keep * (3 - 2 * keep);
+      const k = 1 - keep * (1 - albedo(nx * tc - ny * ts, nx * ts + ny * tc, nz));
+      const lum = sun * (0.71 + 0.29 * k) + (1 - sun) * (0.015 + 0.03 * k), hot = (1 - keep) * 0.75 * sun;
+      const o = (y * size + x) * 4;
+      let r0 = ink[0] * lum + 24 * (1 - lum), g0 = ink[1] * lum + 25 * (1 - lum), b0 = ink[2] * lum + 28 * (1 - lum);
+      r0 += (255 - r0) * hot; g0 += (253 - g0) * hot; b0 += (246 - b0) * hot;
+      px[o] = Math.round(r0); px[o + 1] = Math.round(g0); px[o + 2] = Math.round(b0); px[o + 3] = Math.round(edge * 255);
+    }
+  }
+  return 'data:image/png;base64,' + pngRGBA(size, size, px).toString('base64');
+}
+
 /**
  * The halo past the lit edge: white light that fades out to 1.6 moon radii, in each direction as
  * bright as the face is lit just inside the rim there. Drawn at half resolution; it is blurred.
@@ -96,7 +133,8 @@ export function moonSvg(f: number, r: number, id: string, tilt = 0): string {
   const strength = Math.min(1, 0.6 + lit * 1.2);
   const W = r * 3.8, u = W / 404;          // the site's canvas is 1.9 moon diameters wide
   const size = Math.min(1200, Math.ceil(r * 4));   // the face at 2x for a crisp edge
-  const face = `<image href="${litFace(f, size)}" x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}"/>`;
+  const face = `<image href="${litFace(f, size)}" x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}"/>`;   // the sunlit shape: glow and rim
+  const surface = r >= 10 ? `<image href="${realFace(f, Math.min(800, size), tilt)}" x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}"/>` : face;   // what you see
   // Glow: the site blurs the lit face at W/160, W/70 and W/34.
   const glow = [[160, 0.4], [70, 0.2], [34, 0.12]].map(([d, o], i) =>
     `<filter id="${id}g${i}" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="${(W / d).toFixed(2)}"/></filter>`);
@@ -140,7 +178,7 @@ export function moonSvg(f: number, r: number, id: string, tilt = 0): string {
     `<filter id="${id}hb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${(r * 0.04).toFixed(2)}"/></filter></defs>` +
     glowUse +
     `<g filter="url(#${id}hb)"><image href="${halo(f, r)}" x="${(-r * 1.6).toFixed(1)}" y="${(-r * 1.6).toFixed(1)}" width="${(r * 3.2).toFixed(1)}" height="${(r * 3.2).toFixed(1)}"/></g>` +
-    `<circle r="${r}" fill="#24262A"/>` + face +
+    `<circle r="${r}" fill="#24262A"/>` + surface +
     rim(r * 0.09, r * 0.035, 0.55, 'e2') + rim(r * 0.025, r * 0.008, 0.95, 'e1') +
     `<g filter="url(#${id}r)">${rays}</g>`;
   return tilt ? `<g transform="rotate(${tilt})">${art}</g>` : art;
