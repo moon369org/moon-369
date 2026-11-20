@@ -67,7 +67,7 @@ function litFace(f: number, size: number): string {
 }
 
 // The real surface (site/js/moonglow.js does the same): the map's brightness under the sunlight, a faint
-// earthshine on the dark side, and over the outer 30% the map fades out and the face brightens toward
+// earthshine on the dark side, and over the outer 10% the map fades out and the face brightens toward
 // near white, so it runs smoothly into the glow. `turn` turns the map back by the moon's tilt.
 let MAP: Uint8Array | undefined;
 function albedo(nx: number, ny: number, nz: number): number {
@@ -90,7 +90,7 @@ function realFace(f: number, size: number, turn: number): string {
       const nz = Math.sqrt(Math.max(0, 1 - rr)), dot = nx * sx + nz * sz;
       const A = -0.1 - 0.15 * nz, B = 0.08 + 0.37 * nz;   // the wide fade across the middle, soft at the rim so the cusps curve
       const t = Math.min(1, Math.max(0, (dot - A) / (B - A))), sun = t * t * (3 - 2 * t);
-      const rim = Math.sqrt(rr); let keep = rim < 0.7 ? 1 : Math.max(0, 1 - (rim - 0.7) / 0.3); keep = keep * keep * (3 - 2 * keep);
+      const rim = Math.sqrt(rr); let keep = rim < 0.9 ? 1 : Math.max(0, 1 - (rim - 0.9) / 0.1); keep = keep * keep * (3 - 2 * keep);
       keep = 1 - (1 - keep) * sun;   // the fade and the brightening belong to the lit side only
       const k = 1 - keep * (1 - albedo(nx * tc - ny * ts, nx * ts + ny * tc, nz));
       const lum = sun * (0.71 + 0.29 * k) + (1 - sun) * (0.015 + 0.03 * k), hot = (1 - keep) * 0.75 * sun;
