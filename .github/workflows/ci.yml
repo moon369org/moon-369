@@ -19,6 +19,15 @@ jobs:
       - run: npm run typecheck
       - run: npm test
 
+  # Every page with the site's main nav must use the same header.
+  site-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node scripts/check-headers.cjs
+
   # Every SDK must pass the same conformance vectors (sdk/vectors.json).
   sdk-typescript:
     runs-on: ubuntu-latest

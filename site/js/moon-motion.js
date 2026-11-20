@@ -193,7 +193,8 @@
   // so the page is already in the DOM here and nothing has been painted yet.
   function start() {
     const root = document.querySelector('[data-dc-root]');
-    if (!root || !root.firstElementChild) return;
+    // Pages built by hand (no dc-lite) still get the same header: its mobile menu and hide-on-scroll.
+    if (!root || !root.firstElementChild) { menu(document.body); headroom(document.body); return; }
     starfield(root);
     menu(root);
     headroom(root);

@@ -67,7 +67,7 @@ nav[aria-label="Main"] a:not([style*="border"]):focus-visible {
 }
 
 nav[aria-label="Main"] a[aria-current="page"] { color: #E9E4D8; background-size: 100% 1px; }
-@media (max-width: 720px) { html.mm-js :is([data-dc-root],[data-dc-snapshot]) nav[aria-label="Main"] a[aria-current="page"] { background-size: 0 0; font-weight: 700; } }
+@media (max-width: 720px) { html.mm-js header nav[aria-label="Main"] a[aria-current="page"] { background-size: 0 0; font-weight: 700; } }
 
 /* Footer, desktop: menu on the left, logo on the right. Phones keep their stacked layout. */
 @media (min-width: 721px) {
@@ -218,20 +218,20 @@ section[aria-label="Current Moon date and time"] > svg { filter: drop-shadow(0 0
   #top p { font-size: clamp(14.5px, 3.85vw, 15px) !important; line-height: 1.5 !important; text-wrap: balance; }
   #top > div[style*="gap: 16px"] { gap: 10px !important; }
   #top a[style*="padding: 18px 30px"] { padding: 15px 22px !important; }
-  :is([data-dc-root],[data-dc-snapshot]) header a[aria-label="Moon home"] svg { width: 66px !important; height: 18.5px !important; }
-  :is([data-dc-root],[data-dc-snapshot]) header a[aria-label="Moon home"] { gap: 10px !important; font-size: 10px; }
+  header:has(nav[aria-label="Main"]) a[aria-label="Moon home"] svg { width: 66px !important; height: 18.5px !important; }
+  header:has(nav[aria-label="Main"]) a[aria-label="Moon home"] { gap: 10px !important; font-size: 10px; }
   /* Only collapse the links when the script is there to open them again. */
   /* Pinned top bar: slides away while scrolling down, back in when scrolling up. */
-  html.mm-js :is([data-dc-root],[data-dc-snapshot]) header {
+  html.mm-js header:has(nav[aria-label="Main"]) {
     position: sticky; top: 0; z-index: 20; background: #0B0B0D; transform: translateZ(0);
     transition: transform .35s cubic-bezier(.16, 1, .3, 1); will-change: transform;
   }
-  html.mm-head-hidden :is([data-dc-root],[data-dc-snapshot]) header { transform: translateY(-100%) translateZ(0); }
+  html.mm-head-hidden header:has(nav[aria-label="Main"]) { transform: translateY(-100%) translateZ(0); }
   /* Every section and the footer get their own layer below the bar, so animated or
      scrolling content inside them (map, satellites, fade-ins) can never paint over
      the bar or its menu. Safari otherwise lets composited layers jump the order. */
   html.mm-js :is([data-dc-root],[data-dc-snapshot]) section, html.mm-js :is([data-dc-root],[data-dc-snapshot]) footer { position: relative; z-index: 0; }
-  html.mm-js :is([data-dc-root],[data-dc-snapshot]) header > div { flex-wrap: nowrap !important; }
+  html.mm-js header:has(nav[aria-label="Main"]) > div { flex-wrap: nowrap !important; }
   html.mm-js .mm-burger {
     display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 7px;
     width: 44px; height: 44px; margin-right: -10px; padding: 0; border: 0; background: none; cursor: pointer;
@@ -248,7 +248,7 @@ section[aria-label="Current Moon date and time"] > svg { filter: drop-shadow(0 0
   html.mm-menu-open .mm-burger span:first-child { transform: translateY(4.25px) rotate(45deg); }
   html.mm-menu-open .mm-burger span:last-child { transform: translateY(-4.25px) rotate(-45deg); }
   .mm-burger:focus-visible { outline: 2px solid #E9E4D8; outline-offset: 2px; }
-  html.mm-js :is([data-dc-root],[data-dc-snapshot]) nav[aria-label="Main"] {
+  html.mm-js header nav[aria-label="Main"] {
     position: absolute; left: 0; right: 0; top: 100%;
     flex-direction: column; flex-wrap: nowrap !important; align-items: stretch !important; gap: 0 !important;
     padding: 4px 20px 24px; background: #0B0B0D; border-bottom: 1px solid #1C1D20;
@@ -256,12 +256,12 @@ section[aria-label="Current Moon date and time"] > svg { filter: drop-shadow(0 0
     opacity: 0; transform: translateY(-8px); visibility: hidden; pointer-events: none;
     transition: opacity .25s, transform .3s cubic-bezier(.16, 1, .3, 1), visibility 0s .3s;
   }
-  html.mm-menu-open :is([data-dc-root],[data-dc-snapshot]) nav[aria-label="Main"] {
+  html.mm-menu-open header nav[aria-label="Main"] {
     opacity: 1; transform: none; visibility: visible; pointer-events: auto;
     transition: opacity .25s, transform .3s cubic-bezier(.16, 1, .3, 1);
   }
-  html.mm-js :is([data-dc-root],[data-dc-snapshot]) nav[aria-label="Main"] a { min-height: 52px; padding-bottom: 0; border-bottom: 1px solid #1C1D20; }
-  html.mm-js :is([data-dc-root],[data-dc-snapshot]) nav[aria-label="Main"] a[style*="padding: 14px 22px"] { margin-top: 18px; justify-content: center; padding: 0 22px !important; border: 1px solid #E9E4D8; }
+  html.mm-js header nav[aria-label="Main"] a { min-height: 52px; padding-bottom: 0; border-bottom: 1px solid #1C1D20; }
+  html.mm-js header nav[aria-label="Main"] a[style*="padding: 14px 22px"] { margin-top: 18px; justify-content: center; padding: 0 22px !important; border: 1px solid #E9E4D8; }
 }
 
 /* ---------- Reduced motion: keep the look, drop the movement ---------- */
@@ -339,21 +339,21 @@ html.sl-lock { overflow: hidden; }
 /* Desktop header: logo on the left; links, Sign a file and the language globe together on the right,
    all on one centre line. (The underline's bottom padding is balanced so the words sit level with the button.) */
 @media (min-width: 721px) {
-  :is([data-dc-root],[data-dc-snapshot]) header > div { justify-content: flex-start !important; flex-wrap: nowrap !important; }
-  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] { margin-left: auto; flex-wrap: nowrap !important; gap: clamp(18px, 2.2vw, 32px) !important; }
-  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] a:not([style*="border"]) { padding: 4px 0; white-space: nowrap; }
-  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] a[style*="border"] { white-space: nowrap; }
-  :is([data-dc-root],[data-dc-snapshot]) header .mlp-g { margin-left: 4px !important; flex: none; }
+  header:has(nav[aria-label="Main"]) > div { justify-content: flex-start !important; flex-wrap: nowrap !important; }
+  header:has(nav[aria-label="Main"]) nav[aria-label="Main"] { margin-left: auto; flex-wrap: nowrap !important; gap: clamp(18px, 2.2vw, 32px) !important; }
+  header:has(nav[aria-label="Main"]) nav[aria-label="Main"] a:not([style*="border"]) { padding: 4px 0; white-space: nowrap; }
+  header:has(nav[aria-label="Main"]) nav[aria-label="Main"] a[style*="border"] { white-space: nowrap; }
+  header:has(nav[aria-label="Main"]) .mlp-g { margin-left: 4px !important; flex: none; }
 }
 @media (min-width: 721px) and (max-width: 1000px) {
-  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] { font-size: 10px !important; letter-spacing: 0.2em !important; }
+  header:has(nav[aria-label="Main"]) nav[aria-label="Main"] { font-size: 10px !important; letter-spacing: 0.2em !important; }
 }
 
 /* Narrow desktop (721 to 900px): tighter links and button, so nothing in the header is cut off. */
 @media (min-width: 721px) and (max-width: 900px) {
-  :is([data-dc-root],[data-dc-snapshot]) header > div { padding-left: 20px !important; padding-right: 20px !important; gap: 14px !important; }
-  :is([data-dc-root],[data-dc-snapshot]) header a[aria-label="Moon home"] svg { width: 100px !important; height: auto !important; }
-  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] { gap: 13px !important; font-size: 9.5px !important; letter-spacing: 0.13em !important; }
-  :is([data-dc-root],[data-dc-snapshot]) header nav[aria-label="Main"] a[style*="border"] { padding: 10px 12px !important; min-height: 40px !important; }
-  :is([data-dc-root],[data-dc-snapshot]) header .mlp-g { width: 32px !important; }
+  header:has(nav[aria-label="Main"]) > div { padding-left: 20px !important; padding-right: 20px !important; gap: 14px !important; }
+  header:has(nav[aria-label="Main"]) a[aria-label="Moon home"] svg { width: 100px !important; height: auto !important; }
+  header:has(nav[aria-label="Main"]) nav[aria-label="Main"] { gap: 13px !important; font-size: 9.5px !important; letter-spacing: 0.13em !important; }
+  header:has(nav[aria-label="Main"]) nav[aria-label="Main"] a[style*="border"] { padding: 10px 12px !important; min-height: 40px !important; }
+  header:has(nav[aria-label="Main"]) .mlp-g { width: 32px !important; }
 }
