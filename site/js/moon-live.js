@@ -264,7 +264,7 @@
         var o = (y * W + x) * 4;
         if (real) {
           // The real face: sunlight on the map's brightness, and a faint earthshine on the dark side.
-          var rim = Math.sqrt(rr), keep = rim < 0.9 ? 1 : Math.max(0, 1 - (rim - 0.9) / 0.1); keep = keep * keep * (3 - 2 * keep);   // the surface fades out over the outer 10%, to plain light at the edge
+          var rim = Math.sqrt(rr), fx = Math.max(0, (rim - 0.72) / 0.28), keep = 1 - fx * fx * fx;   // the surface fades to plain light at the edge: most of it in the outer 10%, eased in from further inside so there is no line
           var sun = tt * tt * (3 - 2 * tt); keep = 1 - (1 - keep) * sun;   // the fade and the brightening belong to the lit side only
           var k = 1 - keep * (1 - albedo(nx * tc - ny * ts, nx * ts + ny * tc, nz)), lum = sun * (0.71 + 0.29 * k) + (1 - sun) * (0.015 + 0.03 * k);
           d[o] = ink[0] * lum + 24 * (1 - lum); d[o + 1] = ink[1] * lum + 25 * (1 - lum); d[o + 2] = ink[2] * lum + 28 * (1 - lum);
