@@ -578,5 +578,17 @@
     "NOTHING HERE": "RIEN ICI",
     "This page is dark, like a new moon. The rest of Moon is right where you left it.": "Cette page est sombre, comme une nouvelle lune. Le reste de Moon est là où vous l'avez laissé.",
     "BACK TO MOON": "RETOUR À MOON",
+    // Event cancelling
+    "CANCEL EVENT": "ANNULER L'ÉVÉNEMENT",
+    "REMOVE FROM THIS LIST": "RETIRER DE CETTE LISTE",
+    "TAP AGAIN: CANCEL FOR EVERYONE": "TOUCHEZ À NOUVEAU : ANNULER POUR TOUS",
+    "TAP AGAIN TO REMOVE": "TOUCHEZ À NOUVEAU POUR RETIRER",
+    "CANCELLING": "ANNULATION",
+    "Event cancelled. Its link now says so.": "Événement annulé. Son lien l'indique désormais.",
+    "Cancelling needs a connection": "L'annulation nécessite une connexion",
+    "Moon could not cancel it. Try again.": "Moon n'a pas pu l'annuler. Réessayez.",
+    "THIS EVENT WAS CANCELLED": "CET ÉVÉNEMENT A ÉTÉ ANNULÉ",
+    "Its organizer called it off on {d}. If it is in your calendar, remove it below.": "Son organisateur l'a annulé le {d}. S'il est dans votre calendrier, retirez-le ci-dessous.",
+    "REMOVE FROM MY CALENDAR": "RETIRER DE MON CALENDRIER",
 }
 };

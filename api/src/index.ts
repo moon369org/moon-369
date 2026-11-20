@@ -16,6 +16,7 @@ import { mcp } from './mcp.js';
 import { eventLinks, eventIcs, cleanEventName } from './event.js';
 import { RESEAL, resealFingerprint } from './reseal.js';
 import { parseStatement, statementSha, newPrintIds, type EditionStore } from './editions.js';
+import { type EventStore, eventId, isEventKey, isEventId } from './events.js';
 import { type StayStore, type StayDoor, type Stay, type StayVisit, passBytes, stayPin, passWindow, stayWindow, checkStayCode, ownerOk, newSecret, validTz, zoned, dayNumber, visitStatement as stayVisitStatement, CODE_MS, CODE_SLACK, MAX_STAYS } from './stays.js';
 import { type TicketStore, type TicketEvent, type Ticket, newId, sha256hex, isId, cleanName, p256, ticketStatement, checkInStatement, checkCode, doorOk, MAX_TICKETS, WINDOW_MS, WINDOW_SLACK, passStatement, visitStatement, MAX_MEMBERS } from './tickets.js';
 import { makeRegistration, publicRegistration, isPhash, phashKind, hamming, bands, SIMILAR_BITS, registrantSlug, type RegistryStore, type Registration } from './registry.js';
@@ -85,6 +86,7 @@ export interface Env {
   /** Ticketed events: Moon-signed tickets bound to the guest's phone. Without it, /v1/tickets answers 503. */
   TICKETS?: TicketStore;
   STAYS?: StayStore;
+  EVENTS?: EventStore;
   /** Admin token (MOON_ADMIN_TOKEN) for issuing verified business keys in one call: POST /v1/admin/keys. Without it, admin routes answer 404. */
   ADMIN_TOKEN?: string;
   /** Retired public keys that old receipts may still use: key_id -> base64url raw key. */
@@ -900,7 +902,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
     return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, registrantOf(gate));
   }
   const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof` || path === `/${API_VERSION}/editions` || path === `/${API_VERSION}/reseal` || path === `/${API_VERSION}/reseal/verify`;
-  const either = path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`) || path === `/${API_VERSION}/passes` || path.startsWith(`/${API_VERSION}/passes/`) || path === `/${API_VERSION}/stays` || path.startsWith(`/${API_VERSION}/stays/`);   // tickets, passes and stays: GET to read, POST to change
+  const either = path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`) || path === `/${API_VERSION}/passes` || path.startsWith(`/${API_VERSION}/passes/`) || path === `/${API_VERSION}/stays` || path.startsWith(`/${API_VERSION}/stays/`) || path.startsWith(`/${API_VERSION}/events/`);   // tickets, passes, stays and events: GET to read, POST to change
   if (!either && (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD')))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
@@ -1278,6 +1280,22 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           return json({ registered: true, valid: false, edition: ed.n, reason: print > ed.n ? `This edition has ${ed.n} prints` : 'This print ID does not belong to this print' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
         const h = await env.EDITIONS.hit(sha.toLowerCase(), print, new Date().toISOString());
         return json({ registered: true, valid: true, print, edition: ed.n, registered_at: ed.created, checks: h.count, first_check: h.first }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+
+      // POST /v1/events/cancel {key}: the event's maker calls it off. GET /v1/events/<id>: has it been cancelled?
+      case path === `/${API_VERSION}/events/cancel` || path.startsWith(`/${API_VERSION}/events/`): {
+        if (!env.EVENTS) throw new HttpError(503, 'events_unavailable', 'Event cancelling is not configured on this deployment');
+        if (path.endsWith('/cancel')) {
+          if (req.method !== 'POST') throw new HttpError(405, 'method_not_allowed', 'Use POST');
+          const b = await readJson(req, 1024);
+          if (!isEventKey(b.key)) throw new HttpError(400, 'bad_param', 'key: the cancel key the app made with the event');
+          const c = await env.EVENTS.cancel({ id: eventId(b.key), cancelled_at: new Date().toISOString() });
+          return json({ id: c.id, cancelled: true, cancelled_at: c.cancelled_at }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+        }
+        const id = path.split('/')[3] ?? '';
+        if (!isEventId(id)) throw new HttpError(400, 'bad_param', 'Use /v1/events/<32 hex event id>');
+        const c = await env.EVENTS.get(id);
+        return json({ id, cancelled: !!c, ...(c ? { cancelled_at: c.cancelled_at } : {}) }, 200, { 'Cache-Control': 'public, max-age=30', ...planHdr });
       }
 
       case path === `/${API_VERSION}/stays` || path.startsWith(`/${API_VERSION}/stays/`):

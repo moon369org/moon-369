@@ -576,5 +576,17 @@
     "NOTHING HERE": "HIER IS NIETS",
     "This page is dark, like a new moon. The rest of Moon is right where you left it.": "Deze pagina is donker, als een nieuwe maan. De rest van Moon is precies waar je het liet.",
     "BACK TO MOON": "TERUG NAAR MOON",
+    // Event cancelling
+    "CANCEL EVENT": "EVENEMENT ANNULEREN",
+    "REMOVE FROM THIS LIST": "UIT DEZE LIJST HALEN",
+    "TAP AGAIN: CANCEL FOR EVERYONE": "TIK OPNIEUW: ANNULEER VOOR IEDEREEN",
+    "TAP AGAIN TO REMOVE": "TIK OPNIEUW OM TE VERWIJDEREN",
+    "CANCELLING": "ANNULEREN",
+    "Event cancelled. Its link now says so.": "Evenement geannuleerd. De link laat dat nu zien.",
+    "Cancelling needs a connection": "Annuleren heeft een verbinding nodig",
+    "Moon could not cancel it. Try again.": "Moon kon het niet annuleren. Probeer het opnieuw.",
+    "THIS EVENT WAS CANCELLED": "DIT EVENEMENT IS GEANNULEERD",
+    "Its organizer called it off on {d}. If it is in your calendar, remove it below.": "De organisator heeft het op {d} afgelast. Staat het in je agenda, verwijder het dan hieronder.",
+    "REMOVE FROM MY CALENDAR": "UIT MIJN AGENDA VERWIJDEREN",
 }
 };

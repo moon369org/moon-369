@@ -55,12 +55,13 @@
   }
   function icsStamp(ms) { return new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''); }
   function icsText(x) { return String(x).replace(/\\/g, '\\\\').replace(/[,;]/g, '\\$&').replace(/\n/g, '\\n'); }
-  function ics(name, ms, url, mark) {
-    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Moon//moon369.org//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+  // cancel: the same event (same UID), marked cancelled, so opening it removes the one already in a calendar.
+  function ics(name, ms, url, mark, cancel) {
+    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Moon//moon369.org//EN', 'CALSCALE:GREGORIAN', cancel ? 'METHOD:CANCEL' : 'METHOD:PUBLISH', 'BEGIN:VEVENT',
       'UID:' + mark.replace(/[^0-9]/g, '') + '-' + Math.abs(name.split('').reduce(function (h, c) { return (h * 31 + c.charCodeAt(0)) | 0; }, 7)) + '@moon369.org',
       'DTSTAMP:' + icsStamp(Date.now()), 'DTSTART:' + icsStamp(ms), 'DURATION:PT1H',
-      'SUMMARY:' + icsText(name), 'DESCRIPTION:' + icsText('Moonmark ' + mark + '\n' + url), 'URL:' + url,
-      'END:VEVENT', 'END:VCALENDAR'];
+      'SUMMARY:' + icsText(name), 'DESCRIPTION:' + icsText('Moonmark ' + mark + '\n' + url), 'URL:' + url]
+      .concat(cancel ? ['STATUS:CANCELLED', 'SEQUENCE:1'] : []).concat(['END:VEVENT', 'END:VCALENDAR']);
     return lines.join('\r\n') + '\r\n';
   }
   function gcal(name, ms, url, mark) {
@@ -412,6 +413,24 @@
       a.href = URL.createObjectURL(new Blob([ics(ev, ms, url, text(mk))], { type: 'text/calendar' }));
       a.download = (ev.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'event') + '.ics';
       countdown(root, ms);
+      // Did its maker call it off? (c= is the id of the cancel key the app made with the event.)
+      var cid = new URLSearchParams(location.search).get('c');
+      if (/^[0-9a-f]{32}$/.test(cid || '')) fetch('https://api.moon369.org/v1/events/' + cid).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (!j || !j.cancelled) return;
+        var btns = root.querySelector('.mk-btns'), cd = root.querySelector('[data-mk-cd]');
+
+        var when = ''; try { when = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(j.cancelled_at)); } catch (e) {}
+        var box = document.createElement('div'); box.className = 'mk-cx';
+        box.innerHTML = '<b>' + T2('THIS EVENT WAS CANCELLED') + '</b><span>' + esc(T2('Its organizer called it off on {d}. If it is in your calendar, remove it below.', { d: when })) + '</span>';
+        if (cd) { cd.parentNode.insertBefore(box, cd); cd.style.display = 'none'; } else if (btns) btns.parentNode.insertBefore(box, btns);
+        if (btns) {
+          btns.innerHTML = '<a class="mk-p" data-mk-ics href="#" download="">' + T2('REMOVE FROM MY CALENDAR') + '</a>';
+          var a2 = btns.querySelector('[data-mk-ics]');
+          a2.href = URL.createObjectURL(new Blob([ics(ev, ms, url, text(mk), true)], { type: 'text/calendar' }));
+          a2.download = (ev.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'event') + '-cancelled.ics';
+        }
+        var h = document.querySelector('h1'); if (h) h.classList.add('mk-h1-cx');
+      }).catch(function () {});
       root.querySelector('[data-mk-embed]').onclick = function (e) {
         var code = '<div data-moon-countdown="' + path(mk) + '" data-name="' + esc(ev) + '"></div>\n<script src="https://moon369.org/embed/countdown.js" async><\/script>';
         try { navigator.clipboard.writeText(code); e.target.textContent = 'EMBED CODE COPIED'; } catch (err) { e.target.textContent = 'COULD NOT COPY'; }

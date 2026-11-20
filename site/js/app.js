@@ -31,6 +31,14 @@
   function localStr(ms, opts) { try { return new Intl.DateTimeFormat(LOC, opts || { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(ms); } catch (e) { return new Date(ms).toString(); } }
   function buzz() { try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} }
   function toast(t) { var el = $('[data-app-toast]'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 2400); }
+  // An event's cancel key: kept on this phone; only its id (c=) goes in the link. Whoever holds it can call the event off.
+  function cancelKey() {
+    var b = new Uint8Array(24); crypto.getRandomValues(b);
+    var k = btoa(String.fromCharCode.apply(null, b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode('moon-event/1|' + k)).then(function (d) {
+      return { key: k, id: Array.from(new Uint8Array(d).slice(0, 16), function (x) { return x.toString(16).padStart(2, '0'); }).join('') };
+    });
+  }
   function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || '[]'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return []; } }
 
   // ---------- NOW ----------
@@ -511,19 +519,25 @@
       if (signing) return; signing = true;
       var b3 = $('[data-sheet-create]'); busy(b3, 'CREATING'); b3.disabled = true;
       var c3 = cur;
-      fetch(API + '/v1/tickets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, moonmark: text(moon(cur.ms + 1)), start_utc: new Date(cur.ms).toISOString() }) })
+      var ck = null;
+      cancelKey().then(function (k) { ck = k; }, function () {}).then(function () { return fetch(API + '/v1/tickets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, moonmark: text(moon(cur.ms + 1)), start_utc: new Date(cur.ms).toISOString() }) }); })
         .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error((j.error && j.error.message) || ''); return j; }); })
         .then(function (j) {
           if (cur !== c3) return;
-          var url = link(cur.ms, name, 'event') + '&t=' + j.event.id;
-          finish(name, url, { ms: cur.ms, name: name, url: url, door: j.links.door, tix: j.event.id });
+          var url = link(cur.ms, name, 'event') + '&t=' + j.event.id + (ck ? '&c=' + ck.id : '');
+          finish(name, url, { ms: cur.ms, name: name, url: url, door: j.links.door, tix: j.event.id, ck: ck && ck.key });
         }).catch(function (e) {
           toast(navigator.onLine === false ? 'Tickets need a connection' : (e && e.message) || 'Moon could not open tickets. Try again.');
           b3.disabled = false; b3.textContent = 'CREATE EVENT';
         }).then(function () { signing = false; });
       return;
     }
-    if (cur.kind === 'event') { finish(name, link(cur.ms, name, 'event'), null); return; }
+    if (cur.kind === 'event') {
+      var c2 = cur;
+      cancelKey().then(function (k) { if (cur !== c2) return; var u = link(c2.ms, name, 'event') + '&c=' + k.id; finish(name, u, { ms: c2.ms, name: name, url: u, ck: k.key }); },
+        function () { if (cur === c2) finish(name, link(c2.ms, name, 'event'), null); });
+      return;
+    }
     // A moment without a photo: Moon signs the moment itself, its exact Moonmark and its words, into the Tideline.
     // Only a fingerprint is sent; the words stay in the link. Offline, it's still made, just without the proof.
     if (signing) return; signing = true;
@@ -631,10 +645,12 @@
   // ---------- EVENTS ----------
   function span(ms) { var m = Math.round(ms / 60000); return m < 60 ? m + ' min' : m < 2880 ? Math.round(m / 60) + ' h' : Math.round(m / 1440) + ' days'; }
   function showEvents() {
-    list('moonEvents', '[data-e-list]', 'YOUR EVENTS', function (x) {
+    list('moonEvents', '[data-e-list]', 'YOUR EVENTS', function (x, i) {
       var left = x.ms - Date.now(), when = left > 0 ? 'in ' + span(left) : span(-left) + ' ago';
-      return '<a href="' + esc(x.url) + '"><span>' + esc(x.name) + '<br><small>' + esc(localStr(x.ms)) + '</small></span><span>' + esc(when) + '</span></a>' +
-        (x.door ? '<a class="e-door" href="' + esc(x.door.replace(/^https:\/\/moon369\.org/, '')) + '"><span>DOOR SCANNER · ' + esc(x.name) + '</span><span>SCAN</span></a>' : '');
+      return '<a href="' + esc(x.url) + '"' + (x.cancelled ? ' class="e-cx"' : '') + '><span>' + esc(x.name) + '<br><small>' + esc(localStr(x.ms)) + '</small></span><span>' + esc(x.cancelled ? T('CANCELLED') : when) + '</span></a>' +
+        (x.door && !x.cancelled ? '<a class="e-door" href="' + esc(x.door.replace(/^https:\/\/moon369\.org/, '')) + '"><span>DOOR SCANNER · ' + esc(x.name) + '</span><span>SCAN</span></a>' : '') +
+        '<div class="e-act">' + (x.ck && !x.cancelled ? '<button type="button" data-e-cx="' + i + '">' + T('CANCEL EVENT') + '</button>' : '') +
+        '<button type="button" data-e-rm="' + i + '">' + T('REMOVE FROM THIS LIST') + '</button></div>';
     });
   }
   function setWhen(ms) { var d = new Date(ms); $('[data-e-when]').value = d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); noteWhen(); }
@@ -965,6 +981,21 @@
       $('[data-sheet-photo]').disabled = true; $('[data-sheet-photo]').style.pointerEvents = 'none';   // a disabled input would swallow the tap
       $('[data-sheet-pick]').addEventListener('click', function (e) { e.preventDefault(); openCamera(); });
     }
+    // Your events: cancel one you made (everyone with the link sees it called off), or just clear it from this list. Both take two taps.
+    $('[data-e-list]').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-e-cx],[data-e-rm]'); if (!b) return;
+      e.preventDefault();
+      if (!b.classList.contains('sure')) {
+        $$('[data-e-list] .sure').forEach(function (x) { x.classList.remove('sure'); x.textContent = x.hasAttribute('data-e-cx') ? T('CANCEL EVENT') : T('REMOVE FROM THIS LIST'); });
+        b.classList.add('sure'); b.textContent = b.hasAttribute('data-e-cx') ? T('TAP AGAIN: CANCEL FOR EVERYONE') : T('TAP AGAIN TO REMOVE'); buzz(); return;
+      }
+      var r = store('moonEvents'), i = +(b.getAttribute('data-e-cx') || b.getAttribute('data-e-rm')), x = r[i]; if (!x) return;
+      if (b.hasAttribute('data-e-rm')) { r.splice(i, 1); store('moonEvents', r); showEvents(); buzz(); return; }
+      b.disabled = true; b.textContent = T('CANCELLING');
+      fetch(API + '/v1/events/cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: x.ck }) })
+        .then(function (res) { if (!res.ok) throw 0; x.cancelled = true; store('moonEvents', r); showEvents(); buzz(); toast(T('Event cancelled. Its link now says so.')); })
+        .catch(function () { b.disabled = false; b.classList.remove('sure'); b.textContent = T('CANCEL EVENT'); toast(navigator.onLine === false ? T('Cancelling needs a connection') : T('Moon could not cancel it. Try again.')); });
+    });
     $('[data-app-recent]').addEventListener('click', function (e) {
       if (e.target.closest('[data-m-export]')) { exportLog(); return; }
       if (e.target.closest('[data-m-import]')) { importLog(); return; }
