@@ -29,7 +29,7 @@ export function phasePath(f: number, r: number, kOverride?: number): string {
 // A tiny PNG encoder (RGBA, no filtering) so the lit face can be shaded per pixel like the site's.
 const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
 const crc32 = (b: Buffer) => { let c = 0xffffffff; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
-function pngRGBA(w: number, h: number, px: Uint8Array): Buffer {
+export function pngRGBA(w: number, h: number, px: Uint8Array): Buffer {
   const chunk = (type: string, data: Buffer) => {
     const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
     const td = Buffer.concat([Buffer.from(type, 'ascii'), data]), crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(td));
@@ -70,7 +70,7 @@ function litFace(f: number, size: number): string {
 // earthshine on the dark side, and over the outer 10% the map fades out and the face brightens toward
 // near white, so it runs smoothly into the glow. `turn` turns the map back by the moon's tilt.
 let MAP: Uint8Array | undefined;
-function albedo(nx: number, ny: number, nz: number): number {
+export function albedo(nx: number, ny: number, nz: number): number {
   const m = MAP ?? (MAP = new Uint8Array(inflateSync(Buffer.from(MOON_MAP_ZLIB, 'base64')))), w = MOON_MAP_SIZE;
   const lon = Math.atan2(nx, nz), lat = Math.asin(Math.max(-1, Math.min(1, -ny)));
   const u = (lon / Math.PI + 0.5) * (w - 1), v = (0.5 - lat / Math.PI) * (w - 1);

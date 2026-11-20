@@ -6,6 +6,7 @@
 //   hybrid   the ring thins to nothing on one side, where the corona takes over
 //   partial  the sun with a bite out of it; light only from the uncovered edge
 import type { EclipseType } from './eclipses.js';
+import { albedo, pngRGBA } from './card.js';
 
 const INK = '#0B0B0D', LIGHT = '233,228,216', SUN = '#F4EFE3';
 const wave = (t: number, s: number) => Math.sin(t * 0.31 + s) * 0.55 + Math.sin(t * 0.173 + s * 2.1) * 0.3 + Math.sin(t * 0.071 + s * 3.7) * 0.15;
@@ -18,6 +19,39 @@ function geo(type: EclipseType) {
   if (type === 'partial') return { R, mx: 13, my: -11, mr: R + 0.5 };
   return { R, mx: 0, my: 0, mr: R };
 }
+
+// The real faces, as site/js/eclipseglow.js draws them: the sun brighter in the middle, dimmer and warmer
+// toward its edge with fine still granulation; the moon the real near side, barely there in earthshine.
+function hash(i: number, j: number) { const h = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return h - Math.floor(h); }
+function vnoise(x: number, y: number) {
+  const i = Math.floor(x), j = Math.floor(y); let fx = x - i, fy = y - j; fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+  return (hash(i, j) * (1 - fx) + hash(i + 1, j) * fx) * (1 - fy) + (hash(i, j + 1) * (1 - fx) + hash(i + 1, j + 1) * fx) * fy;
+}
+function sunPx(nx: number, ny: number): [number, number, number] {
+  const mu = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny)), m1 = 1 - mu, I = 1 - 0.38 * m1 - 0.2 * m1 * m1;
+  const gran = (vnoise(nx * 7 + 9, ny * 7 + 9) - 0.5) * 0.6 + (vnoise(nx * 16 + 3, ny * 16 + 3) - 0.5) * 0.4;
+  const L = (0.7 + 0.3 * I) * (1 + gran * 0.09 * mu), w = Math.pow(m1, 1.2);
+  return [(248 * (1 - w) + 228 * w) * L, (244 * (1 - w) + 205 * w) * L, (234 * (1 - w) + 168 * w) * L];
+}
+function moonPx(nx: number, ny: number): [number, number, number] {
+  const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny)), lum = (0.025 + 0.17 * albedo(nx, ny, nz)) * (0.45 + 0.55 * nz);
+  return [11 + 222 * lum, 11 + 217 * lum, 13 + 203 * lum];
+}
+const FACES = new Map<string, string>();
+function face(kind: 'sun' | 'moon', n: number): string {
+  const key = kind + n, hit = FACES.get(key); if (hit) return hit;
+  const px = new Uint8Array(n * n * 4), R = n / 2;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const nx = (x + 0.5 - R) / R, ny = (y + 0.5 - R) / R, edge = Math.min(1, Math.max(0, (1 - Math.hypot(nx, ny)) * R + 0.5));
+    if (edge <= 0) continue;
+    const p = kind === 'sun' ? sunPx(nx, ny) : moonPx(nx, ny), o = (y * n + x) * 4;
+    px[o] = Math.round(p[0]); px[o + 1] = Math.round(p[1]); px[o + 2] = Math.round(p[2]); px[o + 3] = Math.round(edge * 255);
+  }
+  const uri = 'data:image/png;base64,' + pngRGBA(n, n, px).toString('base64');
+  FACES.set(key, uri); return uri;
+}
+const disc = (kind: 'sun' | 'moon', cx: number, cy: number, r: number, size: number) =>
+  `<image href="${face(kind, Math.max(16, Math.min(512, Math.round(size * r / 50))))}" x="${f2(cx - r)}" y="${f2(cy - r)}" width="${f2(2 * r)}" height="${f2(2 * r)}"/>`;
 
 // Fixed, irregular layouts, the same seeds as eclipseglow.js, so the icons match the animation.
 function rng(seed: number) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
@@ -122,10 +156,10 @@ export function eclipseIcon(type: EclipseType, size = 64, bg = true, id = 'ec'):
     const glow = type === 'partial' ? 0.3 : 0.42;
     art = `<circle r="${f2(g.R * 1.02)}" fill="rgb(${LIGHT})" opacity="${glow}" filter="url(#${id}b1)"/>` +
       `<circle r="${f2(g.R * 1.01)}" fill="rgb(${LIGHT})" opacity="${f2(glow * 0.8)}" filter="url(#${id}b2)"/>` +
-      `<circle r="${g.R}" fill="url(#${id}sun)"/>` +
+      disc('sun', 0, 0, g.R, size) +
       light(type, id, small);
   }
-  art += `<circle cx="${g.mx}" cy="${g.my}" r="${f2(g.mr)}" fill="${INK}"/>`;
+  art += `<circle cx="${g.mx}" cy="${g.my}" r="${f2(g.mr * 0.995)}" fill="${INK}"/>` + disc('moon', g.mx, g.my, g.mr, size);
   // The diamond ring's last bead of light: a soft gradient dot, no filter (filters on tiny shapes draw a box in some browsers).
   if (type === 'total') art += `<circle cx="${f2(g.R * 0.72)}" cy="${f2(-g.R * 0.69)}" r="${f2(g.R * 0.085)}" fill="url(#${id}bead)"/>`;
   const label = `${type[0].toUpperCase() + type.slice(1)} solar eclipse`;
