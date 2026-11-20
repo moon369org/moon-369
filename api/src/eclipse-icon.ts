@@ -14,7 +14,7 @@ const f2 = (n: number) => n.toFixed(2);
 
 function geo(type: EclipseType) {
   const R = 26;
-  if (type === 'annular') return { R, mx: 0, my: 0, mr: R - 5.5 };
+  if (type === 'annular') return { R, mx: 0, my: 0, mr: R - 3.6 };
   if (type === 'hybrid') return { R, mx: -1.9, my: 0, mr: R - 1.1 };
   if (type === 'partial') return { R, mx: 13, my: -11, mr: R + 0.5 };
   return { R, mx: 0, my: 0, mr: R };
@@ -27,9 +27,10 @@ function vnoise(x: number, y: number) {
   const i = Math.floor(x), j = Math.floor(y); let fx = x - i, fy = y - j; fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
   return (hash(i, j) * (1 - fx) + hash(i + 1, j) * fx) * (1 - fy) + (hash(i, j + 1) * (1 - fx) + hash(i + 1, j + 1) * fx) * fy;
 }
-function sunPx(nx: number, ny: number): [number, number, number] {
+function sunPx(nx: number, ny: number, hot = false): [number, number, number] {
   const mu = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny)), m1 = 1 - mu, I = 1 - 0.38 * m1 - 0.2 * m1 * m1;
   const gran = (vnoise(nx * 7 + 9, ny * 7 + 9) - 0.5) * 0.6 + (vnoise(nx * 16 + 3, ny * 16 + 3) - 0.5) * 0.4;
+  if (hot) { const Lh = (0.9 + 0.1 * I) * (1 + gran * 0.04 * mu), wh = Math.pow(m1, 2); return [255 * Lh, (253 - 14 * wh) * Lh, (248 - 40 * wh) * Lh]; }
   const L = (0.7 + 0.3 * I) * (1 + gran * 0.09 * mu), w = Math.pow(m1, 1.2);
   return [(248 * (1 - w) + 228 * w) * L, (244 * (1 - w) + 205 * w) * L, (234 * (1 - w) + 168 * w) * L];
 }
@@ -38,19 +39,19 @@ function moonPx(nx: number, ny: number): [number, number, number] {
   return [11 + 222 * lum, 11 + 217 * lum, 13 + 203 * lum];
 }
 const FACES = new Map<string, string>();
-function face(kind: 'sun' | 'moon', n: number): string {
+function face(kind: 'sun' | 'hot' | 'moon', n: number): string {
   const key = kind + n, hit = FACES.get(key); if (hit) return hit;
   const px = new Uint8Array(n * n * 4), R = n / 2;
   for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
     const nx = (x + 0.5 - R) / R, ny = (y + 0.5 - R) / R, edge = Math.min(1, Math.max(0, (1 - Math.hypot(nx, ny)) * R + 0.5));
     if (edge <= 0) continue;
-    const p = kind === 'sun' ? sunPx(nx, ny) : moonPx(nx, ny), o = (y * n + x) * 4;
+    const p = kind === 'moon' ? moonPx(nx, ny) : sunPx(nx, ny, kind === 'hot'), o = (y * n + x) * 4;
     px[o] = Math.round(p[0]); px[o + 1] = Math.round(p[1]); px[o + 2] = Math.round(p[2]); px[o + 3] = Math.round(edge * 255);
   }
   const uri = 'data:image/png;base64,' + pngRGBA(n, n, px).toString('base64');
   FACES.set(key, uri); return uri;
 }
-const disc = (kind: 'sun' | 'moon', cx: number, cy: number, r: number, size: number) =>
+const disc = (kind: 'sun' | 'hot' | 'moon', cx: number, cy: number, r: number, size: number) =>
   `<image href="${face(kind, Math.max(16, Math.min(512, Math.round(size * r / 50))))}" x="${f2(cx - r)}" y="${f2(cy - r)}" width="${f2(2 * r)}" height="${f2(2 * r)}"/>`;
 
 // Fixed, irregular layouts, the same seeds as eclipseglow.js, so the icons match the animation.
@@ -143,6 +144,8 @@ export function eclipseIcon(type: EclipseType, size = 64, bg = true, id = 'ec'):
   const defs =
     `<filter id="${id}b1" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="${type === 'total' ? 6 : 5.5}"/></filter>` +
     `<filter id="${id}b2" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.9"/></filter>` +
+    `<filter id="${id}b0" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="9"/></filter>` +
+    `<filter id="${id}b4" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="${f2(100 / 70)}"/></filter>` +
     `<filter id="${id}b3" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.35"/></filter>` +
     `<radialGradient id="${id}sun" r="0.5"><stop offset="0" stop-color="${SUN}"/><stop offset="0.85" stop-color="rgb(${LIGHT})"/><stop offset="1" stop-color="#D8D1C1"/></radialGradient>` +
     `<radialGradient id="${id}bead" r="0.5"><stop offset="0" stop-color="${SUN}"/><stop offset="0.35" stop-color="${SUN}" stop-opacity="0.8"/><stop offset="1" stop-color="${SUN}" stop-opacity="0"/></radialGradient>`;
@@ -156,7 +159,10 @@ export function eclipseIcon(type: EclipseType, size = 64, bg = true, id = 'ec'):
     const glow = type === 'partial' ? 0.3 : 0.42;
     art = `<circle r="${f2(g.R * 1.02)}" fill="rgb(${LIGHT})" opacity="${glow}" filter="url(#${id}b1)"/>` +
       `<circle r="${f2(g.R * 1.01)}" fill="rgb(${LIGHT})" opacity="${f2(glow * 0.8)}" filter="url(#${id}b2)"/>` +
-      disc('sun', 0, 0, g.R, size) +
+      (type === 'partial' ? '' :   // a bare ring of sun is blinding: a wide bloom and a tight hot halo hug it
+        `<circle r="${f2(g.R * 1.04)}" fill="rgb(${LIGHT})" opacity="0.3" filter="url(#${id}b0)"/>` +
+        `<circle r="${f2(g.R * 0.985)}" fill="none" stroke="#FFFDF8" stroke-width="${f2(g.R * 0.14)}" opacity="0.9" filter="url(#${id}b4)"/>`) +
+      disc(type === 'partial' ? 'sun' : 'hot', 0, 0, g.R, size) +
       light(type, id, small);
   }
   art += `<circle cx="${g.mx}" cy="${g.my}" r="${f2(g.mr * 0.995)}" fill="${INK}"/>` + disc('moon', g.mx, g.my, g.mr, size);
