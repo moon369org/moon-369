@@ -265,11 +265,11 @@
         if (real) {
           // The real face: sunlight on the map's brightness, and a faint earthshine on the dark side.
           var rim = Math.sqrt(rr), fx = Math.max(0, (rim - 0.72) / 0.28), keep = 1 - fx * fx * fx;   // the surface fades to plain light at the edge: most of it in the outer 10%, eased in from further inside so there is no line
-          var sun = tt * tt * (3 - 2 * tt); keep = 1 - (1 - keep) * sun;   // the fade and the brightening belong to the lit side only
+          var sun = tt * tt * (3 - 2 * tt), gw = Math.min(1, Math.max(0, (dot + 0.05) / 0.45)); gw = sun * gw * gw * (3 - 2 * gw); keep = 1 - (1 - keep) * gw;   // the fade and the brightening belong to the lit side only, and taper off well before the shadow so the cusps meet it softly
           var k = 1 - keep * (1 - albedo(nx * tc - ny * ts, nx * ts + ny * tc, nz)), lum = sun * (0.71 + 0.29 * k) + (1 - sun) * (0.015 + 0.03 * k);
           d[o] = ink[0] * lum + 24 * (1 - lum); d[o + 1] = ink[1] * lum + 25 * (1 - lum); d[o + 2] = ink[2] * lum + 28 * (1 - lum);
           // Brighter toward the lit edge: the fade zone warms up to near white, so the face runs smoothly into the glow.
-          var hot = (1 - keep) * 0.75 * sun;
+          var hot = (1 - keep) * 0.75;
           d[o] += (255 - d[o]) * hot; d[o + 1] += (253 - d[o + 1]) * hot; d[o + 2] += (246 - d[o + 2]) * hot;
           d[o + 3] = Math.round(edge * 255);
           continue;
