@@ -286,8 +286,13 @@
           rot = wax ? dir : dir + PI;
         }
         cx.save(); cx.translate(mx, my); if (window.MoonPhase && window.MoonPhase.limbAngle) cx.rotate(rot); else if (!south) cx.scale(-1, 1);
-        if (BLUR_OK) cx.filter = 'blur(' + (0.8 * dpr) + 'px)';
-        cx.fillStyle = '#E9E4D8'; cx.fill(lit); cx.restore();
+        // The real face, as on the Now tab: the drawing is turned by `rot`, so the map turns back by rot
+        // less the way the Moon's north points in your sky (the parallactic angle; flipped in the south).
+        var north = window.MoonPhase && window.MoonPhase.limbAngle ? (south ? qa : PI + qa) : 0;
+        var face = window.MoonFace ? window.MoonFace(f, (rot - north) / rad, Math.round(r * 2)) : null;
+        if (face) cx.drawImage(face, -r, -r, r * 2, r * 2);
+        else { if (BLUR_OK) cx.filter = 'blur(' + (0.8 * dpr) + 'px)'; cx.fillStyle = '#E9E4D8'; cx.fill(lit); }
+        cx.restore();
         cx.restore();
       } else {
         var gx = X(m.az, W, pad);

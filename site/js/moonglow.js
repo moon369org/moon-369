@@ -62,10 +62,14 @@
         var px = g.getImageData(0, 0, im.width, im.height).data, n = im.width * im.height, v = new Float32Array(n);
         for (var i = 0; i < n; i++) v[i] = px[i * 4] / 255;
         TEX = { w: im.width, h: im.height, v: v };
-        document.querySelectorAll('canvas.hm-moonglow[data-real]').forEach(function (cv) { cv.__moonKey = null; });
+        document.querySelectorAll('canvas.hm-moonglow').forEach(function (cv) { cv.__moonKey = null; });
+        if (window.MoonFace) window.MoonFace.cache = {};
       } catch (e) { /* a blocked image: keep the plain moon */ }
     };
-    im.src = '/assets/moon/near-side.jpg';
+    // On moon369.org the map comes from the same site; elsewhere (the moon369 npm package) from moon369.org, which allows it.
+    var here = /(^|\.)moon369\.org$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+    if (!here) im.crossOrigin = 'anonymous';
+    im.src = (here ? '' : 'https://moon369.org') + '/assets/moon/near-side.jpg';
     return null;
   }
   // Surface brightness at a point on the visible face: maria dark, highlands bright, as the map shows.
@@ -122,6 +126,16 @@
     return cvs;
   }
 
+  // The real face on its own, for drawings that place the moon themselves (the Sky tab's arc).
+  // MoonFace(f, turn, px): a canvas px wide, lit for phase f with the Sun on the right while waxing,
+  // its map turned by `turn` degrees (see shade). Null until the map has loaded.
+  window.MoonFace = function (f, turn, px) {
+    if (!texture()) return null;
+    var c = window.MoonFace.cache || (window.MoonFace.cache = {}), k = Math.round(px) + '|' + f.toFixed(3) + '|' + Math.round(turn);
+    if (!c[k]) { var n = Math.max(8, Math.round(px)); c[k] = shade(n, n / 2, n / 2, n / 2, f, true, turn); }
+    return c[k];
+  };
+
   function draw(cv, t) {
     var dpr = Math.min(2, window.devicePixelRatio || 1);
     var W = Math.round(cv.clientWidth * dpr);
@@ -142,7 +156,7 @@
     ctx.clearRect(0, 0, W, W);
 
     // The glow and the moon only change with the phase, so draw them once and reuse them.
-    var real = cv.hasAttribute('data-real') && !!texture();
+    var real = !cv.hasAttribute('data-flat') && R >= 10 && !!texture();   // the real surface everywhere, unless a canvas asks for the flat moon (data-flat) or is too small to show it
     var sk = W + '|' + f.toFixed(4) + '|' + strength.toFixed(3) + (real ? '|real|' + Math.round(tilt * 2) : '');
     var st = cv.__moonStatic || (cv.__moonStatic = document.createElement('canvas'));
     if (cv.__moonKey !== sk) {
