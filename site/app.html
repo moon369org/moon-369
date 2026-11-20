@@ -80,7 +80,8 @@ html,body{margin:0;overflow-x:hidden;overflow-x:clip;background:#0B0B0D;color:#E
 body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 ::selection{background:#24262A}
 a{color:#E9E4D8}
-.top{display:flex;justify-content:space-between;align-items:center;padding:18px 22px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;position:sticky;top:env(safe-area-inset-top);z-index:40;background:#0B0B0D;transition:box-shadow .2s}
+.top.scrolled{box-shadow:0 1px 0 #24262A}
 .top svg{width:96px;height:auto;display:block}
 .top a{font:11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8A8B8F;text-decoration:none}
 main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 22px calc(96px + env(safe-area-inset-bottom));max-width:520px;width:100%;margin:0 auto}
@@ -429,5 +430,6 @@ input.f,.two.f input{width:100%;min-height:52px;background:#08080A;border:1px so
 <script src="/js/qrcode.js" defer></script>
 <script src="/js/moonqr.js" defer></script>
 <script src="/js/app.js" defer></script>
+<script>(function(){var t=document.querySelector('.top');if(!t)return;var f=function(){t.classList.toggle('scrolled',scrollY>4)};addEventListener('scroll',f,{passive:true});f()})();</script>
 </body>
 </html>
