@@ -259,7 +259,7 @@
         var nz = Math.sqrt(Math.max(0, 1 - rr)), dot = nx * sx + nz * sz;
         // The fade is widest across the middle of the face and tightens toward the rim, so the
         // terminator stays soft but meets the edge cleanly (no lit horns, no dark notches).
-        var A = -0.03 - 0.22 * nz, B = 0.03 + 0.42 * nz;
+        var A = real ? -0.07 : -0.03 - 0.22 * nz, B = real ? 0.16 : 0.03 + 0.42 * nz;   // the real face: one even softness, so the lit side curves all the way round the limb to its horns
         var tt = Math.min(1, Math.max(0, (dot - A) / (B - A))), a = tt * tt * (3 - 2 * tt) * edge;
         var o = (y * W + x) * 4;
         if (real) {
