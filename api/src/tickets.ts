@@ -10,12 +10,18 @@
  *
  *   tkt:ev:<event>          -> event JSON (written once)
  *   tkt:ev:<event>:t        -> hash ticket id -> ticket JSON
- *   tkt:ev:<event>:in       -> hash ticket id -> check-in JSON (first write wins)
+ *   tkt:ev:<event>:in       -> hash ticket id -> check-in JSON (first write wins; for a pass, the last visit)
+ *   tkt:ev:<place>:inv      -> hash invite token -> invite JSON (a pass's single-use invitations)
+ *   tkt:ev:<place>:v        -> hash pass id -> number of visits
  */
 import { createHash, createPublicKey, randomBytes, timingSafeEqual, verify as cverify } from 'node:crypto';
 
-export interface TicketEvent { id: string; name: string; moonmark: string | null; start_utc: string | null; door: string; created: string; max: number }
-export interface Ticket { id: string; event: string; pub: string; key_sha256: string; name: string | null; moonmark: string; signed_url: string | null; created: string }
+/** kind 'pass': a place with members (a gym, a club). Passes are used again and again; passback_min stops one pass
+ *  letting a second person in right after the first. */
+export interface TicketEvent { id: string; name: string; moonmark: string | null; start_utc: string | null; door: string; created: string; max: number; kind?: 'event' | 'pass'; passback_min?: number }
+export interface Ticket { id: string; event: string; pub: string; key_sha256: string; name: string | null; moonmark: string; signed_url: string | null; created: string; expires?: string | null; revoked?: string | null }
+/** A single-use invitation to become a member: whoever opens it first binds the pass to their phone. */
+export interface Invite { token: string; name: string | null; days: number | null; created: string }
 export interface CheckIn { at: string; moonmark: string | null; signed_url: string | null }
 
 export interface TicketStore {
@@ -28,6 +34,14 @@ export interface TicketStore {
   checkIn(event: string, id: string, c: CheckIn): Promise<{ first: boolean; checkin: CheckIn }>;
   getCheckIn(event: string, id: string): Promise<CheckIn | null>;
   checkIns(event: string): Promise<Record<string, CheckIn>>;
+  // passes
+  putTicket(t: Ticket): Promise<void>;                              // update a member (renew, cancel)
+  addInvite(event: string, inv: Invite): Promise<void>;
+  takeInvite(event: string, token: string): Promise<Invite | null>;  // once: the first caller gets it
+  invites(event: string): Promise<Invite[]>;
+  dropInvite(event: string, token: string): Promise<boolean>;
+  visit(event: string, id: string, c: CheckIn): Promise<number>;     // records a visit, returns the member's visit count
+  visits(event: string): Promise<Record<string, number>>;
 }
 
 export const WINDOW_MS = 5000;          // the QR changes every 5 seconds
@@ -56,6 +70,11 @@ export const ticketStatement = (ev: TicketEvent, ticketId: string, keySha: strin
   ['moon-ticket/1', 'event:' + ev.id, 'name:' + ev.name, 'ticket:' + ticketId, 'key:' + keySha].join('\n');
 /** What Moon signs when a guest is checked in. */
 export const checkInStatement = (eventId: string, ticketId: string) => ['moon-checkin/1', 'event:' + eventId, 'ticket:' + ticketId].join('\n');
+/** What Moon signs when it issues a member's pass, and at each visit. */
+export const passStatement = (ev: TicketEvent, id: string, keySha: string, expires: string | null) =>
+  ['moon-pass/1', 'place:' + ev.id, 'name:' + ev.name, 'pass:' + id, 'key:' + keySha, 'expires:' + (expires ?? 'never')].join('\n');
+export const visitStatement = (placeId: string, passId: string, n: number) => ['moon-visit/1', 'place:' + placeId, 'pass:' + passId, 'visit:' + n].join('\n');
+export const MAX_MEMBERS = 20_000;
 /** What the guest's phone signs for each code it shows. */
 export const codeMessage = (eventId: string, ticketId: string, w: number) => `moon-ticket-code/1|${eventId}|${ticketId}|${w}`;
 
@@ -86,7 +105,17 @@ export function memoryTickets(): TicketStore {
   const evs = new Map<string, TicketEvent>(), tks = new Map<string, Map<string, Ticket>>(), ins = new Map<string, Map<string, CheckIn>>();
   const T = (e: string) => { if (!tks.has(e)) tks.set(e, new Map()); return tks.get(e)!; };
   const I = (e: string) => { if (!ins.has(e)) ins.set(e, new Map()); return ins.get(e)!; };
+  const invs = new Map<string, Map<string, Invite>>(), vis = new Map<string, Map<string, number>>();
+  const V = (e: string) => { if (!invs.has(e)) invs.set(e, new Map()); return invs.get(e)!; };
+  const N = (e: string) => { if (!vis.has(e)) vis.set(e, new Map()); return vis.get(e)!; };
   return {
+    async putTicket(t) { T(t.event).set(t.id, t); },
+    async addInvite(e, inv) { V(e).set(inv.token, inv); },
+    async takeInvite(e, tok) { const i = V(e).get(tok) ?? null; if (i) V(e).delete(tok); return i; },
+    async invites(e) { return [...V(e).values()]; },
+    async dropInvite(e, tok) { return V(e).delete(tok); },
+    async visit(e, id, c) { I(e).set(id, c); const n = (N(e).get(id) ?? 0) + 1; N(e).set(id, n); return n; },
+    async visits(e) { return Object.fromEntries(N(e)); },
     async putEvent(ev) { if (evs.has(ev.id)) return false; evs.set(ev.id, ev); return true; },
     async getEvent(id) { return evs.get(id) ?? null; },
     async addTicket(t) { T(t.event).set(t.id, t); return T(t.event).size; },
@@ -114,6 +143,17 @@ export function upstashTickets(url: string, token: string): TicketStore {
     return out;
   };
   return {
+    async putTicket(t) { await call(['HSET', K(t.event) + ':t', t.id, JSON.stringify(t)]); },
+    async addInvite(e, inv) { await call(['HSET', K(e) + ':inv', inv.token, JSON.stringify(inv)]); },
+    async takeInvite(e, tok) {
+      const r = (await call(['HGET', K(e) + ':inv', tok])) as string | null;
+      if (!r) return null;
+      return Number(await call(['HDEL', K(e) + ':inv', tok])) === 1 ? (JSON.parse(r) as Invite) : null;   // only one phone wins
+    },
+    async invites(e) { return Object.values(hashAll<Invite>(await call(['HGETALL', K(e) + ':inv']))); },
+    async dropInvite(e, tok) { return Number(await call(['HDEL', K(e) + ':inv', tok])) === 1; },
+    async visit(e, id, c) { await call(['HSET', K(e) + ':in', id, JSON.stringify(c)]); return Number(await call(['HINCRBY', K(e) + ':v', id, 1])); },
+    async visits(e) { const a = ((await call(['HGETALL', K(e) + ':v'])) as string[]) || []; const o: Record<string, number> = {}; for (let i = 0; i + 1 < a.length; i += 2) o[a[i]] = Number(a[i + 1]); return o; },
     async putEvent(ev) { return (await call(['SET', K(ev.id), JSON.stringify(ev), 'NX'])) === 'OK'; },
     async getEvent(id) { const r = (await call(['GET', K(id)])) as string | null; return r ? (JSON.parse(r) as TicketEvent) : null; },
     async addTicket(t) { await call(['HSET', K(t.event) + ':t', t.id, JSON.stringify(t)]); return Number(await call(['HLEN', K(t.event) + ':t'])); },

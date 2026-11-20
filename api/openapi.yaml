@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moon API
-  version: 1.9.0
+  version: 1.10.0
   summary: The open standard for time. The worldwide timestamp, locked to the moon.
   license: { name: MIT, identifier: MIT }
   description: |
@@ -263,6 +263,65 @@ paths:
       parameters: [{ name: event, in: path, required: true, schema: { type: string } }]
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key, ticket, w, sig], properties: { key: { type: string }, ticket: { type: string }, w: { type: integer }, sig: { type: string }, late: { type: boolean } } } } } }
       responses: { '200': { description: 'ok true with name, checked_in, moonmark and signed_url; or ok false with reason: no_ticket, stale_code, wrong_phone, bad_code, already_in' }, '403': { description: Wrong door key } }
+  /v1/passes:
+    post:
+      summary: Open a place (a gym, a club) for member passes. Returns its id, a key, and the members and door links
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [name], properties: { name: { type: string, maxLength: 80 }, passback_min: { type: integer, minimum: 0, maximum: 1440, default: 30 } } } } }
+      responses: { '200': { description: 'place, key, links.members, links.door' }, '400': { $ref: '#/components/responses/BadRequest' } }
+  /v1/passes/{place}:
+    get:
+      summary: A place and how many members it has
+      parameters: [{ name: place, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 'place, members, server_ms' }, '404': { description: No such place } }
+  /v1/passes/{place}/invite:
+    post:
+      summary: A single-use invite link that becomes one member's pass
+      parameters: [{ name: place, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key], properties: { key: { type: string }, name: { type: string }, days: { type: integer, nullable: true, description: '1 to 3660, null for no end date, default 365' } } } } } }
+      responses: { '200': { description: 'invite (token, name, days, created) and link' }, '403': { description: Wrong key } }
+  /v1/passes/{place}/join:
+    post:
+      summary: The member's phone takes an invite; Moon signs a pass bound to its P-256 key
+      parameters: [{ name: place, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [invite, pub], properties: { invite: { type: string }, pub: { type: string }, name: { type: string } } } } } }
+      responses: { '200': { description: 'pass (with expires), place, statement (moon-pass/1), receipt, window_ms, server_ms' }, '410': { description: The invite was already used or withdrawn } }
+  /v1/passes/{place}/members:
+    post:
+      summary: Every member with status, visits and last visit, and invites not yet used
+      parameters: [{ name: place, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key], properties: { key: { type: string } } } } } }
+      responses: { '200': { description: 'place, members, invites' }, '403': { description: Wrong key } }
+  /v1/passes/{place}/renew:
+    post:
+      summary: Extend a membership, from its end date or from today if it has ended; also restores a cancelled one
+      parameters: [{ name: place, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key, pass], properties: { key: { type: string }, pass: { type: string }, days: { type: integer, nullable: true } } } } } }
+      responses: { '200': { description: 'pass and status' } }
+  /v1/passes/{place}/cancel:
+    post:
+      summary: End a membership now, or withdraw an unused invite
+      parameters: [{ name: place, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key], properties: { key: { type: string }, pass: { type: string }, invite: { type: string } } } } } }
+      responses: { '200': { description: 'pass and status, or ok for an invite' } }
+  /v1/passes/{place}/door:
+    post:
+      summary: The member list for a door, with each phone's public key, end date, cancellation and last visit
+      parameters: [{ name: place, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key], properties: { key: { type: string } } } } } }
+      responses: { '200': { description: 'event, kind pass, passback_min, window_ms, window_slack, server_ms, tickets' } }
+  /v1/passes/{place}/checkin:
+    post:
+      summary: A visit with the member's live code. Signed by Moon as moon-visit/1
+      parameters: [{ name: place, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [key, ticket, w, sig], properties: { key: { type: string }, ticket: { type: string }, w: { type: integer }, sig: { type: string }, late: { type: boolean } } } } } }
+      responses: { '200': { description: 'ok true with visits and signed_url; or ok false with reason: stale_code, wrong_phone, just_in, expired, cancelled, no_pass, bad_code' } }
+  /v1/passes/{place}/{pass}:
+    get:
+      summary: How a pass stands, for the member's phone
+      parameters: [{ name: place, in: path, required: true, schema: { type: string } }, { name: pass, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 'pass, place, status (active, expired, cancelled), visits, last_visit, last_visit_url' } }
   /v1/verify:
     post:
       summary: Check a receipt, and optionally that it matches your content

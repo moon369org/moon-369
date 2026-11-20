@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.10.0 (Moon 05, Lune 10, Year 1928)
+
+- **Passes**: member passes for gyms, clubs and coworking spaces, built on tickets. `POST /v1/passes` opens a place and returns its key (Moon keeps only its SHA-256). `POST /v1/passes/{place}/invite` makes a single-use invite; `POST /v1/passes/{place}/join` binds it to a phone's P-256 key and Moon signs `moon-pass/1` (place, name, pass, key fingerprint, end date). A pass shows the same live code as a ticket and is used at every visit until it ends or is cancelled. `POST /v1/passes/{place}/checkin` refuses a pass that came in less than `passback_min` minutes ago (default 30) and signs each visit as `moon-visit/1`.
+- **`POST /v1/passes/{place}/members`**, **`/renew`**, **`/cancel`**, **`/door`** (owner, with the key) and **`GET /v1/passes/{place}/{pass}`** (the member's phone).
+
 ## 1.9.0 (Moon 05, Lune 10, Year 1928)
 
 - **Tickets**: tickets that only work on the phone they were issued to. `POST /v1/tickets` opens a ticketed event and returns a door key (Moon keeps only its SHA-256). A guest's phone makes its own P-256 key pair and sends the public half to `POST /v1/tickets/{event}/issue`; Moon signs a `moon-ticket/1` statement naming the event, the ticket and the key's fingerprint. At the door the phone shows a code that changes every 5 seconds: the ticket, the window number (`floor(unix_ms / 5000)`) and the phone's ECDSA P-256 signature over `moon-ticket-code/1|{event}|{ticket}|{window}`. `POST /v1/tickets/{event}/checkin` accepts a code within 3 windows of now, checks the guest in once, and signs a `moon-checkin/1` Moonmark. A screenshot is stale within seconds, and no other phone can make the next code.

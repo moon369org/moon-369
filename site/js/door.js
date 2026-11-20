@@ -9,7 +9,7 @@
   var $ = function (s) { return document.querySelector(s); };
   var T = function (s, v) { if (window.MoonT) return window.MoonT(s, v); return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; }) : s; };
   var unb64u = function (s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; var b = atob(s), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; };
-  var ev = '', key = '', list = {}, keys = {}, WIN = 5000, SLACK = 3, skew = 0, recent = {}, queue = [], scanning = false, busy = false;
+  var ev = '', key = '', base = '/v1/tickets/', pass = false, passback = 0, list = {}, keys = {}, WIN = 5000, SLACK = 3, skew = 0, recent = {}, queue = [], scanning = false, busy = false;
   var now = function () { return Date.now() + skew; };
 
   function doors() { try { return JSON.parse(localStorage.getItem('moonDoors') || '{}'); } catch (e) { return {}; } }
@@ -19,22 +19,28 @@
   // ---- the guest list, for checking codes here ----
   function load() {
     var t0 = Date.now();
-    return fetch(API + '/v1/tickets/' + ev + '/door', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key }), cache: 'no-store' })
+    // The same door runs an event's tickets or a place's member passes: ask for an event first, then a place.
+    return fetch(API + base + ev + '/door', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key }), cache: 'no-store' })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw Object.assign(new Error((j.error && j.error.message) || 'Error'), { status: r.status }); return j; }); })
+      .then(null, function (e) { if (e && e.status === 404 && base === '/v1/tickets/') { base = '/v1/passes/'; return load(); } throw e; })
       .then(function (j) {
+        if (!j || !j.tickets) return;   // the retry already did the work
         skew = j.server_ms - (t0 + Date.now()) / 2; WIN = j.window_ms || WIN; SLACK = j.window_slack || SLACK;
+        pass = j.kind === 'pass'; passback = (j.passback_min || 0) * 60000;
+        if (pass) { $('[data-d-inl]').textContent = T('TODAY'); $('[data-d-alll]').textContent = T('MEMBERS'); }
         $('[data-d-name]').textContent = j.event.name; document.title = j.event.name + ' · Door · Moon';
-        j.tickets.forEach(function (t) { var had = list[t.id]; list[t.id] = t; if (had && had.local_in && !t.checked_in) t.local_in = had.local_in; });
-        try { localStorage.setItem('moonDoorList:' + ev, JSON.stringify({ name: j.event.name, tickets: list, skew: skew })); } catch (e) {}
+        j.tickets.forEach(function (t) { var had = list[t.id]; list[t.id] = t; if (had && had.local_in && (!t.checked_in || had.local_in > t.checked_in)) t.local_in = had.local_in; });
+        try { localStorage.setItem('moonDoorList:' + ev, JSON.stringify({ name: j.event.name, tickets: list, skew: skew, base: base, pass: pass, passback: passback })); } catch (e) {}
         counts(); $('[data-d-net]').textContent = T('LIVE');
         flush();
       }).catch(function (e) {
-        if (e && e.status === 403) { $('[data-d-main]').hidden = true; msg(T('This door link has the wrong key for this event. Use the door link you got when you made the event.')); throw e; }
+        if (e && e.status === 403) { $('[data-d-main]').hidden = true; msg(T('This door link has the wrong key. Use the door link you got when you made the event or place.')); throw e; }
         $('[data-d-net]').textContent = T('SAVED');
       });
   }
   function counts() {
-    var all = 0, inn = 0; for (var k in list) { all++; if (list[k].checked_in || list[k].local_in) inn++; }
+    var all = 0, inn = 0, today = new Date().toDateString();
+    for (var k in list) { all++; var x = list[k], last = x.local_in || x.checked_in; if (pass ? last && new Date(last).toDateString() === today : last) inn++; }
     $('[data-d-in]').textContent = inn.toLocaleString(); $('[data-d-all]').textContent = all.toLocaleString();
   }
 
@@ -50,9 +56,13 @@
     stale_code: 'Old code: a screenshot, or a phone clock far off. Ask to see the live ticket.',
     wrong_phone: 'This code wasn’t made by the phone this ticket belongs to.',
     bad_code: 'Not a valid ticket code.', no_ticket: 'Not a ticket for this event.', other_event: 'This ticket is for a different event.',
-    already_in: 'Already checked in'
+    already_in: 'Already checked in', cancelled: 'This membership was cancelled.', no_pass: 'Not a pass for this place.'
   };
   function result(kind, big, name, small) {
+    if (pass) {   // the same door words, for a place's member passes
+      big = big === T('NO TICKET') ? T('NO PASS') : big === T('WRONG EVENT') ? T('WRONG PLACE') : big;
+      small = String(small || '').replace(/\bticket\b/g, 'pass').replace(/\bevent\b/g, 'place');
+    }
     var r = $('[data-d-res]'); r.className = 'dr-res ' + kind; r.hidden = false;
     $('[data-d-rb]').textContent = big; $('[data-d-rn]').textContent = name || ''; $('[data-d-rs]').textContent = small || '';
     try { if (navigator.vibrate) navigator.vibrate(kind === 'ok' ? 80 : [60, 60, 60]); } catch (e) {}
@@ -76,17 +86,26 @@
       load().then(function () { busy = false; if (list[tid]) handle(text); else result('no', T('NO TICKET'), '', T(WHY.no_ticket)); }, function () { busy = false; result('no', T('NO TICKET'), '', T(WHY.no_ticket)); });
       return;
     }
-    if (t.checked_in || t.local_in) return result('no', T('ALREADY IN'), t.name, T('Checked in at {t}', { t: at(t.checked_in || t.local_in) }));
+    var last = t.local_in && (!t.checked_in || t.local_in > t.checked_in) ? t.local_in : t.checked_in;
+    if (pass) {
+      if (t.cancelled) return result('no', T('CANCELLED'), t.name, T(WHY.cancelled));
+      if (t.expires && Date.parse(t.expires) < now()) return result('no', T('EXPIRED'), t.name, T('Membership ended {d}', { d: new Date(t.expires).toLocaleDateString() }));
+      if (passback && last && now() - Date.parse(last) < passback) return result('no', T('JUST IN'), t.name, T('This pass came in at {t}. One person per pass.', { t: at(last) }));
+    } else if (last) return result('no', T('ALREADY IN'), t.name, T('Checked in at {t}', { t: at(last) }));
     busy = true;
     verifyHere(t, w, sig).then(function (v) {
       if (v !== 'ok') { result('no', v === 'stale_code' ? T('OLD CODE') : T('NOT VALID'), t.name, T(WHY[v])); return; }
-      return fetch(API + '/v1/tickets/' + ev + '/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, ticket: tid, w: w, sig: sig }) })
+      return fetch(API + base + ev + '/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, ticket: tid, w: w, sig: sig }) })
         .then(function (r) { return r.json(); }).then(function (j) {
-          if (j.ok) { t.checked_in = j.checked_in; counts(); result('ok', T('WELCOME'), t.name, T('Checked in · signed by Moon')); }
-          else { if (j.checked_in) t.checked_in = j.checked_in; counts(); result('no', j.reason === 'already_in' ? T('ALREADY IN') : j.reason === 'stale_code' ? T('OLD CODE') : T('NOT VALID'), t.name, j.reason === 'already_in' ? T('Checked in at {t}', { t: at(j.checked_in) }) : T(WHY[j.reason] || j.message || '')); }
+          if (j.ok) { t.checked_in = j.checked_in; t.visits = j.visits; counts(); result('ok', T('WELCOME'), t.name, pass ? T('Visit {n} · signed by Moon', { n: j.visits }) : T('Checked in · signed by Moon')); }
+          else {
+            if (j.checked_in) t.checked_in = j.checked_in; if (j.last_visit) t.checked_in = j.last_visit; counts();
+            var BIG = { already_in: 'ALREADY IN', stale_code: 'OLD CODE', just_in: 'JUST IN', cancelled: 'CANCELLED', expired: 'EXPIRED' };
+            result('no', T(BIG[j.reason] || 'NOT VALID'), t.name, j.reason === 'already_in' ? T('Checked in at {t}', { t: at(j.checked_in) }) : j.reason === 'just_in' ? T('This pass came in at {t}. One person per pass.', { t: at(j.last_visit) }) : T(WHY[j.reason] || j.message || ''));
+          }
         }, function () {
           // No signal: the code checked out here, so let them in and send it when the door is back online.
-          t.local_in = new Date().toISOString(); queue.push({ ticket: tid, w: w, sig: sig, at: t.local_in }); saveQ(); counts();
+          t.local_in = new Date().toISOString(); queue.push({ ticket: tid, w: w, sig: sig, at: t.local_in, base: base }); saveQ(); counts();
           result('ok', T('WELCOME'), t.name, T('Checked here. It reaches Moon when the signal is back.'));
         });
     }).then(function () { busy = false; }, function () { busy = false; });
@@ -97,7 +116,7 @@
     if (!queue.length) return;
     var q = queue.slice(); queue = []; saveQ();
     q.forEach(function (x) {
-      fetch(API + '/v1/tickets/' + ev + '/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, ticket: x.ticket, w: x.w, sig: x.sig, late: true }) })
+      fetch(API + (x.base || base) + ev + '/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, ticket: x.ticket, w: x.w, sig: x.sig, late: true }) })
         .then(function (r) { return r.json(); }).then(function (j) { if (j.ok && list[x.ticket]) list[x.ticket].checked_in = j.checked_in; }, function () { queue.push(x); saveQ(); });
     });
   }
@@ -170,7 +189,7 @@
     }
     if (q.get('c')) history.replaceState(null, '', '/door#' + ev + '.' + key);   // a code opened in the door's own browser: just scan
     $('[data-d-main]').hidden = false;
-    try { var cached = JSON.parse(localStorage.getItem('moonDoorList:' + ev) || 'null'); if (cached) { list = cached.tickets || {}; skew = cached.skew || 0; $('[data-d-name]').textContent = cached.name; counts(); } } catch (e) {}
+    try { var cached = JSON.parse(localStorage.getItem('moonDoorList:' + ev) || 'null'); if (cached) { list = cached.tickets || {}; skew = cached.skew || 0; base = cached.base || base; pass = !!cached.pass; passback = cached.passback || 0; $('[data-d-name]').textContent = cached.name; if (pass) { $('[data-d-inl]').textContent = T('TODAY'); $('[data-d-alll]').textContent = T('MEMBERS'); } counts(); } } catch (e) {}
     try { queue = JSON.parse(localStorage.getItem('moonDoorQ:' + ev) || '[]'); } catch (e) { queue = []; }
     $('[data-d-start]').addEventListener('click', function () { startCam(); });
     $('[data-d-cam]').addEventListener('change', function () { var id = this.value; try { localStorage.setItem('moonDoorCam', id); } catch (e) {} startCam(id); });

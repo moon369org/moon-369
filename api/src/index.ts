@@ -16,7 +16,7 @@ import { mcp } from './mcp.js';
 import { eventLinks, eventIcs, cleanEventName } from './event.js';
 import { RESEAL, resealFingerprint } from './reseal.js';
 import { parseStatement, statementSha, newPrintIds, type EditionStore } from './editions.js';
-import { type TicketStore, type TicketEvent, type Ticket, newId, sha256hex, isId, cleanName, p256, ticketStatement, checkInStatement, checkCode, doorOk, MAX_TICKETS, WINDOW_MS, WINDOW_SLACK } from './tickets.js';
+import { type TicketStore, type TicketEvent, type Ticket, newId, sha256hex, isId, cleanName, p256, ticketStatement, checkInStatement, checkCode, doorOk, MAX_TICKETS, WINDOW_MS, WINDOW_SLACK, passStatement, visitStatement, MAX_MEMBERS } from './tickets.js';
 import { makeRegistration, publicRegistration, isPhash, phashKind, hamming, bands, SIMILAR_BITS, registrantSlug, type RegistryStore, type Registration } from './registry.js';
 import { svgToPng } from './png.js';
 import { Signer, verifyReceipt, isSha256Hex, RECEIPT_V1, RECEIPT_V2, RECEIPT_V3, RECEIPT_VERSIONS, PQ_ALG, type Receipt } from './receipt.js';
@@ -515,15 +515,149 @@ async function tsaResponse(req: Request, env: Env, planHdr: Record<string, strin
   return reply(der, mark ? { 'X-Moon-Moonmark': mark, ...(moonmarkUrl ? { 'X-Moon-Url': moonmarkUrl } : {}) } : {});
 }
 
+type Pub = (ev: TicketEvent) => Record<string, unknown>;
+/** Passes: a place (a gym, a club, a coworking space) and its members. A pass is bound to one phone like a ticket,
+ *  but it is used again and again, until it expires or is cancelled. Members join only through a single-use invite. */
+async function passRoute(req: Request, env: Env, parts: string[], T: TicketStore, hdr: Record<string, string>, gate: Gate,
+  pub: Pub, tpub: (t: Ticket) => Record<string, unknown>, evOr404: (id: string) => Promise<TicketEvent>): Promise<Response> {
+  const post = req.method === 'POST', now = Date.now();
+  const needPost = () => { if (!post) throw new HttpError(405, 'method_not_allowed', 'Use POST'); };
+  const owner = async (ev: TicketEvent) => { const body = await readJson(req, 4096); if (!doorOk(ev, body.key)) throw new HttpError(403, 'bad_key', 'That key is not for this place'); return body; };
+  const days = (v: unknown) => { if (v === null || v === undefined || v === 0) return null; const n = Number(v); if (!Number.isInteger(n) || n < 1 || n > 3660) throw new HttpError(400, 'bad_param', 'days: 1 to 3660, or null for no end'); return n; };
+  const until = (d: number | null, from = now) => (d === null ? null : new Date(from + d * 86_400_000).toISOString());
+  const state = (t: Ticket) => (t.revoked ? 'cancelled' : t.expires && Date.parse(t.expires) < now ? 'expired' : 'active');
+  const link = (ev: TicketEvent, tok: string) => `https://moon369.org/pass?p=${ev.id}&i=${tok}`;
+
+  // POST /v1/passes  {name, passback_min?}: a place, and the owner's key (it manages members and runs the door).
+  if (parts.length === 0) {
+    needPost();
+    const body = await readJson(req, 4096), name = cleanName(body.name);
+    if (!name) throw new HttpError(400, 'bad_param', 'name: what the place is called, up to 80 characters');
+    const pb = body.passback_min === undefined ? 30 : Number(body.passback_min);
+    if (!Number.isInteger(pb) || pb < 0 || pb > 1440) throw new HttpError(400, 'bad_param', 'passback_min: 0 to 1440 minutes');
+    const key = newId(24), ev: TicketEvent = { id: newId(9), name, moonmark: null, start_utc: null, door: sha256hex(key), created: new Date().toISOString(), max: MAX_MEMBERS, kind: 'pass', passback_min: pb };
+    await T.putEvent(ev);
+    return json({ place: pub(ev), key, links: { members: `https://moon369.org/members#${ev.id}.${key}`, door: `https://moon369.org/door#${ev.id}.${key}` },
+      note: 'Keep the key private: it adds and cancels members and checks them in. Moon keeps only its fingerprint.' }, 200, hdr);
+  }
+  const ev = await evOr404(parts[0]);
+  const sub = parts[1];
+
+  // GET /v1/passes/<place>
+  if (parts.length === 1) {
+    const c = await T.count(ev.id);
+    return json({ place: pub(ev), members: c.tickets, server_ms: now }, 200, hdr);
+  }
+
+  // POST /v1/passes/<place>/invite  {key, name?, days?}: a single-use link that becomes one member's pass.
+  if (sub === 'invite' && parts.length === 2) {
+    needPost();
+    const body = await owner(ev);
+    const inv = { token: newId(12), name: cleanName(body.name, 60) || null, days: days(body.days === undefined ? 365 : body.days), created: new Date().toISOString() };
+    await T.addInvite(ev.id, inv);
+    return json({ invite: inv, link: link(ev, inv.token) }, 200, hdr);
+  }
+
+  // POST /v1/passes/<place>/join  {invite, pub, name?}: the member's phone takes the invite. Moon signs a pass bound to its key.
+  if (sub === 'join' && parts.length === 2) {
+    needPost();
+    if (!env.SIGNER) throw new HttpError(503, 'signing_unavailable', 'Signing is not configured on this deployment');
+    const body = await readJson(req, 4096);
+    if (!p256(body.pub)) throw new HttpError(400, 'bad_param', "pub: the phone's P-256 public key, raw uncompressed, base64url");
+    if (typeof body.invite !== 'string' || !/^[A-Za-z0-9_-]{8,24}$/.test(body.invite)) throw new HttpError(400, 'bad_param', 'invite: the token from the invite link');
+    if ((await T.count(ev.id)).tickets >= ev.max) throw new HttpError(409, 'full', 'This place has no room for more members');
+    const inv = await T.takeInvite(ev.id, body.invite);
+    if (!inv) throw new HttpError(410, 'invite_used', 'This invite was already used, or cancelled. Ask for a new one.');
+    const id = newId(9), keySha = sha256hex(Buffer.from(body.pub as string, 'base64url')), expires = until(inv.days);
+    const out = await signNow(env, sha256hex(passStatement(ev, id, keySha, expires)), undefined, whoFrom({}, gate));
+    const t: Ticket = { id, event: ev.id, pub: body.pub as string, key_sha256: keySha, name: inv.name || cleanName(body.name, 60) || null, moonmark: out.receipt.moonmark,
+      signed_url: (out as { signed_url?: string }).signed_url ?? null, created: new Date().toISOString(), expires, revoked: null };
+    await T.addTicket(t);
+    return json({ pass: tpub(t), place: pub(ev), statement: passStatement(ev, id, keySha, expires), receipt: out.receipt, window_ms: WINDOW_MS, server_ms: Date.now() }, 200, hdr);
+  }
+
+  // POST /v1/passes/<place>/members  {key}: every member, their visits, and invites not yet used.
+  if (sub === 'members' && parts.length === 2) {
+    needPost(); await owner(ev);
+    const [ts, ins, vs, invs] = await Promise.all([T.tickets(ev.id), T.checkIns(ev.id), T.visits(ev.id), T.invites(ev.id)]);
+    return json({ place: pub(ev), server_ms: now,
+      members: ts.sort((a, b) => b.created.localeCompare(a.created)).map((t) => ({ ...tpub(t), status: state(t), visits: vs[t.id] ?? 0, last_visit: ins[t.id]?.at ?? null })),
+      invites: invs.sort((a, b) => b.created.localeCompare(a.created)).map((i) => ({ ...i, link: link(ev, i.token) })) }, 200, hdr);
+  }
+
+  // POST /v1/passes/<place>/renew  {key, pass, days}: extend from today, or from the current end if that is later.
+  // POST /v1/passes/<place>/cancel {key, pass} or {key, invite}: end a membership now, or withdraw an invite.
+  if ((sub === 'renew' || sub === 'cancel') && parts.length === 2) {
+    needPost();
+    const body = await owner(ev);
+    if (sub === 'cancel' && typeof body.invite === 'string') return json({ ok: await T.dropInvite(ev.id, body.invite) }, 200, hdr);
+    const t = isId(body.pass) ? await T.getTicket(ev.id, body.pass) : null;
+    if (!t) throw new HttpError(404, 'not_found', 'No such member');
+    if (sub === 'cancel') t.revoked = new Date().toISOString();
+    else { const d = days(body.days); const from = t.expires && Date.parse(t.expires) > now ? Date.parse(t.expires) : now; t.expires = d === null ? null : until(d, from); t.revoked = null; }
+    await T.putTicket(t);
+    return json({ pass: tpub(t), status: state(t) }, 200, hdr);
+  }
+
+  // POST /v1/passes/<place>/door  {key}: members, for the door's own checks.
+  if (sub === 'door' && parts.length === 2) {
+    needPost(); await owner(ev);
+    const [ts, ins, vs] = await Promise.all([T.tickets(ev.id), T.checkIns(ev.id), T.visits(ev.id)]);
+    return json({ event: pub(ev), kind: 'pass', passback_min: ev.passback_min ?? 0, window_ms: WINDOW_MS, window_slack: WINDOW_SLACK, server_ms: now,
+      tickets: ts.map((t) => ({ id: t.id, pub: t.pub, name: t.name, moonmark: t.moonmark, expires: t.expires ?? null, cancelled: t.revoked ?? null, visits: vs[t.id] ?? 0, checked_in: ins[t.id]?.at ?? null })) }, 200, hdr);
+  }
+
+  // POST /v1/passes/<place>/checkin  {key, ticket, w, sig, late?}: a visit. Moon signs each one.
+  if (sub === 'checkin' && parts.length === 2) {
+    needPost();
+    const body = await owner(ev);
+    const t = isId(body.ticket) ? await T.getTicket(ev.id, body.ticket) : null;
+    if (!t) return json({ ok: false, reason: 'no_pass', message: 'Not a pass for this place' }, 200, hdr);
+    const code = checkCode(t, body.w, body.sig, now, body.late === true);
+    const last = await T.getCheckIn(ev.id, t.id);
+    const base = { name: t.name, expires: t.expires ?? null, last_visit: last?.at ?? null };
+    if (!code.ok) return json({ ok: false, reason: code.reason, ...base, message: code.reason === 'stale_code' ? 'This code is old: a screenshot, or a phone clock far off. Ask to see the live pass.' : code.reason === 'wrong_phone' ? 'This code was not made by the phone the pass belongs to' : 'Not a valid pass code' }, 200, hdr);
+    const st = state(t);
+    if (st === 'cancelled') return json({ ok: false, reason: 'cancelled', ...base, message: 'This membership was cancelled' }, 200, hdr);
+    if (st === 'expired') return json({ ok: false, reason: 'expired', ...base, message: 'This membership has ended' }, 200, hdr);
+    const pb = (ev.passback_min ?? 0) * 60_000;
+    if (body.late !== true && pb && last && now - Date.parse(last.at) < pb) return json({ ok: false, reason: 'just_in', ...base, message: 'This pass was just used to come in' }, 200, hdr);
+    const n = ((await T.visits(ev.id))[t.id] ?? 0) + 1;
+    let mm: string | null = null, url: string | null = null;
+    if (env.SIGNER) { try { const s = await signNow(env, sha256hex(visitStatement(ev.id, t.id, n)), undefined, whoFrom({}, gate)); mm = s.receipt.moonmark; url = (s as { signed_url?: string }).signed_url ?? null; } catch { /* the visit stands without its Moonmark */ } }
+    const at = new Date().toISOString();
+    const visits = await T.visit(ev.id, t.id, { at, moonmark: mm, signed_url: url });
+    return json({ ok: true, name: t.name, ticket: t.id, visits, checked_in: at, expires: t.expires ?? null, moonmark: mm, signed_url: url }, 200, hdr);
+  }
+
+  // GET /v1/passes/<place>/<pass>: the member's phone asks how its pass stands.
+  if (parts.length === 2 && isId(sub)) {
+    const t = await T.getTicket(ev.id, sub);
+    if (!t) throw new HttpError(404, 'not_found', 'No such pass');
+    const [last, vs] = await Promise.all([T.getCheckIn(ev.id, t.id), T.visits(ev.id)]);
+    return json({ pass: tpub(t), place: pub(ev), status: state(t), visits: vs[t.id] ?? 0, last_visit: last?.at ?? null, last_visit_url: last?.signed_url ?? null, window_ms: WINDOW_MS, server_ms: now }, 200, hdr);
+  }
+  throw new HttpError(404, 'not_found', 'Unknown passes route');
+}
+
 /** Ticketed events. A ticket is a Moonmark bound to the guest's phone; the door checks a code only that phone can make. */
 async function ticketRoute(req: Request, env: Env, path: string, planHdr: Record<string, string>, gate: Gate): Promise<Response> {
   if (!env.TICKETS) throw new HttpError(503, 'tickets_unavailable', 'Tickets are not configured on this deployment');
   const T = env.TICKETS, hdr = { 'Cache-Control': 'no-store', ...planHdr };
-  const parts = path.split('/').slice(3);   // after /v1/tickets
-  const pub = (ev: TicketEvent) => ({ id: ev.id, name: ev.name, moonmark: ev.moonmark, start_utc: ev.start_utc, created: ev.created });
-  const tpub = (t: Ticket) => ({ id: t.id, event: t.event, name: t.name, key_sha256: t.key_sha256, moonmark: t.moonmark, signed_url: t.signed_url, created: t.created });
-  const evOr404 = async (id: string) => { if (!isId(id)) throw new HttpError(404, 'not_found', 'No such event'); const ev = await T.getEvent(id); if (!ev) throw new HttpError(404, 'not_found', 'No such event'); return ev; };
+  const parts = path.split('/').slice(3);   // after /v1/tickets or /v1/passes
+  const passes = path.split('/')[2] === 'passes';
+  const pub = (ev: TicketEvent) => ev.kind === 'pass'
+    ? { id: ev.id, kind: 'pass', name: ev.name, passback_min: ev.passback_min ?? 0, created: ev.created }
+    : { id: ev.id, name: ev.name, moonmark: ev.moonmark, start_utc: ev.start_utc, created: ev.created };
+  const tpub = (t: Ticket) => ({ id: t.id, event: t.event, name: t.name, key_sha256: t.key_sha256, moonmark: t.moonmark, signed_url: t.signed_url, created: t.created, ...(t.expires !== undefined ? { expires: t.expires ?? null, cancelled: t.revoked ?? null } : {}) });
+  const evOr404 = async (id: string) => {
+    if (!isId(id)) throw new HttpError(404, 'not_found', passes ? 'No such place' : 'No such event');
+    const ev = await T.getEvent(id);
+    if (!ev || (ev.kind === 'pass') !== passes) throw new HttpError(404, 'not_found', passes ? 'No such place' : 'No such event');
+    return ev;
+  };
   const post = req.method === 'POST';
+  if (passes) return passRoute(req, env, parts, T, hdr, gate, pub, tpub, evOr404);
 
   // POST /v1/tickets  {name, moonmark?, start_utc?}: a ticketed event, and the organizer's door key.
   if (parts.length === 0) {
@@ -614,11 +748,11 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
     return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, registrantOf(gate));
   }
   const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof` || path === `/${API_VERSION}/editions` || path === `/${API_VERSION}/reseal` || path === `/${API_VERSION}/reseal/verify`;
-  const either = path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`);   // tickets: GET to read, POST to change
+  const either = path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`) || path === `/${API_VERSION}/passes` || path.startsWith(`/${API_VERSION}/passes/`);   // tickets and passes: GET to read, POST to change
   if (!either && (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD')))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /v1/tickets', '/v1/tickets/{event}', 'POST /v1/tickets/{event}/issue', '/v1/tickets/{event}/{ticket}', 'POST /v1/tickets/{event}/door', 'POST /v1/tickets/{event}/checkin', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /v1/tickets', '/v1/tickets/{event}', 'POST /v1/tickets/{event}/issue', '/v1/tickets/{event}/{ticket}', 'POST /v1/tickets/{event}/door', 'POST /v1/tickets/{event}/checkin', 'POST /v1/passes', 'POST /v1/passes/{place}/invite', 'POST /v1/passes/{place}/join', 'POST /v1/passes/{place}/members', 'POST /v1/passes/{place}/renew', 'POST /v1/passes/{place}/cancel', 'POST /v1/passes/{place}/door', 'POST /v1/passes/{place}/checkin', '/v1/passes/{place}/{pass}', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   if (path.startsWith(`/${API_VERSION}/admin/`)) return adminRoute(req, env, path);
@@ -994,7 +1128,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         return json({ registered: true, valid: true, print, edition: ed.n, registered_at: ed.created, checks: h.count, first_check: h.first }, 200, { 'Cache-Control': 'no-store', ...planHdr });
       }
 
-      case path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`):
+      case path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`) || path === `/${API_VERSION}/passes` || path.startsWith(`/${API_VERSION}/passes/`):
         return await ticketRoute(req, env, path, planHdr, gate);
 
       case path === `/${API_VERSION}/reseal`: {

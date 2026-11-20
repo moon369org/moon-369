@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<link rel="preconnect" href="https://api.moon369.org" crossorigin>
+<title>Members · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#0B0B0D;color:#E9E4D8;font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.mb{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 48px);display:flex;flex-direction:column;gap:22px}
+.mb-top{display:flex;justify-content:space-between;align-items:center}.mb-top img{height:16px;display:block}
+.k{font:400 11px 'JetBrains Mono',monospace;letter-spacing:.28em;color:#8A8B8F}
+h1{margin:6px 0 0;font:700 clamp(22px,6vw,30px)/1.25 Syncopate,sans-serif;letter-spacing:.06em;text-transform:uppercase;overflow-wrap:anywhere}
+.cnt{display:flex;gap:30px;font:400 11px 'JetBrains Mono',monospace;color:#8A8B8F;letter-spacing:.16em}
+.cnt b{display:block;font:700 26px Syncopate,sans-serif;color:#E9E4D8;letter-spacing:.02em;margin-bottom:4px}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;min-height:52px;padding:0 20px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #E9E4D8;font:700 10.5px Syncopate,sans-serif;letter-spacing:.2em;text-align:center;position:relative;overflow:hidden;isolation:isolate}
+.btn::before{content:'';position:absolute;inset:0;background:#8A8B8F;transform:translateX(-101%);transition:transform .35s cubic-bezier(.2,.8,.2,1);z-index:-1}
+@media (hover:hover){.btn:hover::before{transform:none}.btn:hover{color:#0B0B0D}}
+.btn.p{background:#E9E4D8;color:#0B0B0D}
+.btn.s{min-height:40px;padding:0 14px;font-size:9.5px;border-color:#3A3B3F}
+.btn[disabled]{opacity:.5;cursor:default}
+.box{border:1px solid #24262A;background:#0E0E10;padding:20px;display:flex;flex-direction:column;gap:14px}
+.box h2{margin:0;font:700 12px Syncopate,sans-serif;letter-spacing:.2em}
+.row{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
+.in{box-sizing:border-box;width:100%;min-height:52px;padding:0 14px;background:#111214;border:1px solid #2E3035;border-radius:0;color:#E9E4D8;font:400 16px Inter,sans-serif;-webkit-appearance:none;appearance:none}
+.in:focus{outline:none;border-color:#E9E4D8}
+select.in{background-image:linear-gradient(45deg,transparent 50%,#8A8B8F 50%),linear-gradient(135deg,#8A8B8F 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 15px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
+.inv{display:grid;grid-template-columns:132px 1fr;gap:16px;align-items:center;border-top:1px solid #1C1D20;padding-top:16px}
+.inv .qr{background:#E9E4D8;border-radius:4px;overflow:hidden}.inv .qr svg{display:block;width:100%}
+.inv p{margin:0 0 10px;font-size:14px;line-height:1.55;color:#B9B6AE}
+.lk{width:100%;min-height:40px;padding:0 10px;background:#08080A;border:1px solid #24262A;color:#A2A3A7;font:400 12px 'JetBrains Mono',monospace;margin-bottom:10px}
+.two{display:flex;gap:8px;flex-wrap:wrap}.two .btn{flex:1 1 120px}
+.list{display:flex;flex-direction:column;border-top:1px solid #1C1D20}
+.m{display:flex;flex-direction:column;gap:10px;padding:16px 0;border-bottom:1px solid #1C1D20}
+.m-h{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.m-n{font-size:16px;font-weight:500;overflow-wrap:anywhere}
+.chip{font:400 10px 'JetBrains Mono',monospace;letter-spacing:.2em;padding:4px 8px;border:1px solid currentColor;white-space:nowrap}
+.chip.active{color:#7FBF8E}.chip.expired{color:#D9B26A}.chip.cancelled{color:#E07A6A}.chip.invite{color:#8A8B8F}
+.m-d{display:flex;flex-wrap:wrap;gap:4px 18px;font:400 12px 'JetBrains Mono',monospace;color:#8A8B8F}.m-d b{font-weight:400;color:#C9C6BE}
+.m-a{display:flex;gap:8px;flex-wrap:wrap}
+.m-a select{min-height:40px;font-size:13px;width:auto;padding:0 32px 0 12px}
+.msg{border:1px solid #6B5A33;background:#1A160D;color:#D9B26A;padding:14px 16px;font-size:14px;line-height:1.55}
+.note{font-size:13px;line-height:1.6;color:#8A8B8F;margin:0}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%);background:#E9E4D8;color:#0B0B0D;padding:12px 18px;font:500 14px Inter,sans-serif;z-index:20}
+[hidden]{display:none!important}
+@media (max-width:420px){.inv{grid-template-columns:1fr}.inv .qr{width:180px}}
+</style>
+<script src="/js/i18n.js" defer></script>
+</head>
+<body>
+<main class="mb">
+  <div class="mb-top"><a href="/" aria-label="Moon home"><img src="/assets/brand/logo/moon-wordmark-cream.svg" alt="Moon"></a><span class="k">MEMBERS</span></div>
+  <div class="msg" data-m-msg hidden></div>
+  <section data-m-main hidden style="display:flex;flex-direction:column;gap:22px">
+    <div><div class="k">MOON PASSES</div><h1 data-m-name>…</h1></div>
+    <div class="cnt"><div><b data-m-active>0</b>ACTIVE</div><div><b data-m-today>0</b>IN TODAY</div><div><b data-m-pending>0</b>INVITED</div></div>
+    <a class="btn p" data-m-door href="#">OPEN THE DOOR SCANNER</a>
+    <div class="box">
+      <h2>ADD A MEMBER</h2>
+      <div class="row"><input class="in" data-m-name-in maxlength="60" placeholder="Name" autocomplete="off"><select class="in" data-m-days aria-label="How long"><option value="30">1 month</option><option value="90">3 months</option><option value="365" selected>1 year</option><option value="0">No end date</option></select></div>
+      <button class="btn p" type="button" data-m-add>CREATE INVITE</button>
+      <div class="inv" data-m-inv hidden>
+        <div class="qr" data-m-invqr></div>
+        <div><p>Send this to <b data-m-invname>the member</b>. It works once: it puts their pass on their phone, and then it&#39;s spent.</p>
+        <input class="lk" data-m-invlink readonly aria-label="Invite link">
+        <div class="two"><button class="btn s" type="button" data-m-share>SHARE</button><button class="btn s" type="button" data-m-copy>COPY LINK</button></div></div>
+      </div>
+    </div>
+    <div class="k" style="margin-top:6px">MEMBERS</div>
+    <div class="list" data-m-list></div>
+    <p class="note">Keep this page&#39;s link private: it adds and cancels members and runs the door. Moon keeps only a fingerprint of its key, so save the link somewhere safe.</p>
+  </section>
+</main>
+<div class="toast" data-m-toast hidden role="status"></div>
+<script src="/js/qrcode.js" defer></script>
+<script src="/js/moon-phase.js" defer></script>
+<script src="/js/moonqr.js" defer></script>
+<script src="/js/members.js" defer></script>
+</body>
+</html>
