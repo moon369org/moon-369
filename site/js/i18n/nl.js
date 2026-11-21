@@ -1845,5 +1845,14 @@
     "in Safari, tap the Share button (the square with an arrow pointing up), scroll down, tap Add to Home Screen, then tap Add. It only works from Safari, so if you're in Chrome, switch to Safari first.": "in Safari, tik op de deelknop (het vierkant met een pijl omhoog), scrol omlaag, tik op Zet op beginscherm en dan op Voeg toe. Dit werkt alleen vanuit Safari, dus als je in Chrome zit, schakel dan eerst naar Safari.",
     "How do I add the Moon app to my Android home screen?": "Hoe zet ik de Moon-app op het startscherm van mijn Android?",
     "in Chrome. Tap Install if it's offered. If not, tap the ⋮ menu, then Add to Home screen or Install app, and confirm. Moon then opens full screen from its icon, like any other app.": "in Chrome. Tik op Installeren als dat wordt aangeboden. Zo niet, tik dan op het ⋮-menu, daarna op Toevoegen aan startscherm of App installeren, en bevestig. Moon opent daarna schermvullend vanaf het icoon, zoals elke andere app.",
+    // Sky Check place
+    "Using {place}": "Locatie: {place}",
+    "your location": "je locatie",
+    "CHANGE": "WIJZIGEN",
+    "or type your city or ZIP code": "of typ je stad of postcode",
+    "Your city or ZIP code": "Je stad of postcode",
+    "That ZIP code was not found.": "Die postcode is niet gevonden.",
+    "Could not look up that ZIP code.": "Kon die postcode niet opzoeken.",
+    "No match. Try a nearby city or a ZIP code.": "Geen resultaat. Probeer een stad in de buurt of een postcode.",
 }
 };

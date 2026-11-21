@@ -3,6 +3,7 @@
 (function () {
   var $ = function (s) { return document.querySelector(s); };
   var esc = function (x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var T = function (x, v) { return window.MoonT ? MoonT(x, v) : x.replace(/\{(\w+)\}/g, function (m, k) { return v && v[k] != null ? v[k] : m; }); };
   var INK = [233, 228, 216], loc = null, last = null;
   var p2 = function (n) { return String(n).padStart(2, '0'); };
 
@@ -54,7 +55,15 @@
 
   // Location: from the phone, or a city typed in (for when the phone won't share it).
   function placeMsg(t) { document.querySelectorAll('[data-sc-plmsg]').forEach(function (el) { el.textContent = t || ''; }); }
-  function setPlace(p) { loc = p; placeMsg(''); nowPanel(); withPlace(); renderPlaceBlocks(); }
+  function setPlace(p, keep) {
+    loc = p; placeMsg(''); nowPanel(); withPlace(); renderPlaceBlocks();
+    if (keep && p) { try { localStorage.setItem('moonPlace', JSON.stringify({ lat: p.lat, lng: p.lng, name: p.from })); } catch (e) {} }
+  }
+  // A US ZIP code, looked up from Moon's own small files (one per first two digits), so nothing is sent anywhere.
+  function zipLookup(z) {
+    return fetch('/data/zip/' + z.slice(0, 2) + '.json').then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (d) { var x = d[z]; return x ? { lat: x[0], lng: x[1], from: x[2] + ', ' + x[3] + ' ' + z } : null; });
+  }
   function askLocation(then, quiet) {
     if (!navigator.geolocation) { if (!quiet) placeMsg('This browser can\'t share your location. Type your city instead.'); if (then) then(); return; }
     if (!quiet) placeMsg('Finding you…');
@@ -68,7 +77,7 @@
     }, { maximumAge: 600000, timeout: 10000 });
   }
   function placeBlock() {
-    if (loc) return '';
+    if (loc) return '<div class="sc-pl"><div class="sc-pl-row"><span class="sc-pl-at">' + esc(T('Using {place}', { place: loc.from === 'your location' ? T('your location') : loc.from })) + '</span><button type="button" data-sc-change>' + esc(T('CHANGE')) + '</button></div></div>';
     return '<div class="sc-pl"><div class="sc-pl-row"><button type="button" data-sc-loc>USE MY LOCATION</button></div>' +
       '<input type="text" data-sc-city placeholder="or type your city" autocomplete="off" aria-label="Your city"><div class="sc-pl-list" data-sc-cities role="listbox"></div>' +
       '<span class="sc-pl-msg" data-sc-plmsg role="status"></span></div>';
@@ -77,18 +86,32 @@
     document.querySelectorAll('[data-sc-place]').forEach(function (el) { el.innerHTML = placeBlock(); bindPlace(el); });
   }
   function bindPlace(el) {
+    var ch = el.querySelector('[data-sc-change]'); if (ch) ch.onclick = function () { loc = null; renderPlaceBlocks(); var i = el.querySelector('[data-sc-city]'); if (i) i.focus(); };
     var b = el.querySelector('[data-sc-loc]'); if (b) b.onclick = function () { askLocation(); };
     var inp = el.querySelector('[data-sc-city]'), list = el.querySelector('[data-sc-cities]'), P = window.MoonPlaces;
-    if (!inp || !P) return;
-    var found = [];
-    inp.onfocus = function () { P.load(); };
-    inp.oninput = function () {
-      P.load().then(function () {
-        found = P.search(inp.value).slice(0, 6);
-        list.innerHTML = found.map(function (c, i) { return '<button type="button" data-i="' + i + '">' + esc(P.label(c)) + '</button>'; }).join('');
-        list.querySelectorAll('button').forEach(function (bt) { bt.onclick = function () { var c = found[+bt.dataset.i]; setPlace({ lat: c.lat, lng: c.lng, from: P.label(c) }); }; });
+    if (!inp) return;
+    var found = [], seq = 0;
+    var pick = function (c) { setPlace(c, true); };
+    var draw = function () {
+      list.innerHTML = found.map(function (c, i) { return '<button type="button" data-i="' + i + '">' + esc(c.from) + '</button>'; }).join('');
+      list.querySelectorAll('button').forEach(function (bt) { bt.onclick = function () { pick(found[+bt.dataset.i]); }; });
+    };
+    var lookup = function () {
+      var q = inp.value.trim(), n = ++seq; placeMsg('');
+      if (/^\d{5}$/.test(q)) {
+        return zipLookup(q).then(function (c) { if (n !== seq) return; found = c ? [c] : []; draw(); if (!c) placeMsg(T('That ZIP code was not found.')); })
+          .catch(function () { if (n === seq) placeMsg(T('Could not look up that ZIP code.')); });
+      }
+      if (/^\d+$/.test(q) || !P) { found = []; draw(); return Promise.resolve(); }
+      return P.load().then(function () {
+        if (n !== seq) return;
+        found = P.search(q).slice(0, 6).map(function (c) { return { lat: c.lat, lng: c.lng, from: P.label(c) }; }); draw();
+        if (q.length > 2 && !found.length) placeMsg(T('No match. Try a nearby city or a ZIP code.'));
       });
     };
+    inp.onfocus = function () { if (P) P.load(); };
+    inp.oninput = lookup;
+    inp.onkeydown = function (e) { if (e.key !== 'Enter') return; e.preventDefault(); lookup().then(function () { if (found[0]) pick(found[0]); }); };
   }
 
   var photo = null, sealed = null, sealing = false;
@@ -276,8 +299,10 @@
 
   function start() {
     nowPanel(); setInterval(nowPanel, 60000);
+    try { var saved = JSON.parse(localStorage.getItem('moonPlace') || 'null'); if (saved && saved.lat != null) loc = { lat: saved.lat, lng: saved.lng, from: saved.name || 'your saved place' }; } catch (e) {}
+    if (loc) { nowPanel(); withPlace(); }
     renderPlaceBlocks();
-    if (navigator.permissions && navigator.permissions.query) navigator.permissions.query({ name: 'geolocation' }).then(function (p) { if (p.state === 'granted') askLocation(null, true); }).catch(function () {});
+    if (!loc && navigator.permissions && navigator.permissions.query) navigator.permissions.query({ name: 'geolocation' }).then(function (p) { if (p.state === 'granted') askLocation(null, true); }).catch(function () {});
     [$('[data-sc-file]'), $('[data-sc-file2]')].forEach(function (inp) {
       if (!inp) return;
       inp.onchange = function () { var f = inp.files && inp.files[0]; if (f) { if (!loc) askLocation(null, true); readPhoto(f); } inp.value = ''; };

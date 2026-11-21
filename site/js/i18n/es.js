@@ -1643,5 +1643,14 @@
     "in Safari, tap the Share button (the square with an arrow pointing up), scroll down, tap Add to Home Screen, then tap Add. It only works from Safari, so if you're in Chrome, switch to Safari first.": "en Safari, toca el botón Compartir (el cuadrado con una flecha hacia arriba), desplázate hacia abajo, toca Añadir a pantalla de inicio y luego Añadir. Solo funciona desde Safari, así que si estás en Chrome, cambia antes a Safari.",
     "How do I add the Moon app to my Android home screen?": "¿Cómo añado la app Moon a la pantalla de inicio de mi Android?",
     "in Chrome. Tap Install if it's offered. If not, tap the ⋮ menu, then Add to Home screen or Install app, and confirm. Moon then opens full screen from its icon, like any other app.": "en Chrome. Toca Instalar si aparece. Si no, toca el menú ⋮, luego Añadir a pantalla de inicio o Instalar aplicación, y confirma. Moon se abrirá a pantalla completa desde su icono, como cualquier otra app.",
+    // Sky Check place
+    "Using {place}": "Usando {place}",
+    "your location": "tu ubicación",
+    "CHANGE": "CAMBIAR",
+    "or type your city or ZIP code": "o escribe tu ciudad o código postal",
+    "Your city or ZIP code": "Tu ciudad o código postal",
+    "That ZIP code was not found.": "No se encontró ese código postal.",
+    "Could not look up that ZIP code.": "No se pudo buscar ese código postal.",
+    "No match. Try a nearby city or a ZIP code.": "Sin resultados. Prueba una ciudad cercana o un código postal.",
 }
 };
