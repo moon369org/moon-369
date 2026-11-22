@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};window.moonTrack=function(n,d){try{window.va('event',{name:n,data:d||{}})}catch(e){}};</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="preload" href="/assets/fonts/syncopate-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<script>document.documentElement.classList.add('mm-js')</script>
+<title>Full Moon Tracker · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="When is the next full moon? A live countdown, the exact Moonmark and UTC time, and every full moon in any month you choose.">
+<link rel="canonical" href="https://moon369.org/full-moon">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moon">
+<meta property="og:url" content="https://moon369.org/full-moon">
+<meta property="og:title" content="Full Moon Tracker · Moon">
+<meta property="og:description" content="When is the next full moon? A live countdown, the exact Moonmark and UTC time, and every full moon in any month you choose.">
+<meta property="og:image" content="https://moon369.org/assets/og/home.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Moon, over a photograph of the moon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Full Moon Tracker · Moon">
+<meta name="twitter:description" content="When is the next full moon? A live countdown, the exact Moonmark and UTC time, and every full moon in any month you choose.">
+<meta name="twitter:image" content="https://moon369.org/assets/og/home.jpg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0B0B0D">
+<meta name="apple-mobile-web-app-title" content="Moon">
+<meta name="application-name" content="Moon">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<style>x-dc{display:none}html,body{background:#0B0B0D}html{scrollbar-width:thin;scrollbar-color:#2E3035 #0B0B0D}
+*{scrollbar-width:thin;scrollbar-color:#2E3035 transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#24262A;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#3A3B3F;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+p,li,summary,figcaption,blockquote{text-wrap:pretty}h1,h2,h3{text-wrap:balance}
+@keyframes hdDown{from{transform:translateY(-100%)}to{transform:none}}
+header.hd-stuck{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(11,11,13,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:hdDown .38s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){header.hd-stuck{animation:none}}
+
+
+.fm-eye{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;color:#8A8B8F}
+.fm-p{margin:0;max-width:720px;font-size:17px;line-height:1.65;color:#B9B6AE}
+.fm-hero{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:48px;align-items:center}
+.fm-art{position:relative;width:360px;height:360px}.fm-art canvas{position:absolute;left:50%;top:50%;width:640px;height:640px;margin:-320px 0 0 -320px;pointer-events:none}
+.fm-when{font-family:'Syncopate',sans-serif;font-weight:700;font-size:14px;letter-spacing:.16em;text-transform:uppercase;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.fm-tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;border:1px solid #E9E4D8;padding:4px 8px}
+.fm-cd{display:flex;gap:clamp(14px,2.4vw,32px);flex-wrap:wrap;font-size:clamp(40px,6vw,76px)}.fm-cd div{display:flex;flex-direction:column;gap:6px;min-width:1.75em}
+.fm-cd b{font-family:'Syncopate',sans-serif;font-weight:700;font-size:1em;line-height:1;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.fm-cd span{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
+.fm-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid #24262A;max-width:760px}
+.fm-facts div{display:flex;flex-direction:column;gap:6px;padding:16px 16px 16px 0;border-bottom:1px solid #1C1D20}
+.fm-facts span{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#8A8B8F}
+.fm-facts b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:14px;line-height:1.5}
+.fm-facts a,.fm-rm a{color:#E9E4D8;text-decoration:underline;text-underline-offset:3px}
+.fm-btn{font-family:'Syncopate',sans-serif;font-weight:700;font-size:11px;letter-spacing:.22em;padding:16px 24px;min-height:48px;background:#E9E4D8;color:#0B0B0D;border:1px solid #E9E4D8;cursor:pointer;align-self:flex-start}
+.fm-pick{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.fm-pick input{background:#0B0B0D;border:1px solid #2E3035;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:14px;padding:11px 12px;border-radius:0;color-scheme:dark;min-height:46px;box-sizing:border-box}
+.fm-pick button{background:none;border:1px solid #2E3035;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:13px;padding:0 16px;min-height:46px;cursor:pointer}
+.fm-list{list-style:none;margin:0;padding:0;border-top:1px solid #24262A}
+.fm-row{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto;gap:20px;align-items:center;padding:18px 0;border-bottom:1px solid #1C1D20}
+.fm-rd,.fm-rm{display:flex;flex-direction:column;gap:5px}
+.fm-rd b{font-family:'Syncopate',sans-serif;font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.fm-rd em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;color:#E9E4D8;border:1px solid #3A3B3F;padding:2px 6px;align-self:flex-start}
+.fm-rd span,.fm-rm span{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#8A8B8F}
+.fm-rm a{font-family:'JetBrains Mono',monospace;font-size:13.5px}
+.fm-ics{background:none;border:1px solid #2E3035;color:#E9E4D8;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.12em;padding:10px 12px;cursor:pointer;white-space:nowrap}
+.fm-none,.fm-msg{font-family:'JetBrains Mono',monospace;font-size:13px;color:#8A8B8F;padding:18px 0}.fm-msg{padding:0}.fm-msg:empty{display:none}
+.fm-h2{margin:0;font-family:'Syncopate',sans-serif;font-weight:700;font-size:clamp(18px,2vw,24px);letter-spacing:.08em}
+@media (max-width:900px){.fm-hero{grid-template-columns:1fr}.fm-art{width:170px;height:170px;margin:0 auto;order:-1}.fm-art canvas{width:320px;height:320px;margin:-160px 0 0 -160px}}
+@media (max-width:640px){.fm-facts{grid-template-columns:1fr}.fm-row{grid-template-columns:1fr;gap:10px}.fm-ics{justify-self:start}.fm-cd{font-size:38px}.fm-btn{align-self:stretch}}
+</style>
+
+<script src="js/preact.umd.js" defer></script>
+<script src="js/moon-phase.js" defer></script>
+<script src="js/moonglow.js" defer></script>
+<script src="js/full-moon.js" defer></script>
+<script src="js/header.js" defer></script>
+<script src="js/dc-lite.js" defer></script>
+<link rel="stylesheet" href="assets/moon-motion.css">
+<script src="js/moon-motion.js" defer></script>
+<!-- page styles -->
+<style>
+body{margin:0;background:#0B0B0D}
+a{color:#E9E4D8;text-decoration:none}a:hover{color:#FFFFFF}
+.pk-a,.pk-b,.pk-f{animation-duration:1.6s;animation-iteration-count:infinite;animation-fill-mode:both}
+.pk-a{animation-name:pkA}.pk-b{animation-name:pkB}.pk-f{animation-name:pkF}
+@keyframes pkA{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(-30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkB{0%{transform:translateX(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}48%,52%{transform:translateX(30px);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:translateX(0)}}
+@keyframes pkF{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.6,1)}36%,54%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.6,1)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pk-a,.pk-b,.pk-f{animation:none}}
+@media (max-width: 720px){
+header > div{padding:16px 20px!important;gap:12px 16px!important}
+nav[aria-label="Main"]{gap:10px 18px!important;font-size:10px!important;letter-spacing:.18em!important}
+nav[aria-label="Main"] a{min-height:44px;display:inline-flex!important;align-items:center}
+nav[aria-label="Main"] a[style*="padding: 14px 22px"]{padding:0 14px!important}
+[style*="padding: 140px 32px"],[style*="padding: 160px 32px"],[style*="padding: 120px 32px"]{padding:72px 20px!important}
+[style*="padding: 120px 32px 140px"]{padding:56px 20px 80px!important}
+[style*="padding: 100px 32px 90px"]{padding:56px 20px 48px!important}
+[style*="padding: 64px 32px 120px"],[style*="padding: 80px 32px 120px"]{padding:40px 20px 80px!important}
+[style*="padding: 40px 32px"]{padding:32px 20px!important}
+[style*="padding: 40px 48px"]{padding:28px 22px!important}
+[style*="padding: 40px; display: flex"]{padding:24px!important;gap:24px!important}
+[style*="gap: 104px"]{gap:72px!important}
+[style*="gap: 80px"]{gap:48px!important}
+[style*="gap: 64px"]{gap:40px!important}
+[style*="gap: 56px"]{gap:36px!important}
+pre{font-size:12.5px!important}
+.mw-hint{display:block!important}
+}
+@media (max-width: 720px){
+footer > div{flex-direction:column!important;align-items:center!important;text-align:center;gap:28px!important}
+footer > div > div:first-child{align-items:center!important}
+footer > div > div:last-child{justify-content:center!important;gap:22px!important}
+footer > div > div:first-child svg{width:64px!important}
+}
+</style>
+<style id="ft-css">::selection{background:#24262A}::-moz-selection{background:#24262A}.ft{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:64px 32px 32px;display:grid;grid-template-columns:2.6fr minmax(220px,1fr);gap:48px 64px;font-family:Inter,sans-serif;box-sizing:border-box}.ft-brand{order:2;justify-self:end;display:flex;flex-direction:column;align-items:flex-end;text-align:right}.ft-cols{order:1}.ft-base{order:3}.ft-brand p{margin:18px 0 0;font-size:14px;line-height:1.65;color:#8A8B8F;white-space:nowrap}.ft-cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px}.ft-h{margin:0 0 14px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;color:#5E6064}.ft-col a{display:block;width:fit-content;font-size:14px;line-height:1.4;color:#A2A3A7;padding:7px 0;text-decoration:none}.ft-col a:hover{color:#E9E4D8}.ft-base{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;border-top:1px solid #1C1D20;padding-top:24px;font-size:13px;color:#5E6064}@media (max-width:860px){.ft{grid-template-columns:1fr;gap:40px;padding:48px 20px 28px}.ft-brand{order:0;justify-self:center;align-items:center;text-align:center}.ft-base{flex-direction:column;align-items:center;text-align:center}.ft-brand p{white-space:normal}.ft-cols{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 20px}.ft-col a{padding:10px 0}}</style>
+<script src="/js/i18n.js" defer></script>
+</head>
+<body>
+<!--snapshot--><div data-dc-snapshot="">
+<div style="background: rgb(11, 11, 13); color: rgb(233, 228, 216); font-family: Inter, sans-serif; min-height: 100vh;">
+
+<header style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+<a href="/" aria-label="Moon home" style="display: block;">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block;">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 18;"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8;"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: rgb(233, 228, 216); stroke-width: 8; stroke-linejoin: bevel;"></path>
+</svg>
+</a>
+<nav aria-label="Main" id="mm-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: Syncopate, sans-serif; font-size: 11px; letter-spacing: 0.28em;">
+<a href="/night">YOUR MOON</a>
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/verify">VERIFY</a>
+<a href="/sign" style="padding: 14px 22px; border: 1px solid rgb(233, 228, 216); min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;">SIGN A FILE</a>
+</nav>
+<button type="button" class="mm-burger" aria-label="Menu" aria-controls="mm-nav" aria-expanded="false"><span></span><span></span></button></div>
+</header>
+<section style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 100px 32px 72px; display: flex; flex-direction: column; gap: 30px;">
+<div class="fm-hero"><div style="display: flex; flex-direction: column; gap: 26px;">
+<div class="fm-eye">FULL MOON TRACKER</div>
+<h1 style="margin: 0px; font-family: Syncopate, sans-serif; font-weight: 700; font-size: clamp(30px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1;">THE NEXT FULL MOON</h1>
+<div class="fm-when"><span data-fm-when=""></span><span class="fm-tag" data-fm-tag="">SUPERMOON</span></div>
+<div class="fm-cd" data-fm-cd="" role="timer" aria-label="1 days, 21 hours, 15 minutes until the full moon"><div><b data-fm-n="">1</b><span>DAYS</span></div><div><b data-fm-n="">21</b><span>HOURS</span></div><div><b data-fm-n="">15</b><span>MINUTES</span></div><div><b data-fm-n=""><span style="visibility: hidden;">54</span></b><span>SECONDS</span></div></div>
+<button type="button" class="fm-btn" data-fm-add="">ADD TO MY CALENDAR</button>
+</div><div class="fm-art"><canvas class="hm-moonglow" data-fm-cv="" aria-hidden="true" style="rotate: -77.5deg;" data-at="1795532006000"></canvas></div></div>
+<div class="fm-facts" data-fm-facts=""></div>
+</div>
+</section>
+<section style="border-bottom: 1px solid rgb(28, 29, 32);">
+<div style="max-width: 1280px; margin: 0px auto; padding: 72px 32px; display: flex; flex-direction: column; gap: 24px;">
+<h2 class="fm-h2">ANY MONTH</h2>
+<p class="fm-p">Pick a month to see its full moons, with the exact Moonmark, UTC time and your local time for each.</p>
+<div class="fm-pick"><button type="button" data-fm-prev="" aria-label="Previous month">←</button><input type="month" data-fm-month="" aria-label="Month"><button type="button" data-fm-next="" aria-label="Next month">→</button></div>
+<div class="fm-when"><span data-fm-mname=""></span></div>
+<p class="fm-msg" data-fm-mmsg="" role="status"></p>
+<ul class="fm-list" data-fm-mlist=""></ul>
+</div>
+</section>
+<section>
+<div style="max-width: 1280px; margin: 0px auto; padding: 72px 32px 110px; display: flex; flex-direction: column; gap: 24px;">
+<h2 class="fm-h2">THE NEXT TWELVE</h2>
+<ul class="fm-list" data-fm-coming=""></ul>
+<h2 class="fm-h2" style="margin-top: 32px;">HOW EXACT</h2>
+<p class="fm-p">A full moon is the instant the Moon sits exactly opposite the Sun. Moon computes it with the method almanacs use (Meeus, Astronomical Algorithms, chapter 49) and checks it against PyEphem, a standard astronomy library: within 20 seconds for every full moon from 1900 to 2030. The Moon is rarely 100% lit even then, because it passes a little above or below the Earth's shadow line. Developers can get the same times from <a href="/api" style="color: rgb(233, 228, 216);">the API</a> at /v1/full-moons.</p>
+</div>
+</section>
+<footer style="border-top: 1px solid rgb(28, 29, 32);"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<nav class="ft" aria-label="Footer">
+<div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block;"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: rgb(11, 11, 13); stroke-width: 20;"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: rgb(58, 60, 65); stroke-width: 9;"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/app">Moon app</a><a href="/m">Moonmark</a><a href="/tickets">Tickets</a><a href="/passes">Passes</a><a href="/stays">Stays</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a><a href="/full-moon">Full moons</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/sign">Sign a file</a><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/audit">Audit</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/examples">Examples</a><a href="/widgets">Widgets</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-base"><span>Moon · The new standard for time</span><a href="https://x.com/M00N_369" target="_blank" rel="noopener" aria-label="Moon on X" style="display: inline-flex; align-items: center; gap: 8px; color: rgb(138, 139, 143); text-decoration: none;"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>@M00N_369</a><span>Open source under the MIT license</span></div>
+</nav>
+</footer>
+
+</div>
+</div><!--/snapshot-->
+<template data-dc>
+<div style="background: #0B0B0D; color: #E9E4D8; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="/" aria-label="Moon home" style="display: block">
+<svg aria-hidden="true" viewBox="-10 -10 424 120" style="width: 132px; height: 37px; display: block">
+<path d="M4,100 V4 L48,64 L92,4 V100" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+<circle cx="172" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></circle>
+<circle cx="232" cy="50" r="46" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></circle>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #0B0B0D; stroke-width: 18"></path>
+<path d="M211.91,72.87 A46,46 0 0 1 188.65,92.88" style="fill: none; stroke: #E9E4D8; stroke-width: 8"></path>
+<path d="M312,100 V4 L400,96 V0" style="fill: none; stroke: #E9E4D8; stroke-width: 8; stroke-linejoin: bevel"></path>
+</svg>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px; font-family: 'Syncopate', sans-serif; font-size: 11px; letter-spacing: 0.28em">
+<a href="/night">YOUR MOON</a>
+<a href="/uses">USES</a>
+<a href="/tideline">TIDELINE</a>
+<a href="/trust">TRUST</a>
+<a href="/api">API</a>
+<a href="/verify">VERIFY</a>
+<a href="/sign" style="padding: 14px 22px; border: 1px solid #E9E4D8; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">SIGN A FILE</a>
+</nav>
+</div>
+</header>
+<section style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 100px 32px 72px; display: flex; flex-direction: column; gap: 30px">
+<div class="fm-hero"><div style="display: flex; flex-direction: column; gap: 26px">
+<div class="fm-eye">FULL MOON TRACKER</div>
+<h1 style="margin: 0; font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: clamp(30px, 5vw, 64px); letter-spacing: 0.08em; line-height: 1.1">THE NEXT FULL MOON</h1>
+<div class="fm-when"><span data-fm-when>Working it out…</span><span class="fm-tag" data-fm-tag hidden>SUPERMOON</span></div>
+<div class="fm-cd" data-fm-cd role="timer"><div><b data-fm-n>–</b><span>DAYS</span></div><div><b data-fm-n>–</b><span>HOURS</span></div><div><b data-fm-n>–</b><span>MINUTES</span></div><div><b data-fm-n>–</b><span>SECONDS</span></div></div>
+<button type="button" class="fm-btn" data-fm-add>ADD TO MY CALENDAR</button>
+</div><div class="fm-art"><canvas class="hm-moonglow" data-fm-cv aria-hidden="true"></canvas></div></div>
+<div class="fm-facts" data-fm-facts></div>
+</div>
+</section>
+<section style="border-bottom: 1px solid #1C1D20">
+<div style="max-width: 1280px; margin: 0 auto; padding: 72px 32px; display: flex; flex-direction: column; gap: 24px">
+<h2 class="fm-h2">ANY MONTH</h2>
+<p class="fm-p">Pick a month to see its full moons, with the exact Moonmark, UTC time and your local time for each.</p>
+<div class="fm-pick"><button type="button" data-fm-prev aria-label="Previous month">←</button><input type="month" data-fm-month aria-label="Month"><button type="button" data-fm-next aria-label="Next month">→</button></div>
+<div class="fm-when"><span data-fm-mname></span></div>
+<p class="fm-msg" data-fm-mmsg role="status"></p>
+<ul class="fm-list" data-fm-mlist></ul>
+</div>
+</section>
+<section>
+<div style="max-width: 1280px; margin: 0 auto; padding: 72px 32px 110px; display: flex; flex-direction: column; gap: 24px">
+<h2 class="fm-h2">THE NEXT TWELVE</h2>
+<ul class="fm-list" data-fm-coming></ul>
+<h2 class="fm-h2" style="margin-top: 32px">HOW EXACT</h2>
+<p class="fm-p">A full moon is the instant the Moon sits exactly opposite the Sun. Moon computes it with the method almanacs use (Meeus, Astronomical Algorithms, chapter 49) and checks it against PyEphem, a standard astronomy library: within 20 seconds for every full moon from 1900 to 2030. The Moon is rarely 100% lit even then, because it passes a little above or below the Earth's shadow line. Developers can get the same times from <a href="/api" style="color: #E9E4D8">the API</a> at /v1/full-moons.</p>
+</div>
+</section>
+<footer style="border-top: 1px solid #1C1D20"><canvas class="ft-glow" aria-hidden="true"></canvas>
+<nav class="ft" aria-label="Footer">
+<div class="ft-brand"><a href="/" aria-label="Moon home"><svg aria-hidden="true" viewBox="-80 -52 160 104" style="width: 64px; height: auto; display: block"><circle cx="-30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></circle><circle cx="30" cy="0" r="46" style="fill: none; stroke: #3A3C41; stroke-width: 9"></circle><path d="M9.91,22.87 A46,46 0 0 1 -13.35,42.88" style="fill: none; stroke: #0B0B0D; stroke-width: 20"></path><path d="M11.61,19.61 A46,46 0 0 1 -16.83,44.07" style="fill: none; stroke: #3A3C41; stroke-width: 9"></path></svg></a><p>Worldwide time, locked to the Moon.<br>Signed, checkable and open to everyone.</p></div>
+<div class="ft-cols"><div class="ft-col"><div class="ft-h">MAKE</div><a href="/app">Moon app</a><a href="/m">Moonmark</a><a href="/tickets">Tickets</a><a href="/passes">Passes</a><a href="/stays">Stays</a><a href="/night">Your Moon</a><a href="/sky-check">Sky Check</a><a href="/calendar">Calendar</a><a href="/eclipses">Eclipses</a><a href="/full-moon">Full moons</a></div><div class="ft-col"><div class="ft-h">PROVE</div><a href="/sign">Sign a file</a><a href="/verify">Verify a file</a><a href="/notarize">Notarize</a><a href="/certificate">Certificates</a><a href="/tideline">Tideline</a><a href="/audit">Audit</a><a href="/evidence">Evidence</a></div><div class="ft-col"><div class="ft-h">BUILD</div><a href="/api">API</a><a href="/examples">Examples</a><a href="/widgets">Widgets</a><a href="/guides">Guides</a><a href="/uses">Uses</a><a href="/status">Status</a></div><div class="ft-col"><div class="ft-h">LEARN</div><a href="/trust">Trust</a><a href="/see">See it work</a><a href="/quantum">Quantum</a><a href="/press">Press</a><a href="/#faq">FAQ</a></div></div>
+<div class="ft-base"><span>Moon · The new standard for time</span><a href="https://x.com/M00N_369" target="_blank" rel="noopener" aria-label="Moon on X" style="display: inline-flex; align-items: center; gap: 8px; color: #8A8B8F; text-decoration: none"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>@M00N_369</a><span>Open source under the MIT license</span></div>
+</nav>
+</footer>
+
+</div>
+</template>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2400}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+<script src="js/footglow.js" defer></script>
+</body>
+</html>

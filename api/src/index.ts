@@ -7,6 +7,7 @@ import {
 import { cardSvg, shareSvg, moonOnlySvg } from './card.js';
 import { TsaSigner, TsaReject, parseRequest as parseTsq, issue as issueTst, reject as tsaReject, FAIL as TSA_FAIL, TSA_POLICY, TSA_EXT_MOONMARK } from './tsa.js';
 import { MOON_ROOT_PEM } from './tsa-certs.js';
+import { fullMoonIndexAfter, fullMoonsInMonth, publicFullMoon, FULL_MOON_RANGE } from './fullmoons.js';
 import { allEclipses, indexAfter, publicEclipse, eclipseByDate, eclipseCardSvg, ymdOf, tdTime, ECLIPSE_TYPES, type EclipseType } from './eclipses.js';
 import { eclipseIcon } from './eclipse-icon.js';
 import { driftByCentury, gapHours, trueNewMoonMs, gridNewMoonMs, lunationNear } from './lunation.js';
@@ -106,6 +107,7 @@ class HttpError extends Error {
 }
 
 // JSON with BigInt support (BigInts serialize as strings to keep full precision).
+const FULL_MOON_SOURCE = 'Computed by Moon: Meeus ch. 49 with Espenak-Meeus Delta T. Within about 20 seconds of PyEphem from 1900 to 2030. Times are UTC.';
 const json = (body: unknown, status = 200, extra: Record<string, string> = {}) =>
   new Response(JSON.stringify(body, (_k, v) => (typeof v === 'bigint' ? v.toString() : v), 2), {
     status,
@@ -906,7 +908,7 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
   if (!either && (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD')))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /v1/tickets', '/v1/tickets/{event}', 'POST /v1/tickets/{event}/issue', '/v1/tickets/{event}/{ticket}', 'POST /v1/tickets/{event}/door', 'POST /v1/tickets/{event}/checkin', 'POST /v1/passes', 'POST /v1/passes/{place}/invite', 'POST /v1/passes/{place}/join', 'POST /v1/passes/{place}/members', 'POST /v1/passes/{place}/renew', 'POST /v1/passes/{place}/cancel', 'POST /v1/passes/{place}/door', 'POST /v1/passes/{place}/checkin', '/v1/passes/{place}/{pass}', 'POST /v1/stays', 'POST /v1/stays/{door}/book', 'POST /v1/stays/{door}/join', 'POST /v1/stays/{door}/pass', 'POST /v1/stays/{door}/host', 'POST /v1/stays/{door}/cancel', 'POST /v1/stays/{door}/lock', 'POST /v1/stays/{door}/log', '/v1/stays/{door}/{stay}', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/full-moons', '/v1/full-moons/next', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /v1/tickets', '/v1/tickets/{event}', 'POST /v1/tickets/{event}/issue', '/v1/tickets/{event}/{ticket}', 'POST /v1/tickets/{event}/door', 'POST /v1/tickets/{event}/checkin', 'POST /v1/passes', 'POST /v1/passes/{place}/invite', 'POST /v1/passes/{place}/join', 'POST /v1/passes/{place}/members', 'POST /v1/passes/{place}/renew', 'POST /v1/passes/{place}/cancel', 'POST /v1/passes/{place}/door', 'POST /v1/passes/{place}/checkin', '/v1/passes/{place}/{pass}', 'POST /v1/stays', 'POST /v1/stays/{door}/book', 'POST /v1/stays/{door}/join', 'POST /v1/stays/{door}/pass', 'POST /v1/stays/{door}/host', 'POST /v1/stays/{door}/cancel', 'POST /v1/stays/{door}/lock', 'POST /v1/stays/{door}/log', '/v1/stays/{door}/{stay}', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   if (path.startsWith(`/${API_VERSION}/admin/`)) return adminRoute(req, env, path);
@@ -1081,6 +1083,25 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
           200, { 'Cache-Control': 'public, max-age=86400', ...planHdr });
       }
 
+      case path === `/${API_VERSION}/full-moons/next`: {
+        const after = q.get('after') === null ? Date.now() : Number(q.get('after'));
+        if (!Number.isFinite(after)) throw new HttpError(400, 'bad_param', 'after must be Unix milliseconds');
+        const count = q.get('count') === null ? 1 : Number(q.get('count'));
+        if (!Number.isInteger(count) || count < 1 || count > 24) throw new HttpError(400, 'bad_param', 'count must be 1 to 24');
+        const k = fullMoonIndexAfter(after), list = Array.from({ length: count }, (_, i) => publicFullMoon(k + i));
+        return json({ after: new Date(after).toISOString(), full_moons: list.map((f) => ({ ...f, in_seconds: Math.round((f.unix_ms - after) / 1000) })),
+          source: FULL_MOON_SOURCE }, 200, { 'Cache-Control': 'public, max-age=300', ...planHdr });
+      }
+      case path === `/${API_VERSION}/full-moons`: {
+        const month = q.get('month'), year = q.get('year');
+        const m = month ? /^(-?\d{1,4})-(\d{2})$/.exec(month) : null, y = year && /^-?\d{1,4}$/.test(year) ? Number(year) : null;
+        if (month && (!m || +m[2] < 1 || +m[2] > 12)) throw new HttpError(400, 'bad_param', 'month must look like 2027-03');
+        if (!month && y === null) throw new HttpError(400, 'bad_param', 'Give month=YYYY-MM or year=YYYY, or use /v1/full-moons/next');
+        const yy = m ? Number(m[1]) : (y as number);
+        if (yy < FULL_MOON_RANGE.from || yy > FULL_MOON_RANGE.to) throw new HttpError(400, 'bad_param', `year must be ${FULL_MOON_RANGE.from} to ${FULL_MOON_RANGE.to}`);
+        const list = m ? fullMoonsInMonth(yy, Number(m[2])) : Array.from({ length: 12 }, (_, i) => fullMoonsInMonth(yy, i + 1)).flat();
+        return json({ ...(m ? { month } : { year: yy }), full_moons: list, source: FULL_MOON_SOURCE }, 200, { 'Cache-Control': 'public, max-age=86400', ...planHdr });
+      }
       case path === `/${API_VERSION}/eclipses/next`: {
         const types = (q.get('type') ?? '').split(',').filter(Boolean) as EclipseType[];
         for (const t of types) if (!ECLIPSE_TYPES.includes(t)) throw new HttpError(400, 'bad_param', 'type must be total, annular, hybrid or partial');

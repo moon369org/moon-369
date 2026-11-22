@@ -6,7 +6,7 @@
 const fs = require('fs'), path = require('path');
 const puppeteer = require('puppeteer-core');
 const SITE = path.join(__dirname, '..', 'site');
-const PAGES = ['index', 'audit', 'calendar', 'api', 'm', 'uses', 'see', 'trust', 'quantum', 'evidence', 'verify', 'night', 'eclipses', 'eclipse', 'press', 'by', 'notarize', 'certificate', 'tide', 'guides', 'status', 'sky-check', 'sign', 'widgets'];
+const PAGES = ['full-moon', 'index', 'audit', 'calendar', 'api', 'm', 'uses', 'see', 'trust', 'quantum', 'evidence', 'verify', 'night', 'eclipses', 'eclipse', 'press', 'by', 'notarize', 'certificate', 'tide', 'guides', 'status', 'sky-check', 'sign', 'widgets'];
 const BASE = process.env.BASE || 'http://localhost:8765';
 
 function hoistHelmet(html) {
@@ -39,6 +39,7 @@ function hoistHelmet(html) {
       while (w.nextNode()) { if (a[i] !== b2[i]) live.push(w.currentNode); i++; }
       live.forEach((t) => { const s = document.createElement('span'); s.style.visibility = 'hidden'; t.replaceWith(s); s.appendChild(t); });
       clone.querySelectorAll('[data-mk-root]').forEach((e) => { e.innerHTML = ''; });   // filled from the URL
+      clone.querySelectorAll('[data-fm-facts],[data-fm-mlist],[data-fm-coming],[data-fm-when],[data-fm-mname],[data-fm-mmsg]').forEach((e) => { e.innerHTML = ''; });   // filled from the API
       clone.querySelectorAll('.mlp-g,.mlp-f,.mlp-m').forEach((e) => e.remove());   // the language picker is added live
       clone.querySelectorAll('svg').forEach((v) => { if (v.outerHTML.length > 15000) v.innerHTML = ''; });   // big maps: keep the space, skip the weight
       clone.querySelectorAll('canvas').forEach((c) => { c.removeAttribute('width'); c.removeAttribute('height'); });
