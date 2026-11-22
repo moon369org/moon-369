@@ -1888,5 +1888,8 @@
     "Two full moons this month. The second is often called a blue moon.": "Twee volle manen deze maand. De tweede heet vaak een blauwe maan.",
     "{d} days, {h} hours, {m} minutes until the full moon": "Nog {d} dagen, {h} uur en {m} minuten tot volle maan",
     "Full moons": "Volle manen",
+    "LIT NOW": "NU VERLICHT",
+    "LIT AT FULL MOON": "VERLICHT BIJ VOLLE MAAN",
+    "{p}% lit": "{p}% verlicht",
 }
 };

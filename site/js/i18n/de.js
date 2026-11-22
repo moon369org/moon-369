@@ -1882,5 +1882,8 @@
     "Two full moons this month. The second is often called a blue moon.": "Zwei Vollmonde in diesem Monat. Der zweite wird oft Blue Moon genannt.",
     "{d} days, {h} hours, {m} minutes until the full moon": "Noch {d} Tage, {h} Stunden und {m} Minuten bis zum Vollmond",
     "Full moons": "Vollmonde",
+    "LIT NOW": "JETZT BELEUCHTET",
+    "LIT AT FULL MOON": "BELEUCHTET BEI VOLLMOND",
+    "{p}% lit": "{p} % beleuchtet",
 }
 };

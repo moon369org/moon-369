@@ -27,9 +27,13 @@
     return '<div><span>' + esc(T('MOONMARK')) + '</span><b><a href="/m/' + esc(mmPath(f.moonmark)) + '">' + esc(f.moonmark) + '</a></b></div>' +
       '<div><span>' + esc(T('UTC')) + '</span><b>' + esc(utcText(f)) + '</b></div>' +
       '<div><span>' + esc(T('YOUR TIME')) + '</span><b>' + esc(longLocal(f.unix_ms)) + '</b></div>' +
-      '<div><span>' + esc(T('LIT')) + '</span><b>' + f.illumination.toFixed(2) + '%</b></div>' +
+      '<div><span>' + esc(T('LIT NOW')) + '</span><b data-fm-litnow>' + litNow() + '</b></div>' +
+      '<div><span>' + esc(T('LIT AT FULL MOON')) + '</span><b>' + f.illumination.toFixed(3) + '%</b></div>' +
       '<div><span>' + esc(T('DISTANCE')) + '</span><b>' + esc(f.distance_km.toLocaleString(lang())) + ' km' + (f.supermoon ? ' · ' + esc(T('SUPERMOON')) : '') + '</b></div>';
   }
+
+  // Lit now, from the same formula the API uses (MoonPhase.illumination matches /v1 to the digit).
+  function litNow() { return window.MoonPhase ? (MoonPhase.illumination(Date.now()) * 100).toFixed(3) + '%' : '…'; }
 
   // The next full moon, with a live countdown.
   var next = null, tick = null;
@@ -46,6 +50,7 @@
     var s = Math.max(0, Math.round((next.unix_ms - Date.now()) / 1000));
     if (s === 0) { clearInterval(tick); setTimeout(loadNext, 5000); }
     var parts = [Math.floor(s / 86400), Math.floor(s / 3600) % 24, Math.floor(s / 60) % 60, s % 60];
+    var ln = $('[data-fm-litnow]'); if (ln) ln.textContent = litNow();
     document.querySelectorAll('[data-fm-n]').forEach(function (el, i) { el.textContent = i ? p2(parts[i]) : String(parts[0]); });
     $('[data-fm-cd]').setAttribute('aria-label', T('{d} days, {h} hours, {m} minutes until the full moon', { d: parts[0], h: parts[1], m: parts[2] }));
   }
@@ -56,7 +61,7 @@
 
   function row(f) {
     return '<li class="fm-row"><div class="fm-rd"><b>' + esc(local(f.unix_ms, { month: 'long', day: 'numeric', year: 'numeric' })) + '</b>' + (f.supermoon ? '<em>' + esc(T('SUPERMOON')) + '</em>' : '') +
-      '<span>' + esc(local(f.unix_ms, { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })) + '</span></div>' +
+      '<span>' + esc(local(f.unix_ms, { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })) + ' · ' + esc(T('{p}% lit', { p: f.illumination.toFixed(2) })) + '</span></div>' +
       '<div class="fm-rm"><a href="/m/' + esc(mmPath(f.moonmark)) + '">' + esc(f.moonmark) + '</a><span>' + esc(utcText(f)) + '</span></div>' +
       '<button type="button" class="fm-ics" data-fm-ics="' + f.lunation + '" aria-label="' + esc(T('Add to calendar')) + '">+ ' + esc(T('CALENDAR')) + '</button></li>';
   }

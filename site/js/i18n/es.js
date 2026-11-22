@@ -1686,5 +1686,8 @@
     "Two full moons this month. The second is often called a blue moon.": "Dos lunas llenas este mes. A la segunda se la suele llamar luna azul.",
     "{d} days, {h} hours, {m} minutes until the full moon": "Faltan {d} días, {h} horas y {m} minutos para la luna llena",
     "Full moons": "Lunas llenas",
+    "LIT NOW": "ILUMINADA AHORA",
+    "LIT AT FULL MOON": "ILUMINADA EN LUNA LLENA",
+    "{p}% lit": "{p} % iluminada",
 }
 };
