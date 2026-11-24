@@ -7,6 +7,7 @@ import {
 import { cardSvg, shareSvg, moonOnlySvg } from './card.js';
 import { TsaSigner, TsaReject, parseRequest as parseTsq, issue as issueTst, reject as tsaReject, FAIL as TSA_FAIL, TSA_POLICY, TSA_EXT_MOONMARK } from './tsa.js';
 import { MOON_ROOT_PEM } from './tsa-certs.js';
+import { fieldRecord, recordSha256, weatherFits, FieldError, FIELD_FORMAT, FIELD_KINDS, type WeatherSource } from './field.js';
 import { fullMoonIndexAfter, fullMoonsInMonth, publicFullMoon, FULL_MOON_RANGE } from './fullmoons.js';
 import { allEclipses, indexAfter, publicEclipse, eclipseByDate, eclipseCardSvg, ymdOf, tdTime, ECLIPSE_TYPES, type EclipseType } from './eclipses.js';
 import { eclipseIcon } from './eclipse-icon.js';
@@ -60,6 +61,8 @@ export interface Env {
   ANCHOR?: Anchorer;
   /** Runs work after the response is sent (Vercel waitUntil). Used for checkpoints. */
   DEFER?: (p: Promise<unknown>) => void;
+  /** Looks up observed weather for Field Log records. Without it, records carry weather: null. */
+  WEATHER?: WeatherSource;
   /** Anchors each tide in Bitcoin through OpenTimestamps. Optional. */
   BITCOIN?: BitcoinStamper;
   /** Required on /v1/tideline/seal (Vercel Cron sends it as a Bearer token). */
@@ -903,17 +906,17 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
     if (gate instanceof Response) return gate;
     return tsaResponse(req, env, { 'X-Moon-Plan': gate.plan }, registrantOf(gate));
   }
-  const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof` || path === `/${API_VERSION}/editions` || path === `/${API_VERSION}/reseal` || path === `/${API_VERSION}/reseal/verify`;
+  const postOnly = path.startsWith(`/${API_VERSION}/admin/`) || path === `/${API_VERSION}/api-keys` || path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/lookup/similar` || path === `/${API_VERSION}/verify` || path === `/${API_VERSION}/evidence` || path === `/${API_VERSION}/tideline/proof` || path === `/${API_VERSION}/editions` || path === `/${API_VERSION}/reseal` || path === `/${API_VERSION}/reseal/verify` || path === `/${API_VERSION}/field/sign` || path === `/${API_VERSION}/field/verify`;
   const either = path === `/${API_VERSION}/tickets` || path.startsWith(`/${API_VERSION}/tickets/`) || path === `/${API_VERSION}/passes` || path.startsWith(`/${API_VERSION}/passes/`) || path === `/${API_VERSION}/stays` || path.startsWith(`/${API_VERSION}/stays/`) || path.startsWith(`/${API_VERSION}/events/`);   // tickets, passes, stays and events: GET to read, POST to change
   if (!either && (postOnly ? req.method !== 'POST' : (req.method !== 'GET' && req.method !== 'HEAD')))
     return json({ error: { code: 'method_not_allowed', message: postOnly ? 'Use POST with a JSON body' : 'Use GET' } }, 405, postOnly ? { Allow: 'POST, OPTIONS' } : {});
 
-  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/full-moons', '/v1/full-moons/next', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /v1/tickets', '/v1/tickets/{event}', 'POST /v1/tickets/{event}/issue', '/v1/tickets/{event}/{ticket}', 'POST /v1/tickets/{event}/door', 'POST /v1/tickets/{event}/checkin', 'POST /v1/passes', 'POST /v1/passes/{place}/invite', 'POST /v1/passes/{place}/join', 'POST /v1/passes/{place}/members', 'POST /v1/passes/{place}/renew', 'POST /v1/passes/{place}/cancel', 'POST /v1/passes/{place}/door', 'POST /v1/passes/{place}/checkin', '/v1/passes/{place}/{pass}', 'POST /v1/stays', 'POST /v1/stays/{door}/book', 'POST /v1/stays/{door}/join', 'POST /v1/stays/{door}/pass', 'POST /v1/stays/{door}/host', 'POST /v1/stays/{door}/cancel', 'POST /v1/stays/{door}/lock', 'POST /v1/stays/{door}/log', '/v1/stays/{door}/{stay}', 'POST /mcp (Model Context Protocol)'] });
+  if (path === '/' ) return json({ name: 'Moon API', version: API_VERSION, spec: SPEC_VERSION, docs: '/v1/spec', endpoints: ['/v1/now', '/v1/moonmark', '/v1/m/{moonmark}', '/v1/full-moons', '/v1/full-moons/next', '/v1/convert', '/v1/to-unix', '/v1/cycle/{cycle}', '/v1/spec', '/v1/moon.svg', '/v1/moon.png', '/v1/card.svg', '/v1/card.png', '/v1/keys', '/v1/me', 'POST /v1/sign', 'POST /v1/verify', 'POST /v1/field/sign', 'POST /v1/field/verify', '/v1/tideline', '/v1/tideline/{lune}', 'POST /v1/tideline/proof', 'POST /v1/evidence', 'POST /v1/tsa (RFC 3161)', '/v1/tsa', 'POST /v1/sign/batch', '/v1/lookup/{sha256}', 'POST /v1/lookup/similar', '/v1/night', '/v1/night.png', '/v1/eclipses', '/v1/eclipses/next', '/v1/eclipses/{date}', '/v1/eclipses.csv', '/v1/eclipse.svg', '/v1/eclipse.png', 'POST /v1/api-keys', '/v1/search?q=', '/v1/registrants/{name}', '/v1/drift', '/v1/status', '/v1/stats', '/v1/file-check?url=&sha256=', '/v1/event', '/v1/event.ics', 'POST /v1/reseal', 'POST /v1/reseal/verify', 'POST /v1/editions', '/v1/editions/{statement}/{print}', 'POST /v1/tickets', '/v1/tickets/{event}', 'POST /v1/tickets/{event}/issue', '/v1/tickets/{event}/{ticket}', 'POST /v1/tickets/{event}/door', 'POST /v1/tickets/{event}/checkin', 'POST /v1/passes', 'POST /v1/passes/{place}/invite', 'POST /v1/passes/{place}/join', 'POST /v1/passes/{place}/members', 'POST /v1/passes/{place}/renew', 'POST /v1/passes/{place}/cancel', 'POST /v1/passes/{place}/door', 'POST /v1/passes/{place}/checkin', '/v1/passes/{place}/{pass}', 'POST /v1/stays', 'POST /v1/stays/{door}/book', 'POST /v1/stays/{door}/join', 'POST /v1/stays/{door}/pass', 'POST /v1/stays/{door}/host', 'POST /v1/stays/{door}/cancel', 'POST /v1/stays/{door}/lock', 'POST /v1/stays/{door}/log', '/v1/stays/{door}/{stay}', 'POST /mcp (Model Context Protocol)'] });
   if (path === '/health') return json({ ok: true });
 
   if (path.startsWith(`/${API_VERSION}/admin/`)) return adminRoute(req, env, path);
 
-  const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/reseal` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
+  const signing = req.method === 'POST' && (path === `/${API_VERSION}/sign` || path === `/${API_VERSION}/field/sign` || path === `/${API_VERSION}/reseal` || path === `/${API_VERSION}/sign/batch` || path === `/${API_VERSION}/evidence`);
   const gate = await authAndLimit(req, env, signing);
   if (gate instanceof Response) return gate;
   const planHdr = { 'X-Moon-Plan': gate.plan };
@@ -1265,6 +1268,26 @@ export async function handle(req: Request, env: Env = {}): Promise<Response> {
         if (!env.TSA) throw new HttpError(503, 'tsa_unavailable', 'Time-stamping is not configured on this deployment');
         return new Response(env.TSA.pem() + MOON_ROOT_PEM, { headers: { 'Content-Type': 'application/x-pem-file', 'Content-Disposition': 'inline; filename="moon-tsa.pem"', 'Cache-Control': 'public, max-age=86400', ...CORS, ...planHdr } });
 
+      case path === `/${API_VERSION}/field/sign`: {
+        // Field Log: Moon builds the record (with the weather it looks up), signs its fingerprint, and hands it back. Nothing is kept.
+        if (!env.SIGNER) throw new HttpError(503, 'signing_unavailable', 'Signing is not configured on this deployment');
+        const body = await readJson(req);
+        let record;
+        try { record = fieldRecord(body); } catch (e) { if (e instanceof FieldError) throw new HttpError(400, 'bad_param', e.message); throw e; }
+        if (record.place && env.WEATHER && weatherFits(record.entry.written_utc)) record.weather = await env.WEATHER(record.place.lat, record.place.lng).catch(() => null);
+        const sha = recordSha256(record);
+        const signed = await signNow(env, sha, undefined, { ...whoFrom(body, gate), label: 'Field Log: ' + record.entry.kind });
+        return json({ record, record_sha256: sha, ...signed, check: 'SHA-256 of the record as canonical JSON (keys sorted) must equal receipt.sha256. POST /v1/field/verify {record, receipt} does both checks.' }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
+      case path === `/${API_VERSION}/field/verify`: {
+        const body = await readJson(req);
+        const rec = body.record, r = body.receipt as Receipt;
+        if (!rec || typeof rec !== 'object' || (rec as { format?: unknown }).format !== FIELD_FORMAT) throw new HttpError(400, 'bad_param', `record must be a ${FIELD_FORMAT} record`);
+        if (!r || typeof r !== 'object') throw new HttpError(400, 'bad_param', 'receipt is required');
+        const sha = recordSha256(rec);
+        const out = checkReceipt(r, sha, env) as Record<string, unknown>;
+        return json({ ...out, record_sha256: sha, record_matches: out.valid === true }, 200, { 'Cache-Control': 'no-store', ...planHdr });
+      }
       case path === `/${API_VERSION}/verify`: {
         const body = await readJson(req);
         // Accept the receipt itself, or { receipt: {...} }. A bare receipt has its own "receipt" field: the version string.

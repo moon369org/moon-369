@@ -1,5 +1,6 @@
 // Vercel Function entry. vercel.json rewrites every path here; strip a leading /api
 // so the router always sees the public path (/v1/now, not /api/v1/now).
+import { nwsWeather } from '../src/field.js';
 import { handle } from '../src/index.js';
 import { memoryLimiter, upstashLimiter } from '../src/ratelimit.js';
 import { Signer, PqSigner, loadPrivateKey } from '../src/receipt.js';
@@ -109,6 +110,7 @@ const route = (req: Request) => {
     BITCOIN,
     TSA,
     DEFER: (p: Promise<unknown>) => waitUntil(p),
+    WEATHER: process.env.MOON_WEATHER === 'off' ? undefined : nwsWeather(),
     CRON_SECRET: process.env.CRON_SECRET,
     ADMIN_TOKEN: process.env.MOON_ADMIN_TOKEN,
     EDITIONS: RL_URL && RL_TOKEN ? upstashEditions(RL_URL, RL_TOKEN) : undefined,

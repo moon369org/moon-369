@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<link rel="preconnect" href="https://api.moon369.org" crossorigin>
+<title>Field Log · Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Field Log: a signed record of every spray, planting, harvest and storm, with photos, place and weather. Kept on your phone, printable for an insurer or inspector.">
+<link rel="canonical" href="https://moon369.org/field">
+<meta property="og:title" content="Field Log · Moon">
+<meta property="og:description" content="A signed record of every spray, planting, harvest and storm, with photos, place and weather. Printable for an insurer or inspector.">
+<meta property="og:url" content="https://moon369.org/field">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#0B0B0D;color:#E9E4D8;font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased;min-height:100%}
+a{color:inherit}
+[hidden]{display:none!important}
+.fl{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 48px);display:flex;flex-direction:column;gap:20px;min-height:100vh}
+.fl-top{display:flex;justify-content:space-between;align-items:center}
+.fl-top img{height:16px;display:block}
+.k{font:400 11px 'JetBrains Mono',monospace;letter-spacing:.28em;color:#8A8B8F}
+.fl h1{margin:0;font:700 clamp(24px,7vw,34px)/1.2 Syncopate,sans-serif;letter-spacing:.06em}
+.fl-p{margin:0;font-size:15px;line-height:1.6;color:#A2A3A7}
+.fl-btn{all:unset;box-sizing:border-box;cursor:pointer;min-height:56px;padding:0 22px;display:flex;align-items:center;justify-content:center;background:#E9E4D8;color:#0B0B0D;border-radius:2px;font:700 11px Syncopate,sans-serif;letter-spacing:.22em;text-align:center}
+.fl-btn.alt{background:none;color:#E9E4D8;border:1px solid #2E3035}
+.fl-btn[disabled]{opacity:.6;cursor:default}
+.fl-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fl-note{margin:0;font:400 12.5px/1.6 'JetBrains Mono',monospace;color:#B9B6AE;border:1px solid #2E3035;padding:12px 14px}
+.fl-list{list-style:none;margin:0;padding:0;border-top:1px solid #24262A}
+.fl-row{position:relative;padding:14px 44px 14px 0;border-bottom:1px solid #1C1D20;display:flex;flex-direction:column;gap:5px}
+.fl-rk{font:700 12px Syncopate,sans-serif;letter-spacing:.14em}
+.fl-rk em{font:400 10px 'JetBrains Mono',monospace;letter-spacing:.18em;color:#8A8B8F;border:1px solid #3A3B3F;padding:2px 6px;margin-left:6px;vertical-align:2px}
+.fl-rk em.ok{color:#E9E4D8}.fl-rk em.bad{color:#F0A08C;border-color:#6B3A30}
+.fl-rt{font-size:15px;line-height:1.45;overflow-wrap:anywhere}
+.fl-rm{font:400 12.5px 'JetBrains Mono',monospace;color:#8A8B8F;overflow-wrap:anywhere}
+.fl-del{all:unset;cursor:pointer;position:absolute;right:0;top:12px;min-width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:#8A8B8F;font:400 18px Inter,sans-serif}
+.fl-del[data-sure]{font:700 9px Syncopate,sans-serif;letter-spacing:.14em;color:#F0A08C}
+.fl-empty{padding:20px 0;color:#8A8B8F;font-size:14.5px;line-height:1.6}
+.fl-f{display:flex;flex-direction:column;gap:18px}
+.fl-lab{display:flex;flex-direction:column;gap:8px}
+.fl-in{width:100%;min-height:52px;padding:0 14px;background:#111214;border:1px solid #2E3035;border-radius:2px;color:#E9E4D8;font:400 16px Inter,sans-serif}
+textarea.fl-in{min-height:110px;padding:12px 14px;line-height:1.5;resize:vertical}
+.fl-in:focus{outline:none;border-color:#E9E4D8}
+.fl-chips{display:flex;flex-wrap:wrap;gap:8px}
+.fl-chip{all:unset;cursor:pointer;min-height:44px;padding:0 14px;display:flex;align-items:center;border:1px solid #2E3035;font:700 10px Syncopate,sans-serif;letter-spacing:.16em}
+.fl-chip[aria-pressed=true]{background:#E9E4D8;color:#0B0B0D;border-color:#E9E4D8}
+.fl-phs{display:flex;flex-wrap:wrap;gap:10px}
+.fl-ph{position:relative;width:96px;height:96px}.fl-ph img{width:100%;height:100%;object-fit:cover;display:block;border-radius:2px}
+.fl-ph button{all:unset;cursor:pointer;position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;background:rgba(11,11,13,.8);display:flex;align-items:center;justify-content:center}
+.fl-add{width:96px;height:96px;border:1px dashed #3A3B3F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;font:700 9px Syncopate,sans-serif;letter-spacing:.14em;color:#B9B6AE;text-align:center}
+.fl-add input{position:absolute;width:1px;height:1px;opacity:0}
+.fl-where{display:flex;gap:10px;align-items:flex-start}
+.fl-where p{flex:1}
+.fl-where button{all:unset;cursor:pointer;font:400 11px 'JetBrains Mono',monospace;letter-spacing:.14em;border:1px solid #2E3035;padding:10px 12px;white-space:nowrap}
+.fl-toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%);background:#E9E4D8;color:#0B0B0D;padding:12px 18px;font:400 13px 'JetBrains Mono',monospace;border-radius:2px;max-width:90vw;z-index:9}
+.fl-back{all:unset;cursor:pointer;font:400 12px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#B9B6AE}
+.fl-ctl{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fl-ctl .wide{grid-column:1/-1}
+.fl-ctl input[type=date]{color-scheme:dark}
+/* the report: a paper page */
+.rp{background:#F4F1EA;color:#0B0B0D;padding:28px 24px;border-radius:2px}
+.rp-h{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:2px solid #0B0B0D;padding-bottom:14px}
+.rp-k{font:400 10px 'JetBrains Mono',monospace;letter-spacing:.26em;color:#55565B}
+.rp-h h2{margin:8px 0 6px;font:700 20px Syncopate,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.rp-s{font:400 12px 'JetBrains Mono',monospace;color:#55565B}
+.rp-logo{height:14px}
+.rp-e{padding:18px 0;border-bottom:1px solid #C9C4B8;break-inside:avoid}
+.rp-et{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.rp-et b{font:700 13px Syncopate,sans-serif;letter-spacing:.14em}.rp-et span{font:400 12.5px 'JetBrains Mono',monospace}
+.rp-eb{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:16px}
+.rp dl{margin:0;display:grid;grid-template-columns:150px minmax(0,1fr);gap:5px 12px;font-size:13px;line-height:1.45}
+.rp dt{font:400 10px 'JetBrains Mono',monospace;letter-spacing:.16em;color:#55565B;padding-top:2px}
+.rp dd{margin:0;overflow-wrap:anywhere}
+.rp-qr{display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;font:400 9.5px 'JetBrains Mono',monospace;color:#55565B}.rp-qr svg{width:112px;height:112px}
+.rp-ph{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.rp-ph img{height:130px;width:auto;max-width:48%;object-fit:cover;border:1px solid #C9C4B8}
+.rp-f{margin-top:16px;font-size:11.5px;line-height:1.6;color:#55565B}
+.rp-none{font-size:14px;color:#55565B}
+@media (max-width:520px){.rp{padding:20px 14px}.rp-eb{grid-template-columns:1fr}.rp dl{grid-template-columns:1fr;gap:2px}.rp dd{margin-bottom:6px}.rp-qr{align-items:flex-start}}
+@media print{
+  @page{margin:14mm}
+  html,body{background:#fff}
+  .fl{max-width:none;padding:0;min-height:0}
+  body>.fl>*:not([data-view=report]){display:none!important}
+  [data-view=report]>*:not(.rp){display:none!important}
+  .rp{background:#fff;padding:0}
+}
+</style>
+<script src="/js/i18n.js" defer></script>
+</head>
+<body>
+<main class="fl">
+<div class="fl-top"><a href="/" aria-label="Moon home"><img src="/assets/brand/logo/moon-wordmark-cream.svg" alt="Moon"></a><span class="k">FIELD LOG</span></div>
+
+<section data-view="list" class="fl-f">
+<h1>FIELD LOG</h1>
+<p class="fl-p">A signed record of every spray, planting, harvest and storm. Moon stamps the time, adds where you were and the weather, and signs it so nobody can change it later. It stays on this phone.</p>
+<a class="fl-btn" href="#new">NEW ENTRY</a>
+<div class="fl-two"><a class="fl-btn alt" href="#report">REPORT</a><a class="fl-btn alt" href="#check">CHECK A FILE</a></div>
+<p class="fl-note" data-fl-pend hidden></p>
+<div class="k" data-fl-count></div>
+<ul class="fl-list" data-fl-list></ul>
+</section>
+
+<section data-view="new" hidden>
+<form class="fl-f" data-fl-form novalidate>
+<a class="fl-back" href="#">← FIELD LOG</a>
+<h1>NEW ENTRY</h1>
+<div class="fl-lab"><span class="k">WHAT</span><div class="fl-chips" data-fl-kinds></div></div>
+<label class="fl-lab"><span class="k">FIELD</span><input class="fl-in" name="field" list="fl-fields" autocomplete="off" placeholder="North 40" maxlength="80"></label>
+<datalist id="fl-fields"></datalist>
+<label class="fl-lab"><span class="k">CROP OR ANIMALS</span><input class="fl-in" name="crop" autocomplete="off" placeholder="Barley" maxlength="80"></label>
+<div class="fl-f" data-fl-spray>
+<label class="fl-lab"><span class="k">PRODUCT</span><input class="fl-in" name="product" autocomplete="off" placeholder="Product name from the label" maxlength="120"></label>
+<div class="fl-two">
+<label class="fl-lab"><span class="k">EPA REG. NO.</span><input class="fl-in" name="epa_reg" autocomplete="off" placeholder="524-659" maxlength="40"></label>
+<label class="fl-lab"><span class="k">RATE</span><input class="fl-in" name="rate" autocomplete="off" placeholder="22 oz/acre" maxlength="60"></label>
+</div>
+<label class="fl-lab"><span class="k">AREA</span><input class="fl-in" name="area" autocomplete="off" placeholder="40 acres" maxlength="60"></label>
+</div>
+<div class="fl-lab"><span class="k">PHOTOS</span><div class="fl-phs"><div class="fl-phs" data-fl-photos></div><label class="fl-add" data-fl-addph><span style="font-size:22px">+</span>ADD PHOTO<input type="file" accept="image/*" capture="environment" multiple data-fl-file></label></div></div>
+<label class="fl-lab"><span class="k">NOTES</span><textarea class="fl-in" name="notes" maxlength="2000" placeholder="Tap the microphone on your keyboard to speak"></textarea></label>
+<label class="fl-lab"><span class="k">DONE BY</span><input class="fl-in" name="by" autocomplete="name" placeholder="Your name" maxlength="80"></label>
+<div class="fl-where"><p class="fl-p" data-fl-where></p><button type="button" data-fl-locate>RETRY</button></div>
+<button type="submit" class="fl-btn" data-fl-save>SIGN AND SAVE</button>
+<p class="fl-p" style="font-size:13px">Moon gets the entry's text, place and the fingerprints of the photos, never the photos themselves. It signs the whole record and keeps only its fingerprint.</p>
+</form>
+</section>
+
+<section data-view="report" class="fl-f" hidden>
+<a class="fl-back" href="#">← FIELD LOG</a>
+<h1>REPORT</h1>
+<p class="fl-p">Print it or save it as a PDF for an insurer, inspector or buyer. Each entry has a QR code they can scan to check Moon's signature.</p>
+<div class="fl-ctl">
+<label class="fl-lab wide"><span class="k">FARM OR BUSINESS</span><input class="fl-in" data-fl-farm autocomplete="organization" placeholder="Your farm" maxlength="80"></label>
+<label class="fl-lab wide"><span class="k">FIELD</span><select class="fl-in" data-fl-rf></select></label>
+<label class="fl-lab"><span class="k">FROM</span><input class="fl-in" type="date" data-fl-from></label>
+<label class="fl-lab"><span class="k">TO</span><input class="fl-in" type="date" data-fl-to></label>
+</div>
+<div class="fl-two"><button type="button" class="fl-btn" data-fl-print>PRINT OR PDF</button><button type="button" class="fl-btn alt" data-fl-ev>EVIDENCE FILE</button></div>
+<div class="rp" data-fl-doc></div>
+</section>
+
+<section data-view="check" class="fl-f" hidden>
+<a class="fl-back" href="#">← FIELD LOG</a>
+<h1>CHECK A FILE</h1>
+<p class="fl-p">Got a Field Log evidence file? Open it here. Moon checks every entry's signature, and this page checks every photo against the fingerprint that was signed. Change one word, one number or one pixel and it shows.</p>
+<label class="fl-btn">CHOOSE THE FILE<input type="file" accept="application/json,.json" data-fl-cfile style="position:absolute;width:1px;height:1px;opacity:0"></label>
+<ul class="fl-list" data-fl-cout></ul>
+</section>
+</main>
+<div class="fl-toast" data-fl-toast role="status" hidden></div>
+<script src="/js/qrcode.js" defer></script>
+<script src="/js/field.js" defer></script>
+</body>
+</html>
