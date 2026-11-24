@@ -1790,5 +1790,16 @@
     "Signed records of farm and site work": "Registros firmados del trabajo en la finca o la obra",
     "FULL MOONS": "LUNAS LLENAS",
     "Countdown to the next one, to the second": "Cuenta atrás hasta la próxima, al segundo",
+    "Open entry": "Abrir entrada",
+    "This entry is no longer on this phone.": "Esta entrada ya no está en este teléfono.",
+    "Added when it is signed": "Se añade al firmarla",
+    "WAITING FOR SIGNAL": "ESPERANDO SEÑAL",
+    "SEE THE SIGNATURE": "VER LA FIRMA",
+    "Moon could not sign this entry: {why}": "Moon no pudo firmar esta entrada: {why}",
+    "Saved on this phone with its phone time. Moon signs it as soon as there is signal.": "Guardada en este teléfono con su hora. Moon la firma en cuanto haya señal.",
+    "SIGN NOW": "FIRMAR AHORA",
+    "SIGNING…": "FIRMANDO…",
+    "Still no connection to Moon. It will try again when you are online.": "Aún sin conexión con Moon. Lo intentará de nuevo cuando estés en línea.",
+    "REMOVE FROM THIS PHONE": "QUITAR DE ESTE TELÉFONO",
 }
 };

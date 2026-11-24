@@ -53,7 +53,12 @@
     if (v === 'list') drawList();
     if (v === 'report') drawReport();
   }
-  function route() { var h = location.hash.replace('#', ''); show(['new', 'report', 'check'].indexOf(h) >= 0 ? h : 'list'); if (h === 'new') openNew(); }
+  function route() {
+    var h = location.hash.replace('#', ''), m = /^e\/(.+)$/.exec(h);
+    only = null;
+    if (m) { show('entry'); drawEntry(decodeURIComponent(m[1])); return; }
+    show(['new', 'report', 'check'].indexOf(h) >= 0 ? h : 'list'); if (h === 'new') openNew();
+  }
 
   // ---------- the list ----------
   function drawList() {
@@ -64,7 +69,7 @@
     if (!list.length) { box.innerHTML = '<li class="fl-empty">' + esc(T('No entries yet. Tap NEW ENTRY when you spray, plant, harvest or find damage.')) + '</li>'; return; }
     box.innerHTML = list.slice().reverse().map(function (e) {
       var en = e.record ? e.record.entry : e.body.entry, ms = e.signed_ms || Date.parse(en.written_utc) || e.at;
-      return '<li class="fl-row" data-id="' + esc(e.id) + '"><div class="fl-rk">' + esc(kindName(en.kind)) + (e.status === 'pending' ? ' <em>' + esc(T('WAITING')) + '</em>' : ' <em class="ok">' + esc(T('SIGNED')) + '</em>') + '</div>' +
+      return '<li class="fl-row fl-open" data-id="' + esc(e.id) + '"><a class="fl-hit" href="#e/' + encodeURIComponent(e.id) + '" aria-label="' + esc(T('Open entry')) + '"></a><div class="fl-rk">' + esc(kindName(en.kind)) + (e.status === 'pending' ? ' <em>' + esc(T('WAITING')) + '</em>' : ' <em class="ok">' + esc(T('SIGNED')) + '</em>') + '</div>' +
         '<div class="fl-rt">' + esc([en.field, en.crop, en.product].filter(Boolean).join(' · ') || en.notes || '') + '</div>' +
         '<div class="fl-rm">' + esc(when(ms)) + (e.photos && e.photos.length ? ' · ' + esc(e.photos.length === 1 ? T('1 photo') : T('{n} photos', { n: e.photos.length })) : '') + '</div>' +
         '<button type="button" class="fl-del" data-del="' + esc(e.id) + '" aria-label="' + esc(T('Remove from this phone')) + '">×</button></li>';
@@ -72,10 +77,11 @@
   }
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('[data-del]'); if (!b) return;
-    if (b.getAttribute('data-sure') !== '1') { b.setAttribute('data-sure', '1'); b.textContent = T('REMOVE?'); setTimeout(function () { if (b.isConnected) { b.removeAttribute('data-sure'); b.textContent = '×'; } }, 3000); return; }
+    if (b.getAttribute('data-sure') !== '1') { var was = b.textContent; b.setAttribute('data-sure', '1'); b.textContent = T('REMOVE?'); setTimeout(function () { if (b.isConnected) { b.removeAttribute('data-sure'); b.textContent = was; } }, 3000); return; }
     var id = b.getAttribute('data-del'), list = load(), e = list.filter(function (x) { return x.id === id; })[0];
     if (e && e.photos) e.photos.forEach(function (p) { delPhoto(p.key); });
-    save(list.filter(function (x) { return x.id !== id; })); drawList();
+    save(list.filter(function (x) { return x.id !== id; }));
+    if (document.body.getAttribute('data-on') === 'entry') location.hash = ''; else drawList();
   });
 
   // ---------- a new entry ----------
@@ -159,6 +165,36 @@
   }
   window.addEventListener('online', syncAll);
 
+  // ---------- one entry ----------
+  var entryUrls = [];
+  function drawEntry(id) {
+    entryUrls.forEach(URL.revokeObjectURL); entryUrls = [];
+    var e = load().filter(function (x) { return x.id === id; })[0], box = $('[data-fl-entry]');
+    if (!e) { box.innerHTML = '<p class="fl-p">' + esc(T('This entry is no longer on this phone.')) + '</p>'; return; }
+    var signed = e.status === 'signed', en = signed ? e.record.entry : e.body.entry, r = signed ? e.record : null, p = r ? r.place : (e.body.lat != null ? { lat: e.body.lat, lng: e.body.lng, accuracy_m: e.body.accuracy_m && Math.round(e.body.accuracy_m) } : null);
+    var rows = [[T('FIELD'), en.field], [T('CROP'), en.crop], [T('PRODUCT'), en.product], [T('EPA REG. NO.'), en.epa_reg], [T('RATE'), en.rate], [T('AREA'), en.area], [T('BY'), en.by], [T('NOTES'), en.notes],
+      [T('PLACE'), p ? (+p.lat).toFixed(5) + ', ' + (+p.lng).toFixed(5) + (p.accuracy_m != null ? ' (±' + p.accuracy_m + ' m)' : '') : T('Not shared')],
+      [T('WEATHER'), signed ? weatherLine(r.weather) : T('Added when it is signed')],
+      [T('WRITTEN (PHONE CLOCK)'), en.written_utc ? when(Date.parse(en.written_utc), { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', timeZoneName: 'short' }) : null]];
+    if (signed) rows.push([T('SIGNED BY MOON'), e.receipt.moonmark.replace(/\.\d+$/, '') + ' · ' + new Date(e.signed_ms).toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC')], [T('RECORD FINGERPRINT'), e.receipt.sha256]);
+    box.innerHTML = '<div class="k">' + esc(signed ? T('SIGNED') : T('WAITING FOR SIGNAL')) + '</div><h1>' + esc(kindName(en.kind)) + '</h1>' +
+      '<p class="fl-p">' + esc(when(e.signed_ms || Date.parse(en.written_utc) || e.at, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })) + '</p>' +
+      (e.photos && e.photos.length ? '<div class="fl-big" data-fl-eph></div>' : '') +
+      '<dl class="fl-dl">' + rows.filter(function (x) { return x[1]; }).map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>' +
+      (signed ? '<a class="fl-btn" href="' + esc(e.signed_url) + '" target="_blank" rel="noopener">' + esc(T('SEE THE SIGNATURE')) + '</a>' +
+        '<div class="fl-two"><button type="button" class="fl-btn alt" data-fl-eprint>' + esc(T('PRINT OR PDF')) + '</button><button type="button" class="fl-btn alt" data-fl-eev>' + esc(T('EVIDENCE FILE')) + '</button></div>'
+        : '<p class="fl-note">' + esc(e.error ? T('Moon could not sign this entry: {why}', { why: e.error }) : T('Saved on this phone with its phone time. Moon signs it as soon as there is signal.')) + '</p><button type="button" class="fl-btn" data-fl-esign>' + esc(T('SIGN NOW')) + '</button>') +
+      '<button type="button" class="fl-btn alt fl-remove" data-del="' + esc(e.id) + '">' + esc(T('REMOVE FROM THIS PHONE')) + '</button>';
+    var ph = box.querySelector('[data-fl-eph]');
+    (e.photos || []).forEach(function (x) { getPhoto(x.key).then(function (b) { if (!b || !ph) return; var u = URL.createObjectURL(b); entryUrls.push(u); var a = document.createElement('a'); a.href = u; a.target = '_blank'; a.rel = 'noopener'; var im = new Image(); im.src = u; im.alt = ''; a.appendChild(im); ph.appendChild(a); }); });
+    var pr = box.querySelector('[data-fl-eprint]'); if (pr) pr.onclick = function () { only = e.id; show('report'); paint(); setTimeout(function () { window.print(); }, 400); };
+    var ev = box.querySelector('[data-fl-eev]'); if (ev) ev.onclick = function () { only = e.id; evidence(); only = null; };
+    var sg = box.querySelector('[data-fl-esign]'); if (sg) sg.onclick = function () {
+      sg.disabled = true; sg.textContent = T('SIGNING…');
+      signOne(e.id).then(function (ok) { toast(ok ? T('Signed by Moon.') : T('Still no connection to Moon. It will try again when you are online.')); drawEntry(e.id); });
+    };
+  }
+
   // ---------- the report ----------
   function qr(url) {
     try { var q = window.qrcode(0, 'L'); q.addData(url); q.make(); return q.createSvgTag({ cellSize: 3, margin: 1, scalable: true }).replace('<svg ', '<svg role="img" aria-label="' + esc(T('QR code to the signed record')) + '" '); } catch (e) { return ''; }
@@ -173,7 +209,9 @@
       w.humidity_pct != null ? T('humidity {h}%', { h: Math.round(w.humidity_pct) }) : null, w.conditions].filter(Boolean).join(', ') +
       ' · ' + T('{station}, {km} km away, observed {t}', { station: w.station_name || w.station, km: w.distance_km, t: w.observed_utc ? w.observed_utc.replace('T', ' ').replace('Z', ' UTC') : '' });
   }
+  var only = null;   // when set, the report and evidence file cover just this entry
   function selected() {
+    if (only) return load().filter(function (e) { return e.id === only && e.status === 'signed'; });
     var f = $('[data-fl-rf]').value, a = $('[data-fl-from]').value, b = $('[data-fl-to]').value;
     var lo = a ? Date.parse(a + 'T00:00:00') : -Infinity, hi = b ? Date.parse(b + 'T23:59:59') : Infinity;
     return load().filter(function (e) { return e.status === 'signed' && (!f || e.record.entry.field === f) && e.signed_ms >= lo && e.signed_ms <= hi; });
@@ -261,6 +299,7 @@
     $('[data-fl-ev]').onclick = evidence;
     $('[data-fl-cfile]').addEventListener('change', function (ev) { if (ev.target.files[0]) check(ev.target.files[0]); ev.target.value = ''; });
     window.addEventListener('hashchange', route);
+    window.addEventListener('afterprint', function () { if (only) route(); });
     route(); syncAll();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();

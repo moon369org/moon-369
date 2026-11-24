@@ -1992,5 +1992,16 @@
     "Signed records of farm and site work": "Ondertekende logboeken van boerderij- en bouwwerk",
     "FULL MOONS": "VOLLE MANEN",
     "Countdown to the next one, to the second": "Aftellen naar de volgende, tot op de seconde",
+    "Open entry": "Invoer openen",
+    "This entry is no longer on this phone.": "Deze invoer staat niet meer op deze telefoon.",
+    "Added when it is signed": "Wordt toegevoegd bij ondertekening",
+    "WAITING FOR SIGNAL": "WACHT OP BEREIK",
+    "SEE THE SIGNATURE": "BEKIJK DE HANDTEKENING",
+    "Moon could not sign this entry: {why}": "Moon kon deze invoer niet ondertekenen: {why}",
+    "Saved on this phone with its phone time. Moon signs it as soon as there is signal.": "Opgeslagen op deze telefoon met de telefoontijd. Moon ondertekent hem zodra er bereik is.",
+    "SIGN NOW": "NU ONDERTEKENEN",
+    "SIGNING…": "ONDERTEKENEN…",
+    "Still no connection to Moon. It will try again when you are online.": "Nog steeds geen verbinding met Moon. Het probeert opnieuw zodra je online bent.",
+    "REMOVE FROM THIS PHONE": "VERWIJDEREN VAN DEZE TELEFOON",
 }
 };

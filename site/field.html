@@ -38,8 +38,15 @@ a{color:inherit}
 .fl-rk em.ok{color:#E9E4D8}.fl-rk em.bad{color:#F0A08C;border-color:#6B3A30}
 .fl-rt{font-size:15px;line-height:1.45;overflow-wrap:anywhere}
 .fl-rm{font:400 12.5px 'JetBrains Mono',monospace;color:#8A8B8F;overflow-wrap:anywhere}
-.fl-del{all:unset;cursor:pointer;position:absolute;right:0;top:12px;min-width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:#8A8B8F;font:400 18px Inter,sans-serif}
+.fl-open{cursor:pointer}.fl-hit{position:absolute;inset:0;z-index:1}.fl-open:active{background:#111214}
+.fl-del{all:unset;z-index:2;cursor:pointer;position:absolute;right:0;top:12px;min-width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:#8A8B8F;font:400 18px Inter,sans-serif}
 .fl-del[data-sure]{font:700 9px Syncopate,sans-serif;letter-spacing:.14em;color:#F0A08C}
+.fl-dl{margin:0;display:grid;grid-template-columns:132px minmax(0,1fr);gap:10px 14px;border-top:1px solid #24262A;padding-top:16px}
+.fl-dl dt{font:400 10.5px 'JetBrains Mono',monospace;letter-spacing:.18em;color:#8A8B8F;padding-top:3px}
+.fl-dl dd{margin:0;font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.fl-big{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fl-big a:only-child{grid-column:1/-1}.fl-big img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;border-radius:2px}
+.fl-remove{color:#F0A08C!important;border-color:#3A2A27!important}.fl-remove[data-sure]{background:#3A2A27}
+@media (max-width:420px){.fl-dl{grid-template-columns:1fr;gap:4px}.fl-dl dd{margin-bottom:10px}}
 .fl-empty{padding:20px 0;color:#8A8B8F;font-size:14.5px;line-height:1.6}
 .fl-f{display:flex;flex-direction:column;gap:18px}
 .fl-lab{display:flex;flex-direction:column;gap:8px}
@@ -128,6 +135,11 @@ textarea.fl-in{min-height:110px;padding:12px 14px;line-height:1.5;resize:vertica
 <button type="submit" class="fl-btn" data-fl-save>SIGN AND SAVE</button>
 <p class="fl-p" style="font-size:13px">Moon gets the entry's text, place and the fingerprints of the photos, never the photos themselves. It signs the whole record and keeps only its fingerprint.</p>
 </form>
+</section>
+
+<section data-view="entry" class="fl-f" hidden>
+<a class="fl-back" href="#">← FIELD LOG</a>
+<div class="fl-f" data-fl-entry></div>
 </section>
 
 <section data-view="report" class="fl-f" hidden>

@@ -1994,5 +1994,16 @@
     "Signed records of farm and site work": "Registri firmati del lavoro in azienda o in cantiere",
     "FULL MOONS": "LUNE PIENE",
     "Countdown to the next one, to the second": "Conto alla rovescia alla prossima, al secondo",
+    "Open entry": "Apri voce",
+    "This entry is no longer on this phone.": "Questa voce non è più su questo telefono.",
+    "Added when it is signed": "Aggiunto alla firma",
+    "WAITING FOR SIGNAL": "IN ATTESA DI SEGNALE",
+    "SEE THE SIGNATURE": "VEDI LA FIRMA",
+    "Moon could not sign this entry: {why}": "Moon non ha potuto firmare questa voce: {why}",
+    "Saved on this phone with its phone time. Moon signs it as soon as there is signal.": "Salvata su questo telefono con l'ora del telefono. Moon la firma appena c'è segnale.",
+    "SIGN NOW": "FIRMA ORA",
+    "SIGNING…": "FIRMA IN CORSO…",
+    "Still no connection to Moon. It will try again when you are online.": "Ancora nessuna connessione a Moon. Riproverà quando sarai online.",
+    "REMOVE FROM THIS PHONE": "RIMUOVI DA QUESTO TELEFONO",
 }
 };

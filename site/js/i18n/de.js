@@ -1986,5 +1986,16 @@
     "Signed records of farm and site work": "Signierte Protokolle für Hof- und Baustellenarbeit",
     "FULL MOONS": "VOLLMONDE",
     "Countdown to the next one, to the second": "Countdown bis zum nächsten, auf die Sekunde",
+    "Open entry": "Eintrag öffnen",
+    "This entry is no longer on this phone.": "Dieser Eintrag ist nicht mehr auf diesem Handy.",
+    "Added when it is signed": "Wird beim Signieren ergänzt",
+    "WAITING FOR SIGNAL": "WARTET AUF EMPFANG",
+    "SEE THE SIGNATURE": "SIGNATUR ANSEHEN",
+    "Moon could not sign this entry: {why}": "Moon konnte diesen Eintrag nicht signieren: {why}",
+    "Saved on this phone with its phone time. Moon signs it as soon as there is signal.": "Mit der Handyzeit auf diesem Handy gespeichert. Moon signiert ihn, sobald es Empfang gibt.",
+    "SIGN NOW": "JETZT SIGNIEREN",
+    "SIGNING…": "WIRD SIGNIERT…",
+    "Still no connection to Moon. It will try again when you are online.": "Immer noch keine Verbindung zu Moon. Es wird erneut versucht, sobald du online bist.",
+    "REMOVE FROM THIS PHONE": "VON DIESEM HANDY ENTFERNEN",
 }
 };
